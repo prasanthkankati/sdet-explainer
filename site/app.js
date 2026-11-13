@@ -70,7 +70,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.3.0";
+  const SITE_VERSION = "v2.5.1";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -103,7 +103,7 @@
       brand.className = "brand";
       brand.href = homeHref;
       brand.title = "Home (Alt+H)";
-      brand.textContent = "SDET Explainer";
+      brand.textContent = "SDET EXPLAINER";
       navLeft.appendChild(brand);
 
       if (firstP) {
@@ -127,8 +127,11 @@
       navRight.className = "chapter-nav-right";
       navRight.appendChild(btn);
 
-      nav.appendChild(navLeft);
-      nav.appendChild(navRight);
+      const navInner = document.createElement("div");
+      navInner.className = "chapter-nav-inner";
+      navInner.appendChild(navLeft);
+      navInner.appendChild(navRight);
+      nav.appendChild(navInner);
       document.body.insertBefore(nav, document.body.firstChild);
 
       // FLIP animation when entering from Homepage
