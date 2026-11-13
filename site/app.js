@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.0";
+  const SITE_VERSION = "v1.9.1";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -85,7 +85,7 @@
 
     if (inTopicsDir) {
       document.body.classList.add("in-chapter");
-      // Build flush-left single-row chapter top bar (no '>' arrow on SDET Explainer, <- All topics moved left)
+      // Build flush-left single-row chapter top bar: SDET Explainer > <- All topics [search]
       const container = document.querySelector(".wrap");
       const firstP = container ? container.querySelector(":scope > p") : null;
       const hdr = document.createElement("header");
@@ -99,19 +99,58 @@
       hdr.appendChild(brand);
 
       const sep = document.createElement("span");
-      sep.className = "nav-sep";
-      sep.textContent = "|";
+      sep.className = "nav-sep entering";
+      sep.textContent = ">";
       hdr.appendChild(sep);
 
+      let backDiv = null;
       if (firstP) {
-        const backDiv = document.createElement("div");
-        backDiv.className = "back-links";
+        backDiv = document.createElement("div");
+        backDiv.className = "back-links entering";
         backDiv.innerHTML = firstP.innerHTML;
         firstP.remove();
         hdr.appendChild(backDiv);
       }
 
       document.body.insertBefore(hdr, document.body.firstChild);
+
+      // FLIP animation: animate SDET Explainer from Homepage position to flush-left, then reveal '>' folder chevron
+      const prevRectRaw = sessionStorage.getItem("sdet-brand-rect");
+      sessionStorage.removeItem("sdet-brand-rect");
+      if (prevRectRaw) {
+        try {
+          const prev = JSON.parse(prevRectRaw);
+          const cur = brand.getBoundingClientRect();
+          const dx = prev.left - cur.left;
+          const dy = prev.top - cur.top;
+          brand.style.transform = `translate(${dx}px, ${dy}px)`;
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              brand.style.transition = "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
+              brand.style.transform = "translate(0, 0)";
+              sep.classList.remove("entering");
+              if (backDiv) backDiv.classList.remove("entering");
+            });
+          });
+        } catch (_) {
+          sep.classList.remove("entering");
+          if (backDiv) backDiv.classList.remove("entering");
+        }
+      } else {
+        requestAnimationFrame(() => {
+          sep.classList.remove("entering");
+          if (backDiv) backDiv.classList.remove("entering");
+        });
+      }
+
+      // Save chapter brand rect when returning Home so Home animates back cleanly
+      hdr.addEventListener("click", e => {
+        const a = e.target.closest("a");
+        if (a && a.getAttribute("href") === homeHref) {
+          const r = brand.getBoundingClientRect();
+          sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
+        }
+      });
     } else if (document.querySelector("header.top")) {
       const h1 = document.querySelector("header.top h1");
       if (h1 && !h1.querySelector("a")) {
@@ -119,6 +158,26 @@
       }
       const homeLink = document.querySelector("header.top h1 a");
       if (homeLink) {
+        // Animate SDET Explainer back to Homepage position if returning from a chapter
+        const prevRectRaw = sessionStorage.getItem("sdet-brand-rect");
+        sessionStorage.removeItem("sdet-brand-rect");
+        if (prevRectRaw) {
+          try {
+            const prev = JSON.parse(prevRectRaw);
+            const cur = homeLink.getBoundingClientRect();
+            const dx = prev.left - cur.left;
+            const dy = prev.top - cur.top;
+            homeLink.style.display = "inline-block";
+            homeLink.style.transform = `translate(${dx}px, ${dy}px)`;
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                homeLink.style.transition = "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
+                homeLink.style.transform = "translate(0, 0)";
+              });
+            });
+          } catch (_) {}
+        }
+
         homeLink.addEventListener("click", e => {
           if (selectTrackFn) {
             e.preventDefault();
@@ -129,6 +188,15 @@
           }
         });
       }
+
+      // Capture Homepage SDET Explainer rect before navigating into any chapter
+      document.addEventListener("click", e => {
+        const a = e.target.closest("a[href*='topics/']");
+        if (a && homeLink) {
+          const r = homeLink.getBoundingClientRect();
+          sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
+        }
+      });
     }
 
     // Make footer 'SDET Explainer' clickable to navigate Home + show version & shortcuts
