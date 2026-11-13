@@ -10,6 +10,7 @@ header.top,header.chapter-top,nav,.controls,.stats,.tag,.status-pill,.kbd-hint,.
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .wrap,header.top{max-width:940px;margin:0 auto;padding:24px 24px}
 .home-wrap{max-width:1080px;padding:18px 24px 28px}
+body.home-page footer{max-width:1080px;padding:18px 24px}
 body.home-page .theme,body.home-page .cmd-trigger{display:none !important}
 .home-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--border);font-family:Consolas,"Cascadia Mono",monospace}
 .home-brand{font-size:1.02rem;font-weight:700;color:var(--bold);letter-spacing:.4px;border-left:3px solid var(--accent);padding:2px 0 2px 10px;text-decoration:none}
