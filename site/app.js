@@ -91,16 +91,39 @@
     if (inTopicsDir) {
       document.body.classList.add("in-chapter");
 
-      // Floating fixed Home button at the middle-left of the screen
-      const floatHome = document.createElement("a");
-      floatHome.className = "floating-home-btn";
-      floatHome.href = homeHref;
-      floatHome.title = "Home (Alt+H)";
-      floatHome.innerHTML = `<span class="btn-arrow">&larr;</span> SDET EXPLAINER`;
-      document.body.appendChild(floatHome);
+      // Vertical architectural typography spine in left gutter (fills empty space, centered vertically)
+      const spine = document.createElement("a");
+      spine.className = "vertical-brand-spine";
+      spine.href = homeHref;
+      spine.title = "Back to Home (Alt+H)";
+      spine.setAttribute("aria-label", "SDET Explainer Home");
 
-      floatHome.addEventListener("click", () => {
-        const r = floatHome.getBoundingClientRect();
+      const word1 = document.createElement("span");
+      word1.className = "v-word";
+      "SDET".split("").forEach(char => {
+        const s = document.createElement("span");
+        s.textContent = char;
+        word1.appendChild(s);
+      });
+
+      const dot = document.createElement("span");
+      dot.className = "v-dot";
+
+      const word2 = document.createElement("span");
+      word2.className = "v-word";
+      "EXPLAINER".split("").forEach(char => {
+        const s = document.createElement("span");
+        s.textContent = char;
+        word2.appendChild(s);
+      });
+
+      spine.appendChild(word1);
+      spine.appendChild(dot);
+      spine.appendChild(word2);
+      document.body.appendChild(spine);
+
+      spine.addEventListener("click", () => {
+        const r = spine.getBoundingClientRect();
         sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
       });
 
@@ -113,10 +136,22 @@
       const navLeft = document.createElement("div");
       navLeft.className = "chapter-nav-left";
 
+      const navBrand = document.createElement("a");
+      navBrand.className = "nav-home-text";
+      navBrand.href = homeHref;
+      navBrand.title = "Home (Alt+H)";
+      navBrand.textContent = "SDET EXPLAINER";
+      navLeft.appendChild(navBrand);
+
       if (firstP) {
         firstP.querySelectorAll("a[href*='index.html']").forEach(a => a.remove());
         const remainingLinks = firstP.querySelectorAll("a");
         if (remainingLinks.length > 0) {
+          const sep = document.createElement("span");
+          sep.className = "nav-sep";
+          sep.textContent = ">";
+          navLeft.appendChild(sep);
+
           const backDiv = document.createElement("div");
           backDiv.className = "back-links";
           remainingLinks.forEach(a => backDiv.appendChild(a));
