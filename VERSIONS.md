@@ -36,6 +36,7 @@ Every feature change, UI improvement, or syllabus chapter build is tracked with 
 | **v2.1.1** | 2026-11-13 | Homepage Footer Alignment Polish | Aligned `body.home-page footer` `max-width: 1080px` flush with `.home-nav`, `.hero-banner`, and `.bento-grid`. | `site/style.css`, `site/index.html`, `site/app.js`, `VERSIONS.md`, `PROGRESS.md` |
 | **v2.1.2** | 2026-11-13 | Chapter Top Utility Bar Alignment | Aligned chapter top bar (`.chapter-nav` `max-width: 940px`) flush with `<article>` on both edges: `SDET Explainer > ← All topics` on left, `search [/]` + `light [Alt+L]` inline on right (removed overlapping `position: fixed` buttons). | `site/style.css`, `site/app.js`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
 | **v2.1.3** | 2026-11-13 | Professional Tone & Full Agile 4 Values + 12 Principles | Replaced informal `"mindset"` in `M5.1` with `"iterative software development and delivery methodology"`, added all **4 Agile Manifesto Values** and **12 Agile Principles** to `manual-m5-1-agile-scrum.html`, and updated `explain/SKILL.md` with Professional Engineering Tone & Complete Enumeration rules. | `site/topics/manual-m5-1-agile-scrum.html`, `SKILL.md`, `site/index.html`, `site/app.js`, `VERSIONS.md`, `PROGRESS.md` |
+| **v2.1.4** | 2026-11-13 | Fix Duplicate Numbering in M5.1 12 Principles | Removed redundant `1.`–`12.` text prefixes inside `<ol><li>` for the 12 Agile Principles in `manual-m5-1-agile-scrum.html`. | `site/topics/manual-m5-1-agile-scrum.html`, `site/index.html`, `site/app.js`, `VERSIONS.md`, `PROGRESS.md` |
 
 ---
 
