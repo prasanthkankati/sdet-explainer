@@ -491,10 +491,11 @@ const TOPICS = [
     section: "S1. Architecture, Setup & Browser Control",
     order: 1,
     title: "1.1 Selenium 4 W3C Architecture & WebDriver Hierarchy",
-    file: "",
-    summary: "W3C WebDriver protocol over HTTP client, SearchContext -> WebDriver -> RemoteWebDriver -> ChromeDriver hierarchy.",
-    keywords: "W3C protocol, JSON wire protocol, SearchContext, WebDriver, RemoteWebDriver, ChromeDriver",
-    status: "planned"
+    file: "selenium-s1-1-architecture-setup.html",
+    summary: "W3C WebDriver protocol over HTTP client, SearchContext -> WebDriver -> RemoteWebDriver -> ChromeDriver hierarchy, built-in Selenium Manager & complete setup.",
+    keywords: "Selenium 4, WebDriver, architecture, W3C protocol, JSON Wire Protocol, SearchContext, RemoteWebDriver, ChromeDriver, Selenium Manager, ThreadLocal, DriverFactory",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Selenium",
@@ -904,6 +905,17 @@ const TOPICS = [
     file: "interview-m5-2-qa.html",
     summary: "35 questions: INVEST, Given-When-Then, DoR vs DoD, Story Points Fibonacci, Velocity, Lead vs Cycle Time & Kanban WIP.",
     keywords: "INVEST user story, DoR vs DoD, story points vs hours, velocity, kanban vs scrum",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-S1. Selenium: Architecture, Setup & Protocol Q&A",
+    order: 1,
+    title: "S1.1 Q&A: Selenium 4 W3C Architecture, Protocol & Driver Setup (35 Questions)",
+    file: "interview-s1-1-qa.html",
+    summary: "35 questions across 5 tiers: W3C vs JSON Wire, driver hierarchy, ThreadLocal DriverFactory, Selenium Manager vs proxy, and port/session exceptions.",
+    keywords: "Selenium interview questions, W3C WebDriver, JSON Wire Protocol, ThreadLocal WebDriver, Selenium Manager, driver.close vs driver.quit, SearchContext",
     status: "done",
     date: "2026-11-13"
   },

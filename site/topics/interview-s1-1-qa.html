@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: S1.1 Selenium WebDriver Architecture, The W3C Protocol &amp; Driver Setup</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>S1.1 Question Bank: Selenium WebDriver Architecture, The W3C Protocol &amp; Driver Setup (35 Questions)</h1>
+  <p><a class="qa-chip" href="selenium-s1-1-architecture-setup.html">&larr; Back to Concept Page</a></p>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q7)</h2>
+    <ol>
+      <li><b>What is Selenium WebDriver?</b><br>Selenium WebDriver is an open-source, multi-language browser automation framework that controls web browsers natively by sending W3C-standard HTTP requests directly to browser-specific driver executables.</li>
+      <li><b>Why did Selenium Core fail in 2004?</b><br>Selenium Core operated via JavaScript injection directly into the webpage, which caused tests to crash whenever a test navigated across different domains due to the browser's Same-Origin Policy (RFC 6454).</li>
+      <li><b>What was Selenium RC (Selenium 1.0) and how did it attempt to solve the Same-Origin Policy?</b><br>Selenium RC introduced a local HTTP proxy server (running on port 4444) that intercepted browser requests, rewritten domain headers, and tricked the browser into believing the test script and the application under test originated from the same host.</li>
+      <li><b>Why did Simon Stewart create WebDriver?</b><br>WebDriver was created to bypass JavaScript execution sandboxes completely by controlling browsers from the outside through native operating system calls and browser debugging interfaces.</li>
+      <li><b>What was the JSON Wire Protocol used in Selenium 2 and 3?</b><br>It was a custom REST-like protocol where client libraries encoded commands into proprietary JSON envelopes with <code>desiredCapabilities</code>, requiring driver binaries to decode and translate them into native browser commands.</li>
+      <li><b>What major architectural change occurred in Selenium 4 regarding protocols?</b><br>Selenium 4 completely removed the JSON Wire Protocol and standardized all client-driver communication strictly on the W3C WebDriver specification, eliminating the translation layer.</li>
+      <li><b>What is WebDriver BiDi?</b><br>WebDriver BiDi is a next-generation W3C bidirectional protocol that operates over persistent WebSockets, allowing the browser to stream asynchronous events (console logs, network requests, DOM mutations) back to the client test script in real time.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 2: Why / Why Not &amp; Deep Comparisons (Q8&ndash;Q14)</h2>
+    <ol start="8">
+      <li><b>Why does Selenium WebDriver use native OS events instead of synthetic JavaScript events?</b><br>Synthetic JavaScript events do not generate hardware scan codes and cannot interact with OS file dialogs, system-level alerts, or cross-domain iframes. Native OS events accurately replicate human user behavior.</li>
+      <li><b>What is the difference between <code>driver.close()</code> and <code>driver.quit()</code>?</b><br><code>driver.close()</code> sends an HTTP POST command that closes only the active browser tab or window. <code>driver.quit()</code> sends an HTTP DELETE command that destroys all open windows and terminates the underlying driver binary operating system process.</li>
+      <li><b>Why does failing to call <code>driver.quit()</code> lead to CI/CD agent failure?</b><br>Orphaned driver executables (e.g. <code>chromedriver.exe</code>) remain active in background memory. In CI/CD pipelines executing hundreds of builds, these orphaned processes exhaust system RAM and CPU, eventually causing OutOfMemory crashes.</li>
+      <li><b>How does Selenium WebDriver compare against Playwright?</b><br>Selenium is built on the W3C WebDriver specification and communicates over HTTP/REST with BiDi WebSockets across 5 languages. Playwright runs over direct WebSockets via the Chrome DevTools Protocol across 4 languages and features built-in auto-waiting and browser context isolation.</li>
+      <li><b>How does Selenium compare against Cypress?</b><br>Selenium executes out-of-process and controls real browser windows natively across multiple tabs and origins. Cypress executes in-process inside an iframe within the browser DOM, restricting native multi-tab and cross-origin testing.</li>
+      <li><b>Why is <code>SearchContext</code> the root interface rather than <code>WebDriver</code>?</b><br>Because both <code>WebDriver</code> (the browser window) and <code>WebElement</code> (a specific DOM element) must possess the ability to search for elements using <code>findElement()</code> and <code>findElements()</code>.</li>
+      <li><b>Why is <code>RemoteWebDriver</code> significant in the class hierarchy?</b><br><code>RemoteWebDriver</code> is the core concrete class implementing <code>WebDriver</code> and <code>JavascriptExecutor</code>. All browser-specific classes (<code>ChromeDriver</code>, <code>FirefoxDriver</code>) extend <code>RemoteWebDriver</code>.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 3: Setup, Driver Management &amp; Build Tools (Q15&ndash;Q21)</h2>
+    <ol start="15">
+      <li><b>What was the problem with the manual <code>System.setProperty()</code> driver management approach?</b><br>Desktop browsers auto-update every 4 weeks. Hardcoded paths to local driver binaries inevitably led to binary-browser version mismatches, throwing <code>SessionNotCreatedException</code>.</li>
+      <li><b>How does Selenium Manager (Selenium 4.6.0+) resolve driver binaries?</b><br>Selenium Manager automatically queries the operating system registry to determine the installed browser version, checks <code>~/.cache/selenium</code>, and downloads the exact matching driver binary from vendor repositories if missing.</li>
+      <li><b>What is the failure mode of Selenium Manager in corporate enterprise environments?</b><br>In air-gapped networks or corporate environments protected by firewalls, Selenium Manager cannot access external vendor endpoints, throwing a <code>NoSuchDriverException</code> unless configured with proxy environment variables (<code>SE_PROXY</code>).</li>
+      <li><b>What are the default communication ports for ChromeDriver and GeckoDriver?</b><br>ChromeDriver defaults to port <code>9515</code>; GeckoDriver (Firefox) defaults to port <code>4444</code>.</li>
+      <li><b>What exact dependencies are required in Maven for a Selenium TestNG project?</b><br><code>org.seleniumhq.selenium:selenium-java</code> (version 4.28.1) and <code>org.testng:testng</code> (version 7.10.2).</li>
+      <li><b>What is the role of <code>useTestNG()</code> in a Gradle <code>build.gradle</code> file?</b><br>It overrides Gradle's default test execution engine (which defaults to JUnit) to configure and run the suite using TestNG.</li>
+      <li><b>Where does Selenium Manager store cached driver executables on Windows and Linux?</b><br>On Windows: <code>%USERPROFILE%\.cache\selenium\</code>; on Linux/macOS: <code>~/.cache/selenium/</code>.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 4: Enterprise Production, Headless &amp; Parallelism (Q22&ndash;Q28)</h2>
+    <ol start="22">
+      <li><b>Why is <code>ThreadLocal&lt;WebDriver&gt;</code> required in parallel TestNG execution?</b><br>In multi-threaded execution, multiple tests run concurrently. A static <code>WebDriver</code> variable would be overwritten by concurrent threads, causing race conditions and test failures. <code>ThreadLocal</code> gives each thread its own isolated driver copy.</li>
+      <li><b>Why must <code>ThreadLocal.remove()</code> be called in teardown?</b><br>Test runners and application servers use thread pools that reuse threads. If <code>remove()</code> is not invoked, stale driver references linger in heap memory, causing severe memory leaks.</li>
+      <li><b>Why is the <code>--headless=new</code> flag used in modern Chrome instead of legacy <code>--headless</code>?</b><br>Chrome v109 introduced <code>--headless=new</code>, which runs the full, real Chrome browser engine without a UI shell, ensuring identical DOM rendering and extension support compared to headed Chrome.</li>
+      <li><b>Why are <code>--no-sandbox</code> and <code>--disable-dev-shm-usage</code> required in Docker CI/CD containers?</b><br>Docker containers default to a 64MB <code>/dev/shm</code> shared memory partition, which Chrome quickly exhausts, causing browser crashes. <code>--no-sandbox</code> disables OS security sandboxing when running as the root user.</li>
+      <li><b>What does <code>options.addArguments("--start-maximized")</code> prevent?</b><br>It prevents Chrome from launching in a small default 800x600 viewport, which causes responsive web designs to collapse desktop navigation elements into hidden mobile hamburger menus.</li>
+      <li><b>What is the TestNG lifecycle order for WebDriver initialization and teardown?</b><br><code>@BeforeSuite &rarr; @BeforeTest &rarr; @BeforeClass &rarr; @BeforeMethod</code> (initialize driver) &rarr; <code>@Test</code> &rarr; <code>@AfterMethod</code> (quit and remove driver) &rarr; <code>@AfterClass &rarr; @AfterTest &rarr; @AfterSuite</code>.</li>
+      <li><b>How do you execute tests in parallel across methods using <code>testng.xml</code>?</b><br>Set <code>&lt;suite name="Suite" parallel="methods" thread-count="4"&gt;</code> in the testng.xml suite descriptor.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 5: Common Exceptions, Root Causes &amp; Rapid-Fire Traps (Q29&ndash;Q35)</h2>
+    <ol start="29">
+      <li><b>What causes <code>SessionNotCreatedException: This version of ChromeDriver only supports Chrome version X</code>?</b><br>A version mismatch between the installed Google Chrome browser and the cached or hardcoded ChromeDriver executable.</li>
+      <li><b>What causes <code>IllegalStateException: The path to the driver executable must be set</code>?</b><br>Using Selenium 3 without configuring <code>System.setProperty("webdriver.chrome.driver", path)</code> and without having the executable on the OS <code>PATH</code>.</li>
+      <li><b>What causes <code>WebDriverException: address already in use: bind</code>?</b><br>An orphaned driver executable process from an earlier crashed test session is still running in the background and holding its default port (9515).</li>
+      <li><b>How do you terminate orphaned driver executables on Windows and Linux via command line?</b><br>Windows: <code>taskkill /F /IM chromedriver.exe /T</code>; Linux/macOS: <code>pkill -f chromedriver</code>.</li>
+      <li><b>What causes <code>NoSuchSessionException: Session ID is null</code>?</b><br>Calling a WebDriver method (e.g. <code>driver.findElement()</code>) after <code>driver.quit()</code> has already been executed on that session.</li>
+      <li><b>What is the default implicit wait timeout in Selenium 4 if unconfigured?</b><br>Exactly 0 seconds (0 milliseconds).</li>
+      <li><b>Can WebDriver control mobile browsers on physical devices?</b><br>Yes, via Appium, which extends the W3C WebDriver protocol to native, hybrid, and mobile web applications on iOS and Android.</li>
+    </ol>
+  </section>
+
+  <p><a class="qa-chip" href="selenium-s1-1-architecture-setup.html">&larr; Back to Concept Page</a></p>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>
