@@ -70,7 +70,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.1.1";
+  const SITE_VERSION = "v2.1.2";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -96,26 +96,35 @@
       const nav = document.createElement("div");
       nav.className = "chapter-nav";
 
+      const navLeft = document.createElement("div");
+      navLeft.className = "chapter-nav-left";
+
       const brand = document.createElement("a");
       brand.className = "brand";
       brand.href = homeHref;
       brand.title = "Home (Alt+H)";
       brand.textContent = "SDET Explainer";
-      nav.appendChild(brand);
+      navLeft.appendChild(brand);
 
       const sep = document.createElement("span");
       sep.className = "nav-sep";
       sep.textContent = ">";
-      nav.appendChild(sep);
+      navLeft.appendChild(sep);
 
       if (firstP) {
         const backDiv = document.createElement("div");
         backDiv.className = "back-links";
         backDiv.innerHTML = firstP.innerHTML;
         firstP.remove();
-        nav.appendChild(backDiv);
+        navLeft.appendChild(backDiv);
       }
 
+      const navRight = document.createElement("div");
+      navRight.className = "chapter-nav-right";
+      navRight.appendChild(btn);
+
+      nav.appendChild(navLeft);
+      nav.appendChild(navRight);
       document.body.insertBefore(nav, document.body.firstChild);
 
       // FLIP animation when entering from Homepage
@@ -359,7 +368,9 @@
     triggerBtn.title = "Search syllabus (/ or type anywhere)";
     triggerBtn.textContent = "search [/]";
     triggerBtn.addEventListener("click", () => openCmd(""));
-    document.body.appendChild(triggerBtn);
+    const navRight = document.querySelector(".chapter-nav-right");
+    if (navRight) navRight.insertBefore(triggerBtn, navRight.firstChild);
+    else document.body.appendChild(triggerBtn);
 
     const heroSearchBtn = document.getElementById("hero-search-btn");
     if (heroSearchBtn) heroSearchBtn.addEventListener("click", () => openCmd(""));

@@ -59,21 +59,18 @@ header.top h1 a{color:var(--bold);text-decoration:none;cursor:pointer}
 header.top h1 a:hover{color:var(--accent);text-decoration:none}
 header.top h1:before{content:"> ";color:var(--accent)}
 .hero-sub{margin:6px 0 0;color:var(--muted);font-size:.9rem}
-.chapter-nav{padding:11px 140px 0 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:Consolas,"Cascadia Mono","Courier New",monospace}
+.chapter-nav{max-width:940px;margin:0 auto;padding:14px 20px 10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:Consolas,"Cascadia Mono","Courier New",monospace}
+.chapter-nav-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chapter-nav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
 .chapter-nav .brand{font-weight:700;font-size:.98rem;color:var(--bold);text-decoration:none;letter-spacing:.3px;border-left:3px solid var(--accent);padding:2px 0 2px 8px;display:inline-block;will-change:transform}
 .chapter-nav .brand:hover{color:var(--accent);text-decoration:none}
 .chapter-nav .nav-sep{color:var(--accent);font-weight:700;font-size:1rem}
-.chapter-nav .back-links{display:flex;align-items:center;gap:8px;font-size:.82rem}
+.chapter-nav .back-links{display:flex;align-items:center;gap:8px;font-size:.82rem;flex-wrap:wrap}
 .chapter-nav .back-links a{padding:3px 9px;border:1px solid var(--border);background:var(--bg);color:var(--text);text-decoration:none}
 .chapter-nav .back-links a:hover{border-color:var(--accent);color:var(--accent)}
 .chapter-nav .back-links .qa-chip{margin-top:0;padding:3px 9px;font-size:.82rem}
-body.in-chapter .wrap{max-width:940px;padding:11px 20px 28px}
-@media (min-width:1180px){
-  .chapter-nav{position:fixed;top:11px;left:18px;padding:0;width:225px;flex-direction:column;align-items:flex-start;gap:8px;z-index:20}
-  .chapter-nav .nav-sep{display:none}
-  body.in-chapter .wrap{max-width:none;margin:0;padding:11px 145px 28px 256px}
-  body.in-chapter article{max-width:920px}
-}
+body.in-chapter .theme,body.in-chapter .cmd-trigger{position:static;padding:4px 10px;font-size:12.5px}
+body.in-chapter .wrap{max-width:940px;margin:0 auto;padding:0 20px 28px}
 body.in-chapter article{background:var(--code-bg);border:1px solid var(--border);border-radius:0;padding:24px 32px}
 .cmd-backdrop{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none;align-items:flex-start;justify-content:center;padding:72px 16px 24px}
 :root[data-theme=light] .cmd-backdrop{background:rgba(242,242,242,.86)}
@@ -218,8 +215,8 @@ footer{color:var(--muted);padding:20px 24px;font-size:.8rem;max-width:900px;marg
   header.top{padding-top:46px;padding-bottom:4px}
   .theme{top:10px;right:12px;font-size:12px;padding:4px 8px}
   .cmd-trigger{top:10px;right:114px;font-size:12px;padding:4px 8px}
-  .chapter-nav{padding:46px 14px 0 14px}
-  body.in-chapter .wrap{padding:10px 10px 24px}
+  .chapter-nav{padding:12px 10px 8px}
+  body.in-chapter .wrap{padding:0 10px 24px}
   body.in-chapter article{padding:16px 14px}
   .v-hdr,.v-row{grid-template-columns:1fr;gap:4px}
   .v-row.lv1,.v-row.lv2,.v-row.lv3,.v-row.lv4{padding:0}
