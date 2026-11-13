@@ -69,9 +69,14 @@ body.in-chapter article{background:var(--code-bg);border:1px solid var(--border)
 .theme-toggle:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(255,77,0,.35);transform:scale(1.05)}
 .theme-icon{position:absolute;color:var(--bold);transition:transform .4s cubic-bezier(.22,1,.36,1),opacity .3s ease,color .2s ease}
 
-:root[data-theme=dark] .theme-icon.moon-icon{opacity:1;transform:rotate(0deg) scale(1);color:#FFFFFF;fill:#FFFFFF}
-:root[data-theme=dark] .theme-icon.moon-icon path{fill:#FFFFFF;stroke:#FFFFFF}
-:root[data-theme=dark] .theme-toggle:hover .theme-icon.moon-icon{color:#FFFFFF;fill:#FFFFFF;filter:drop-shadow(0 0 8px rgba(255,255,255,.9))}
+:root[data-theme=dark] .theme-icon.moon-icon{opacity:1;transform:rotate(0deg) scale(1);color:#8E8E8E}
+:root[data-theme=dark] .theme-icon.moon-icon circle.night-moon{fill:#FFFFFF !important;stroke:#FFFFFF !important;filter:drop-shadow(0 0 4px rgba(255,255,255,.9))}
+:root[data-theme=dark] .theme-icon.moon-icon path,
+:root[data-theme=dark] .theme-icon.moon-icon line{stroke:#8E8E8E;fill:none;transition:stroke .2s ease}
+:root[data-theme=dark] .theme-toggle:hover .theme-icon.moon-icon{color:var(--accent)}
+:root[data-theme=dark] .theme-toggle:hover .theme-icon.moon-icon circle.night-moon{fill:#FFFFFF !important;stroke:#FFFFFF !important;filter:drop-shadow(0 0 8px #FFFFFF)}
+:root[data-theme=dark] .theme-toggle:hover .theme-icon.moon-icon path,
+:root[data-theme=dark] .theme-toggle:hover .theme-icon.moon-icon line{stroke:var(--accent)}
 :root[data-theme=dark] .theme-icon.sun-icon{opacity:0;transform:rotate(-90deg) scale(.35)}
 
 :root[data-theme=light] .theme-icon.sun-icon{opacity:1;transform:rotate(0deg) scale(1);color:var(--accent)}
