@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 1.1 Verification vs Validation (Static vs Dynamic Testing)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>1.1 Verification vs Validation (Static vs Dynamic Testing)</h1>
+
+  <section><h2>1. The Base: What is Software Testing and Why Do We Need It?</h2>
+    <p class="def">Software Testing is the complete process of evaluating project artifacts (requirements, design, source code) and the running application to prevent defects early, detect runtime bugs before release, and prove the software meets both the technical specification and the user's business need.</p>
+    <p><b>The Problem It Solves:</b> When a business wants a feature (e.g., <i>"Users can transfer up to $1,000 per day"</i>), humans write that requirement in English, architects design it, and developers write code in Java or TypeScript. Mistakes happen at every stage: an unclear specification, a developer coding <code>&lt; 1000</code> instead of <code>&lt;= 1000</code>, or a server crash when clicking "Transfer". Software Testing catches these flaws at every stage.</p>
+    <p><b>Core Terminology Defined First (Error vs Defect vs Failure &amp; Project Artifacts):</b></p>
+    <ul>
+      <li><b>1. Error (Mistake):</b> A human mistake made by a Business Analyst, Architect, or Developer (e.g., a developer misreads the discount formula and thinks a discount should be added instead of subtracted).</li>
+      <li><b>2. Defect (Bug / Fault):</b> The actual flaw written inside a document or source code file as a result of that human error (e.g., line 4 of <code>CartCalculator.java</code> contains <code>price + discount</code> instead of <code>price - discount</code>).</li>
+      <li><b>3. Failure:</b> The observable incorrect behavior when the compiled application actually runs (e.g., a user applies a 20% coupon on a $100 item and the checkout screen charges $120 instead of $80).</li>
+      <li><b>4. Project Artifacts:</b> All tangible files created during a software project before or during coding—including requirement docs (<b>BRS/SRS</b>), <b>Jira User Stories</b>, API contracts (<b>Swagger</b>), <b>Test Cases</b>, and source code files (<code>.java</code>, <code>.ts</code>).</li>
+    </ul></section>
+
+  <section><h2>2. Where Do Static and Dynamic Testing Fall? (The Classification Tree)</h2>
+    <p>Based on <b>whether we execute (run) the code or not</b>, all of Software Testing is divided into <b>2 fundamental branches</b>:</p>
+    <ol>
+      <li><b>Static Testing (performed via Verification)</b> &mdash; Testing <b>without</b> executing the code.</li>
+      <li><b>Dynamic Testing (performed via Validation)</b> &mdash; Testing <b>by</b> executing the running code.</li>
+    </ol>
+    <div class="arch">
+      <div class="lbl">SOFTWARE TESTING <small>Root Classification by Code Execution</small></div>
+      <div class="note">Splits on one question: "Do we compile and run the application code?"</div>
+      <div class="cols">
+        <div class="item">
+          <b>1. STATIC TESTING (Verification)</b>
+          <span>&bull; Code is <b>NOT</b> executed<br>&bull; Checks: Requirements, Design, Test Cases, Source Code text<br>&bull; Goal: <b>Prevent</b> defects early (1x cost)<br>&bull; Sub-types: Manual Reviews (Informal, Walkthrough, Technical, Inspection) &amp; Static Analysis (SonarQube)</span>
+        </div>
+        <div class="item">
+          <b>2. DYNAMIC TESTING (Validation)</b>
+          <span>&bull; Code <b>IS</b> compiled &amp; executed<br>&bull; Checks: Running App, Live APIs, Browser DOM, DB<br>&bull; Goal: <b>Detect</b> runtime defects (10x cost)<br>&bull; Sub-types: Functional (Unit, Integration, System, UAT) &amp; Non-Functional (Performance, Security)</span>
+        </div>
+      </div>
+    </div>
+    <p><b>Interview Answer:</b> <i>"Based on code execution, Software Testing is classified into Static Testing and Dynamic Testing. Static Testing evaluates documents and source code without executing the program (Verification), whereas Dynamic Testing evaluates the behavior of the software by actually executing it with test inputs (Validation)."</i></p></section>
+
+  <section><h2>3. Branch 1: Static Testing (Verification)</h2>
+    <p><b>Definition:</b> <b>Static Testing</b> is the evaluation of project documents (BRS, SRS, Jira User Stories, API specs, Test Cases) and source code (<code>.java</code>, <code>.ts</code>) <b>without executing the program</b>. It performs <b>Verification</b>: <i>"Are we building the product right according to the specification?"</i></p>
+    <p><b>Why we need it (Cost of Defect Multiplier &mdash; IBM/NIST Standard):</b></p>
+    <ul>
+      <li>Fixing a defect during Requirement/Code Review (Static Verification): <b>1x cost</b> (minutes).</li>
+      <li>Fixing it during QA Test Execution (Dynamic Validation): <b>10x cost</b> (requires bug logging, dev debugging, code fix, new build, retest).</li>
+      <li>Fixing it in Production: <b>100x cost</b> (customer impact, hotfix, rollback).</li>
+    </ul>
+    <p><b>Sub-Types of Static Testing (Listed First, Explained in Order):</b></p>
+    <ol>
+      <li><b>Manual Static Reviews</b> (4 levels from least to most formal: <i>Informal Review, Walkthrough, Technical Review, Inspection</i>)</li>
+      <li><b>Automated Static Code Analysis</b> (<i>SonarQube, Checkstyle, PMD, SpotBugs, ESLint</i>)</li>
+    </ol>
+    <p><b>Explained in order:</b></p>
+    <ol>
+      <li><b>Informal Review:</b> Peer check without a formal meeting or checklist (e.g., a teammate reads your test cases or PR and leaves comments).</li>
+      <li><b>Walkthrough:</b> Led by the <b>author</b> of the document/code, who walks the team through the logic to explain it and gather open feedback.</li>
+      <li><b>Technical Review:</b> Led by technical experts / senior SDETs to verify architecture, Swagger API contracts, or automation framework standards.</li>
+      <li><b>Inspection (Most Formal):</b> Led by a trained <b>Moderator</b> (never the author) with defined roles (Author, Reader, Recorder/Scribe, Inspector), formal entry/exit criteria, checklists, and logged defect metrics.</li>
+      <li><b>Automated Static Code Analysis:</b> Tools that parse source code AST (Abstract Syntax Tree) without running the app to catch null-pointer risks, dead code, hardcoded waits, security vulnerabilities (SAST), and cyclomatic complexity.</li>
+    </ol>
+    <p><b>In What Exact Cases Do We Perform Static Testing?</b></p>
+    <ul>
+      <li><b>Case 1 (Sprint Refinement):</b> Reviewing new Jira stories and Acceptance Criteria for ambiguity or missing negative scenarios before coding begins.</li>
+      <li><b>Case 2 (Design Sign-Off):</b> Reviewing Swagger/OpenAPI schemas, wireframes, and DB tables before backend implementation.</li>
+      <li><b>Case 3 (Test Readiness):</b> Peer-reviewing manual test cases and RTM coverage before build deployment.</li>
+      <li><b>Case 4 (Pull Request Gate):</b> Reviewing developer <code>.java</code> code or SDET Selenium Page Object PRs + running SonarQube before merging to <code>main</code>.</li>
+    </ul></section>
+
+  <section><h2>4. Branch 2: Dynamic Testing (Validation)</h2>
+    <p><b>Definition:</b> <b>Dynamic Testing</b> is the evaluation of the software by <b>compiling and executing the program</b> with test inputs and comparing actual runtime outputs against expected business outcomes. It performs <b>Validation</b>: <i>"Did we build the right product that actually works for the user?"</i></p>
+    <p><b>Why we need it even after Static Testing:</b> Static Testing cannot observe runtime memory, network timeouts, database locks, browser DOM rendering differences, CORS failures, or whether the finished workflow actually satisfies the real end-user.</p>
+    <p><b>Sub-Types of Dynamic Testing (Listed First, Explained in Order):</b></p>
+    <ol>
+      <li><b>Functional Dynamic Testing</b> (<i>Unit, Integration, System, User Acceptance Testing [UAT]</i>)</li>
+      <li><b>Non-Functional Dynamic Testing</b> (<i>Performance/Load, Security/Penetration, Usability, Compatibility</i>)</li>
+    </ol>
+    <p><b>Explained in order:</b></p>
+    <ol>
+      <li><b>Unit Testing:</b> Executing individual methods/classes in isolation (JUnit / TestNG).</li>
+      <li><b>Integration Testing:</b> Executing combined services, DB queries, and live REST APIs (RestAssured / Postman).</li>
+      <li><b>System Testing:</b> Executing the complete end-to-end application in a QA environment (Manual UI + <b>Selenium / Playwright</b> automation).</li>
+      <li><b>User Acceptance Testing (UAT):</b> Business stakeholders/end-users validating real-world workflows before go-live.</li>
+      <li><b>Non-Functional Testing:</b> Executing the system under load (JMeter/k6) or security attacks (OWASP ZAP) to measure speed, stability, and resilience.</li>
+    </ol>
+    <p><b>In What Exact Cases Do We Perform Dynamic Testing?</b></p>
+    <ul>
+      <li><b>Case 1 (Local Dev Build):</b> Running unit tests after compiling a class.</li>
+      <li><b>Case 2 (QA Build Deployment):</b> Running automated Selenium Smoke Tests to verify the deployed build is stable enough for testing.</li>
+      <li><b>Case 3 (In-Sprint Story Validation):</b> Executing positive, negative, and boundary test cases against live UI and APIs.</li>
+      <li><b>Case 4 (Pre-Release Regression):</b> Executing parallel Selenium/Playwright regression suites in CI/CD before production release.</li>
+    </ul></section>
+
+  <section><h2>5. End-to-End Connected Process Flow</h2>
+    <div class="arch">
+      <div class="lbl">PHASE A: STATIC TESTING (Before Build Exists &mdash; Prevent Defects)</div>
+      <div class="cols">
+        <div class="item"><b>1. Requirement Review</b><span>QA reviews Jira story &amp; Acceptance Criteria; logs ambiguity with PO.</span></div>
+        <div class="item"><b>2. Design &amp; Test Review</b><span>Peer review of API Swagger spec, Test Cases &amp; RTM mapping.</span></div>
+        <div class="item"><b>3. Code PR &amp; SonarQube</b><span>Static code review + linter checks before merging to main.</span></div>
+      </div>
+      <div class="flow">code compiles &amp; deploys to QA server</div>
+      <div class="lbl">PHASE B: DYNAMIC TESTING (After Build Exists &mdash; Detect Runtime Defects)</div>
+      <div class="cols">
+        <div class="item"><b>4. Smoke Execution</b><span>Selenium Smoke suite runs against live QA URL to accept build.</span></div>
+        <div class="item"><b>5. System &amp; Regression</b><span>Full Manual + Automated UI/API tests execute; runtime bugs logged.</span></div>
+        <div class="item"><b>6. UAT Validation</b><span>Business validates real user journey &rarr; Release Sign-Off.</span></div>
+      </div>
+    </div></section>
+
+  <section><h2>6. Real Code Trace: Static vs Dynamic Testing on the Same Feature</h2>
+<pre><code>public class CartCalculator {
+    public static double calculateFinalPrice(double price, double discountPercent) {
+        // BUG: Developer wrote '+' instead of '-'
+        return price + (price * discountPercent / 100);
+    }
+}
+
+public class CartTest {
+    public static void main(String[] args) {
+        double actual = CartCalculator.calculateFinalPrice(100.0, 20.0);
+        double expected = 80.0;
+        System.out.println("Actual output at runtime : " + actual);
+        System.out.println("Expected output          : " + expected);
+        System.out.println("Validation Passed?       : " + (actual == expected));
+    }
+}</code></pre>
+<pre><code class="bash">Actual output at runtime : 120.0
+Expected output          : 80.0
+Validation Passed?       : false</code></pre>
+    <ul>
+      <li><b>Static Testing catch:</b> In the GitHub Pull Request review (before running <code>java CartTest</code>), the reviewer sees <code>price + ...</code> on line 4 and flags it immediately.</li>
+      <li><b>Dynamic Testing catch:</b> When <code>java CartTest</code> (or a Selenium test reading the cart total from the browser DOM) runs with inputs <code>(100.0, 20.0)</code>, it produces <code>120.0</code> instead of <code>80.0</code> and fails the assertion.</li>
+    </ul></section>
+
+  <section><h2>7. Complete Differences: Static Testing (Verification) vs Dynamic Testing (Validation)</h2>
+    <table>
+      <tr><th>Parameter</th><th>Static Testing (Verification)</th><th>Dynamic Testing (Validation)</th></tr>
+      <tr><td>Definition</td><td>Evaluating docs &amp; source code <b>without</b> executing the program</td><td>Evaluating software <b>by executing</b> compiled code with test inputs</td></tr>
+      <tr><td>Core Question</td><td><i>"Are we building the product <b>right</b>?"</i> (Matches spec)</td><td><i>"Did we build the <b>right</b> product?"</i> (Meets user need)</td></tr>
+      <tr><td>Code Execution</td><td><b>No</b> (Zero execution)</td><td><b>Yes</b> (Application must run)</td></tr>
+      <tr><td>Timing in SDLC</td><td>Early (Requirements, Design, Coding PRs &mdash; before build)</td><td>Later (Unit, Integration, System, UAT &mdash; after build)</td></tr>
+      <tr><td>Artifacts Checked</td><td>BRS/SRS, Jira Stories, Swagger, Test Cases, <code>.java</code>/<code>.ts</code> files</td><td>Running binaries, live REST APIs, Browser DOM, DB state</td></tr>
+      <tr><td>Techniques</td><td>Informal Review, Walkthrough, Technical Review, Inspection, SonarQube</td><td>Unit, Integration, System, UAT, Smoke, Sanity, Regression, Load</td></tr>
+      <tr><td>Nature</td><td><b>Preventative</b> (QA oriented)</td><td><b>Detective</b> (QC oriented)</td></tr>
+      <tr><td>Cost to Fix Defect</td><td><b>Lowest (1x)</b></td><td><b>Higher (10x&ndash;100x)</b></td></tr>
+      <tr><td>Selenium Example</td><td>Reviewing a Page Object PR for <code>Thread.sleep()</code> or locator rules</td><td>Running <code>mvn test</code> to launch <code>ChromeDriver</code> and assert UI state</td></tr>
+    </table></section>
+
+  <section><h2>8. Self-Check</h2>
+    <ol>
+      <li>Based on code execution, what are the 2 main types of Software Testing? <i>(Static Testing and Dynamic Testing)</i></li>
+      <li>Who leads a <b>Walkthrough</b> vs who leads an <b>Inspection</b>? <i>(Walkthrough = the Author; Inspection = a trained Moderator)</i></li>
+      <li>Does Static Testing require a deployed QA environment? <i>(No &mdash; it inspects documents and source code without execution.)</i></li>
+    </ol></section>
+
+  <section><h2>9. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m1-1-qa.html"><span class="tag Interview">Interview</span>M1.1 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

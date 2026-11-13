@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Java: JVM Architecture and Memory Areas</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Java">Java</span>
+  <h1>JVM Architecture and Memory Areas</h1>
+
+  <section><h2>1. Definition</h2>
+    <p class="def">The JVM is a program with 4 parts: a Class Loader that brings code in, Memory Areas that store it, an Execution Engine that runs it, and a Native Interface that talks to the OS.</p></section>
+
+  <section><h2>2. Memory hook</h2>
+    <p><b>Load, Store, Run, Reach out: L-S-R-R.</b> Class Loader loads, Memory Areas store, Execution Engine runs, Native Interface reaches out to the OS.</p></section>
+
+  <section><h2>3. Architecture (read top to bottom, follow the arrows)</h2>
+    <div class="arch jvm">
+      <div class="lbl">JVM <small>one JVM process per running Java program</small></div>
+      <div class="note">Input: <b>Hello.class</b> (bytecode on disk). Output: your program running.</div>
+
+      <div class="arch">
+        <div class="lbl">&#9312; Class Loader Subsystem <small>the delivery person</small></div>
+        <div class="note">Brings .class files from disk into memory, only when first needed (lazy loading).</div>
+        <div class="cols">
+          <div class="item"><b>Loading</b><span>Finds the .class file, reads its bytes, creates the class description.</span></div>
+          <div class="item"><b>Linking</b><span>Verify (is it safe?), Prepare (static variables get default 0/null), Resolve (names become real addresses).</span></div>
+          <div class="item"><b>Initialization</b><span>Static variables get real values; static { } blocks run.</span></div>
+        </div>
+      </div>
+      <div class="flow">stores the loaded class information in</div>
+
+      <div class="arch">
+        <div class="lbl">&#9313; Runtime Data Areas <small>the JVM's memory: where things live</small></div>
+        <div class="note">Allocated from your computer's RAM when the JVM starts.</div>
+        <div class="grp">SHARED by all threads (one copy):</div>
+        <div class="cols">
+          <div class="item"><b>Heap</b><span>All objects (new Dog()) and arrays. Cleaned by the Garbage Collector.</span></div>
+          <div class="item"><b>Metaspace</b><span>Class info: method bytecode, field names, constant pool. Lives in native memory.</span></div>
+        </div>
+        <div class="grp">ONE PER THREAD (each thread gets its own):</div>
+        <div class="cols">
+          <div class="item"><b>Stack</b><span>One frame per method call: local variables and parameters. Frame is removed when the method returns.</span></div>
+          <div class="item"><b>PC Register</b><span>Remembers which bytecode instruction this thread runs next.</span></div>
+          <div class="item"><b>Native Method Stack</b><span>Same as Stack, but for native (C/C++) methods.</span></div>
+        </div>
+      </div>
+      <div class="flow">the engine reads bytecode from these areas, and creates objects and frames in them</div>
+
+      <div class="arch">
+        <div class="lbl">&#9314; Execution Engine <small>the cooks</small></div>
+        <div class="note">Does the actual running of the program.</div>
+        <div class="cols">
+          <div class="item"><b>Interpreter</b><span>Runs bytecode one instruction at a time. Starts fast, slow when repeated.</span></div>
+          <div class="item"><b>JIT Compiler</b><span>Finds hot code (run many times) and compiles it to native machine code, then caches it. Why Java speeds up after warm-up.</span></div>
+          <div class="item"><b>Garbage Collector</b><span>Finds objects nothing points to and frees their Heap memory automatically.</span></div>
+        </div>
+      </div>
+      <div class="flow">calls out when it needs the operating system</div>
+
+      <div class="arch">
+        <div class="lbl">&#9315; Native Interface (JNI) + Native Libraries <small>the outside suppliers</small></div>
+        <div class="note">Bridge to C/C++ code: file access, network, the OS's own functions. The JVM itself uses it constantly. You rarely write it.</div>
+      </div>
+    </div>
+    <div class="flow">runs on</div>
+    <div class="arch"><div class="lbl">Operating System + Hardware <small>Windows / Mac / Linux, CPU, RAM, disk</small></div></div></section>
+
+  <section><h2>4. Class Loader: the 3 loaders</h2>
+    <p>Each loader asks its <b>parent first</b> (parent delegation). This stops anyone from replacing the real <code>java.lang.String</code> with a fake one.</p>
+    <table>
+      <tr><th>Loader</th><th>Loads</th></tr>
+      <tr><td>Bootstrap</td><td>Core Java classes (String, Object...)</td></tr>
+      <tr><td>Platform</td><td>Extra platform modules</td></tr>
+      <tr><td>Application</td><td>Your classes and Selenium jars from the classpath</td></tr>
+    </table></section>
+
+  <section><h2>5. Memory areas at a glance</h2>
+    <table>
+      <tr><th>Area</th><th>Shared?</th><th>Stores</th><th>Cleared when</th></tr>
+      <tr><td>Heap</td><td>All threads</td><td>Objects and arrays</td><td>GC finds them unused</td></tr>
+      <tr><td>Metaspace</td><td>All threads</td><td>Class info, constant pool</td><td>Class is unloaded</td></tr>
+      <tr><td>Stack</td><td>One per thread</td><td>Method frames, local variables</td><td>Method returns</td></tr>
+      <tr><td>PC Register</td><td>One per thread</td><td>Current instruction address</td><td>Thread ends</td></tr>
+      <tr><td>Native Stack</td><td>One per thread</td><td>Native method calls</td><td>Method returns</td></tr>
+    </table></section>
+
+  <section><h2>6. Code example: where does each thing live?</h2>
+<pre><code>public class Demo {
+    static int count = 5;             // class info in Metaspace; value kept with the class (Heap in modern Java)
+    public static void main(String[] a) {
+        int x = 10;                   // Stack: local primitive
+        Dog d = new Dog();            // d (reference) in Stack; the Dog object in Heap
+    }
+}</code></pre></section>
+
+  <section><h2>7. Execution flow, step by step</h2>
+    <ol>
+      <li><code>java Demo</code> starts a JVM process.</li>
+      <li>Class Loader loads, verifies and prepares <code>Demo</code> (and String, System from the libraries).</li>
+      <li>Metaspace stores the class info. <code>main</code> gets a frame on the Stack.</li>
+      <li>Execution Engine runs the bytecode (Interpreter first, JIT for hot parts).</li>
+      <li>Objects created with <code>new</code> go to the Heap. The GC cleans them up later.</li>
+      <li>Program ends, the JVM exits, memory returns to the OS.</li>
+    </ol></section>
+
+  <section><h2>8. Real-life analogy: the restaurant kitchen</h2>
+    <table>
+      <tr><th>Restaurant</th><th>JVM part</th></tr>
+      <tr><td>Delivery person bringing recipe cards, inspector checking them</td><td>Class Loader, Verifier</td></tr>
+      <tr><td>Shelf holding all recipe books</td><td>Metaspace</td></tr>
+      <tr><td>Big shared prep tables holding all dishes in progress</td><td>Heap</td></tr>
+      <tr><td>Each cook's personal chopping board for the current step</td><td>Stack (one per thread)</td></tr>
+      <tr><td>Cook's finger on the current recipe line</td><td>PC Register</td></tr>
+      <tr><td>Cook reading step by step / cook who memorized the popular dish</td><td>Interpreter / JIT</td></tr>
+      <tr><td>Cleaner clearing tables of leftovers nobody needs</td><td>Garbage Collector</td></tr>
+      <tr><td>Outside supplier with special equipment</td><td>Native Libraries (JNI)</td></tr>
+    </table></section>
+
+  <section><h2>9. Where else is memory and storage?</h2>
+    <p>JVM memory is one layer. The full picture:</p>
+    <table>
+      <tr><th>Layer</th><th>Where</th><th>Terms</th></tr>
+      <tr><td>Disk (storage)</td><td>Hard drive / SSD</td><td>.java, .class, .jar (permanent)</td></tr>
+      <tr><td>JVM memory</td><td>RAM, managed by the JVM</td><td>Heap, Stack, PC register</td></tr>
+      <tr><td>Native / OS memory</td><td>RAM outside the heap</td><td>Metaspace, thread stacks, JIT code cache, direct buffers</td></tr>
+      <tr><td>CPU</td><td>Inside the processor</td><td>Registers and cache (not managed by the JVM)</td></tr>
+    </table>
+    <p>Coming up as separate pages: Stack vs Heap, Garbage Collection (Young/Old generation), String Pool, Primitive vs Reference types.</p></section>
+
+  <section><h2>10. Why it matters</h2>
+    <p>Heap vs Stack explains <code>NullPointerException</code>, <code>StackOverflowError</code>, <code>OutOfMemoryError</code> and why <code>d1 == d2</code> is false for two objects.</p>
+    <p><b>SDET link:</b> Selenium jars load through the Application Class Loader via the classpath. A leaky test suite fills the Heap, which is what <code>OutOfMemoryError</code> means. Parallel tests mean multiple threads, each with its own Stack.</p></section>
+
+  <section><h2>11. Quick test</h2>
+    <p>Where does <code>new Dog()</code> live? <b>Heap</b>. Where does the variable <code>d</code> holding its reference live? <b>Stack</b>.</p></section>
+
+  <section><h2>12. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Thread</td><td>One independent line of execution (parallel tests use several)</td></tr>
+      <tr><td>Frame</td><td>One method call's workspace on the Stack</td></tr>
+      <tr><td>Heap</td><td>Big shared memory where objects live</td></tr>
+      <tr><td>Reference</td><td>A pointer to an object, not the object itself</td></tr>
+      <tr><td>GC</td><td>Garbage Collector: automatic memory cleaner</td></tr>
+      <tr><td>JIT</td><td>Compiles hot bytecode to machine code during the run</td></tr>
+      <tr><td>Native</td><td>Code written in C/C++, specific to the OS</td></tr>
+    </table>
+    <p>&larr; Previous: <a href="java-jdk-jre-jvm.html">JDK vs JRE vs JVM</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

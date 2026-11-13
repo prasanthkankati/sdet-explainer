@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 1.2 SDLC Models (Waterfall, V-Model, Iterative, Spiral, Agile)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>1.2 SDLC Models: Waterfall, V-Model, Iterative, Spiral &amp; Agile</h1>
+
+  <section><h2>1. The Base: What is SDLC and Why Does It Exist?</h2>
+    <p class="def">The Software Development Life Cycle (SDLC) is the structured engineering framework that defines the exact sequence of phases—Requirement Gathering, System Design, Coding, Testing, Deployment, and Maintenance—used to turn a business idea into working production software.</p>
+    <p><b>The Problem It Solves (In Plain Words):</b> Without a defined SDLC, developers start writing code before business rules are agreed upon ("Cowboy Coding"), QA receives unstable code drops with zero documentation or test servers, and nobody knows when a feature is ready for customers. SDLC establishes clear phase handoffs, deliverables, and quality gates across the entire engineering team.</p>
+    <p><b>Core Document Terminology &amp; Their Properties (Defined First):</b></p>
+    <ul>
+      <li><b>1. BRS (Business Requirement Specification):</b> High-level document written by the Business Analyst describing <b>WHAT</b> the business/customer needs and <b>WHY</b> (e.g., <i>"Support UPI and Apple Pay checkout to increase conversion by 15%"</i>).</li>
+      <li><b>2. SRS (System Requirement Specification):</b> Detailed technical specification translating the BRS into <b>HOW</b> the system must behave—exact input fields, validation rules, API error codes, and response times.</li>
+      <li><b>3. Agile User Story &amp; Acceptance Criteria:</b> In Agile projects, giant BRS/SRS documents are replaced by bite-sized <b>User Stories</b> (<i>"As a &lt;role&gt;, I want &lt;feature&gt;, so that &lt;value&gt;"</i>) paired with testable <b>Acceptance Criteria</b> (exact pass/fail rules QA verifies).</li>
+      <li><b>4. HLD (High-Level Design) vs LLD (Low-Level Design):</b>
+        <ul>
+          <li><b>HLD (Macro Architecture):</b> System-wide blueprint created by Architects showing microservices, cloud infrastructure, message queues, and databases.</li>
+          <li><b>LLD (Micro Component Design):</b> Detailed blueprint showing exact Java class names, method signatures, SQL table columns, and REST API JSON payloads.</li>
+        </ul>
+      </li>
+    </ul></section>
+
+  <section><h2>2. Universal Foundation: The 6 Core Phases of Every SDLC</h2>
+    <p>Regardless of which SDLC model a company chooses, every software project executes these <b>6 fundamental phases</b> in sequence:</p>
+    <div class="arch">
+      <div class="lbl">SDLC 6-PHASE ARCHITECTURE PIPELINE <small>End-to-End Flow from Business Idea to Production Maintenance</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">01</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Requirement Gathering &amp; Analysis</b><span class="phase-role">Owner: BA / Product Owner / Client</span></div>
+            <div class="phase-meta">
+              <div><span>Input</span>Client business needs &amp; market problem</div>
+              <div><span>Core Activity</span>Gather, analyze &amp; freeze functional/non-functional specs</div>
+              <div><span>Deliverable Output</span><b>BRS</b>, <b>SRS</b>, or <b>Agile User Stories + Acceptance Criteria</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Signed-off SRS / User Stories handed to Architects</span></div>
+        <div class="phase-card">
+          <div class="phase-num">02</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>System Design (HLD &amp; LLD)</b><span class="phase-role">Owner: System &amp; Solution Architects</span></div>
+            <div class="phase-meta">
+              <div><span>Input</span>Approved SRS / User Stories</div>
+              <div><span>Core Activity</span>Design architecture (HLD) &amp; class/DB/API schemas (LLD)</div>
+              <div><span>Deliverable Output</span><b>HLD</b> (Microservices/Infra) &amp; <b>LLD</b> (DB Tables, Swagger APIs)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Frozen HLD &amp; LLD blueprints handed to Engineering</span></div>
+        <div class="phase-card">
+          <div class="phase-num">03</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Implementation (Coding)</b><span class="phase-role">Owner: Frontend / Backend Devs &amp; SDETs</span></div>
+            <div class="phase-meta">
+              <div><span>Input</span>HLD &amp; LLD Documents</div>
+              <div><span>Core Activity</span>Write source code (<code>.java</code>/<code>.ts</code>), Unit Tests &amp; Page Objects</div>
+              <div><span>Deliverable Output</span><b>Source Code in Git</b>, Passing Unit Tests &amp; Deployable Build</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Compiled build deployed to QA Environment</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">04</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Testing (Verification &amp; Validation &mdash; STLC Runs Here)</b><span class="phase-role">Owner: Manual QA &amp; SDET Team</span></div>
+            <div class="phase-meta">
+              <div><span>Input</span>QA Build + SRS + Test Cases</div>
+              <div><span>Core Activity</span>Execute Smoke, Sanity, Integration, System, Regression &amp; UAT</div>
+              <div><span>Deliverable Output</span><b>RTM</b>, Jira Bug Reports, ExtentReports &amp; <b>QA Release Sign-Off</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>QA Sign-Off unlocks Production Release Gate</span></div>
+        <div class="phase-card">
+          <div class="phase-num">05</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Deployment (Release)</b><span class="phase-role">Owner: DevOps / SRE / Release Eng</span></div>
+            <div class="phase-meta">
+              <div><span>Input</span>QA Signed-Off Release Build</div>
+              <div><span>Core Activity</span>CI/CD deployment (Blue-Green / Canary) + Prod Smoke Test</div>
+              <div><span>Deliverable Output</span><b>Live Production Release</b> &amp; Release Notes</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Live customer traffic &amp; telemetry monitoring</span></div>
+        <div class="phase-card">
+          <div class="phase-num">06</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Maintenance &amp; Support</b><span class="phase-role">Owner: SRE / Support / Dev &amp; QA</span></div>
+            <div class="phase-meta">
+              <div><span>Input</span>Prod Logs, Alerts &amp; User Tickets</div>
+              <div><span>Core Activity</span>Monitor SLA/uptime, patch live hotfixes, upgrade dependencies</div>
+              <div><span>Deliverable Output</span><b>Hotfix Patches</b>, Root Cause Analysis (RCA) &amp; Health Metrics</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>3. Classification Tree: How SDLC Models Split</h2>
+    <p>Different projects have different requirement stability and risk profiles (e.g., a fixed-spec NASA spacecraft vs a fast-changing e-commerce app). Based on <b>how and when the 6 phases are executed</b>, SDLC models split into <b>2 families (5 core models)</b>:</p>
+    <ol>
+      <li><b>Sequential Models (Phases run in one big pass):</b> <i>1. Waterfall Model, 2. V-Model</i></li>
+      <li><b>Incremental &amp; Evolutionary Models (Software is built in repeated cycles):</b> <i>3. Iterative &amp; Incremental Model, 4. Spiral Model, 5. Agile Model</i></li>
+    </ol>
+    <div class="arch">
+      <div class="lbl">SDLC MODELS <small>Classified by Execution Flow &amp; Requirement Flexibility</small></div>
+      <div class="cols">
+        <div class="item">
+          <b>FAMILY A: SEQUENTIAL MODELS</b>
+          <span>Requirements are locked up front; entire product is delivered at the end.<br>&bull; <b>1. Waterfall Model</b> (Linear step-by-step)<br>&bull; <b>2. V-Model</b> (Verification paired with Validation)</span>
+        </div>
+        <div class="item">
+          <b>FAMILY B: INCREMENTAL / CYCLICAL MODELS</b>
+          <span>Product is built, tested, and delivered in repeated increments/loops.<br>&bull; <b>3. Iterative &amp; Incremental</b> (Module by module)<br>&bull; <b>4. Spiral Model</b> (Risk-driven loops)<br>&bull; <b>5. Agile Model</b> (1&ndash;4 week Sprints &mdash; Industry Standard)</span>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. Each SDLC Model Defined &amp; Explained in Order</h2>
+
+    <p><b>① Waterfall Model (Linear Sequential Model)</b></p>
+    <ul>
+      <li><b>Definition:</b> Each phase must <b>100% finish and freeze</b> before the next phase begins (<code>Requirements &rarr; Design &rarr; Coding &rarr; Testing &rarr; Deployment</code>). There is no overlapping or going backward.</li>
+      <li><b>How QA works in Waterfall:</b> QA only enters at Phase 4 (after 100% of coding is finished). If a requirement bug was introduced in Month 1, QA discovers it in Month 9 when fixing it requires rewriting the architecture (10x&ndash;100x cost).</li>
+      <li><b>In what exact cases we use it:</b> Short, small projects where requirements are 100% clear, fixed, and guaranteed not to change (e.g., migrating a static legacy report).</li>
+    </ul>
+
+    <p><b>② V-Model (Verification and Validation Model)</b></p>
+    <ul>
+      <li><b>Definition:</b> An extension of Waterfall where <b>every Left-Side Development (Verification) phase is directly paired with a Right-Side Testing (Validation) phase</b>, forming a <b>V-shape</b> with Coding at the bottom vertex.</li>
+      <li><b>How QA works in V-Model:</b> QA starts on <b>Day 1</b>. While architects write a design document on the left side, QA simultaneously reviews it (Static Verification) and writes the corresponding test cases for the right side (Dynamic Validation):</li>
+    </ul>
+    <div class="arch">
+      <div class="lbl">V-MODEL VISUAL DIAGRAM <small>Left Side (Static Verification) &harr; Test Design Bridge &harr; Right Side (Dynamic Validation)</small></div>
+      <div class="v-diagram">
+        <div class="v-hdr"><div>&darr; LEFT: VERIFICATION (DEV SPECS)</div><div>TEST DESIGN</div><div>RIGHT: VALIDATION (EXECUTION) &uarr;</div></div>
+        <div class="v-row lv1">
+          <div class="v-box left"><b>1. BRS / User Requirements</b><span>Business needs reviewed</span></div>
+          <div class="v-mid">Writes UAT Cases &rarr;</div>
+          <div class="v-box right"><b>8. User Acceptance Testing (UAT)</b><span>Validates business readiness</span></div>
+        </div>
+        <div class="v-row lv2">
+          <div class="v-box left"><b>2. SRS (System Spec)</b><span>Functional specs reviewed</span></div>
+          <div class="v-mid">Writes System Cases &rarr;</div>
+          <div class="v-box right"><b>7. System Testing (E2E QA)</b><span>Validates full end-to-end app</span></div>
+        </div>
+        <div class="v-row lv3">
+          <div class="v-box left"><b>3. HLD (Architecture)</b><span>Module &amp; API contracts</span></div>
+          <div class="v-mid">Writes API/Int Cases &rarr;</div>
+          <div class="v-box right"><b>6. Integration Testing</b><span>Validates service &amp; DB links</span></div>
+        </div>
+        <div class="v-row lv4">
+          <div class="v-box left"><b>4. LLD (Class / Schema)</b><span>Method &amp; table logic</span></div>
+          <div class="v-mid">Writes Unit Cases &rarr;</div>
+          <div class="v-box right"><b>5. Unit Testing</b><span>Validates classes &amp; methods</span></div>
+        </div>
+        <div class="v-vertex"><b>VERTEX: IMPLEMENTATION (CODING)</b><span>Source code written here at the bottom of the V</span></div>
+      </div>
+    </div>
+    <ul>
+      <li><b>In what exact cases we use it:</b> Safety-critical, regulated systems (medical devices, aviation control, automotive firmware, core banking) where strict traceability and zero defects matter more than mid-project requirement changes.</li>
+    </ul>
+
+    <p><b>③ Iterative &amp; Incremental Model</b></p>
+    <ul>
+      <li><b>Definition:</b> Instead of building the entire application in one giant pass, the system is divided into smaller functional modules built across repeated mini-SDLC cycles (Cycle 1 builds &amp; tests Login; Cycle 2 adds &amp; tests Search + runs Regression on Login; Cycle 3 adds &amp; tests Checkout).</li>
+      <li><b>In what exact cases we use it:</b> Large enterprise systems where core requirements are known, so high-priority modules can be delivered early and refined over cycles.</li>
+    </ul>
+
+    <p><b>④ Spiral Model (Risk-Driven Model)</b></p>
+    <ul>
+      <li><b>Definition:</b> Combines iterative prototyping with <b>formal risk analysis</b>. Every loop of the spiral passes through <b>4 quadrants</b>: (1) Determine Objectives, (2) <b>Identify &amp; Resolve Risks (Build Prototype)</b>, (3) Develop &amp; Test, (4) Plan Next Iteration with Customer.</li>
+      <li><b>In what exact cases we use it:</b> High-budget, high-risk R&amp;D, defense, aerospace, or first-of-a-kind financial trading engines where technical feasibility is uncertain up front.</li>
+    </ul>
+
+    <p><b>⑤ Agile Model (Scrum / Kanban &mdash; Modern Industry Standard)</b></p>
+    <ul>
+      <li><b>Definition:</b> Breaks the product into small user-centric features (<b>User Stories</b>) delivered in fixed time-boxes called <b>Sprints (typically 2 weeks)</b>. Each sprint is a complete mini-SDLC producing a working, tested, potentially shippable product increment.</li>
+      <li><b>How QA &amp; SDET work in Agile:</b> QA is embedded inside the development team from Day 1 of the sprint. Manual testing, API testing, and <b>Selenium/Playwright UI automation happen inside the same sprint</b> ("In-Sprint Automation"), while CI/CD pipelines run automated regression on every code push.</li>
+      <li><b>In what exact cases we use it:</b> Almost all modern SaaS, e-commerce, banking apps, mobile apps, and cloud platforms where requirements evolve rapidly with market feedback.</li>
+    </ul>
+    <p><b>Interview Answer:</b> <i>"In Waterfall, testing happens only at the end after coding completes. In the V-Model, every development stage is paired with a testing stage designed in parallel (LLD to Unit, HLD to Integration, SRS to System, BRS to UAT). In Agile, development, manual testing, and Selenium/API automation happen together inside short 2-week sprints with continuous CI/CD delivery."</i></p></section>
+
+  <section><h2>5. Complete Comparison Table Across All 5 SDLC Models</h2>
+    <table>
+      <tr><th>Dimension</th><th>Waterfall</th><th>V-Model</th><th>Iterative</th><th>Spiral</th><th>Agile (Scrum)</th></tr>
+      <tr><td>Requirement Flexibility</td><td>Frozen on Day 1</td><td>Rigid (costly to change)</td><td>Medium (between cycles)</td><td>High (evaluated per loop)</td><td><b>Very High</b> (every sprint)</td></tr>
+      <tr><td>When QA Testing Starts</td><td>Only after 100% coding</td><td>Day 1 (Test design in parallel)</td><td>Inside each cycle</td><td>Inside each risk loop</td><td><b>Day 1 of every Sprint</b></td></tr>
+      <tr><td>First Working Software</td><td>Very end of project</td><td>Very end of project</td><td>After Iteration 1</td><td>Early prototype</td><td><b>Every 2 weeks (Sprint 1)</b></td></tr>
+      <tr><td>Risk &amp; Cost of Late Bugs</td><td><b>Highest</b></td><td>Low (if specs don't change)</td><td>Medium-Low</td><td><b>Lowest</b> for R&amp;D risks</td><td><b>Lowest</b> for business changes</td></tr>
+      <tr><td>Automation Strategy</td><td>End-of-project only</td><td>Planned early, run at right of V</td><td>Cumulative per module</td><td>Prototype + regression</td><td><b>In-Sprint + CI/CD every PR</b></td></tr>
+    </table></section>
+
+  <section><h2>6. Real SDET &amp; Selenium Framework Context Across SDLC</h2>
+    <p>In a real Agile/V-Model engineering team, your Selenium + TestNG + RestAssured framework maps directly to the 6 SDLC phases inside every 2-week sprint:</p>
+<pre><code>// Phase 1 &amp; 2 (Requirements &amp; Design): Agree on stable test attributes with Frontend Dev
+// &lt;button id="pay-now-btn" data-testid="submit-payment"&gt;Pay&lt;/button&gt;
+
+// Phase 3 (Coding): Build Page Object while Developer codes the feature
+public class PaymentPage {
+    private final WebDriver driver;
+    private final By payButton = By.id("pay-now-btn");
+
+    public PaymentPage(WebDriver driver) { this.driver = driver; }
+    public void submitPayment() { driver.findElement(payButton).click(); }
+}
+
+// Phase 4 &amp; 5 (Testing &amp; CI/CD Deployment Gate):
+// Jenkins runs Smoke (@Test(groups="smoke")) on every PR, and Regression nightly</code></pre></section>
+
+  <section><h2>7. Self-Check</h2>
+    <ol>
+      <li>In the V-Model, which testing level pairs directly with <b>HLD (High-Level Design)</b> and which pairs with <b>LLD (Low-Level Design)</b>? <i>(HLD &rarr; Integration Testing; LLD &rarr; Unit Testing)</i></li>
+      <li>Which SDLC model explicitly dedicates a quadrant of every cycle to <b>Risk Analysis and Prototyping</b>? <i>(Spiral Model)</i></li>
+      <li>Why does Regression Testing grow after every cycle in Iterative and Agile models? <i>(Because each new sprint/iteration adds features on top of previous increments, requiring automated regression to ensure old features didn't break.)</i></li>
+    </ol></section>
+
+  <section><h2>8. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m1-2-qa.html"><span class="tag Interview">Interview</span>M1.2 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

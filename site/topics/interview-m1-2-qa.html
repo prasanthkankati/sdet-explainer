@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: M1.2 SDLC Models (Waterfall, V-Model, Iterative, Spiral, Agile)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a class="qa-chip" href="manual-m1-2-sdlc-models.html"><span class="tag Manual">Manual</span>&larr; Back to M1.2 Concept Page</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>M1.2 Question Bank: SDLC Models &mdash; Waterfall, V-Model, Iterative, Spiral &amp; Agile (35 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Phases &amp; Classification (Q1&ndash;Q10)</h2>
+    <ol>
+      <li><b>What is SDLC, and what are its 6 universal phases in exact chronological order?</b><br>
+      SDLC (Software Development Life Cycle) is the end-to-end engineering process for building, testing, and maintaining software. The 6 phases are: <b>1. Requirement Gathering &amp; Analysis &rarr; 2. System Design (HLD &amp; LLD) &rarr; 3. Implementation (Coding) &rarr; 4. Testing &rarr; 5. Deployment &rarr; 6. Maintenance</b>.</li>
+
+      <li><b>What is the difference between BRS and SRS in Phase 1 of the SDLC?</b><br>
+      <b>BRS (Business Requirement Specification)</b> describes <i>what</i> the business needs in high-level business language (written by Product/BA for stakeholders). <b>SRS (System/Software Requirement Specification)</b> translates the BRS into detailed functional and non-functional system behavior (inputs, outputs, validations, SLAs) used by developers to code and QA to write System Test cases.</li>
+
+      <li><b>What is the difference between HLD (High-Level Design) and LLD (Low-Level Design) in Phase 2?</b><br>
+      <b>HLD</b> defines the macro architecture: microservices, databases, message queues, third-party integrations, and data flow between modules. <b>LLD</b> defines the micro component details: exact Java class names, method signatures, database table columns/indexes, and API JSON schemas.</li>
+
+      <li><b>How do SDLC models split into families?</b><br>
+      They split into <b>Sequential Models</b> (<i>Waterfall, V-Model</i>—where requirements are locked up front and delivered in one pass) and <b>Incremental / Evolutionary Models</b> (<i>Iterative, Spiral, Agile</i>—where software is built, tested, and delivered in repeated loops or sprints).</li>
+
+      <li><b>Why is the V-Model called the "Verification and Validation" model?</b><br>
+      Because the <b>Left side of the V</b> represents <b>Verification</b> (Requirements, SRS, HLD, LLD reviews and test planning), the bottom vertex is **Coding**, and the <b>Right side of the V</b> represents <b>Validation</b> (Unit, Integration, System, and UAT execution). Every left-side phase directly designs its paired right-side test phase.</li>
+
+      <li><b>State the exact 4-level pairing between the Left Side and Right Side of the V-Model.</b><br>
+      1. <b>BRS / User Requirements</b> &harr; <b>User Acceptance Testing (UAT)</b><br>
+      2. <b>SRS (System Requirements)</b> &harr; <b>System Testing</b><br>
+      3. <b>HLD (High-Level Design)</b> &harr; <b>Integration Testing</b><br>
+      4. <b>LLD (Low-Level Design)</b> &harr; <b>Unit Testing</b></li>
+
+      <li><b>What are the 4 quadrants of the Spiral Model?</b><br>
+      1. Determine Objectives &amp; Constraints &rarr; 2. <b>Identify &amp; Resolve Risks (Build Prototype)</b> &rarr; 3. Develop &amp; Test the Iteration &rarr; 4. Evaluate with Customer &amp; Plan the Next Loop.</li>
+
+      <li><b>What is the difference between "Iterative" and "Incremental" development?</b><br>
+      <b>Incremental</b> means building the system piece by piece (Increment 1 adds Login; Increment 2 adds Cart; Increment 3 adds Payment). <b>Iterative</b> means refining a capability through repeated versions (v1 is a basic search box; v2 adds filters; v3 adds AI autocomplete). Modern Agile is **both Iterative and Incremental**.</li>
+
+      <li><b>What is the core difference between Agile and Waterfall from a QA perspective?</b><br>
+      In **Waterfall**, QA waits until 100% of coding is finished at the end of the project to start dynamic testing. In **Agile**, QA works alongside developers inside every 1&ndash;4 week Sprint—reviewing stories on Day 1, testing features as they are built, and automating regression continuously.</li>
+
+      <li><b>In which SDLC model is the cost of fixing a requirement defect highest, and why?</b><br>
+      <b>Waterfall</b>, because requirements are frozen in Month 1 and dynamic validation (System/UAT testing) does not happen until the end of the lifecycle, meaning any misunderstood requirement has already been designed and coded across the entire system.</li>
+    </ol></section>
+
+  <section><h2>Tier 2: Why / Why Not &amp; Deep Model Comparisons (Q11&ndash;Q18)</h2>
+    <ol start="11">
+      <li><b>Why does the V-Model still fail for modern web/SaaS startups even though QA starts on Day 1?</b><br>
+      Because while V-Model starts test *design* on Day 1, actual working software is still delivered only at the very end, and requirements are still frozen up front. If a startup pivots its feature mid-way, all pre-written System and UAT test documents on the left side of the V must be rewritten.</li>
+
+      <li><b>Why not use Agile for every project in the world? When is V-Model or Waterfall actually better than Agile?</b><br>
+      When building embedded hardware/firmware (e.g., an implantable cardiac pacemaker or aircraft flight controller) where FDA/FAA regulations require 100% frozen specs, formal mathematical verification, and complete traceability before a physical chip is manufactured.</li>
+
+      <li><b>Why is the Spiral Model rarely used for standard web or CRUD applications?</b><br>
+      Because formal risk-analysis cycles and throwaway prototyping in every loop require expensive risk-assessment experts and high overhead, which is overkill for standard web apps with well-understood tech stacks.</li>
+
+      <li><b>What is a "Prototype" Model, and how does a Throwaway Prototype differ from an Evolutionary Prototype?</b><br>
+      Prototyping builds a quick UI/functional mock when customer requirements are unclear. A <b>Throwaway Prototype</b> is discarded once requirements are clarified so developers can code clean production architecture from scratch. An <b>Evolutionary Prototype</b> is continuously refactored into the final production system.</li>
+
+      <li><b>Why does Automation Testing become mandatory in Agile and Iterative models compared to Waterfall?</b><br>
+      In Waterfall, System Testing runs once at the end. In Agile (2-week sprints), by Sprint 20 you must test Sprint 20's new features **plus** re-verify all features from Sprints 1&ndash;19. Manual regression cannot scale across 20 sprints in 2 weeks without **Selenium/Playwright/API automation**.</li>
+
+      <li><b>What is "Water-Scrum-Fall" (Fake Agile), and why is it an anti-pattern?</b><br>
+      When a team claims to use Scrum, but business analysts spend 3 months writing upfront specs (Water), developers code for 9 days of the sprint and dump all stories on QA on Day 10 (Scrum), and releases only happen once every 6 months (Fall). It combines the worst bottlenecks of Waterfall with the meeting overhead of Scrum.</li>
+
+      <li><b>In the V-Model, when are System Test Cases written vs when are they executed?</b><br>
+      System Test Cases are **written** during the **SRS (System Requirement Specification) phase** on the left side of the V, and **executed** during the **System Testing phase** on the right side of the V after Integration Testing passes.</li>
+
+      <li><b>How does documentation weight compare across Waterfall, V-Model, and Agile?</b><br>
+      <b>V-Model &amp; Waterfall</b> require heavy upfront documentation (formal BRS, SRS, HLD, LLD, Test Plans). <b>Agile</b> favors lightweight, living documentation (Jira User Stories, Gherkin `Given/When/Then` Acceptance Criteria, Swagger auto-docs, and executable automated test suites).</li>
+    </ol></section>
+
+  <section><h2>Tier 3: Real-World Tricky &amp; Edge-Case Scenarios (Q19&ndash;Q26)</h2>
+    <ol start="19">
+      <li><b>[Scenario &mdash; The Frozen Requirements Trap in Waterfall] Halfway through coding a healthcare portal in Waterfall, a new government privacy law is passed. The PM says "Requirements are frozen; we can't change course now." As QA Lead, what do you do?</b><br>
+      Legal compliance cannot be ignored—shipping illegal software is a blocker. I would immediately log a **Critical Compliance Risk**, initiate a formal **Change Control Board (CCB)** impact analysis to measure the delta between current code and the new law, and either update the SRS/Test Plan via approved change request or isolate the affected module for a mandatory pre-launch compliance patch.</li>
+
+      <li><b>[Scenario &mdash; The Flawed HLD Blueprint in V-Model] During the High-Level Design (HLD) phase in a V-Model project, you spot a major flaw in how payment retries are designed. A developer says: "Don't worry about HLD; QA's job starts when the build is deployed." How do you respond?</b><br>
+      I explain that in the V-Model, **Integration Test planning pairs directly with HLD on the left side of the V**. Catching an architectural flaw in HLD costs 1x; waiting until Integration Execution costs 10x. I log a formal **Design Defect** against the HLD and show the exact Integration Test scenario that will fail if built as designed.</li>
+
+      <li><b>[Scenario &mdash; Spiral Creep / Endless Loops] Your company is building a trading platform using the Spiral Model. After 3 loops, leadership complains the team is "spinning in circles with prototypes" and wants to push the current prototype straight to production. What is your stance?</b><br>
+      Pushing an unhardened risk prototype to production in financial trading is catastrophic. As QA, I review the **Risk Exit Criteria** of Loop 3: if core technical risks (latency, concurrency) are now resolved, I recommend transitioning from Spiral prototyping into a structured **Agile/V-Model hardening and full System/Performance validation phase** rather than shipping raw prototype code.</li>
+
+      <li><b>[Scenario &mdash; Hybrid Hardware + Mobile App Product] An automotive client is building a smart car: physical sensor hardware takes 18 months to manufacture, while the companion mobile app needs bi-weekly updates. Should they use Waterfall, V-Model, or Agile?</b><br>
+      Recommend a **Hybrid SDLC**:<br>
+      &bull; Use the **V-Model** for the **embedded hardware &amp; firmware** (where specs must be strictly verified before factory manufacturing).<br>
+      &bull; Use **Agile (Scrum)** for the **mobile app &amp; cloud backend**.<br>
+      &bull; **SDET solution:** Build a **Hardware Mock / Service Virtualization server** so the Agile app team can run automated integration tests every sprint without waiting 18 months for physical car sensors.</li>
+
+      <li><b>[Scenario &mdash; The "No Documentation" Chaotic Startup] You join a startup with zero SRS docs and daily "cowboy" pushes to production. How do you establish SDLC/QA stability without freezing the business?</b><br>
+      1. **Week 1 (Safety Net):** Build a fast Selenium/Playwright **Smoke Suite** covering the top 5 revenue flows (Signup, Login, Search, Cart, Checkout) and wire it into CI on every deploy.<br>
+      2. **Week 2 (Reverse-Engineer Living Docs):** Pair with Product &amp; Support to document core business rules as concise Acceptance Criteria.<br>
+      3. **Week 3 (Shift-Left Gate):** Introduce a lightweight Kanban/Scrum workflow with a mandatory PR review + green Smoke check before production merge.</li>
+
+      <li><b>[Scenario &mdash; Mid-Sprint Requirement Flip in Agile] On Day 6 of a 10-day Sprint, the Product Owner wants to completely change the tax calculation logic of a story QA is already testing. How does Agile handle this vs Waterfall?</b><br>
+      Even in Agile, once a Sprint starts, the Sprint scope should remain stable to protect the **Sprint Goal**. If the change is a small clarification, we adjust in-sprint; if it invalidates completed dev/QA effort, the PO and Scrum Master either **swap out** an unstarted story of equal Story Points or place the new tax change into the **next Sprint Backlog**.</li>
+
+      <li><b>[Scenario &mdash; Developer Dumps Code on Day 9 of a 10-Day Sprint] In your 2-week Agile sprint, developers hand over all 6 stories to QA on the second-to-last day. How do you fix this SDLC bottleneck?</b><br>
+      Enforce **WIP (Work-In-Progress) limits**, break large 8-point stories into smaller 2&ndash;3 point vertical slices deliverable by Day 3&ndash;4, require developers to pass Unit + API checks before moving tickets to `Ready for QA`, and write Selenium Page Object skeletons early using mocked UI/contracts.</li>
+
+      <li><b>[Scenario &mdash; Regulated Banking App Moving from Waterfall to Agile] A bank wants Agile speed but auditors require V-Model traceability. How do you satisfy both?</b><br>
+      Use **Disciplined Agile + Automated Traceability**: link every Jira User Story ID to Git commits, TestNG `@Test` annotations (e.g., `@Test(description = "JIRA-104")`), and ExtentReports/Allure dashboards so every sprint automatically generates an audit-ready Requirement Traceability Matrix (RTM).</li>
+    </ol></section>
+
+  <section><h2>Tier 4: SDET, Automation &amp; CI/CD Across SDLC (Q27&ndash;Q31)</h2>
+    <ol start="27">
+      <li><b>What is "In-Sprint Automation" in Agile, and how do you achieve it when the UI isn't ready until Day 7?</b><br>
+      **In-Sprint Automation** means a User Story is not marked `Done` until its automated tests are written and passing inside the *same* sprint. To achieve this before Day 7:<br>
+      &bull; **Days 1&ndash;3:** Lock down API Swagger specs and HTML `id`/`data-testid` attributes with devs during Design.<br>
+      &bull; **Days 3&ndash;6:** Write API automation (`RestAssured`) and Selenium Page Object classes against local dev branches or wireframes.<br>
+      &bull; **Days 7&ndash;9:** Plug in the live QA URL, run the suite, fix any locator/timing tweaks, and merge into CI.</li>
+
+      <li><b>What is the "N-1 Automation" pattern, and when do teams use it instead of In-Sprint Automation?</b><br>
+      In **N-1 Automation**, Sprint `N` stories are tested manually in Sprint `N`, and their UI automation scripts are written in Sprint `N+1` once the UI has stabilized. Teams use this when UI designs change rapidly mid-sprint, though **In-Sprint Automation** is always preferred for mature teams.</li>
+
+      <li><b>How does the Test Automation Pyramid fit into the Agile SDLC?</b><br>
+      &bull; **Base (70% &mdash; Unit Tests):** Run in seconds during Phase 3 (Coding) on every local save.<br>
+      &bull; **Middle (20% &mdash; Integration / API Tests):** Run in 1&ndash;3 minutes on every PR build.<br>
+      &bull; **Top (10% &mdash; Selenium / Playwright E2E UI Tests):** Cover critical end-to-end user journeys in staging/CI. Relying 100% on slow UI tests ("Ice-Cream Cone anti-pattern") breaks Agile sprint velocity.</li>
+
+      <li><b>Where does CI/CD (Jenkins / GitHub Actions) sit in the SDLC?</b><br>
+      CI/CD automates the bridge between **Phase 3 (Coding)**, **Phase 4 (Testing)**, and **Phase 5 (Deployment)**: Continuous Integration (CI) compiles code and runs static + dynamic tests on every commit; Continuous Delivery/Deployment (CD) promotes passing builds to QA/Staging/Production automatically.</li>
+
+      <li><b>During Phase 6 (Maintenance) of the SDLC, what is the SDET's primary responsibility?</b><br>
+      1. Running post-deployment **Production Smoke / Synthetic Monitoring** tests.<br>
+      2. Performing **Defect Escape Root Cause Analysis** when a production bug occurs, and immediately adding an automated regression test for that bug before the hotfix ships.<br>
+      3. Maintaining framework dependencies (upgrading Selenium, JDK, browser drivers) and eliminating flaky tests.</li>
+    </ol></section>
+
+  <section><h2>Tier 5: Rapid-Fire Curveballs &amp; True/False Traps (Q32&ndash;Q35)</h2>
+    <ol start="32">
+      <li><b>True or False: "In Agile, we don't need System Design (HLD/LLD) or Test Planning because we follow the Agile Manifesto."</b><br>
+      <b>False.</b> The Agile Manifesto values *"working software over comprehensive documentation"*, not *zero* design or planning. In Agile, design and test planning happen **just-in-time** during Backlog Refinement and Sprint Planning for each increment.</li>
+
+      <li><b>In the V-Model, if a bug is found during Integration Testing, which design document on the left side of the V should you check first?</b><br>
+      The **HLD (High-Level Design)**, because Integration Testing directly validates module-to-module interfaces defined in the HLD.</li>
+
+      <li><b>In the V-Model, if a bug is found during System Testing, which document on the left side of the V is the reference?</b><br>
+      The **SRS (System Requirement Specification)**.</li>
+
+      <li><b>What is your 20-second interview summary of SDLC Models for an SDET role?</b><br>
+      <i>"SDLC defines the 6 phases from Requirements to Maintenance. Sequential models like Waterfall and V-Model lock requirements up front—with V-Model pairing each design phase to a test level—while Incremental models like Iterative, Spiral, and Agile build software in cycles. In modern Agile teams, I apply V-Model's shift-left discipline inside 2-week Scrum sprints, combining early story/design verification with in-sprint API and Selenium/Playwright CI/CD automation."</i></li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="manual-m1-2-sdlc-models.html"><span class="tag Manual">Manual</span>&larr; Back to M1.2 Concept Page</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

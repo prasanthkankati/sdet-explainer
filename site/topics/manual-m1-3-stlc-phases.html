@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 1.3 STLC (All 6 Phases, Entry &amp; Exit Criteria, Deliverables)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>1.3 STLC: All 6 Phases, Entry &amp; Exit Criteria</h1>
+
+  <section><h2>1. The Base: What is STLC and How Does It Fit Inside SDLC?</h2>
+    <p class="def">The Software Testing Life Cycle (STLC) is the structured 6-phase testing workflow executed by the QA and SDET team—spanning Requirement Analysis, Test Planning, Test Case Development, Environment Setup, Test Execution, and Test Cycle Closure—to systematically verify and validate software.</p>
+    <p><b>Where It Falls (SDLC vs STLC):</b> While <b>SDLC</b> governs the entire engineering organization (Product, Architects, Developers, QA, DevOps) from idea to production maintenance, <b>STLC</b> is the dedicated <b>Testing sub-lifecycle</b> that runs in parallel with SDLC phases so QA is never an unstructured afterthought.</p>
+    <p><b>The Problem It Solves (In Plain Words):</b> Without a structured testing lifecycle, three chaotic failures happen in every project:</p>
+    <ol>
+      <li><b>Testing Unstable Code (Wasted QA Time):</b> Developers hand over an uncompiled or crashing version of the app, and QA wastes hours trying to run tests on a server where even the Login page crashes.</li>
+      <li><b>Missed Business Rules (Zero Requirement Tracking):</b> A specification has 50 business rules, but QA only writes tests for 40 of them because nobody tracked which requirement maps to which test case.</li>
+      <li><b>Subjective Releases (Guesswork Sign-Off):</b> The product is pushed to customers based on "it looks fine" rather than proving that 100% of planned tests ran and zero critical bugs remain open.</li>
+    </ol></section>
+
+  <section><h2>2. Core Terms &amp; Their Properties Defined First (Before Reading the 6 Phases)</h2>
+    <p>Before walking through the 6 STLC phases, you must know the exact meaning and properties of the <b>5 foundational STLC building blocks</b>:</p>
+
+    <p><b>① What is a Software Build vs a Broken Build?</b></p>
+    <ul>
+      <li><b>Software Build:</b> When developers finish writing source code (<code>.java</code> / <code>.ts</code>), a CI server (like Jenkins) compiles, packages, and deploys that code into a testable version (e.g., <code>Build #142</code> or <code>app-v2.4.jar</code>) on the QA server.</li>
+      <li><b>Broken Build:</b> A deployed build that fails basic compilation, fails server startup, or crashes on core primary flows (like Login or Database connection), making full QA testing impossible.</li>
+      <li><b>Exact Properties of a Broken Build:</b>
+        <ul>
+          <li><b>Property 1 &mdash; Build Identifier:</b> Version tag / Git commit SHA (e.g., <code>v2.4.1-b142</code>) that uniquely identifies the faulty drop.</li>
+          <li><b>Property 2 &mdash; Failure Stage:</b> Fails during compilation, database migration, container startup, or the Phase 4 <b>Smoke Test Gate</b>.</li>
+          <li><b>Property 3 &mdash; Blocking Impact:</b> Blocks 50%&ndash;100% of downstream manual and Selenium test execution (e.g., HTTP 500 on login).</li>
+          <li><b>Property 4 &mdash; QA Protocol:</b> QA <b>immediately rejects</b> a broken build at Phase 4, logs a Blocker defect, and halts Phase 5 until Dev deploys a healthy build.</li>
+        </ul>
+      </li>
+    </ul>
+
+    <p><b>② What is an RTM (Requirement Traceability Matrix) &amp; Its Properties?</b></p>
+    <ul>
+      <li><b>Definition:</b> An <b>RTM</b> is a structured mapping document (Excel sheet, Jira Xray, or TestRail table) that connects every single <b>Requirement ID</b> to its <b>Test Case IDs</b>, <b>Execution Status</b>, and <b>Defect IDs</b> so zero requirements are ever missed.</li>
+      <li><b>The 3 Types of Traceability in an RTM:</b>
+        <ol>
+          <li><b>Forward Traceability (Requirement &rarr; Test Case):</b> Maps each Requirement ID to its Test Cases to verify <i>"Does every requirement have at least one positive and negative test case?"</i></li>
+          <li><b>Backward / Reverse Traceability (Test Case &rarr; Requirement):</b> Maps each Test Case ID back to a Requirement ID to verify <i>"Are we writing gold-plated tests for features nobody asked for?"</i></li>
+          <li><b>Bi-Directional Traceability (Forward + Backward):</b> Combines both directions—the industry standard used in STLC.</li>
+        </ol>
+      </li>
+      <li><b>Exact Properties (Columns) of a Real RTM:</b></li>
+    </ul>
+    <table>
+      <tr><th>Req ID</th><th>Requirement Description</th><th>Test Case IDs</th><th>Automation Method</th><th>Execution Status</th><th>Defect ID</th></tr>
+      <tr><td><code>REQ_101</code></td><td>User login with valid email &amp; OTP</td><td><code>TC_01, TC_02</code></td><td><code>LoginTest#verifyValidLogin</code></td><td><b>PASS</b></td><td>&mdash;</td></tr>
+      <tr><td><code>REQ_102</code></td><td>Apply 20% discount code <code>SAVE20</code></td><td><code>TC_03, TC_04</code></td><td><code>CartTest#verifyCoupon</code></td><td><b>FAIL</b></td><td><code>BUG-409</code> (High)</td></tr>
+    </table>
+
+    <p><b>③ What are Entry Criteria, Exit Criteria, Deliverables &amp; Sign-Off Criteria?</b></p>
+    <ol>
+      <li><b>Entry Criteria (Prerequisites to Start):</b> The mandatory inputs and conditions that <b>must exist before</b> a phase is allowed to begin (e.g., <i>"QA will not start Phase 5 Test Execution until the Smoke Test passes 100%"</i>).</li>
+      <li><b>Deliverables (Work Products):</b> The tangible documents, scripts, or reports produced as output of a phase (e.g., <i>Test Plan, RTM, Automated Scripts, Test Summary Report</i>).</li>
+      <li><b>Exit Criteria (Gate to Finish):</b> The measurable quality conditions that <b>must be completed before</b> a phase can be closed (the <i>Exit Criteria</i> of Phase <code>N</code> unlock the <i>Entry Criteria</i> of Phase <code>N+1</code>).</li>
+      <li><b>Release Sign-Off Criteria (Final Phase 6 Gate):</b> The objective checklist required to approve a production release: (a) <b>100% Requirement Coverage in RTM</b>, (b) <b>100% Planned Tests Executed</b>, (c) <b>&ge; 95% Pass Rate</b>, and (d) <b>0 Open Blocker/Critical Defects</b>.</li>
+    </ol>
+    <p><b>Interview Answer:</b> <i>"SDLC is the overarching development lifecycle for the whole product, whereas STLC is the 6-phase testing lifecycle owned by QA. Every STLC phase is governed by strict Entry Criteria (prerequisites to start), Activities, Deliverables (like the RTM), and Exit Criteria (like passing the Smoke Test to reject Broken Builds and meeting Release Sign-Off criteria)."</i></p></section>
+
+  <section><h2>3. Visual Diagram: The 6-Phase STLC Pipeline (Entry &rarr; Activity &rarr; Output &rarr; Exit Gate)</h2>
+    <p>All 6 STLC phases execute in strict sequence, where the <b>Exit Criteria</b> of each phase unlock the <b>Entry Criteria</b> of the next phase:</p>
+    <div class="arch">
+      <div class="lbl">THE 6-PHASE STLC EXECUTION PIPELINE <small>Entry Criteria &rarr; Core QA Activity &rarr; Deliverable &amp; Exit Gate</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">01</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Requirement Analysis</b><span class="phase-role">Static Verification + Feasibility</span></div>
+            <div class="phase-meta">
+              <div><span>Entry Criteria</span>BRS / SRS / Jira User Stories shared</div>
+              <div><span>Core Activity</span>Spot spec gaps, initialize RTM, check Automation Feasibility</div>
+              <div><span>Deliverable &amp; Exit Gate</span><b>Ambiguity Report</b>, <b>Initial RTM</b> &amp; <b>Automation Feasibility Sign-Off</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Clarified SRS + Feasibility Report unlock Test Planning</span></div>
+        <div class="phase-card">
+          <div class="phase-num">02</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Planning</b><span class="phase-role">Strategy + Effort + Tooling</span></div>
+            <div class="phase-meta">
+              <div><span>Entry Criteria</span>Clarified SRS, Initial RTM &amp; Feasibility Report</div>
+              <div><span>Core Activity</span>Define Scope, Effort Estimation, Risk Plan &amp; Selenium/TestNG stack</div>
+              <div><span>Deliverable &amp; Exit Gate</span><b>Approved Test Plan Document</b> &amp; Schedule Baseline</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Approved Test Plan unlocks Test Case &amp; Script Authoring</span></div>
+        <div class="phase-card">
+          <div class="phase-num">03</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Case Design &amp; Development</b><span class="phase-role">Manual Cases + Test Data + Scripts</span></div>
+            <div class="phase-meta">
+              <div><span>Entry Criteria</span>Approved Test Plan, frozen UI wireframes &amp; API specs</div>
+              <div><span>Core Activity</span>Write/review Test Cases, map RTM, build Test Data &amp; Selenium Page Objects</div>
+              <div><span>Deliverable &amp; Exit Gate</span><b>Reviewed Test Cases</b>, <b>Updated RTM</b>, Test Data (<code>.xlsx</code>/<code>.json</code>) &amp; PR Merged</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Dev deploys build to QA Server &rarr; Triggers Environment Gate</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">04</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Environment Setup &amp; Smoke Gate</b><span class="phase-role">Mandatory Build Verification Gate</span></div>
+            <div class="phase-meta">
+              <div><span>Entry Criteria</span>Env specs + Dev build deployed to QA Server</div>
+              <div><span>Core Activity</span>Configure QA URL/DB/Selenium Grid, seed test data &amp; <b>run Smoke Suite</b></div>
+              <div><span>Deliverable &amp; Exit Gate</span>Live QA Env + <b>Smoke Test 100% PASSED</b> <i>(Rejects build if Smoke fails!)</i></div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Smoke Gate PASSED &rarr; Opens Full QA Execution</span></div>
+        <div class="phase-card">
+          <div class="phase-num">05</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Execution</b><span class="phase-role">Manual + Automated Suite Run</span></div>
+            <div class="phase-meta">
+              <div><span>Entry Criteria</span>Smoke Passed + Approved Test Cases &amp; Scripts</div>
+              <div><span>Core Activity</span>Run manual/Selenium suites, log Jira defects, Retest fixes &amp; run Regression</div>
+              <div><span>Deliverable &amp; Exit Gate</span><b>Completed RTM</b>, Closed Jira Bugs, <b>ExtentReports</b> (0 Critical/High open)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>100% Execution + Zero Blocker/Critical Bugs &rarr; Enters Closure</span></div>
+        <div class="phase-card">
+          <div class="phase-num">06</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Cycle Closure</b><span class="phase-role">Metrics + Release Sign-Off</span></div>
+            <div class="phase-meta">
+              <div><span>Entry Criteria</span>All Execution Exit Criteria met</div>
+              <div><span>Core Activity</span>Calculate DRE/Leakage/Coverage metrics, document Lessons Learned</div>
+              <div><span>Deliverable &amp; Exit Gate</span><b>Test Summary Report</b> &amp; Formal <b>QA Release Go/No-Go Sign-Off</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. Deep Breakdown of Each STLC Phase in Order</h2>
+
+    <p><b>① Phase 1: Requirement Analysis</b></p>
+    <ul>
+      <li><b>Goal:</b> Understand <i>what</i> to test, spot missing/contradictory rules early (Static Verification), and decide what can be automated.</li>
+      <li><b>Entry Criteria:</b> BRS / SRS / Jira User Stories and Architecture/Wireframe docs are shared with QA.</li>
+      <li><b>Activities:</b>
+        <ol>
+          <li>Identify Functional vs Non-Functional testable requirements.</li>
+          <li>Log requirement gaps, missing edge cases, and ambiguities with the BA/Product Owner.</li>
+          <li>Initialize the <b>RTM (Requirement Traceability Matrix)</b> listing every Requirement ID.</li>
+          <li>Perform <b>Automation Feasibility Analysis</b> (evaluate DOM stability, ROI, API availability, and tool support for Selenium/Playwright).</li>
+        </ol>
+      </li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> All requirement ambiguities resolved; **Ambiguity Review Report**, **Initial RTM**, and **Automation Feasibility Report** signed off.</li>
+    </ul>
+
+    <p><b>② Phase 2: Test Planning</b></p>
+    <ul>
+      <li><b>Goal:</b> Define the blueprint of <i>how</i>, <i>who</i>, <i>when</i>, and <i>with what tools</i> testing will be done.</li>
+      <li><b>Entry Criteria:</b> Clarified requirements, initial RTM, and Automation Feasibility Report.</li>
+      <li><b>Activities:</b>
+        <ol>
+          <li>Draft the **Test Plan** document: define **In-Scope** (features/browsers to test) and **Out-of-Scope** items.</li>
+          <li>Select test types (Smoke, Sanity, Regression, API, Performance) and automation stack (`Java`, `Selenium`, `TestNG`, `Maven`, `Jenkins`).</li>
+          <li>Perform **Test Effort Estimation** (using Work Breakdown Structure, Story Points, or 3-Point Estimation) and assign QA roles.</li>
+          <li>Define **Risk &amp; Mitigation Plan** (e.g., what if staging DB is delayed?) and set formal Entry/Exit criteria for execution.</li>
+        </ol>
+      </li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> **Approved Test Plan Document** and **Effort/Schedule Baseline**.</li>
+    </ul>
+
+    <p><b>③ Phase 3: Test Case Design &amp; Development</b></p>
+    <ul>
+      <li><b>Goal:</b> Write detailed positive/negative manual test cases, prepare test data, and build automated test scripts.</li>
+      <li><b>Entry Criteria:</b> Approved Test Plan, frozen UI designs/locators, and API contracts.</li>
+      <li><b>Activities:</b>
+        <ol>
+          <li>Write step-by-step **Test Cases** (Preconditions, Test Steps, Test Data, Expected Result) using **Equivalence Partitioning** and **Boundary Value Analysis**.</li>
+          <li>Conduct **Peer Review** (Static Verification) of written test cases and map every Test Case ID to its Requirement ID in the **RTM**.</li>
+          <li>Create **Test Data** sets (`.xlsx` sheets, `.json` payloads, SQL seed scripts).</li>
+          <li>Write &amp; review **Selenium Page Objects and TestNG `@Test` scripts** in Git.</li>
+        </ol>
+      </li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> **Reviewed &amp; Approved Test Cases**, **Updated RTM**, **Test Data files**, and **Merged Automation Scripts**.</li>
+    </ul>
+
+    <p><b>④ Phase 4: Test Environment Setup</b></p>
+    <ul>
+      <li><b>Goal:</b> Prepare the hardware, software, network, and database where dynamic testing will run, and verify build health.</li>
+      <li><b>Entry Criteria:</b> Test Plan specifying environment needs; Dev build deployed to QA server.</li>
+      <li><b>Activities:</b>
+        <ol>
+          <li>Configure QA server URLs, database connections, mock services, and Selenium Grid / Docker / BrowserStack nodes.</li>
+          <li>Load baseline test data into the QA database.</li>
+          <li>Execute the **Smoke Test (Build Verification Test)** to verify core application stability before opening full QA execution.</li>
+        </ol>
+      </li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> QA Environment operational; **Smoke Test Report = PASSED**. *(If Smoke Test fails, the build is rejected immediately!)*</li>
+    </ul>
+
+    <p><b>⑤ Phase 5: Test Execution</b></p>
+    <ul>
+      <li><b>Goal:</b> Run manual and automated test cases against the live QA build, report defects, and verify fixes.</li>
+      <li><b>Entry Criteria:</b> Smoke Test passed, Approved Test Cases &amp; Test Data ready, RTM mapped.</li>
+      <li><b>Activities:</b>
+        <ol>
+          <li>Execute manual test cases and trigger automated **Selenium / API suites** (`mvn clean test`).</li>
+          <li>Compare Actual Result vs Expected Result; mark each test `PASS`, `FAIL`, or `BLOCKED` in the RTM / Jira Xray / TestRail.</li>
+          <li>Log failed test cases as **Defects in Jira** with clear steps to reproduce, severity/priority, screenshots, and logs.</li>
+          <li>Perform **Retesting (Confirmation Testing)** on fixed bugs and **Regression Testing** to verify fixes didn't break existing flows.</li>
+        </ol>
+      </li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> 100% planned test cases executed; all Blocker/Critical/High defects fixed and verified; **Completed RTM**, **Defect Reports**, and **Automation Execution Reports (ExtentReports)**.</li>
+    </ul>
+
+    <p><b>⑥ Phase 6: Test Cycle Closure</b></p>
+    <ul>
+      <li><b>Goal:</b> Formally evaluate release readiness, archive test assets, calculate quality metrics, and sign off.</li>
+      <li><b>Entry Criteria:</b> Test Execution phase completed; all Exit Criteria met (or open low-priority bugs formally waived by Product).</li>
+      <li><b>Activities:</b>
+        <ol>
+          <li>Verify 100% requirement coverage in the final RTM.</li>
+          <li>Calculate quality metrics: **Test Coverage %**, **Defect Density**, **Defect Removal Efficiency (DRE)**, and **Automation Pass Rate**.</li>
+          <li>Document **Lessons Learned** (what caused delays or flaky tests) and clean up test environments.</li>
+          <li>Publish the **Test Closure / Test Summary Report** and issue formal **QA Release Sign-Off**.</li>
+        </ol>
+      </li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> **Signed-Off Test Summary Report** and **Release Go/No-Go Sign-Off**.</li>
+    </ul></section>
+
+  <section><h2>5. Master STLC Reference Matrix (One-Look Interview Table)</h2>
+    <table>
+      <tr><th>Phase</th><th>Entry Criteria</th><th>Key Deliverables (Outputs)</th><th>Exit Criteria</th></tr>
+      <tr><td>1. Requirement Analysis</td><td>BRS / SRS / User Stories</td><td>Ambiguity Report, Initial RTM, Automation Feasibility</td><td>Ambiguities resolved; RTM initialized</td></tr>
+      <tr><td>2. Test Planning</td><td>Clarified SRS &amp; Feasibility</td><td>Test Plan, Effort Estimate, Risk Plan</td><td>Test Plan approved by leads/PM</td></tr>
+      <tr><td>3. Test Case Development</td><td>Approved Test Plan &amp; Specs</td><td>Reviewed Test Cases, Test Data, Automation Scripts</td><td>Test cases &amp; scripts peer-reviewed</td></tr>
+      <tr><td>4. Environment Setup</td><td>Env specs + Deployed QA Build</td><td>Ready QA Env + <b>Smoke Test Report</b></td><td>Env live &amp; Smoke Test 100% Passed</td></tr>
+      <tr><td>5. Test Execution</td><td>Smoke Passed + Approved Cases</td><td>Executed RTM, Jira Defects, ExtentReports</td><td>100% executed; 0 Critical/High bugs open</td></tr>
+      <tr><td>6. Test Closure</td><td>Execution Exit Criteria met</td><td><b>Test Summary Report</b>, QA Sign-Off</td><td>Sign-off approved by stakeholders</td></tr>
+    </table></section>
+
+  <section><h2>6. Real SDET Code Trace: Enforcing STLC Phase 4 Smoke Gate &amp; Phase 5 RTM</h2>
+<pre><code>// In TestNG + Selenium, we tag tests by STLC phase &amp; RTM Requirement ID:
+public class CheckoutTest extends BaseTest {
+
+    // Phase 4 Gate: Runs in 'mvn test -Dgroups=smoke' — blocks Phase 5 if it fails!
+    @Test(groups = {"smoke"}, description = "RTM_REQ_101: Verify Checkout page loads")
+    public void verifyCheckoutPageLoads() {
+        CheckoutPage page = new CheckoutPage(getDriver());
+        Assert.assertTrue(page.isLoaded(), "Smoke Gate Failed: Checkout page down!");
+    }
+
+    // Phase 5 Execution: Runs only after Smoke Gate passes
+    @Test(groups = {"regression"}, dependsOnGroups = {"smoke"},
+          description = "RTM_REQ_102: Verify discount coupon deduction")
+    public void verifyDiscountCoupon() {
+        CheckoutPage page = new CheckoutPage(getDriver());
+        Assert.assertEquals(page.applyCoupon("SAVE20", 100.0), 80.0);
+    }
+}</code></pre></section>
+
+  <section><h2>7. Self-Check</h2>
+    <ol>
+      <li>In which STLC phase is **Automation Feasibility Analysis** performed? <i>(Phase 1: Requirement Analysis)</i></li>
+      <li>What is the mandatory gate at the end of **Phase 4 (Test Environment Setup)** before entering Phase 5? <i>(Executing and passing the Smoke Test / Build Verification Test)</i></li>
+      <li>What are the two main deliverables of **Phase 6 (Test Cycle Closure)**? <i>(The Test Summary / Closure Report and formal QA Release Sign-Off)</i></li>
+    </ol></section>
+
+  <section><h2>8. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m1-3-qa.html"><span class="tag Interview">Interview</span>M1.3 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

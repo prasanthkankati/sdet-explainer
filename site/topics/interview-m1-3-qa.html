@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: M1.3 STLC Phases, Entry/Exit Criteria, RTM &amp; Test Closure</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a class="qa-chip" href="manual-m1-3-stlc-phases.html"><span class="tag Manual">Manual</span>&larr; Back to M1.3 Concept Page</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>M1.3 Question Bank: STLC Phases, Entry/Exit Criteria, RTM &amp; Closure (35 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Phases &amp; Deliverables (Q1&ndash;Q10)</h2>
+    <ol>
+      <li><b>What is STLC, and what are all 6 phases in exact sequence?</b><br>
+      STLC (Software Testing Life Cycle) is the step-by-step testing process executed by QA. The 6 phases are: <b>1. Requirement Analysis &rarr; 2. Test Planning &rarr; 3. Test Case Design &amp; Development &rarr; 4. Test Environment Setup &rarr; 5. Test Execution &rarr; 6. Test Cycle Closure</b>.</li>
+
+      <li><b>What is the difference between SDLC and STLC?</b><br>
+      <b>SDLC</b> covers the entire software creation process (Requirements, Design, Coding, Testing, Deployment, Maintenance) across all teams. <b>STLC</b> covers specifically the testing phases owned by QA/SDET, running in parallel with SDLC phases to verify and validate the product.</li>
+
+      <li><b>What are Entry Criteria and Exit Criteria in STLC?</b><br>
+      <b>Entry Criteria</b> are the mandatory prerequisite conditions and inputs required *before* a testing phase can start. <b>Exit Criteria</b> are the quality conditions, metrics, and deliverables that must be completed *before* a phase can be formally closed.</li>
+
+      <li><b>Can the Exit Criteria of one STLC phase act as the Entry Criteria of the next phase? Give an example.</b><br>
+      <b>Yes.</b> The Exit Criteria of Phase 3 (Peer-reviewed and signed-off Test Cases, Test Data, and RTM) directly form the Entry Criteria required to start Phase 5 (Test Execution). Similarly, Phase 4's Exit Criterion (Passing Smoke Test) is the Entry Criterion for Phase 5.</li>
+
+      <li><b>What is an RTM (Requirement Traceability Matrix), and in which STLC phase is it created vs updated?</b><br>
+      An RTM is a document that maps every **Requirement ID** to its corresponding **Test Case IDs**, **Automation Script IDs**, **Execution Status**, and **Defect IDs** to guarantee 100% test coverage. It is **initialized in Phase 1 (Requirement Analysis)**, mapped to test cases in **Phase 3**, updated with Pass/Fail/Defect IDs in **Phase 5**, and audited for 100% coverage in **Phase 6**.</li>
+
+      <li><b>What are the 3 types of Traceability Matrix (Forward, Backward, Bidirectional)?</b><br>
+      1. <b>Forward Traceability (Requirement &rarr; Test Case):</b> Ensures every business requirement has at least one test case.<br>
+      2. <b>Backward / Reverse Traceability (Test Case &rarr; Requirement):</b> Ensures we are not writing bloated test cases for features that were never requested ("gold-plating").<br>
+      3. <b>Bidirectional Traceability (Forward + Backward):</b> Combines both to prove 100% coverage with zero orphan requirements and zero unmapped tests.</li>
+
+      <li><b>What is Automation Feasibility Analysis, and why is it done in Phase 1 instead of Phase 5?</b><br>
+      It evaluates whether a feature is suitable and cost-effective to automate (checking tech stack support, DOM stability, frequency of execution, and ROI). It must happen in Phase 1 so Phase 2 (Test Planning) can allocate SDET resources and Phase 3 can develop the scripts before execution starts.</li>
+
+      <li><b>What is the difference between a Test Plan and a Test Summary (Closure) Report?</b><br>
+      A **Test Plan** is written in **Phase 2 (before testing)** defining what we *plan* to test, scope, schedule, tools, and risks. A **Test Summary Report** is written in **Phase 6 (after testing)** summarizing what was *actually* executed, pass/fail counts, open defects, waivers, and the final Go/No-Go release recommendation.</li>
+
+      <li><b>Why is Smoke Testing performed in Phase 4 (Test Environment Setup) before Phase 5 (Test Execution)?</b><br>
+      Smoke Testing acts as the **Build Verification Gate**. If the QA database connection is broken or the login page returns HTTP 500, running a 500-case regression suite in Phase 5 wastes QA time and floods Jira with duplicate environment bugs.</li>
+
+      <li><b>What is the difference between a Blocked test case and a Failed test case during Phase 5 (Test Execution)?</b><br>
+      A **Failed** test case was executed completely, and the actual result did not match the expected result. A **Blocked** test case *could not be executed at all* because a precondition failed (e.g., "Verify Order History" is Blocked because the "Place Order" button is throwing a 500 error, or the third-party payment sandbox is down).</li>
+    </ol></section>
+
+  <section><h2>Tier 2: Why / Why Not &amp; Deep Comparisons (Q11&ndash;Q18)</h2>
+    <ol start="11">
+      <li><b>Why not write Test Cases during Phase 5 (Test Execution) while clicking through the live application?</b><br>
+      If you write test cases by looking at the already-built UI instead of the SRS/User Story in Phase 3, you will **document the developer's bugs as expected behavior**! Designing test cases in Phase 3 from requirements ensures independent validation against what the system *should* do, not just what the developer happened to build.</li>
+
+      <li><b>Who owns Phase 4 (Test Environment Setup)—Developers, DevOps, or QA?</b><br>
+      While DevOps/Infra provisions the servers/containers and Developers deploy the build, **QA owns verifying environment readiness**: configuring test properties, seeding baseline test data, verifying mock endpoints, and executing the **Smoke Test Gate** to accept or reject the build.</li>
+
+      <li><b>What is "Suspension Criteria" vs "Exit Criteria" in a Test Plan?</b><br>
+      **Suspension Criteria** define when testing must be **paused mid-cycle** (e.g., if >30% of test cases are blocked by a core API crash or environment outage). **Exit Criteria** define when testing is **successfully finished** and ready for sign-off.</li>
+
+      <li><b>Why do we map Defect IDs inside the RTM during Phase 5?</b><br>
+      So during impact analysis or regression, if Requirement `REQ-204` changes or fails, we can immediately see every historical defect (`BUG-88`, `BUG-102`) and every test case tied to that requirement.</li>
+
+      <li><b>What happens in STLC if a feature is marked "Out of Scope" in the Phase 2 Test Plan, and a bug escapes to production in that feature?</b><br>
+      Because the Phase 2 Test Plan explicitly listed that feature under **Out-of-Scope** (and explained the risk) and stakeholders formally signed off on the Test Plan, accountability is transparent. This is why getting formal stakeholder sign-off on Phase 2 Out-of-Scope items is critical for a QA Lead.</li>
+
+      <li><b>In Agile (2-week sprints), do we still follow all 6 STLC phases, or is STLC only for Waterfall?</b><br>
+      We still follow **all 6 STLC phases inside every 2-week sprint**, compressed and continuous:<br>
+      &bull; Phase 1 &amp; 2 happen in Backlog Refinement &amp; Sprint Planning (Day 1).<br>
+      &bull; Phase 3 &amp; 4 happen on Days 2&ndash;5 while devs code.<br>
+      &bull; Phase 5 happens continuously as stories move to `Ready for QA` (Days 4&ndash;9).<br>
+      &bull; Phase 6 happens at Sprint Review / Release Sign-off (Day 10).</li>
+
+      <li><b>Why should Test Data preparation happen in Phase 3 instead of Phase 5?</b><br>
+      Preparing complex test data (e.g., 50 user accounts with specific credit scores, expired subscriptions, or multi-row Excel `.xlsx` sheets) takes significant time. Doing it in Phase 3 ensures zero idle time once the build lands in Phase 5.</li>
+
+      <li><b>What metrics are included in the Phase 6 Test Closure Report?</b><br>
+      1. Total Requirements vs Covered Requirements (`RTM Coverage %`).<br>
+      2. Total Test Cases Planned vs Executed vs Passed / Failed / Blocked.<br>
+      3. Defect Summary broken down by Severity (`S1/S2/S3/S4`) and Status (`Closed`, `Deferred`).<br>
+      4. Automation Execution Pass % and execution duration.</li>
+    </ol></section>
+
+  <section><h2>Tier 3: Real-World Tricky &amp; Edge-Case Scenarios (Q19&ndash;Q26)</h2>
+    <ol start="19">
+      <li><b>[Scenario &mdash; PM Pressures QA to Skip Entry Criteria] A build is deployed late. Entry Criteria require a unit test report and a passing Smoke Test, but the PM tells you to skip the Smoke Test and start full functional execution immediately with 6 QA engineers. What do you do?</b><br>
+      I do not blindly throw 6 engineers at an unverified build, nor do I simply refuse to work. I explain that if the build is broken, 6 engineers will waste hours logging duplicate crash bugs. I propose running the **automated Smoke Suite first (which takes 5&ndash;10 minutes)** while the team prepares execution runs; if Smoke passes, all 6 engineers start immediately, and if it fails, we save 6x wasted effort and return the build to Dev.</li>
+
+      <li><b>[Scenario &mdash; Undocumented Slack Feature Discovered in Phase 5] During Phase 5 Test Execution, you find a new "Export to CSV" button that is not in the SRS or your RTM. Developers say the client asked for it on Slack. How do you handle this?</b><br>
+      1. Confirm with the Product Owner/BA that the Slack request is an approved requirement.<br>
+      2. Have the PO add a formal Requirement/Story ID so it is no longer "shadow scope".<br>
+      3. Add the Requirement ID to the **RTM**, design positive/negative test cases for CSV export, execute them, and run a mini-regression on the surrounding table module.</li>
+
+      <li><b>[Scenario &mdash; Premature Test Closure on 95% Execution] Release day arrives. 95% of test cases passed, 0 high-severity bugs are open, and the manager asks you to sign off Phase 6 Test Closure. However, the unexecuted 5% are Payment Gateway tests that were Blocked by sandbox downtime. Do you sign off?</b><br>
+      <b>No unconditional sign-off.</b> Execution percentage (`95%`) without risk context is misleading—shipping an untested Payment Gateway is a critical business risk. I escalate the blocker, get the sandbox restored to run those 5% payment tests, or—if business insists on releasing with payment feature-flagged off—issue a **Conditional Sign-Off with Explicit Risk Waiver** documented in the Test Summary Report.</li>
+
+      <li><b>[Scenario &mdash; 100% Tests Executed and Passed, Still Can't Close Phase 5] Can a test cycle have 100% of test cases executed and 100% passed, yet still fail Exit Criteria? How?</b><br>
+      <b>Yes!</b> If the **RTM audit** reveals that 3 critical requirements from the SRS were accidentally never mapped to any test cases (`Requirement Coverage = 75%`), or if non-functional Exit Criteria (like security/performance SLAs) were not executed.</li>
+
+      <li><b>[Scenario &mdash; Developer Rejects Bug Saying "Not in SRS"] In Phase 5, you log a bug because typing 500 characters into the "First Name" field crashes the layout. The developer marks it `Invalid` saying the SRS didn't specify a max length. How could STLC Phase 1 have prevented this, and how do you resolve it now?</b><br>
+      In **Phase 1 (Requirement Analysis)**, QA should check for missing field-length boundaries and get them added to the SRS before coding. Right now in Phase 5, a UI layout crash is still a valid usability/validation bug—I attach the screenshot, bring in the PO during bug triage to define the standard limit (e.g., 50 chars), and get it fixed.</li>
+
+      <li><b>[Scenario &mdash; High Defect Reopen Rate in Phase 5] During Phase 5, 40% of bugs marked "Fixed" by developers fail Retesting and have to be Reopened, delaying STLC closure. How do you fix this using STLC guardrails?</b><br>
+      Tighten the **Entry Criteria for Bug Retesting**: require developers to (1) verify their fix locally in the dev environment with unit tests, (2) specify the exact build version number containing the fix in the Jira ticket, and (3) run the automated PR smoke/regression check before moving a ticket to `Ready for QA Retest`.</li>
+
+      <li><b>[Scenario &mdash; Zero Time Left for Full Regression] An emergency hotfix lands 2 hours before production deployment. Full manual + UI regression takes 6 hours. How do you execute Phase 5 &amp; 6 safely?</b><br>
+      1. Perform **Impact Analysis** using the **RTM** to identify the exact modules touched by the hotfix.<br>
+      2. Execute **Retesting** on the hotfix defect + **Sanity &amp; Risk-Based Regression** on the impacted modules.<br>
+      3. Run the **Parallel Selenium/API Smoke &amp; Critical-Path Suite** (`ThreadLocal` across multiple threads) to validate core flows within 20 minutes before signing off.</li>
+
+      <li><b>[Scenario &mdash; Orphan Test Cases Found in Phase 6] While auditing the RTM in Phase 6, you find 40 old Selenium tests that don't map to any current requirement because that feature was removed 3 sprints ago. What do you do?</b><br>
+      Use **Backward Traceability** to confirm the feature is retired, remove those 40 obsolete tests from the active regression suite to eliminate code bloat and CI execution waste, and log the cleanup in the Test Closure Report.</li>
+    </ol></section>
+
+  <section><h2>Tier 4: SDET, Automation &amp; CI/CD in STLC (Q27&ndash;Q31)</h2>
+    <ol start="27">
+      <li><b>How do you automate the Requirement Traceability Matrix (RTM) in a Selenium + TestNG framework?</b><br>
+      Use custom annotations or TestNG `@Test(description = "REQ-105")` / Allure `@Issue("JIRA-105")` `@TmsLink("TC-201")` annotations on every test method. When `mvn test` finishes, the Allure or ExtentReport listener parses those annotations and auto-generates a live RTM mapping Requirements &rarr; Test Cases &rarr; Pass/Fail results.</li>
+
+      <li><b>In Phase 1 (Automation Feasibility), what top 5 criteria make a test case a BAD candidate for Selenium UI automation?</b><br>
+      1. One-time ad-hoc tests that will never be re-run.<br>
+      2. Features whose UI design is changing every day (wait until UI stabilizes or test at the API layer instead).<br>
+      3. Pure visual/UX subjective checks ("Does this font look appealing?").<br>
+      4. Flows blocked by un-bypassable third-party CAPTCHA / physical hardware tokens in QA (unless mocked/whitelisted).<br>
+      5. Scenarios that can be validated 50x faster at the **Unit or REST API layer**.</li>
+
+      <li><b>How does Docker / Selenium Grid speed up STLC Phase 4 (Environment Setup) and Phase 5 (Test Execution)?</b><br>
+      In **Phase 4**, instead of manually installing Chrome, Firefox, and Edge drivers on physical VMs, a `docker-compose.yml` spins up a clean Selenium Grid in 10 seconds. In **Phase 5**, running tests with `ThreadLocal<WebDriver>` across 10 Docker browser nodes cuts a 2-hour sequential regression run down to **12 minutes**.</li>
+
+      <li><b>What is the difference between a Test Plan (STLC Phase 2) and a Test Strategy?</b><br>
+      A **Test Strategy** is a high-level, **organization-wide or long-term document** (rarely changes) defining general testing standards, tools, test pyramid ratios, and CI/CD gates across projects. A **Test Plan** is a **project- or release-specific document** written in STLC Phase 2 detailing the exact scope, schedule, environment, and resources for *this specific release*.</li>
+
+      <li><b>How does Shift-Left change the relationship between STLC Phase 3 (Test Development) and SDLC Phase 3 (Coding)?</b><br>
+      Instead of waiting for SDLC Coding to finish before starting STLC Test Development, both run **simultaneously**: SDETs write API tests from Swagger contracts and Selenium Page Objects from agreed DOM IDs while developers write the application code.</li>
+    </ol></section>
+
+  <section><h2>Tier 5: Rapid-Fire Curveballs &amp; True/False Traps (Q32&ndash;Q35)</h2>
+    <ol start="32">
+      <li><b>True or False: "Test Execution is the first phase of STLC."</b><br>
+      <b>False.</b> **Requirement Analysis** is Phase 1; Test Execution is **Phase 5** (4 phases of preparation happen before execution!).</li>
+
+      <li><b>True or False: "If all test cases are executed, STLC Phase 5 Exit Criteria are automatically met even if 3 Critical bugs are still Open."</b><br>
+      <b>False.</b> Execution Exit Criteria require both execution completion **and** resolution/closure of all Blocker/Critical/High severity defects.</li>
+
+      <li><b>Which STLC phase produces the "Ambiguity Review Report"?</b><br>
+      <b>Phase 1: Requirement Analysis.</b></li>
+
+      <li><b>Give a 20-second interview summary of STLC and how you execute it as an SDET.</b><br>
+      <i>"STLC is the 6-phase testing lifecycle inside SDLC: Requirement Analysis, Test Planning, Test Case &amp; Script Development, Environment Setup, Test Execution, and Test Closure. Each phase has strict Entry and Exit criteria. As an SDET, I initialize the RTM and assess automation feasibility in Phase 1, build Page Objects and TestData in Phase 3, enforce an automated Selenium Smoke Gate in Phase 4, run parallel regression in Phase 5, and deliver metric-driven Test Summary sign-offs in Phase 6."</i></li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="manual-m1-3-stlc-phases.html"><span class="tag Manual">Manual</span>&larr; Back to M1.3 Concept Page</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

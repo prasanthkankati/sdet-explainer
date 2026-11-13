@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Java: JDK vs JRE vs JVM</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Java">Java</span>
+  <h1>Java Intro: JDK vs JRE vs JVM</h1>
+
+  <section><h2>1. Definition</h2>
+    <p class="def">Java source code is compiled by the JDK into bytecode, and the JVM (inside the JRE) loads, checks and runs that bytecode on any computer.</p></section>
+
+  <section><h2>2. Memory hook</h2>
+    <p><b>JDK = Make it, JRE = Run it, JVM = Do it.</b></p>
+    <ul>
+      <li><b>JVM</b> is only the engine that does the work. It cannot run alone, because it needs the library files.</li>
+      <li><b>JRE</b> is JVM plus the library files, so it can run programs but cannot build them.</li>
+      <li><b>JDK</b> is JRE plus the build tools, so you can write, build and run.</li>
+    </ul></section>
+
+  <section><h2>3. The three layers (they nest like Russian dolls)</h2>
+    <div class="arch jdk">
+      <div class="lbl">JDK <small>Java Development Kit: "Make it". What you install.</small></div>
+      <div class="note">Everything to write, build and run. Contains the JRE plus the developer tools below.</div>
+      <div class="cols">
+        <div class="item"><b>javac</b><span>Compiler. Turns Hello.java into Hello.class (bytecode).</span></div>
+        <div class="item"><b>jar</b><span>Packs many .class files into one .jar (this is what Selenium ships as).</span></div>
+        <div class="item"><b>javadoc / jdb / jshell</b><span>Docs generator, debugger, quick playground.</span></div>
+      </div>
+      <div class="arch jre">
+        <div class="lbl">JRE <small>Java Runtime Environment: "Run it"</small></div>
+        <div class="note">Everything to run a finished program. Contains the JVM plus the library files.</div>
+        <div class="cols">
+          <div class="item"><b>Class libraries</b><span>Ready-made code: String, ArrayList, Math, System. Loaded by the JVM when your code uses them.</span></div>
+          <div class="item"><b>Config files</b><span>Security and settings files the JVM reads at startup.</span></div>
+        </div>
+        <div class="arch jvm">
+          <div class="lbl">JVM <small>Java Virtual Machine: "Do it". The engine.</small></div>
+          <div class="note">Loads bytecode, stores it in memory, executes it. Details on the next page.</div>
+          <div class="cols">
+            <div class="item"><b>Class Loader</b><span>Brings .class files into memory.</span></div>
+            <div class="item"><b>Memory areas</b><span>Heap, Stack, Metaspace: where data lives.</span></div>
+            <div class="item"><b>Execution Engine</b><span>Interpreter, JIT, Garbage Collector: runs code.</span></div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. JRE vs JVM: the confusion fixed</h2>
+    <table>
+      <tr><th></th><th>JVM</th><th>JRE</th></tr>
+      <tr><td>Is it</td><td>A program (the engine)</td><td>A package that contains the JVM</td></tr>
+      <tr><td>Contains</td><td>Class loader, memory areas, execution engine</td><td>JVM + class libraries + config files</td></tr>
+      <tr><td>Runs Hello.class alone?</td><td>No. String and System live in the libraries.</td><td>Yes</td></tr>
+      <tr><td>Job</td><td>Executes bytecode</td><td>Provides everything needed to run</td></tr>
+    </table>
+    <p>Example: your code calls <code>new ArrayList&lt;&gt;()</code>. The code for ArrayList is <b>not</b> in the JVM. It sits in the library files (<code>java.base</code>) shipped in the JRE. The JVM's class loader fetches it when needed.</p></section>
+
+  <section><h2>5. Code example</h2>
+<pre><code>// Hello.java
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello, SDET!");   // prints: Hello, SDET!
+    }
+}</code></pre>
+<pre><code class="bash">javac Hello.java    # JDK tool: compiles to Hello.class (bytecode)
+java Hello          # starts the JVM, which runs the bytecode -> Hello, SDET!</code></pre></section>
+
+  <section><h2>6. Step-by-step: what happens</h2>
+    <ol>
+      <li>You write <code>Hello.java</code> (human-readable source code).</li>
+      <li><code>javac</code> (JDK) checks syntax and creates <code>Hello.class</code> (bytecode, not machine code).</li>
+      <li><code>java Hello</code> starts the JVM.</li>
+      <li>The JVM loads <code>Hello.class</code> plus <code>String</code> and <code>System</code> from the libraries (JRE).</li>
+      <li>The JVM checks the bytecode is safe, then runs it on your OS and CPU.</li>
+    </ol>
+    <p>Bytecode is the same on every OS. The <b>JVM is different per OS</b> (Windows, Mac, Linux). That is the trick behind "write once, run anywhere".</p></section>
+
+  <section><h2>7. Real-life analogy: a restaurant</h2>
+    <table>
+      <tr><th>Restaurant</th><th>Java</th></tr>
+      <tr><td>Recipe written in plain language</td><td>Hello.java</td></tr>
+      <tr><td>Translator who rewrites it as a standard kitchen-code card</td><td>javac, bytecode</td></tr>
+      <tr><td>Whole restaurant business: recipe office + open kitchen</td><td>JDK</td></tr>
+      <tr><td>Open kitchen ready to serve: chef, pantry (ingredient library), stoves. Cannot write recipes.</td><td>JRE</td></tr>
+      <tr><td>The head chef's cooking operation (useless without a pantry)</td><td>JVM</td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Compile once and the same .class file runs on Windows, Mac and Linux. You install the <b>JDK</b> (it includes the JRE). Since Java 11 there is no separate JRE download.</p>
+    <p><b>SDET link:</b> Selenium tests are Java code. You need the JDK to compile them, and <code>JAVA_HOME</code> must point to it so Maven, Gradle, Eclipse and IntelliJ can find it.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p><code>javac -version</code> works: you have the JDK. Only <code>java -version</code> works: JRE only, you can run Java but cannot compile it.</p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Source code</td><td>Text you write (.java)</td></tr>
+      <tr><td>Compile</td><td>Translate to another form (.java to .class)</td></tr>
+      <tr><td>Bytecode</td><td>Universal half-compiled code (.class), same on every OS</td></tr>
+      <tr><td>Machine code</td><td>Native 0s and 1s for one specific CPU</td></tr>
+      <tr><td>Runtime</td><td>While the program is running</td></tr>
+      <tr><td>Library</td><td>Ready-made code you reuse (ArrayList, Selenium)</td></tr>
+      <tr><td>Classpath</td><td>List of folders and jars where Java looks for classes</td></tr>
+    </table>
+    <p>Next: <a href="java-jvm-architecture.html">JVM Architecture and Memory Areas &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>
