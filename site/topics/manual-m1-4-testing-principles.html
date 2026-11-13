@@ -15,7 +15,7 @@
 
   <section><h2>1. The Base: What Are Testing Principles and Why Do They Exist?</h2>
     <p class="def">The 7 ISTQB Testing Principles are universal engineering laws established over 50+ years of software quality engineering that govern what testing can and cannot prove, how to select test cases without infinite effort, and how to keep test suites effective over time.</p>
-    <p><b>The Problem They Solve (In Plain Words):</b> Without these fundamental laws, teams fall into three destructive traps:</p>
+    <p><b>The Problem They Solve:</b> Without these fundamental laws, teams fall into three destructive traps:</p>
     <ol>
       <li>Trying to test every possible input combination (causing test execution to take years).</li>
       <li>Believing that when all automated tests pass (`100% green`), the application is guaranteed to have zero bugs.</li>
@@ -42,24 +42,24 @@
 
   <section><h2>3. Each Principle Defined &amp; Explained in Order (With Real SDET Application)</h2>
 
-    <p><b>① Principle 1: Testing shows the presence of defects, not their absence</b></p>
+    <p><b>â‘  Principle 1: Testing shows the presence of defects, not their absence</b></p>
     <ul>
-      <li><b>Definition:</b> Testing can prove that defects are present in the software, but **can never mathematically prove that zero defects remain**.</li>
+      <li><b>Definition:</b> Testing can prove that defects are present in the software, but <b>can never mathematically prove that zero defects remain</b>.</li>
       <li><b>Why:</b> Even if 1,000 manual and Selenium tests pass (`0 failures`), an unscripted combination of network latency, browser cache state, or specific user data can still trigger a failure in production.</li>
-      <li><b>In what cases we apply it:</b> When reporting release status to stakeholders—never say *"The software is 100% bug-free"*; instead report: *"100% of planned high/medium risk scenarios passed with 0 open critical defects."*</li>
+      <li><b>In what cases we apply it:</b> When reporting release status to stakeholdersâ€”never say <i>"The software is 100% bug-free"</i>; instead report: <i>"100% of planned high/medium risk scenarios passed with 0 open critical defects."</i></li>
     </ul>
 
-    <p><b>② Principle 2: Exhaustive testing is impossible</b></p>
+    <p><b>â‘¡ Principle 2: Exhaustive testing is impossible</b></p>
     <ul>
       <li><b>Definition:</b> Testing every possible combination of inputs, preconditions, and execution paths is mathematically impossible for any non-trivial application.</li>
-      <li><b>Why (Real Math Proof):</b> A single 10-character password field accepting 95 printable ASCII characters has $95^{10} \approx 5.98 \times 10^{19}$ possible inputs. Executing 10,000 Selenium tests per second would still take **189 million years** to test just that one text box!</li>
-      <li><b>In what cases we apply it:</b> Whenever designing test cases or TestNG `@DataProvider` datasets—instead of brute-forcing thousands of redundant numbers, we use **Equivalence Partitioning (EP)** and **Boundary Value Analysis (BVA)** to test the exact edge boundaries (`min-1, min, min+1, max-1, max, max+1`).</li>
+      <li><b>Why (Real Math Proof):</b> A single 10-character password field accepting 95 printable ASCII characters has $95^{10} \approx 5.98 \times 10^{19}$ possible inputs. Executing 10,000 Selenium tests per second would still take <b>189 million years</b> to test just that one text box!</li>
+      <li><b>In what cases we apply it:</b> Whenever designing test cases or TestNG `@DataProvider` datasetsâ€”instead of brute-forcing thousands of redundant numbers, we use <b>Equivalence Partitioning (EP)</b> and <b>Boundary Value Analysis (BVA)</b> to test the exact edge boundaries (`min-1, min, min+1, max-1, max, max+1`).</li>
     </ul>
 
-    <p><b>③ Principle 3: Early testing saves time and money (Shift-Left Testing)</b></p>
+    <p><b>â‘¢ Principle 3: Early testing saves time and money (Shift-Left Testing)</b></p>
     <ul>
-      <li><b>Definition:</b> Both Static and Dynamic testing activities should start as early as possible in the SDLC (at **Phase 1: Requirement Analysis**).</li>
-      <li><b>What is Shift-Left Testing?</b> On a project timeline (`Requirements &rarr; Design &rarr; Code &rarr; Test &rarr; Deploy`), testing traditionally sat on the **right side**. **Shift-Left** moves testing to the **left side**:
+      <li><b>Definition:</b> Both Static and Dynamic testing activities should start as early as possible in the SDLC (at <b>Phase 1: Requirement Analysis</b>).</li>
+      <li><b>What is Shift-Left Testing?</b> On a project timeline (`Requirements &rarr; Design &rarr; Code &rarr; Test &rarr; Deploy`), testing traditionally sat on the <b>right side</b>. <b>Shift-Left</b> moves testing to the <b>left side</b>:
         <ol>
           <li><b>Requirement Shift-Left:</b> QA reviews Jira stories and Acceptance Criteria before coding starts (1x fix cost).</li>
           <li><b>Code &amp; API Shift-Left:</b> Developers run Unit tests and SDETs run SonarQube + RestAssured API contract tests before the UI even exists.</li>
@@ -68,40 +68,40 @@
       </li>
     </ul>
 
-    <p><b>④ Principle 4: Defects cluster together (Pareto Principle &mdash; 80/20 Rule)</b></p>
+    <p><b>â‘£ Principle 4: Defects cluster together (Pareto Principle &mdash; 80/20 Rule)</b></p>
     <ul>
-      <li><b>Definition:</b> Defects are not spread evenly across an application; roughly **80% of all defects are concentrated in 20% of the modules**.</li>
+      <li><b>Definition:</b> Defects are not spread evenly across an application; roughly <b>80% of all defects are concentrated in 20% of the modules</b>.</li>
       <li><b>Why:</b> Modules with complex business logic (e.g., Cart Tax/Discount engine, Payment Gateway, Multi-threaded Order Processing, or frequently modified legacy code) naturally harbor far more bugs than static pages (`About Us`, `Terms &amp; Conditions`).</li>
-      <li><b>In what cases we apply it:</b> **Risk-Based Testing &amp; Automation Prioritization**—focus 80% of your deep Selenium, API, and negative test coverage on those bug-prone 20% hotspot modules.</li>
+      <li><b>In what cases we apply it:</b> <b>Risk-Based Testing &amp; Automation Prioritization</b>â€”focus 80% of your deep Selenium, API, and negative test coverage on those bug-prone 20% hotspot modules.</li>
     </ul>
 
-    <p><b>⑤ Principle 5: Beware of the Pesticide Paradox</b></p>
+    <p><b>â‘¤ Principle 5: Beware of the Pesticide Paradox</b></p>
     <ul>
-      <li><b>Definition:</b> If the exact same set of test cases is executed repeatedly with the same test data, those tests will eventually **stop finding any new defects**.</li>
-      <li><b>Why:</b> Once developers fix the bugs along the specific paths your existing regression scripts walk, those exact paths remain clean—while new bugs hide in newly added features, altered data patterns, or adjacent paths your old scripts never touch.</li>
+      <li><b>Definition:</b> If the exact same set of test cases is executed repeatedly with the same test data, those tests will eventually <b>stop finding any new defects</b>.</li>
+      <li><b>Why:</b> Once developers fix the bugs along the specific paths your existing regression scripts walk, those exact paths remain cleanâ€”while new bugs hide in newly added features, altered data patterns, or adjacent paths your old scripts never touch.</li>
       <li><b>How SDETs overcome the Pesticide Paradox:</b>
         <ol>
           <li>Review and update Selenium/Playwright regression suites every sprint with new edge cases.</li>
           <li>Rotate and randomize test data (e.g., using Faker libraries or dynamic `@DataProvider` inputs instead of hardcoding `"testuser1"` forever).</li>
-          <li>Complement automated regression with fresh **Manual Exploratory Testing** on new features.</li>
+          <li>Complement automated regression with fresh <b>Manual Exploratory Testing</b> on new features.</li>
         </ol>
       </li>
     </ul>
 
-    <p><b>⑥ Principle 6: Testing is context-dependent</b></p>
+    <p><b>â‘¥ Principle 6: Testing is context-dependent</b></p>
     <ul>
       <li><b>Definition:</b> Different software domains require completely different testing strategies, techniques, coverage depth, and tools.</li>
       <li><b>Why:</b> An ICU ventilator or banking wire-transfer system requires formal inspections, 100% boundary &amp; security coverage, and strict regulatory audit trails; an internal employee lunch-poll app only needs lightweight functional smoke testing.</li>
     </ul>
 
-    <p><b>⑦ Principle 7: Absence-of-errors is a fallacy</b></p>
+    <p><b>â‘¦ Principle 7: Absence-of-errors is a fallacy</b></p>
     <ul>
-      <li><b>Definition:</b> Finding and fixing 99% of technical bugs is pointless if the built system is unusable or **fails to solve the customer's actual business goal**.</li>
-      <li><b>Connection to M1.1:</b> This principle is why **Verification alone is never enough**—we must perform **Validation** (and UAT) against real user workflows.</li>
+      <li><b>Definition:</b> Finding and fixing 99% of technical bugs is pointless if the built system is unusable or <b>fails to solve the customer's actual business goal</b>.</li>
+      <li><b>Connection to M1.1:</b> This principle is why <b>Verification alone is never enough</b>â€”we must perform <b>Validation</b> (and UAT) against real user workflows.</li>
     </ul></section>
 
   <section><h2>4. Shift-Left vs Shift-Right Testing (The Modern Continuous Quality Loop)</h2>
-    <p>In senior SDET interviews, panelists often ask how **Shift-Left** (Principle #3) pairs with **Shift-Right**:</p>
+    <p>In senior SDET interviews, panelists often ask how <b>Shift-Left</b> (Principle #3) pairs with <b>Shift-Right</b>:</p>
     <div class="arch">
       <div class="lbl">CONTINUOUS QUALITY <small>Shift-Left (Prevent &amp; Detect Early) + Shift-Right (Validate in Production)</small></div>
       <div class="cols">
@@ -156,7 +156,7 @@ public class TransferLimitTest {
     <ol>
       <li>Which principle explains why 80% of production bugs come from 20% of application modules? <i>(Principle #4: Defects cluster together / Pareto Principle)</i></li>
       <li>Which principle warns that running the exact same Selenium regression suite unchanged for a year will stop finding new defects? <i>(Principle #5: Pesticide Paradox)</i></li>
-      <li>What is the difference between **Shift-Left** and **Shift-Right** testing? <i>(Shift-Left moves testing earlier into Requirements/Design/PRs; Shift-Right extends validation into Production via canary releases, feature flags, and synthetic monitoring.)</i></li>
+      <li>What is the difference between <b>Shift-Left</b> and <b>Shift-Right</b> testing? <i>(Shift-Left moves testing earlier into Requirements/Design/PRs; Shift-Right extends validation into Production via canary releases, feature flags, and synthetic monitoring.)</i></li>
     </ol></section>
 
   <section><h2>8. Q&amp;A</h2>

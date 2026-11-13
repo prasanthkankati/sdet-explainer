@@ -15,7 +15,7 @@
 
   <section><h2>1. The Base: What is a Bug Life Cycle and Why Does It Exist?</h2>
     <p class="def">The Bug Life Cycle (Defect Life Cycle) is the end-to-end state-machine workflow a software defect travels through from the moment QA discovers and logs it in a bug tracker (like Jira), through developer triage and fixing, to QA retesting and final closure.</p>
-    <p><b>The Problem It Solves (In Plain Words):</b> If a QA engineer simply messages a developer on Slack saying <i>"Checkout is broken"</i>, that bug gets forgotten when the sprint gets busy, nobody knows who is fixing it, whether the fix has been deployed to QA yet, or whether QA verified it before release. A strict state workflow (`New &rarr; Assigned &rarr; Open &rarr; Fixed &rarr; Pending Retest &rarr; Verified &rarr; Closed`) enforces accountability at every handoff.</p></section>
+    <p><b>The Problem It Solves:</b> If a QA engineer simply messages a developer on Slack saying <i>"Checkout is broken"</i>, that bug gets forgotten when the sprint gets busy, nobody knows who is fixing it, whether the fix has been deployed to QA yet, or whether QA verified it before release. A strict state workflow (`New &rarr; Assigned &rarr; Open &rarr; Fixed &rarr; Pending Retest &rarr; Verified &rarr; Closed`) enforces accountability at every handoff.</p></section>
 
   <section><h2>2. Core Terms &amp; Defect Report Properties Defined First</h2>
     <ul>
@@ -87,17 +87,23 @@
       <li><b>REJECTED (Invalid / Not a Bug):</b> Developer or BA rejects the ticket because the software actually matches the SRS, or QA misunderstood the requirement / used wrong test data.</li>
       <li><b>DUPLICATE:</b> Another QA engineer already logged the exact same defect earlier (`BUG-102` is linked as a duplicate of `BUG-088`).</li>
       <li><b>DEFERRED (Postponed):</b> A valid bug, but Product/Triage decides to fix it in a <b>future sprint/release</b> because its Severity/Priority is Low or the release deadline is hours away.</li>
-      <li><b>CANNOT REPRODUCE (Works on My Machine):</b> Developer cannot trigger the bug locally—usually caused by environment differences, missing browser cache clear, or specific seed data. QA must attach exact HAR logs/video/user ID or re-verify on Staging.</li>
+      <li><b>CANNOT REPRODUCE (Works on My Machine):</b> Developer cannot trigger the bug locallyâ€”usually caused by environment differences, missing browser cache clear, or specific seed data. QA must attach exact HAR logs/video/user ID or re-verify on Staging.</li>
     </ol>
     <p><b>Interview Answer:</b> <i>"A defect moves from New &rarr; Assigned &rarr; Open &rarr; Fixed &rarr; Pending Retest &rarr; Retest &rarr; Verified &rarr; Closed. If retesting fails, QA moves it to Reopened. Non-standard terminal/hold states include Rejected (not a bug), Duplicate (already logged), Deferred (valid bug postponed to a future release), and Cannot Reproduce."</i></p></section>
 
-  <section><h2>5. Self-Check</h2>
+  <section><h2>5. In Selenium &amp; SDET Automation</h2>
+    <ul>
+      <li><b>Automated Defect Evidence:</b> In Selenium/TestNG <code>ITestListener.onTestFailure()</code>, capture <code>TakesScreenshot</code>, browser console errors, and the failing URL/build tag so Jira defects never hit <b>CANNOT REPRODUCE</b>.</li>
+      <li><b>Retesting via Targeted Groups:</b> Tag bug-fix verification tests with <code>@Test(groups = {"retest", "BUG-104"})</code> so CI can re-verify a fix in seconds before QA moves the ticket to <b>CLOSED</b>.</li>
+    </ul></section>
+
+  <section><h2>6. Self-Check</h2>
     <ol>
-      <li>Who has the final authority to move a defect to <b>CLOSED</b>—the Developer or QA? <i>(QA, after confirming the fix via Retesting on the deployed QA environment.)</i></li>
+      <li>Who has the final authority to move a defect to <b>CLOSED</b>â€”the Developer or QA? <i>(QA, after confirming the fix via Retesting on the deployed QA environment.)</i></li>
       <li>What is the difference between <b>Rejected</b> and <b>Deferred</b>? <i>(Rejected = invalid/not a real bug; Deferred = valid real bug intentionally postponed to a later release.)</i></li>
     </ol></section>
 
-  <section><h2>6. Q&amp;A</h2>
+  <section><h2>7. Q&amp;A</h2>
     <p><a class="qa-chip" href="interview-m4-1-qa.html"><span class="tag Interview">Interview</span>M4.1 Question Bank (35 Questions) &rarr;</a></p></section>
 </article>
 </div>

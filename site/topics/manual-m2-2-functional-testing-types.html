@@ -15,15 +15,15 @@
 
   <section><h2>1. The Base: What is Functional Testing and What Problem Does It Solve?</h2>
     <p class="def">Functional Testing is the branch of Dynamic Testing that verifies WHAT the system does by feeding valid, invalid, and boundary inputs into every feature and asserting that the actual output matches the business specification (SRS / User Stories).</p>
-    <p><b>The Problem It Solves (In Plain Words):</b> In an active project, developers deploy new builds every day—sometimes adding a new feature, sometimes fixing a single bug, and sometimes refactoring shared code. If QA runs all 2,000 test cases on every tiny build, testing takes 3 days per build. If QA only tests the 1 changed line, a broken checkout flow escapes to production. Functional Testing divides execution into **targeted execution types** (`Smoke`, `Sanity`, `Retesting`, `Regression`, `Exploratory`, `Ad-Hoc`) so QA knows **which exact subset of tests to run on each build drop**.</p></section>
+    <p><b>The Problem It Solves:</b> In an active project, developers deploy new builds every dayâ€”sometimes adding a new feature, sometimes fixing a single bug, and sometimes refactoring shared code. If QA runs all 2,000 test cases on every tiny build, testing takes 3 days per build. If QA only tests the 1 changed line, a broken checkout flow escapes to production. Functional Testing divides execution into <b>targeted execution types</b> (`Smoke`, `Sanity`, `Retesting`, `Regression`, `Exploratory`, `Ad-Hoc`) so QA knows <b>which exact subset of tests to run on each build drop</b>.</p></section>
 
   <section><h2>2. Core Terms &amp; Their Properties Defined First</h2>
     <p>Before comparing the functional testing types, understand the <b>4 foundational properties</b> that distinguish them:</p>
     <ul>
       <li><b>1. Breadth vs Depth (Wide &amp; Shallow vs Narrow &amp; Deep):</b>
         <ul>
-          <li><b>Wide &amp; Shallow:</b> Touching every major module of the application (Login, Search, Cart, Checkout, Profile) with 1–2 basic happy-path tests each, without digging into negative edge cases.</li>
-          <li><b>Narrow &amp; Deep:</b> Focusing on <b>only 1–2 recently modified modules</b> (e.g., only the Coupon Engine) and testing every positive, negative, and boundary rule inside that module.</li>
+          <li><b>Wide &amp; Shallow:</b> Touching every major module of the application (Login, Search, Cart, Checkout, Profile) with 1â€“2 basic happy-path tests each, without digging into negative edge cases.</li>
+          <li><b>Narrow &amp; Deep:</b> Focusing on <b>only 1â€“2 recently modified modules</b> (e.g., only the Coupon Engine) and testing every positive, negative, and boundary rule inside that module.</li>
         </ul>
       </li>
       <li><b>2. Positive Testing vs Negative Testing:</b>
@@ -43,16 +43,16 @@
   <section><h2>3. Classification Tree: All 6 Functional Execution Types</h2>
     <p>Based on <b>why the build was deployed and what risk we are checking</b>, Functional Testing splits into <b>6 core execution types</b>:</p>
     <ol>
-      <li><b>1. Smoke Testing (Build Verification Testing &mdash; BVT)</b> &mdash; Wide &amp; Shallow health check on a new build.</li>
-      <li><b>2. Sanity Testing</b> &mdash; Narrow &amp; Deep check on a specific newly changed/fixed module.</li>
-      <li><b>3. Retesting (Confirmation Testing)</b> &mdash; Re-running a previously failed test case to confirm a specific bug is fixed.</li>
-      <li><b>4. Regression Testing</b> &mdash; Re-running existing passing test cases to ensure code changes did not break old features.
+      <li><b>Smoke Testing (Build Verification Testing &mdash; BVT)</b> &mdash; Wide &amp; Shallow health check on a new build.</li>
+      <li><b>Sanity Testing</b> &mdash; Narrow &amp; Deep check on a specific newly changed/fixed module.</li>
+      <li><b>Retesting (Confirmation Testing)</b> &mdash; Re-running a previously failed test case to confirm a specific bug is fixed.</li>
+      <li><b>Regression Testing</b> &mdash; Re-running existing passing test cases to ensure code changes did not break old features.
         <ul>
           <li><i>Sub-Types:</i> <b>Unit Regression</b>, <b>Regional (Partial) Regression</b>, and <b>Full Regression</b>.</li>
         </ul>
       </li>
-      <li><b>5. Exploratory Testing</b> &mdash; Structured, time-boxed (Session-Based) unscripted investigation of edge cases.</li>
-      <li><b>6. Ad-Hoc Testing (Monkey / Gorilla Testing)</b> &mdash; Informal, random unscripted bug hunting without test charters.</li>
+      <li><b>Exploratory Testing</b> &mdash; Structured, time-boxed (Session-Based) unscripted investigation of edge cases.</li>
+      <li><b>Ad-Hoc Testing (Monkey / Gorilla Testing)</b> &mdash; Informal, random unscripted bug hunting without test charters.</li>
     </ol>
 
     <div class="arch">
@@ -110,44 +110,44 @@
 
   <section><h2>4. Each Functional Testing Type Defined &amp; Explained in Order</h2>
 
-    <p><b>① Smoke Testing (Build Verification Testing &mdash; BVT)</b></p>
+    <p><b>â‘  Smoke Testing (Build Verification Testing &mdash; BVT)</b></p>
     <ul>
       <li><b>Definition:</b> A fast, surface-level (<b>Wide &amp; Shallow</b>) health check executed on a newly deployed build to verify that critical end-to-end functionalities (App launch, Login, Home, Cart, DB connection) work without crashing.</li>
       <li><b>Key Properties:</b> (a) Runs at STLC Phase 4 Gate, (b) Checks only positive happy paths across all major modules, (c) Fully scripted/automated (`@Test(groups="smoke")`), (d) Performed by Dev (pre-drop) and QA/CI-CD (post-drop).</li>
       <li><b>In what exact cases we perform it:</b> Immediately on every new build deployment or Git Pull Request before spending any manual QA effort.</li>
     </ul>
 
-    <p><b>② Sanity Testing</b></p>
+    <p><b>â‘¡ Sanity Testing</b></p>
     <ul>
-      <li><b>Definition:</b> A focused, **Narrow &amp; Deep** evaluation of a **specific module or functionality** after receiving a relatively stable build containing minor code changes or bug fixes, to verify that the new logic works rationally before running full regression.</li>
+      <li><b>Definition:</b> A focused, <b>Narrow &amp; Deep</b> evaluation of a <b>specific module or functionality</b> after receiving a relatively stable build containing minor code changes or bug fixes, to verify that the new logic works rationally before running full regression.</li>
       <li><b>Key Properties:</b> (a) Narrow scope (only the impacted module, e.g., Checkout Tax calculation), (b) Deep checks (positive + negative + boundary rules of that module), (c) Unscripted or a targeted subset of Regression, (d) Performed strictly by QA.</li>
       <li><b>In what exact cases we perform it:</b> On Build #10, #11, #12 when a developer changes the GST discount formula in the Cart module and you want to deeply verify the Cart module in 15 minutes before triggering a 2-hour regression run.</li>
     </ul>
 
-    <p><b>③ Retesting (Confirmation Testing)</b></p>
+    <p><b>â‘¢ Retesting (Confirmation Testing)</b></p>
     <ul>
-      <li><b>Definition:</b> Executing a **previously failed test case** again on a new build using the **exact same test steps and test data** to confirm that the reported defect has actually been fixed by the developer.</li>
+      <li><b>Definition:</b> Executing a <b>previously failed test case</b> again on a new build using the <b>exact same test steps and test data</b> to confirm that the reported defect has actually been fixed by the developer.</li>
       <li><b>Key Properties:</b> (a) Targets only `FAILED` test cases linked to fixed Jira bugs, (b) Uses identical input data that triggered the bug, (c) Cannot be pre-automated ahead of time as a permanent suite (though once fixed, the test joins Regression).</li>
       <li><b>In what exact cases we perform it:</b> Whenever a developer moves a Jira bug from `IN PROGRESS` to `READY FOR QA`.</li>
     </ul>
 
-    <p><b>④ Regression Testing (And Its 3 Sub-Types)</b></p>
+    <p><b>â‘£ Regression Testing (And Its 3 Sub-Types)</b></p>
     <ul>
-      <li><b>Definition:</b> Re-executing **previously passing test cases** across existing modules after a code change, bug fix, or configuration update to ensure that old working features have not regressed (broken as an unintended side effect).</li>
+      <li><b>Definition:</b> Re-executing <b>previously passing test cases</b> across existing modules after a code change, bug fix, or configuration update to ensure that old working features have not regressed (broken as an unintended side effect).</li>
       <li><b>The 3 Sub-Types of Regression Testing:</b>
         <ol>
           <li><b>Unit Regression:</b> Testing only the single changed code unit/component in isolation after a tiny local fix.</li>
-          <li><b>Regional (Partial / Impact-Based) Regression:</b> Testing the modified module **plus its directly connected neighbor modules** identified via **Impact Analysis** (e.g., if `Cart` changed, run Regression on `Product Catalog`, `Cart`, and `Payment`).</li>
-          <li><b>Full Regression:</b> Executing 100% of the regression suite across the entire application—mandatory before a major production release, framework upgrade, or database migration.</li>
+          <li><b>Regional (Partial / Impact-Based) Regression:</b> Testing the modified module <b>plus its directly connected neighbor modules</b> identified via <b>Impact Analysis</b> (e.g., if `Cart` changed, run Regression on `Product Catalog`, `Cart`, and `Payment`).</li>
+          <li><b>Full Regression:</b> Executing 100% of the regression suite across the entire applicationâ€”mandatory before a major production release, framework upgrade, or database migration.</li>
         </ol>
       </li>
       <li><b>Why Regression is #1 for Selenium Automation:</b> Manual regression of 1,500 test cases every 2-week sprint is impossible; SDETs automate Regression in Selenium/Playwright + TestNG to run in parallel on CI/CD every night.</li>
     </ul>
 
-    <p><b>⑤ Exploratory Testing vs ⑥ Ad-Hoc Testing</b></p>
+    <p><b>â‘¤ Exploratory Testing vs â‘¥ Ad-Hoc Testing</b></p>
     <ul>
-      <li><b>Exploratory Testing (Structured Unscripted):</b> Time-boxed (typically 60–90 minute **Session-Based Test Management [SBTM]** charters) where an experienced QA engineer simultaneously explores the app, designs edge-case attacks on the fly, and logs notes/defects.</li>
-      <li><b>Ad-Hoc Testing (Unstructured Unscripted):</b> Informal, random bug-hunting without any test cases, charters, or timers. Includes **Monkey Testing** (random chaotic clicks/inputs to crash the app) and **Buddy/Pair Testing** (1 Dev + 1 QA testing together at one desk).</li>
+      <li><b>Exploratory Testing (Structured Unscripted):</b> Time-boxed (typically 60â€“90 minute <b>Session-Based Test Management [SBTM]</b> charters) where an experienced QA engineer simultaneously explores the app, designs edge-case attacks on the fly, and logs notes/defects.</li>
+      <li><b>Ad-Hoc Testing (Unstructured Unscripted):</b> Informal, random bug-hunting without any test cases, charters, or timers. Includes <b>Monkey Testing</b> (random chaotic clicks/inputs to crash the app) and <b>Buddy/Pair Testing</b> (1 Dev + 1 QA testing together at one desk).</li>
     </ul>
     <p><b>Interview Answer:</b> <i>"Smoke vs Sanity: Smoke testing is wide and shallow across the whole application on initial builds to verify stability, whereas Sanity testing is narrow and deep on a specific module after minor changes or bug fixes. Retesting vs Regression: Retesting re-runs previously failed test cases to confirm a specific bug fix works, whereas Regression re-runs previously passing test cases to ensure that the code change didn't accidentally break existing functionality."</i></p></section>
 
@@ -171,11 +171,11 @@
       <tr><td>Primary Goal</td><td>Confirm a <b>specific reported bug is fixed</b></td><td>Ensure code changes caused <b>zero side-effect bugs</b> in old modules</td></tr>
       <tr><td>Priority Order</td><td>Runs <b>BEFORE</b> Regression on the fixed build</td><td>Runs <b>AFTER</b> Retesting passes</td></tr>
       <tr><td>Automation Strategy</td><td>Verified manually/targeted first; then added to Regression</td><td><b>Primary target for Selenium / Playwright / API automation</b></td></tr>
-      <tr><td>Defect Verification</td><td>Closes or Reopens an existing Jira defect</td><td>Discovers brand-new **Regression Defects**</td></tr>
+      <tr><td>Defect Verification</td><td>Closes or Reopens an existing Jira defect</td><td>Discovers brand-new <b>Regression Defects</b></td></tr>
     </table></section>
 
   <section><h2>6. Real Selenium + TestNG Code Trace: Running Smoke, Sanity &amp; Regression via Groups</h2>
-    <p>In a real Maven + TestNG + Selenium framework, SDETs tag `@Test` methods with `groups` so Jenkins can trigger **Smoke** (3 mins), **Sanity on Checkout** (5 mins), or **Full Regression** (30 mins) via a single CLI flag:</p>
+    <p>In a real Maven + TestNG + Selenium framework, SDETs tag `@Test` methods with `groups` so Jenkins can trigger <b>Smoke</b> (3 mins), <b>Sanity on Checkout</b> (5 mins), or <b>Full Regression</b> (30 mins) via a single CLI flag:</p>
 <pre><code>import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -215,8 +215,8 @@ mvn clean test -Dgroups="regression" -Dparallel="methods" -DthreadCount=4</code>
 
   <section><h2>7. Self-Check</h2>
     <ol>
-      <li>Which testing type is **Wide &amp; Shallow**, and which is **Narrow &amp; Deep**? <i>(Smoke Testing is Wide &amp; Shallow; Sanity Testing is Narrow &amp; Deep.)</i></li>
-      <li>A developer fixes `BUG-205` (Password reset link fails) and deploys Build #14. Do you run **Retesting** or **Regression** first? <i>(Retesting first to confirm `BUG-205` actually works; if Retesting passes, then run Regression to ensure login/signup didn't break.)</i></li>
+      <li>Which testing type is <b>Wide &amp; Shallow</b>, and which is <b>Narrow &amp; Deep</b>? <i>(Smoke Testing is Wide &amp; Shallow; Sanity Testing is Narrow &amp; Deep.)</i></li>
+      <li>A developer fixes `BUG-205` (Password reset link fails) and deploys Build #14. Do you run <b>Retesting</b> or <b>Regression</b> first? <i>(Retesting first to confirm `BUG-205` actually works; if Retesting passes, then run Regression to ensure login/signup didn't break.)</i></li>
       <li>What are the 3 sub-types of Regression Testing? <i>(Unit Regression, Regional/Partial Regression, and Full Regression.)</i></li>
     </ol></section>
 

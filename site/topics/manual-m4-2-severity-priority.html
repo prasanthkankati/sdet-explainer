@@ -15,7 +15,7 @@
 
   <section><h2>1. The Base: What Are Severity and Priority?</h2>
     <p class="def"><b>Severity</b> measures the <b>technical impact</b> of a defect on the system's functionality (assigned by QA). <b>Priority</b> measures the <b>business urgency</b> of how soon the defect must be fixed (assigned by Product / Triage Lead).</p>
-    <p><b>The Problem It Solves (In Plain Words):</b> A typo in a company logo on the home page causes zero technical crashes, yet the CEO demands it fixed before tonight's launch. Meanwhile, a crash inside an obsolete "Export to Fax" page used by 0.01% of users is technically severe, yet business won't delay a release for it. Separating **Severity (Technical Impact)** from **Priority (Fix Order)** prevents engineering teams from fixing the wrong bugs first.</p></section>
+    <p><b>The Problem It Solves:</b> A typo in a company logo on the home page causes zero technical crashes, yet the CEO demands it fixed before tonight's launch. Meanwhile, a crash inside an obsolete "Export to Fax" page used by 0.01% of users is technically severe, yet business won't delay a release for it. Separating <b>Severity (Technical Impact)</b> from <b>Priority (Fix Order)</b> prevents engineering teams from fixing the wrong bugs first.</p></section>
 
   <section><h2>2. Severity Levels &amp; Priority Levels Listed in Order</h2>
     <ul>
@@ -42,7 +42,7 @@
       <tr><th>Combination</th><th>Real-World Example</th><th>Why?</th></tr>
       <tr><td><b>High Severity + High Priority</b></td><td>Clicking "Place Order" or "Login" throws HTTP 500 Server Error for all users.</td><td>Core functionality is completely broken (High Severity) AND blocks revenue immediately (High Priority).</td></tr>
       <tr><td><b>High Severity + Low Priority</b></td><td>Application crashes when clicking a legacy "Print Monthly Statement (IE11)" button on an archived FAQ page visited by &lt; 0.01% users.</td><td>A full system crash is technically High Severity, but almost no real user hits that rare edge path today (Low Priority).</td></tr>
-      <tr><td><b>Low Severity + High Priority</b></td><td>Company brand name misspelled ("Amzon" instead of "Amazon") on the Homepage banner or wrong helpline phone number shown.</td><td>Zero technical failure or crash (Low Severity), but huge brand/legal embarrassment requiring an immediate fix (High Priority).</td></tr>
+      <tr><td><b>Low Severity + High Priority</b></td><td>Company brand name misspelled ("Amzon" instead of "Amazon") on the Homepage banner or wrong helpline phone number shown.</td><td>Zero technical failure or crash (Low Severity), but substantial brand/legal embarrassment requiring an immediate fix (High Priority).</td></tr>
       <tr><td><b>Low Severity + Low Priority</b></td><td>1-pixel padding misalignment on the "Terms &amp; Conditions" footer link.</td><td>Zero functional impact (Low Severity) and negligible business urgency (Low Priority).</td></tr>
     </table>
     <p><b>Interview Answer:</b> <i>"Severity is the technical impact of a defect on the application, usually set by QA. Priority is the business urgency of how soon it should be fixed, set by the Product Owner or Triage Lead. A homepage logo typo is Low Severity / High Priority, whereas a crash on a rarely used legacy archive link is High Severity / Low Priority."</i></p></section>
@@ -56,7 +56,13 @@
       <tr><td>Typical Scale</td><td>Blocker, Critical, Major, Minor/Trivial</td><td>P1 (Urgent), P2 (High), P3 (Medium), P4 (Low)</td></tr>
     </table></section>
 
-  <section><h2>5. Q&amp;A</h2>
+  <section><h2>5. In Selenium &amp; SDET Automation</h2>
+    <ul>
+      <li><b>Mapping Severity to CI Test Suites:</b> Blocker/Critical Selenium flows (Login, Checkout, Payment) run in the <code>smoke</code> suite on every Pull Request, whereas Minor UI/layout checks run in the nightly <code>regression</code> suite.</li>
+      <li><b>Failure Triage:</b> When a Selenium assertion fails in Jenkins, SDETs distinguish an application <b>Blocker</b> (HTTP 500 on checkout) from a test-script <b>NoSuchElementException</b> caused by a locator rename before assigning Severity.</li>
+    </ul></section>
+
+  <section><h2>6. Q&amp;A</h2>
     <p><a class="qa-chip" href="interview-m4-2-qa.html"><span class="tag Interview">Interview</span>M4.2 Question Bank (35 Questions) &rarr;</a></p></section>
 </article>
 </div>

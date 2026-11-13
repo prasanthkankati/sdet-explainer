@@ -14,9 +14,9 @@
   <h1>1.3 STLC: All 6 Phases, Entry &amp; Exit Criteria</h1>
 
   <section><h2>1. The Base: What is STLC and How Does It Fit Inside SDLC?</h2>
-    <p class="def">The Software Testing Life Cycle (STLC) is the structured 6-phase testing workflow executed by the QA and SDET team—spanning Requirement Analysis, Test Planning, Test Case Development, Environment Setup, Test Execution, and Test Cycle Closure—to systematically verify and validate software.</p>
+    <p class="def">The Software Testing Life Cycle (STLC) is the structured 6-phase testing workflow executed by the QA and SDET teamâ€”spanning Requirement Analysis, Test Planning, Test Case Development, Environment Setup, Test Execution, and Test Cycle Closureâ€”to systematically verify and validate software.</p>
     <p><b>Where It Falls (SDLC vs STLC):</b> While <b>SDLC</b> governs the entire engineering organization (Product, Architects, Developers, QA, DevOps) from idea to production maintenance, <b>STLC</b> is the dedicated <b>Testing sub-lifecycle</b> that runs in parallel with SDLC phases so QA is never an unstructured afterthought.</p>
-    <p><b>The Problem It Solves (In Plain Words):</b> Without a structured testing lifecycle, three chaotic failures happen in every project:</p>
+    <p><b>The Problem It Solves:</b> Without a structured testing lifecycle, three chaotic failures happen in every project:</p>
     <ol>
       <li><b>Testing Unstable Code (Wasted QA Time):</b> Developers hand over an uncompiled or crashing version of the app, and QA wastes hours trying to run tests on a server where even the Login page crashes.</li>
       <li><b>Missed Business Rules (Zero Requirement Tracking):</b> A specification has 50 business rules, but QA only writes tests for 40 of them because nobody tracked which requirement maps to which test case.</li>
@@ -26,7 +26,7 @@
   <section><h2>2. Core Terms &amp; Their Properties Defined First (Before Reading the 6 Phases)</h2>
     <p>Before walking through the 6 STLC phases, you must know the exact meaning and properties of the <b>5 foundational STLC building blocks</b>:</p>
 
-    <p><b>① What is a Software Build vs a Broken Build?</b></p>
+    <p><b>â‘  What is a Software Build vs a Broken Build?</b></p>
     <ul>
       <li><b>Software Build:</b> When developers finish writing source code (<code>.java</code> / <code>.ts</code>), a CI server (like Jenkins) compiles, packages, and deploys that code into a testable version (e.g., <code>Build #142</code> or <code>app-v2.4.jar</code>) on the QA server.</li>
       <li><b>Broken Build:</b> A deployed build that fails basic compilation, fails server startup, or crashes on core primary flows (like Login or Database connection), making full QA testing impossible.</li>
@@ -40,14 +40,14 @@
       </li>
     </ul>
 
-    <p><b>② What is an RTM (Requirement Traceability Matrix) &amp; Its Properties?</b></p>
+    <p><b>â‘¡ What is an RTM (Requirement Traceability Matrix) &amp; Its Properties?</b></p>
     <ul>
       <li><b>Definition:</b> An <b>RTM</b> is a structured mapping document (Excel sheet, Jira Xray, or TestRail table) that connects every single <b>Requirement ID</b> to its <b>Test Case IDs</b>, <b>Execution Status</b>, and <b>Defect IDs</b> so zero requirements are ever missed.</li>
       <li><b>The 3 Types of Traceability in an RTM:</b>
         <ol>
           <li><b>Forward Traceability (Requirement &rarr; Test Case):</b> Maps each Requirement ID to its Test Cases to verify <i>"Does every requirement have at least one positive and negative test case?"</i></li>
           <li><b>Backward / Reverse Traceability (Test Case &rarr; Requirement):</b> Maps each Test Case ID back to a Requirement ID to verify <i>"Are we writing gold-plated tests for features nobody asked for?"</i></li>
-          <li><b>Bi-Directional Traceability (Forward + Backward):</b> Combines both directions—the industry standard used in STLC.</li>
+          <li><b>Bi-Directional Traceability (Forward + Backward):</b> Combines both directionsâ€”the industry standard used in STLC.</li>
         </ol>
       </li>
       <li><b>Exact Properties (Columns) of a Real RTM:</b></li>
@@ -58,7 +58,7 @@
       <tr><td><code>REQ_102</code></td><td>Apply 20% discount code <code>SAVE20</code></td><td><code>TC_03, TC_04</code></td><td><code>CartTest#verifyCoupon</code></td><td><b>FAIL</b></td><td><code>BUG-409</code> (High)</td></tr>
     </table>
 
-    <p><b>③ What are Entry Criteria, Exit Criteria, Deliverables &amp; Sign-Off Criteria?</b></p>
+    <p><b>â‘¢ What are Entry Criteria, Exit Criteria, Deliverables &amp; Sign-Off Criteria?</b></p>
     <ol>
       <li><b>Entry Criteria (Prerequisites to Start):</b> The mandatory inputs and conditions that <b>must exist before</b> a phase is allowed to begin (e.g., <i>"QA will not start Phase 5 Test Execution until the Smoke Test passes 100%"</i>).</li>
       <li><b>Deliverables (Work Products):</b> The tangible documents, scripts, or reports produced as output of a phase (e.g., <i>Test Plan, RTM, Automated Scripts, Test Summary Report</i>).</li>
@@ -148,7 +148,7 @@
 
   <section><h2>4. Deep Breakdown of Each STLC Phase in Order</h2>
 
-    <p><b>① Phase 1: Requirement Analysis</b></p>
+    <p><b>â‘  Phase 1: Requirement Analysis</b></p>
     <ul>
       <li><b>Goal:</b> Understand <i>what</i> to test, spot missing/contradictory rules early (Static Verification), and decide what can be automated.</li>
       <li><b>Entry Criteria:</b> BRS / SRS / Jira User Stories and Architecture/Wireframe docs are shared with QA.</li>
@@ -160,40 +160,40 @@
           <li>Perform <b>Automation Feasibility Analysis</b> (evaluate DOM stability, ROI, API availability, and tool support for Selenium/Playwright).</li>
         </ol>
       </li>
-      <li><b>Exit Criteria &amp; Deliverables:</b> All requirement ambiguities resolved; **Ambiguity Review Report**, **Initial RTM**, and **Automation Feasibility Report** signed off.</li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> All requirement ambiguities resolved; <b>Ambiguity Review Report</b>, <b>Initial RTM</b>, and <b>Automation Feasibility Report</b> signed off.</li>
     </ul>
 
-    <p><b>② Phase 2: Test Planning</b></p>
+    <p><b>â‘¡ Phase 2: Test Planning</b></p>
     <ul>
       <li><b>Goal:</b> Define the blueprint of <i>how</i>, <i>who</i>, <i>when</i>, and <i>with what tools</i> testing will be done.</li>
       <li><b>Entry Criteria:</b> Clarified requirements, initial RTM, and Automation Feasibility Report.</li>
       <li><b>Activities:</b>
         <ol>
-          <li>Draft the **Test Plan** document: define **In-Scope** (features/browsers to test) and **Out-of-Scope** items.</li>
+          <li>Draft the <b>Test Plan</b> document: define <b>In-Scope</b> (features/browsers to test) and <b>Out-of-Scope</b> items.</li>
           <li>Select test types (Smoke, Sanity, Regression, API, Performance) and automation stack (`Java`, `Selenium`, `TestNG`, `Maven`, `Jenkins`).</li>
-          <li>Perform **Test Effort Estimation** (using Work Breakdown Structure, Story Points, or 3-Point Estimation) and assign QA roles.</li>
-          <li>Define **Risk &amp; Mitigation Plan** (e.g., what if staging DB is delayed?) and set formal Entry/Exit criteria for execution.</li>
+          <li>Perform <b>Test Effort Estimation</b> (using Work Breakdown Structure, Story Points, or 3-Point Estimation) and assign QA roles.</li>
+          <li>Define <b>Risk &amp; Mitigation Plan</b> (e.g., what if staging DB is delayed?) and set formal Entry/Exit criteria for execution.</li>
         </ol>
       </li>
-      <li><b>Exit Criteria &amp; Deliverables:</b> **Approved Test Plan Document** and **Effort/Schedule Baseline**.</li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> <b>Approved Test Plan Document</b> and <b>Effort/Schedule Baseline</b>.</li>
     </ul>
 
-    <p><b>③ Phase 3: Test Case Design &amp; Development</b></p>
+    <p><b>â‘¢ Phase 3: Test Case Design &amp; Development</b></p>
     <ul>
       <li><b>Goal:</b> Write detailed positive/negative manual test cases, prepare test data, and build automated test scripts.</li>
       <li><b>Entry Criteria:</b> Approved Test Plan, frozen UI designs/locators, and API contracts.</li>
       <li><b>Activities:</b>
         <ol>
-          <li>Write step-by-step **Test Cases** (Preconditions, Test Steps, Test Data, Expected Result) using **Equivalence Partitioning** and **Boundary Value Analysis**.</li>
-          <li>Conduct **Peer Review** (Static Verification) of written test cases and map every Test Case ID to its Requirement ID in the **RTM**.</li>
-          <li>Create **Test Data** sets (`.xlsx` sheets, `.json` payloads, SQL seed scripts).</li>
-          <li>Write &amp; review **Selenium Page Objects and TestNG `@Test` scripts** in Git.</li>
+          <li>Write step-by-step <b>Test Cases</b> (Preconditions, Test Steps, Test Data, Expected Result) using <b>Equivalence Partitioning</b> and <b>Boundary Value Analysis</b>.</li>
+          <li>Conduct <b>Peer Review</b> (Static Verification) of written test cases and map every Test Case ID to its Requirement ID in the <b>RTM</b>.</li>
+          <li>Create <b>Test Data</b> sets (`.xlsx` sheets, `.json` payloads, SQL seed scripts).</li>
+          <li>Write &amp; review <b>Selenium Page Objects and TestNG `@Test` scripts</b> in Git.</li>
         </ol>
       </li>
-      <li><b>Exit Criteria &amp; Deliverables:</b> **Reviewed &amp; Approved Test Cases**, **Updated RTM**, **Test Data files**, and **Merged Automation Scripts**.</li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> <b>Reviewed &amp; Approved Test Cases</b>, <b>Updated RTM</b>, <b>Test Data files</b>, and <b>Merged Automation Scripts</b>.</li>
     </ul>
 
-    <p><b>④ Phase 4: Test Environment Setup</b></p>
+    <p><b>â‘£ Phase 4: Test Environment Setup</b></p>
     <ul>
       <li><b>Goal:</b> Prepare the hardware, software, network, and database where dynamic testing will run, and verify build health.</li>
       <li><b>Entry Criteria:</b> Test Plan specifying environment needs; Dev build deployed to QA server.</li>
@@ -201,40 +201,40 @@
         <ol>
           <li>Configure QA server URLs, database connections, mock services, and Selenium Grid / Docker / BrowserStack nodes.</li>
           <li>Load baseline test data into the QA database.</li>
-          <li>Execute the **Smoke Test (Build Verification Test)** to verify core application stability before opening full QA execution.</li>
+          <li>Execute the <b>Smoke Test (Build Verification Test)</b> to verify core application stability before opening full QA execution.</li>
         </ol>
       </li>
-      <li><b>Exit Criteria &amp; Deliverables:</b> QA Environment operational; **Smoke Test Report = PASSED**. *(If Smoke Test fails, the build is rejected immediately!)*</li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> QA Environment operational; <b>Smoke Test Report = PASSED</b>. <i>(If Smoke Test fails, the build is rejected immediately!)</i></li>
     </ul>
 
-    <p><b>⑤ Phase 5: Test Execution</b></p>
+    <p><b>â‘¤ Phase 5: Test Execution</b></p>
     <ul>
       <li><b>Goal:</b> Run manual and automated test cases against the live QA build, report defects, and verify fixes.</li>
       <li><b>Entry Criteria:</b> Smoke Test passed, Approved Test Cases &amp; Test Data ready, RTM mapped.</li>
       <li><b>Activities:</b>
         <ol>
-          <li>Execute manual test cases and trigger automated **Selenium / API suites** (`mvn clean test`).</li>
+          <li>Execute manual test cases and trigger automated <b>Selenium / API suites</b> (`mvn clean test`).</li>
           <li>Compare Actual Result vs Expected Result; mark each test `PASS`, `FAIL`, or `BLOCKED` in the RTM / Jira Xray / TestRail.</li>
-          <li>Log failed test cases as **Defects in Jira** with clear steps to reproduce, severity/priority, screenshots, and logs.</li>
-          <li>Perform **Retesting (Confirmation Testing)** on fixed bugs and **Regression Testing** to verify fixes didn't break existing flows.</li>
+          <li>Log failed test cases as <b>Defects in Jira</b> with clear steps to reproduce, severity/priority, screenshots, and logs.</li>
+          <li>Perform <b>Retesting (Confirmation Testing)</b> on fixed bugs and <b>Regression Testing</b> to verify fixes didn't break existing flows.</li>
         </ol>
       </li>
-      <li><b>Exit Criteria &amp; Deliverables:</b> 100% planned test cases executed; all Blocker/Critical/High defects fixed and verified; **Completed RTM**, **Defect Reports**, and **Automation Execution Reports (ExtentReports)**.</li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> 100% planned test cases executed; all Blocker/Critical/High defects fixed and verified; <b>Completed RTM</b>, <b>Defect Reports</b>, and <b>Automation Execution Reports (ExtentReports)</b>.</li>
     </ul>
 
-    <p><b>⑥ Phase 6: Test Cycle Closure</b></p>
+    <p><b>â‘¥ Phase 6: Test Cycle Closure</b></p>
     <ul>
       <li><b>Goal:</b> Formally evaluate release readiness, archive test assets, calculate quality metrics, and sign off.</li>
       <li><b>Entry Criteria:</b> Test Execution phase completed; all Exit Criteria met (or open low-priority bugs formally waived by Product).</li>
       <li><b>Activities:</b>
         <ol>
           <li>Verify 100% requirement coverage in the final RTM.</li>
-          <li>Calculate quality metrics: **Test Coverage %**, **Defect Density**, **Defect Removal Efficiency (DRE)**, and **Automation Pass Rate**.</li>
-          <li>Document **Lessons Learned** (what caused delays or flaky tests) and clean up test environments.</li>
-          <li>Publish the **Test Closure / Test Summary Report** and issue formal **QA Release Sign-Off**.</li>
+          <li>Calculate quality metrics: <b>Test Coverage %</b>, <b>Defect Density</b>, <b>Defect Removal Efficiency (DRE)</b>, and <b>Automation Pass Rate</b>.</li>
+          <li>Document <b>Lessons Learned</b> (what caused delays or flaky tests) and clean up test environments.</li>
+          <li>Publish the <b>Test Closure / Test Summary Report</b> and issue formal <b>QA Release Sign-Off</b>.</li>
         </ol>
       </li>
-      <li><b>Exit Criteria &amp; Deliverables:</b> **Signed-Off Test Summary Report** and **Release Go/No-Go Sign-Off**.</li>
+      <li><b>Exit Criteria &amp; Deliverables:</b> <b>Signed-Off Test Summary Report</b> and <b>Release Go/No-Go Sign-Off</b>.</li>
     </ul></section>
 
   <section><h2>5. Master STLC Reference Matrix (One-Look Interview Table)</h2>
@@ -252,7 +252,7 @@
 <pre><code>// In TestNG + Selenium, we tag tests by STLC phase &amp; RTM Requirement ID:
 public class CheckoutTest extends BaseTest {
 
-    // Phase 4 Gate: Runs in 'mvn test -Dgroups=smoke' — blocks Phase 5 if it fails!
+    // Phase 4 Gate: Runs in 'mvn test -Dgroups=smoke' â€” blocks Phase 5 if it fails!
     @Test(groups = {"smoke"}, description = "RTM_REQ_101: Verify Checkout page loads")
     public void verifyCheckoutPageLoads() {
         CheckoutPage page = new CheckoutPage(getDriver());
@@ -270,9 +270,9 @@ public class CheckoutTest extends BaseTest {
 
   <section><h2>7. Self-Check</h2>
     <ol>
-      <li>In which STLC phase is **Automation Feasibility Analysis** performed? <i>(Phase 1: Requirement Analysis)</i></li>
-      <li>What is the mandatory gate at the end of **Phase 4 (Test Environment Setup)** before entering Phase 5? <i>(Executing and passing the Smoke Test / Build Verification Test)</i></li>
-      <li>What are the two main deliverables of **Phase 6 (Test Cycle Closure)**? <i>(The Test Summary / Closure Report and formal QA Release Sign-Off)</i></li>
+      <li>In which STLC phase is <b>Automation Feasibility Analysis</b> performed? <i>(Phase 1: Requirement Analysis)</i></li>
+      <li>What is the mandatory gate at the end of <b>Phase 4 (Test Environment Setup)</b> before entering Phase 5? <i>(Executing and passing the Smoke Test / Build Verification Test)</i></li>
+      <li>What are the two main deliverables of <b>Phase 6 (Test Cycle Closure)</b>? <i>(The Test Summary / Closure Report and formal QA Release Sign-Off)</i></li>
     </ol></section>
 
   <section><h2>8. Q&amp;A</h2>

@@ -15,26 +15,26 @@
 
   <section><h2>1. The Base: Why Do QA Teams Measure Defect Metrics &amp; Perform RCA?</h2>
     <p class="def">Defect Metrics (DRE, Defect Leakage, Defect Density) mathematically measure how effective our QA testing process was at catching bugs before release, while Root Cause Analysis (RCA) investigates WHY an escaped bug slipped into Production so we fix the process gap permanently.</p>
-    <p><b>The Problem They Solve (In Plain Words):</b> Saying <i>"Testing went well this sprint"</i> is an opinion. If QA caught 95 bugs and only 5 reached Production (`95% DRE`), testing was strong; if QA caught 10 bugs and customers reported 15 bugs (`40% DRE`), our test coverage or CI/CD gates have a serious hole that needs RCA.</p></section>
+    <p><b>The Problem They Solve:</b> Saying <i>"Testing went well this sprint"</i> is an opinion. If QA caught 95 bugs and only 5 reached Production (`95% DRE`), testing was strong; if QA caught 10 bugs and customers reported 15 bugs (`40% DRE`), our test coverage or CI/CD gates have a serious hole that needs RCA.</p></section>
 
   <section><h2>2. Core Formulas Defined &amp; Calculated Step by Step</h2>
     <ol>
-      <li><b>1. Defect Removal Efficiency (DRE):</b> Percentage of total defects caught by QA before Production release.
+      <li><b>Defect Removal Efficiency (DRE):</b> Percentage of total defects caught by QA before Production release.
         <br><code>DRE (%) = [ Defects Caught by QA / (Defects Caught by QA + Defects Found in Production) ] &times; 100</code>
         <br><i>Example:</i> QA found `95` bugs; customers found `5` bugs &rarr; `DRE = (95 / 100) * 100 = 95%`.
       </li>
-      <li><b>2. Defect Leakage % (Defect Escape Rate):</b> Percentage of total defects that **escaped QA** and reached Production/UAT.
+      <li><b>Defect Leakage % (Defect Escape Rate):</b> Percentage of total defects that <b>escaped QA</b> and reached Production/UAT.
         <br><code>Defect Leakage (%) = [ Production Defects / (QA Defects + Production Defects) ] &times; 100 = 100% - DRE</code>
         <br><i>Example:</i> `(5 / 100) * 100 = 5%` Leakage.
       </li>
-      <li><b>3. Defect Density:</b> Number of confirmed defects per unit size of software (e.g., per 1,000 Lines of Code `KLOC` or per Module/Story Point) — identifies **Defect Clustering (80/20)** hotspots.
+      <li><b>Defect Density:</b> Number of confirmed defects per unit size of software (e.g., per 1,000 Lines of Code `KLOC` or per Module/Story Point) â€” identifies <b>Defect Clustering (80/20)</b> hotspots.
         <br><code>Defect Density = Total Confirmed Defects in Module / Size of Module (KLOC or Story Points)</code>
       </li>
-      <li><b>4. Defect Rejection Ratio:</b> `(Rejected Bugs / Total Logged Bugs) * 100` — measures QA test accuracy and requirement understanding.</li>
+      <li><b>Defect Rejection Ratio:</b> `(Rejected Bugs / Total Logged Bugs) * 100` â€” measures QA test accuracy and requirement understanding.</li>
     </ol></section>
 
   <section><h2>3. Root Cause Analysis (RCA): 5-Whys &amp; Fishbone (Ishikawa)</h2>
-    <p>Whenever a **High/Critical Defect escapes to Production**, QA &amp; Engineering conduct a **Blameless Post-Mortem RCA** using two standard tools:</p>
+    <p>Whenever a <b>High/Critical Defect escapes to Production</b>, QA &amp; Engineering conduct a <b>Blameless Post-Mortem RCA</b> using two standard tools:</p>
     <ul>
       <li><b>1. The 5-Whys Technique (Drilling down from Symptom to Process Fix):</b>
         <ol>
@@ -45,11 +45,17 @@
           <li><i>Root Fix:</i> Add BVA checklist to Sprint Refinement + add automated regression test for `$0` cart in CI/CD.</li>
         </ol>
       </li>
-      <li><b>2. Fishbone (Ishikawa) Diagram:</b> Categorizes causes into branches (**Requirements**, **Code**, **Test Coverage**, **Test Data**, **Environment/Config**, **CI/CD**) to make sure no contributing factor is missed.</li>
+      <li><b>2. Fishbone (Ishikawa) Diagram:</b> Categorizes causes into branches (<b>Requirements</b>, <b>Code</b>, <b>Test Coverage</b>, <b>Test Data</b>, <b>Environment/Config</b>, <b>CI/CD</b>) to make sure no contributing factor is missed.</li>
     </ul>
     <p><b>Interview Answer:</b> <i>"DRE is `(QA Defects / (QA + Prod Defects)) * 100` and Defect Leakage is `100% - DRE`. When a critical bug escapes to production, we run a blameless 5-Whys RCA to fix both the code bug and the missing test/process gate, then add a permanent automated regression test."</i></p></section>
 
-  <section><h2>4. Q&amp;A</h2>
+  <section><h2>4. In Selenium &amp; SDET Automation</h2>
+    <ul>
+      <li><b>Closing Escaped Defects Permanently:</b> Every production escape identified during 5-Whys RCA must produce a permanent Selenium/API regression test (e.g., asserting <code>$0</code> gift-card checkout in CI) so the same defect can never leak twice.</li>
+      <li><b>Tracking Suite Effectiveness:</b> High DRE correlates directly with deterministic Selenium assertions, explicit <code>WebDriverWait</code> conditions, and isolated test data rather than brittle <code>Thread.sleep()</code> waits.</li>
+    </ul></section>
+
+  <section><h2>5. Q&amp;A</h2>
     <p><a class="qa-chip" href="interview-m4-3-qa.html"><span class="tag Interview">Interview</span>M4.3 Question Bank (35 Questions) &rarr;</a></p></section>
 </article>
 </div>

@@ -15,15 +15,15 @@
 
   <section><h2>1. The Base: Why Are EP and BVA Alone Not Enough?</h2>
     <p class="def">While Equivalence Partitioning and BVA test a single input field's range in isolation, real business systems depend on combinations of multiple conditions (Decision Tables), sequences of state changes over time (State Transitions), end-to-end actor interactions (Use Cases), and internal code branch execution (White-Box Coverage).</p>
-    <p><b>The Problem They Solve (In Plain Words):</b></p>
+    <p><b>The Problem They Solve:</b></p>
     <ul>
-      <li><b>Problem 1 (Multiple Interdependent Conditions):</b> A shipping discount depends on 3 conditions together: *Is user a Prime Member?* + *Is cart &ge; $50?* + *Is payment via Credit Card?* EP/BVA cannot model how 3 boolean conditions interact; **Decision Table Testing** solves this.</li>
-      <li><b>Problem 2 (History / Sequence of Events Matters):</b> Entering a wrong ATM PIN once shows a warning, twice shows a warning, and the **3rd consecutive time locks the card**. The input is identical all 3 times, so only **State Transition Testing** can model how past attempts change the system's state.</li>
+      <li><b>Problem 1 (Multiple Interdependent Conditions):</b> A shipping discount depends on 3 conditions together: <i>Is user a Prime Member?</i> + <i>Is cart &ge; $50?</i> + <i>Is payment via Credit Card?</i> EP/BVA cannot model how 3 boolean conditions interact; <b>Decision Table Testing</b> solves this.</li>
+      <li><b>Problem 2 (History / Sequence of Events Matters):</b> Entering a wrong ATM PIN once shows a warning, twice shows a warning, and the <b>3rd consecutive time locks the card</b>. The input is identical all 3 times, so only <b>State Transition Testing</b> can model how past attempts change the system's state.</li>
     </ul></section>
 
   <section><h2>2. Core Terms &amp; Formulas Defined First</h2>
     <ul>
-      <li><b>1. Decision Table Formula ($2^n$ Rule):</b> If a business feature has $n$ boolean (True/False) conditions, the total number of possible rule combinations (columns) in a full Decision Table is **$2^n$** (e.g., 3 conditions = $2^3 = 8$ test rules; 4 conditions = $2^4 = 16$ test rules).</li>
+      <li><b>1. Decision Table Formula ($2^n$ Rule):</b> If a business feature has $n$ boolean (True/False) conditions, the total number of possible rule combinations (columns) in a full Decision Table is <b>$2^n$</b> (e.g., 3 conditions = $2^3 = 8$ test rules; 4 conditions = $2^4 = 16$ test rules).</li>
       <li><b>2. The 4 Elements of a State Transition Machine:</b>
         <ol>
           <li><b>State (Circle):</b> The current condition/mode of the object (e.g., `NEW_ORDER`, `PAID`, `SHIPPED`, `CANCELLED`).</li>
@@ -35,13 +35,13 @@
       <li><b>3. White-Box Coverage Formulas:</b>
         <ul>
           <li><b>Statement Coverage %:</b> `(Executed Statements / Total Statements) * 100`</li>
-          <li><b>Branch / Decision Coverage %:</b> `(Executed True & False Outcomes / Total Decision Outcomes) * 100` *(Note: 100% Branch Coverage guarantees 100% Statement Coverage, but NOT vice versa!)*</li>
+          <li><b>Branch / Decision Coverage %:</b> `(Executed True & False Outcomes / Total Decision Outcomes) <i> 100` </i>(Note: 100% Branch Coverage guarantees 100% Statement Coverage, but NOT vice versa!)*</li>
         </ul>
       </li>
     </ul></section>
 
   <section><h2>3. Technique 1: Decision Table Testing (Cause-Effect Table)</h2>
-    <p><b>Definition:</b> A structured tabular Black-Box technique that lists all **Conditions (Inputs/Causes)** in the top rows and all **Actions (Outputs/Effects)** in the bottom rows, where every vertical column (`Rule 1 .. Rule 2^n`) becomes **1 Test Case**.</p>
+    <p><b>Definition:</b> A structured tabular Black-Box technique that lists all <b>Conditions (Inputs/Causes)</b> in the top rows and all <b>Actions (Outputs/Effects)</b> in the bottom rows, where every vertical column (`Rule 1 .. Rule 2^n`) becomes <b>1 Test Case</b>.</p>
     <p><b>Real Example:</b> E-Commerce Shipping Fee Rules (`n = 3` Boolean Conditions &rarr; $2^3 = 8$ Rules; collapsed where "Don't Care `-`" applies):</p>
     <table>
       <tr><th>Conditions / Actions</th><th>Rule 1</th><th>Rule 2</th><th>Rule 3</th><th>Rule 4</th><th>Rule 5</th><th>Rule 6</th><th>Rule 7</th><th>Rule 8</th></tr>
@@ -52,12 +52,12 @@
       <tr><td><b>A2: Extra 10% Off?</b></td><td><b>YES</b></td><td>NO</td><td>NO</td><td>NO</td><td><b>YES</b></td><td>NO</td><td>NO</td><td>NO</td></tr>
     </table>
     <ul>
-      <li><b>Collapsed Decision Table:</b> Notice in Rules 3 &amp; 4 that if `C1 (Prime) = T` and `C2 (Cart >= $500) = F`, the user gets Free Shipping with NO extra 10% off regardless of `C3`. When a condition does not affect the outcome, we mark it `-` (**Don't Care**) to collapse redundant test cases.</li>
+      <li><b>Collapsed Decision Table:</b> Notice in Rules 3 &amp; 4 that if `C1 (Prime) = T` and `C2 (Cart >= $500) = F`, the user gets Free Shipping with NO extra 10% off regardless of `C3`. When a condition does not affect the outcome, we mark it `-` (<b>Don't Care</b>) to collapse redundant test cases.</li>
       <li><b>In what exact cases we use Decision Tables:</b> Insurance premium calculators, credit card approval matrices, tax/discount engines, and role-based access control (RBAC) permissions.</li>
     </ul></section>
 
   <section><h2>4. Technique 2: State Transition Testing</h2>
-    <p><b>Definition:</b> A Black-Box technique used when an application's output depends not only on the current input, but also on **previous inputs and the current internal state** of the system. We test both **Valid Transitions** (via a State Diagram) and **Invalid/Blocked Transitions** (via a State Table).</p>
+    <p><b>Definition:</b> A Black-Box technique used when an application's output depends not only on the current input, but also on <b>previous inputs and the current internal state</b> of the system. We test both <b>Valid Transitions</b> (via a State Diagram) and <b>Invalid/Blocked Transitions</b> (via a State Table).</p>
 
     <div class="arch">
       <div class="lbl">STATE TRANSITION PIPELINE <small>Example: Account Login Lockout After 3 Failed Attempts</small></div>
@@ -99,7 +99,7 @@
 
   <section><h2>5. Technique 3 (Use Case &amp; Error Guessing) &amp; Technique 4 (White-Box Coverage)</h2>
     <ul>
-      <li><b>Use Case Testing (Black-Box):</b> Designing end-to-end test scenarios based on Actor &harr; System interactions, covering the **Main Success Scenario (Basic Flow)**, **Alternative Flows** (e.g., user pays by UPI instead of Card), and **Exception Flows** (e.g., bank server times out).</li>
+      <li><b>Use Case Testing (Black-Box):</b> Designing end-to-end test scenarios based on Actor &harr; System interactions, covering the <b>Main Success Scenario (Basic Flow)</b>, <b>Alternative Flows</b> (e.g., user pays by UPI instead of Card), and <b>Exception Flows</b> (e.g., bank server times out).</li>
       <li><b>Error Guessing (Experience-Based):</b> Using a tester's past experience of common developer mistakes to attack weak spots (`null`, empty string, `0`, negative numbers, emojis, double-clicking submit, SQL quotes `'`).</li>
       <li><b>White-Box Statement vs Branch Coverage (With Proof):</b></li>
     </ul>
@@ -129,14 +129,20 @@ public class BonusCalculator {
       <tr><td><b>Statement &amp; Branch Coverage</b></td><td>White-Box</td><td>Developer Unit Testing &amp; JaCoCo/SonarQube PR gates</td><td>100% Branch &rArr; 100% Statement</td></tr>
     </table></section>
 
-  <section><h2>7. Self-Check</h2>
+  <section><h2>7. In Selenium &amp; SDET Automation</h2>
+    <ul>
+      <li><b>Decision Table via TestNG <code>@DataProvider</code>:</b> Every column/rule in a Decision Table maps directly to one row in a TestNG <code>Object[][]</code> <code>@DataProvider</code>, driving Selenium checkout/discount assertions across all rule combinations without duplicating test methods.</li>
+      <li><b>State Transition in WebDriver Tests:</b> Automate negative state transitions (e.g., navigating directly via <code>driver.get(checkoutUrl)</code> or replaying a cancelled order ID) and assert that the UI blocks progression or redirects to <code>ACCOUNT_LOCKED</code> / <code>403</code>.</li>
+    </ul></section>
+
+  <section><h2>8. Self-Check</h2>
     <ol>
-      <li>If a loan approval rule depends on **4 boolean conditions**, how many columns exist in an uncollapsed Decision Table? <i>($2^4 = 16$ rules.)</i></li>
+      <li>If a loan approval rule depends on <b>4 boolean conditions</b>, how many columns exist in an uncollapsed Decision Table? <i>($2^4 = 16$ rules.)</i></li>
       <li>In an e-commerce order lifecycle (`CREATED &rarr; PAID &rarr; SHIPPED &rarr; DELIVERED`), testing whether a user or API call can move an order directly from `CREATED` to `DELIVERED` without paying is an example of which technique? <i>(Negative / Invalid State Transition Testing.)</i></li>
-      <li>Does 100% Statement Coverage guarantee 100% Branch Coverage? <i>(No — an `if` statement without an `else` achieves 100% Statement Coverage with just the `true` path, leaving the `false` branch untested.)</i></li>
+      <li>Does 100% Statement Coverage guarantee 100% Branch Coverage? <i>(No â€” an `if` statement without an `else` achieves 100% Statement Coverage with just the `true` path, leaving the `false` branch untested.)</i></li>
     </ol></section>
 
-  <section><h2>8. Q&amp;A</h2>
+  <section><h2>9. Q&amp;A</h2>
     <p><a class="qa-chip" href="interview-m3-2-qa.html"><span class="tag Interview">Interview</span>M3.2 Question Bank (35 Questions) &rarr;</a></p></section>
 </article>
 </div>

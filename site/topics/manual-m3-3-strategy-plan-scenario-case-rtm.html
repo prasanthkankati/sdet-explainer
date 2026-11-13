@@ -14,8 +14,8 @@
   <h1>3.3 Test Strategy vs Test Plan, Test Scenario vs Test Case &amp; RTM</h1>
 
   <section><h2>1. The Base: What Are Test Artifacts and How Do They Connect from Top to Bottom?</h2>
-    <p class="def">Test Artifacts are the formal engineering documents and work products created across the STLC—flowing top-down from an organization-wide Test Strategy, to a project-specific Test Plan, down to high-level Test Scenarios, granular step-by-step Test Cases, and connected via the Requirement Traceability Matrix (RTM).</p>
-    <p><b>The Problem They Solve (In Plain Words):</b> Without a clear hierarchy of test documents, every project team reinvents quality standards from scratch, new QA engineers don't know which browsers or environments are in scope, and test execution relies on memory instead of reproducible steps. Organizing artifacts into a **4-level top-down hierarchy** ensures consistency from the VP of Engineering down to individual `@Test` methods.</p></section>
+    <p class="def">Test Artifacts are the formal engineering documents and work products created across the STLCâ€”flowing top-down from an organization-wide Test Strategy, to a project-specific Test Plan, down to high-level Test Scenarios, granular step-by-step Test Cases, and connected via the Requirement Traceability Matrix (RTM).</p>
+    <p><b>The Problem They Solve:</b> Without a clear hierarchy of test documents, every project team reinvents quality standards from scratch, new QA engineers don't know which browsers or environments are in scope, and test execution relies on memory instead of reproducible steps. Organizing artifacts into a <b>4-level top-down hierarchy</b> ensures consistency from the VP of Engineering down to individual `@Test` methods.</p></section>
 
   <section><h2>2. Visual Hierarchy Pipeline: How All 5 QA Artifacts Flow Top-Down</h2>
     <div class="arch">
@@ -81,7 +81,7 @@
   <section><h2>3. Pair 1 Explained: Test Strategy vs Test Plan (IEEE 829 Standard)</h2>
     <ul>
       <li><b>1. Test Strategy:</b> A high-level, static organizational document (owned by the QA Director / Principal SDET) that defines the company's overarching testing philosophy: which test levels exist, standard automation stack (`Java 21 + Selenium 4 + TestNG + RestAssured`), coding standards, defect severity definitions, and CI/CD merge gates.</li>
-      <li><b>2. Test Plan:</b> A dynamic, project-specific execution blueprint (owned by the QA Lead / SDET Lead) created during **STLC Phase 2** that specifies how a particular release or sprint will be tested.
+      <li><b>2. Test Plan:</b> A dynamic, project-specific execution blueprint (owned by the QA Lead / SDET Lead) created during <b>STLC Phase 2</b> that specifies how a particular release or sprint will be tested.
         <ul>
           <li><b>Exact Sections (Properties) of an IEEE 829 Test Plan:</b>
             <ol>
@@ -116,12 +116,12 @@
         <ol>
           <li><b>Test Case ID:</b> `TC_LOGIN_001`</li>
           <li><b>Requirement / RTM ID &amp; Scenario ID:</b> `REQ_101 / TS_LOGIN_01`</li>
-          <li><b>Test Case Title / Description:</b> *Verify login with valid email and valid password*</li>
+          <li><b>Test Case Title / Description:</b> <i>Verify login with valid email and valid password</i></li>
           <li><b>Priority / Type:</b> `P0 (Smoke / Positive)`</li>
-          <li><b>Preconditions:</b> *User account `qa@shop.com` is registered and active; user is on `/login` page*</li>
-          <li><b>Test Steps:</b> *1. Enter email, 2. Enter password, 3. Click Login button*</li>
+          <li><b>Preconditions:</b> <i>User account `qa@shop.com` is registered and active; user is on `/login` page</i></li>
+          <li><b>Test Steps:</b> <i>1. Enter email, 2. Enter password, 3. Click Login button</i></li>
           <li><b>Test Data:</b> `Email = qa@shop.com`, `Password = Pass#123`</li>
-          <li><b>Expected Result:</b> *User is redirected to `/dashboard` and greeting `"Welcome, QA"` is displayed*</li>
+          <li><b>Expected Result:</b> <i>User is redirected to `/dashboard` and greeting `"Welcome, QA"` is displayed</i></li>
           <li><b>Actual Result &amp; Status:</b> Filled during Phase 5 Execution (`PASS` / `FAIL` / `BLOCKED`)</li>
           <li><b>Automation Status &amp; Defect ID:</b> `Automated (LoginTest#verifyValidLogin)` / `Defect ID` if failed</li>
         </ol>
@@ -166,8 +166,8 @@ public class LoginScenarioTest extends BaseTest {
   <section><h2>6. Self-Check</h2>
     <ol>
       <li>Which document is static at the organization level, and which is dynamic at the project/release level? <i>(Test Strategy is static/organization-level; Test Plan is dynamic/project-level.)</i></li>
-      <li>What is **Suspension Criteria** inside a Test Plan? <i>(The threshold condition under which QA temporarily halts all test execution—for example, if the staging environment goes down or >40% of core test cases are blocked by a critical defect.)</i></li>
-      <li>How does **Forward Traceability** differ from **Backward Traceability** in an RTM? <i>(Forward maps `Requirement -> Test Case` to ensure 100% of requirements are tested; Backward maps `Test Case -> Requirement` to ensure no extra unrequested features/tests are being built.)</i></li>
+      <li>What is <b>Suspension Criteria</b> inside a Test Plan? <i>(The threshold condition under which QA temporarily halts all test executionâ€”for example, if the staging environment goes down or >40% of core test cases are blocked by a critical defect.)</i></li>
+      <li>How does <b>Forward Traceability</b> differ from <b>Backward Traceability</b> in an RTM? <i>(Forward maps `Requirement -> Test Case` to ensure 100% of requirements are tested; Backward maps `Test Case -> Requirement` to ensure no extra unrequested features/tests are being built.)</i></li>
     </ol></section>
 
   <section><h2>7. Q&amp;A</h2>

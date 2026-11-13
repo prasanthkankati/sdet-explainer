@@ -14,20 +14,20 @@
   <h1>2.3 Non-Functional Testing: Performance, Security, Usability &amp; Compatibility</h1>
 
   <section><h2>1. The Base: What is Non-Functional Testing and Why Does It Exist?</h2>
-    <p class="def">Non-Functional Testing is the branch of Dynamic Testing that evaluates HOW WELL the software performs its functions—measuring speed, scalability under concurrent user load, security against attacks, usability, cross-browser compatibility, and crash recovery against measurable SLAs.</p>
-    <p><b>The Problem It Solves (In Plain Words):</b> Suppose an e-commerce checkout feature passes 100% of Functional Testing when 1 QA engineer clicks "Pay Now" in Chrome. On Black Friday, 50,000 customers click "Pay Now" simultaneously: the server takes 45 seconds to respond, leaks database connections after 4 hours, breaks on Safari iOS, or allows an attacker to view another user's invoice by changing `?orderId=101` to `?orderId=102` in the URL. Functional Testing checks **WHAT** the button does for 1 user; Non-Functional Testing guarantees **HOW WELL, HOW FAST, and HOW SAFELY** it works in the real world.</p></section>
+    <p class="def">Non-Functional Testing is the branch of Dynamic Testing that evaluates HOW WELL the software performs its functionsâ€”measuring speed, scalability under concurrent user load, security against attacks, usability, cross-browser compatibility, and crash recovery against measurable SLAs.</p>
+    <p><b>The Problem It Solves:</b> Suppose an e-commerce checkout feature passes 100% of Functional Testing when 1 QA engineer clicks "Pay Now" in Chrome. On Black Friday, 50,000 customers click "Pay Now" simultaneously: the server takes 45 seconds to respond, leaks database connections after 4 hours, breaks on Safari iOS, or allows an attacker to view another user's invoice by changing `?orderId=101` to `?orderId=102` in the URL. Functional Testing checks <b>WHAT</b> the button does for 1 user; Non-Functional Testing guarantees <b>HOW WELL, HOW FAST, and HOW SAFELY</b> it works in the real world.</p></section>
 
   <section><h2>2. Core Terms &amp; Their Properties Defined First (Throughput, Latency, SLA, I18n vs L10n)</h2>
     <p>Before exploring each Non-Functional testing type, understand the <b>5 core engineering metrics and properties</b> used to measure them:</p>
     <ul>
       <li><b>1. Response Time (Latency) &amp; Percentiles (`p95`, `p99`):</b> The total time taken from sending an HTTP request to receiving the response (e.g., `p95 < 500ms` means 95% of all user requests complete in under 500 milliseconds).</li>
-      <li><b>2. Throughput (RPS / TPS):</b> The number of **Requests Per Second (RPS)** or **Transactions Per Second (TPS)** the server successfully processes under load.</li>
+      <li><b>2. Throughput (RPS / TPS):</b> The number of <b>Requests Per Second (RPS)</b> or <b>Transactions Per Second (TPS)</b> the server successfully processes under load.</li>
       <li><b>3. Concurrent Users (Virtual Users / VUs):</b> The number of simulated users simultaneously active on the system at the same instant.</li>
       <li><b>4. SLA (Service Level Agreement):</b> The formal contract defining exact pass/fail thresholds for non-functional metrics (e.g., <i>"99.9% uptime, p95 response time &le; 800ms at 5,000 concurrent users, 0% HTTP 5xx error rate"</i>).</li>
       <li><b>5. I18n (Internationalization) vs L10n (Localization):</b>
         <ul>
-          <li><b>Internationalization (`I18n` &mdash; 18 letters between `I` and `n`):</b> Designing the application's architecture so it *can* support multiple languages, UTF-8 characters, time zones, and currencies without hardcoding English strings in code.</li>
-          <li><b>Localization (`L10n` &mdash; 10 letters between `L` and `n`):</b> Adapting and testing the product for a *specific target locale/region* (e.g., Japanese `ja-JP` translation, `¥` Yen currency, `YYYY/MM/DD` date format, or Arabic Right-to-Left UI layout).</li>
+          <li><b>Internationalization (`I18n` &mdash; 18 letters between `I` and `n`):</b> Designing the application's architecture so it <i>can</i> support multiple languages, UTF-8 characters, time zones, and currencies without hardcoding English strings in code.</li>
+          <li><b>Localization (`L10n` &mdash; 10 letters between `L` and `n`):</b> Adapting and testing the product for a <i>specific target locale/region</i> (e.g., Japanese `ja-JP` translation, `Â¥` Yen currency, `YYYY/MM/DD` date format, or Arabic Right-to-Left UI layout).</li>
         </ul>
       </li>
     </ul></section>
@@ -113,47 +113,47 @@
 
   <section><h2>4. Each Non-Functional Family Explained in Order</h2>
 
-    <p><b>① Performance Testing (Load, Stress, Spike, Endurance, Volume)</b></p>
+    <p><b>â‘  Performance Testing (Load, Stress, Spike, Endurance, Volume)</b></p>
     <ul>
       <li><b>Load Testing:</b> Tests system behavior under expected normal and peak concurrent user load (e.g., 5,000 VUs) to verify SLA compliance.</li>
-      <li><b>Stress Testing:</b> Tests system behavior **beyond** normal peak capacity (e.g., 15,000 VUs) to find the exact breaking point and verify whether the system fails gracefully (returning `HTTP 429/503`) and recovers automatically once load subsides.</li>
+      <li><b>Stress Testing:</b> Tests system behavior <b>beyond</b> normal peak capacity (e.g., 15,000 VUs) to find the exact breaking point and verify whether the system fails gracefully (returning `HTTP 429/503`) and recovers automatically once load subsides.</li>
       <li><b>Spike Testing:</b> Tests an instantaneous extreme surge and drop in user traffic (e.g., Flash Sale at midnight).</li>
-      <li><b>Endurance (Soak) Testing:</b> Runs continuous load for 12–72 hours to catch slow **memory leaks**, connection pool exhaustion, and log-disk saturation.</li>
+      <li><b>Endurance (Soak) Testing:</b> Runs continuous load for 12â€“72 hours to catch slow <b>memory leaks</b>, connection pool exhaustion, and log-disk saturation.</li>
       <li><b>Volume (Flood) Testing:</b> Populates the database with massive data volumes (hundreds of millions of rows) to test query indexing and storage performance.</li>
     </ul>
 
-    <p><b>② Security Testing (Authentication vs Authorization &amp; OWASP Top Risks)</b></p>
+    <p><b>â‘¡ Security Testing (Authentication vs Authorization &amp; OWASP Top Risks)</b></p>
     <ul>
       <li><b>Definition:</b> Evaluating the application to uncover vulnerabilities that could allow unauthorized access, data theft, or service disruption.</li>
       <li><b>Core Security Checks Every SDET Must Know:</b>
         <ol>
           <li><b>Authentication (`401 Unauthorized` &mdash; "Who are you?"):</b> Verifying password hashing, MFA/OTP expiration, brute-force account lockout, and JWT token signature validation.</li>
-          <li><b>Authorization (`403 Forbidden` &mdash; "What are you allowed to do?"):</b> Verifying a standard user cannot access `/admin` endpoints or view another customer's order (`IDOR` — Insecure Direct Object Reference).</li>
+          <li><b>Authorization (`403 Forbidden` &mdash; "What are you allowed to do?"):</b> Verifying a standard user cannot access `/admin` endpoints or view another customer's order (`IDOR` â€” Insecure Direct Object Reference).</li>
           <li><b>SQL Injection (SQLi) &amp; Cross-Site Scripting (XSS):</b> Ensuring malicious inputs like <code>' OR 1=1 --</code> or <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> are sanitized and parameterized.</li>
         </ol>
       </li>
       <li><b>Tools:</b> OWASP ZAP, Burp Suite, SonarQube SAST.</li>
     </ul>
 
-    <p><b>③ Compatibility Testing (Cross-Browser, Device &amp; Backward/Forward)</b></p>
+    <p><b>â‘¢ Compatibility Testing (Cross-Browser, Device &amp; Backward/Forward)</b></p>
     <ul>
-      <li><b>Browser &amp; OS Compatibility:</b> Running Selenium Grid / BrowserStack / Playwright projects across **Chromium (Chrome/Edge), WebKit (Safari), and Gecko (Firefox)** on Windows, macOS, iOS, and Android.</li>
+      <li><b>Browser &amp; OS Compatibility:</b> Running Selenium Grid / BrowserStack / Playwright projects across <b>Chromium (Chrome/Edge), WebKit (Safari), and Gecko (Firefox)</b> on Windows, macOS, iOS, and Android.</li>
       <li><b>Backward Compatibility:</b> Verifying that a new backend API v2 or new app version still works seamlessly with older mobile app clients or legacy database data.</li>
       <li><b>Forward Compatibility:</b> Verifying that the current system works smoothly on upcoming OS/Browser beta versions (e.g., Chrome Beta / iOS Beta).</li>
     </ul>
 
-    <p><b>④ Usability &amp; Accessibility (`a11y`) Testing</b></p>
+    <p><b>â‘£ Usability &amp; Accessibility (`a11y`) Testing</b></p>
     <ul>
       <li><b>Usability Testing:</b> Evaluating how intuitive and frictionless the UI is for humans (clear error messages, logical tab order, minimal clicks to checkout).</li>
-      <li><b>Accessibility (`a11y`) Testing:</b> Verifying the app is usable by people with disabilities per **WCAG (Web Content Accessibility Guidelines)**—checking `aria-label` attributes, keyboard-only navigation (`Tab`/`Enter`), color contrast ratios, and screen-reader compatibility (automated in Selenium/Playwright via `@axe-core`).</li>
+      <li><b>Accessibility (`a11y`) Testing:</b> Verifying the app is usable by people with disabilities per <b>WCAG (Web Content Accessibility Guidelines)</b>â€”checking `aria-label` attributes, keyboard-only navigation (`Tab`/`Enter`), color contrast ratios, and screen-reader compatibility (automated in Selenium/Playwright via `@axe-core`).</li>
     </ul>
 
-    <p><b>⑤ Reliability, Recovery (Failover) &amp; Globalization (`I18n` / `L10n`)</b></p>
+    <p><b>â‘¤ Reliability, Recovery (Failover) &amp; Globalization (`I18n` / `L10n`)</b></p>
     <ul>
-      <li><b>Recovery / Failover Testing:</b> Intentionally killing a microservice pod or primary DB node to verify how fast the standby replica takes over (`RTO` — Recovery Time Objective) without losing committed transactions (`RPO` — Recovery Point Objective).</li>
+      <li><b>Recovery / Failover Testing:</b> Intentionally killing a microservice pod or primary DB node to verify how fast the standby replica takes over (`RTO` â€” Recovery Time Objective) without losing committed transactions (`RPO` â€” Recovery Point Objective).</li>
       <li><b>Globalization (`I18n` + `L10n`):</b> Testing multi-language UTF-8 rendering, currency conversions, and date/number formatting across global regions.</li>
     </ul>
-    <p><b>Interview Answer:</b> <i>"Functional testing checks WHAT the software does against business rules, whereas Non-Functional testing checks HOW WELL it performs—covering Load testing (expected peak users), Stress testing (pushing beyond capacity to find the breaking point), Spike testing (sudden traffic surge), Endurance testing (long duration for memory leaks), Volume testing (huge DB records), Security, Accessibility, and Cross-Browser Compatibility."</i></p></section>
+    <p><b>Interview Answer:</b> <i>"Functional testing checks WHAT the software does against business rules, whereas Non-Functional testing checks HOW WELL it performsâ€”covering Load testing (expected peak users), Stress testing (pushing beyond capacity to find the breaking point), Spike testing (sudden traffic surge), Endurance testing (long duration for memory leaks), Volume testing (substantial DB records), Security, Accessibility, and Cross-Browser Compatibility."</i></p></section>
 
   <section><h2>5. Side-by-Side Comparison Tables</h2>
 
@@ -178,7 +178,7 @@
     </table></section>
 
   <section><h2>6. Real SDET Code Trace: Cross-Browser Compatibility, Response SLA &amp; Accessibility in Selenium</h2>
-    <p>While dedicated load tests run in **JMeter / k6**, SDETs enforce **Cross-Browser Compatibility**, **API/UI Response Time SLAs**, and **Accessibility (`aria-label`)** directly inside automated TestNG suites:</p>
+    <p>While dedicated load tests run in <b>JMeter / k6</b>, SDETs enforce <b>Cross-Browser Compatibility</b>, <b>API/UI Response Time SLAs</b>, and <b>Accessibility (`aria-label`)</b> directly inside automated TestNG suites:</p>
 <pre><code>import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
@@ -219,8 +219,8 @@ public class NonFunctionalChecksTest {
 
   <section><h2>7. Self-Check</h2>
     <ol>
-      <li>Which performance testing type runs a steady load for 24–48 hours specifically to detect **memory leaks** and unclosed database connections? <i>(Endurance / Soak Testing)</i></li>
-      <li>What is the difference between **Load Testing** and **Volume Testing**? <i>(Load Testing tests concurrent user traffic up to expected peak; Volume Testing tests massive amounts of data stored in the database.)</i></li>
+      <li>Which performance testing type runs a steady load for 24â€“48 hours specifically to detect <b>memory leaks</b> and unclosed database connections? <i>(Endurance / Soak Testing)</i></li>
+      <li>What is the difference between <b>Load Testing</b> and <b>Volume Testing</b>? <i>(Load Testing tests concurrent user traffic up to expected peak; Volume Testing tests massive amounts of data stored in the database.)</i></li>
       <li>What is the difference between `I18n` (Internationalization) and `L10n` (Localization)? <i>(`I18n` is engineering the codebase to support multiple languages/locales without code changes; `L10n` is translating and adapting UI/currency/dates for one specific locale like `ja-JP`.)</i></li>
     </ol></section>
 
