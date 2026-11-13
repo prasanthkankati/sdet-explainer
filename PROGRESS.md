@@ -1,4 +1,4 @@
-# Progress Tracker (Current Version: `v1.7.0`)
+# Progress Tracker (Current Version: `v1.7.1`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
 
@@ -35,6 +35,7 @@ See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) rele
 ---
 
 ## Feature & Build Version Log
+- **2026-11-13 (`v1.7.1`):** Simplified chapter container to a clean thin metallic border liner (`1px solid var(--sheet-border)`) without inner page background fill/shadow.
 - **2026-11-13 (`v1.7.0`):** Flush-left single-row chapter top bar (`SDET Explainer` without `>` + `← All topics` + search bar on far left) and metallic-sheet reading UI (`article` with thin metallic liner border & sheen).
 - **2026-11-13 (`v1.6.0`):** Published Manual **Section M2** (3 concept pages + 3 connected Interview Question Banks = 105 new Q&As; 245 total Q&As) and expanded `glossary.js`.
 - **2026-11-13 (`v1.5.0`):** Readability overhaul (block `h2` headers, `.def` callouts, sans-serif prose + monospace code, table row borders, boxed code blocks, raw markdown cleaner) + `Alt+L` Light/Dark theme toggle shortcut.

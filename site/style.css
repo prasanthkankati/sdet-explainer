@@ -1,5 +1,5 @@
-:root{--bg:#090d13;--text:#d1d7e0;--bold:#f0f6fc;--muted:#8b949e;--accent:#58a6ff;--kw:#39c5cf;--type:#a371f7;--fn:#3fb950;--str:#ffa657;--cmt:#8b949e;--op:#ff7b72;--punc:#d2a8ff;--java:#f89820;--sel:#43b02a;--man:#39c5cf;--ts:#3178c6;--pw:#e05263;--int:#a371f7;--border:#262c36;--code-bg:#0d1117;--sheet-bg:linear-gradient(165deg,#141b26 0%,#0f141d 55%,#121924 100%);--sheet-border:rgba(148,187,233,.26);--sheet-top-liner:rgba(195,225,255,.58);--sheet-shadow:0 1px 0 rgba(255,255,255,.09) inset,0 16px 40px rgba(0,0,0,.6)}
-:root[data-theme=light]{--bg:#eef2f6;--text:#24292f;--bold:#0f172a;--muted:#57606a;--accent:#0969da;--kw:#0550ae;--type:#6639ba;--fn:#116329;--str:#953800;--cmt:#6e7781;--op:#cf222e;--punc:#8250df;--java:#d97706;--sel:#2e8b1a;--man:#0b7ea3;--ts:#2563eb;--pw:#c83246;--int:#6d28d9;--border:#d8dee4;--code-bg:#f4f6f9;--sheet-bg:linear-gradient(165deg,#ffffff 0%,#f8fafc 60%,#ffffff 100%);--sheet-border:#cbd5e1;--sheet-top-liner:#94a3b8;--sheet-shadow:0 1px 0 #ffffff inset,0 10px 30px rgba(15,23,42,.07)}
+:root{--bg:#0d1117;--text:#c9d1d9;--bold:#f0f6fc;--muted:#8b949e;--accent:#58a6ff;--kw:#39c5cf;--type:#a371f7;--fn:#3fb950;--str:#ffa657;--cmt:#8b949e;--op:#ff7b72;--punc:#d2a8ff;--java:#f89820;--sel:#43b02a;--man:#39c5cf;--ts:#3178c6;--pw:#e05263;--int:#a371f7;--border:#262c36;--code-bg:#161b22;--sheet-border:#485b73}
+:root[data-theme=light]{--bg:#ffffff;--text:#24292f;--bold:#0f172a;--muted:#57606a;--accent:#0969da;--kw:#0550ae;--type:#6639ba;--fn:#116329;--str:#953800;--cmt:#6e7781;--op:#cf222e;--punc:#8250df;--java:#d97706;--sel:#2e8b1a;--man:#0b7ea3;--ts:#2563eb;--pw:#c83246;--int:#6d28d9;--border:#d8dee4;--code-bg:#f6f8fa;--sheet-border:#94a3b8}
 .theme{position:fixed;top:11px;right:18px;font:13px/1.4 Consolas,"Cascadia Mono",monospace;padding:4px 10px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;z-index:20;border-radius:4px}
 .theme:hover{color:var(--accent);border-color:var(--accent)}
 *{box-sizing:border-box}
@@ -23,7 +23,7 @@ header.chapter-top .back-links .qa-chip{margin-top:0;padding:3px 10px;font-size:
 header.chapter-top .search-wrap{max-width:360px;flex:1;min-width:200px}
 header.chapter-top .search-wrap input{padding:5px 10px;font-size:.86rem;border-radius:4px}
 body.in-chapter .wrap{max-width:960px;padding:18px 20px 28px}
-body.in-chapter article{background:var(--sheet-bg);border:1px solid var(--sheet-border);border-top:1.5px solid var(--sheet-top-liner);border-radius:10px;padding:28px 36px;box-shadow:var(--sheet-shadow);position:relative}
+body.in-chapter article{background:transparent;border:1px solid var(--sheet-border);border-radius:6px;padding:24px 32px}
 .search-row{margin-bottom:10px;position:relative}
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;position:relative}
 .search-wrap{width:100%;position:relative}
