@@ -70,7 +70,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.1.4";
+  const SITE_VERSION = "v2.1.5";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -106,17 +106,21 @@
       brand.textContent = "SDET Explainer";
       navLeft.appendChild(brand);
 
-      const sep = document.createElement("span");
-      sep.className = "nav-sep";
-      sep.textContent = ">";
-      navLeft.appendChild(sep);
-
       if (firstP) {
-        const backDiv = document.createElement("div");
-        backDiv.className = "back-links";
-        backDiv.innerHTML = firstP.innerHTML;
+        firstP.querySelectorAll("a[href*='index.html']").forEach(a => a.remove());
+        const remainingLinks = firstP.querySelectorAll("a");
+        if (remainingLinks.length > 0) {
+          const sep = document.createElement("span");
+          sep.className = "nav-sep";
+          sep.textContent = ">";
+          navLeft.appendChild(sep);
+
+          const backDiv = document.createElement("div");
+          backDiv.className = "back-links";
+          remainingLinks.forEach(a => backDiv.appendChild(a));
+          navLeft.appendChild(backDiv);
+        }
         firstP.remove();
-        navLeft.appendChild(backDiv);
       }
 
       const navRight = document.createElement("div");
