@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SDET Explainer</title>
-<link rel="stylesheet" href="style.css?v=2.5.1">
+<link rel="stylesheet" href="style.css?v=2.5.5">
 </head>
 <body class="home-page">
 <div class="wrap home-wrap">
@@ -12,13 +12,28 @@
     <a href="index.html" id="home-link" class="home-brand" title="Home (Alt+H)">SDET EXPLAINER</a>
     <div class="home-nav-actions">
       <button class="nav-btn" type="button" id="hero-search-btn">SEARCH [/]</button>
-      <button class="nav-btn" type="button" id="hero-theme-btn" title="Toggle Light/Dark (Alt+L)">LIGHT [Alt+L]</button>
+      <button class="theme-toggle home-theme-toggle" type="button" id="hero-theme-btn" title="Toggle Light/Dark Theme (Alt+L)" aria-label="Toggle Light/Dark Theme">
+        <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
     </div>
   </nav>
 
   <section class="hero-banner" aria-label="Overview">
     <div class="hero-left">
-      <div class="hero-kicker">01 / ZERO-FLUFF ENGINEERING SYLLABUS &middot; v2.5.1</div>
+      <div class="hero-kicker">01 / ZERO-FLUFF ENGINEERING SYLLABUS &middot; v2.5.5</div>
       <h1>FORGED FOR<br>SDET MASTERY.</h1>
       <p class="hero-sub">Deep architecture notes, inline term definitions, and 525+ interview Q&amp;As across Manual, Java, Selenium, TypeScript &amp; Playwright.</p>
       <div class="hero-cta-row">
@@ -43,8 +58,8 @@
   <div class="controls home-tabs" id="controls"></div>
   <div class="grid bento-grid" id="grid"></div>
 </div>
-<footer><b>v2.5.1</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview</footer>
-<script src="topics.js?v=2.5.1"></script>
-<script src="app.js?v=2.5.1"></script>
+<footer><b>v2.5.5</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview</footer>
+<script src="topics.js?v=2.5.5"></script>
+<script src="app.js?v=2.5.5"></script>
 </body>
 </html>

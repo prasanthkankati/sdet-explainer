@@ -8,7 +8,7 @@
   const saved = localStorage.getItem("theme");
   const sys = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   const btn = document.createElement("button");
-  btn.className = "theme-toggle";
+  btn.className = "theme-toggle fixed-theme-toggle";
   btn.type = "button";
   btn.title = "Toggle Light/Dark Theme (Alt+L)";
   btn.setAttribute("aria-label", "Toggle Light/Dark Theme");
@@ -31,7 +31,7 @@
   const setTheme = t => {
     root.setAttribute("data-theme", t);
     const heroThemeBtn = document.getElementById("hero-theme-btn");
-    if (heroThemeBtn) heroThemeBtn.textContent = (t === "light" ? "DARK [Alt+L]" : "LIGHT [Alt+L]");
+    if (heroThemeBtn) heroThemeBtn.title = (t === "light" ? "Switch to Dark Mode (Alt+L)" : "Switch to Light Mode (Alt+L)");
     localStorage.setItem("theme", t);
   };
   const toggleTheme = () => setTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
@@ -86,7 +86,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.5.1";
+  const SITE_VERSION = "v2.5.5";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
