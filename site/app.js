@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.6.0";
+  const SITE_VERSION = "v1.7.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -83,19 +83,42 @@
   function initHeaderAndShortcuts() {
     const homeHref = inTopicsDir ? "../index.html" : "index.html";
 
-    // Ensure a clickable '> SDET Explainer' header exists on topic pages too
-    if (!document.querySelector("header.top")) {
+    if (inTopicsDir) {
+      document.body.classList.add("in-chapter");
+      // Build flush-left single-row chapter top bar (no '>' arrow on SDET Explainer, <- All topics moved left)
+      const container = document.querySelector(".wrap");
+      const firstP = container ? container.querySelector(":scope > p") : null;
       const hdr = document.createElement("header");
-      hdr.className = "top";
-      hdr.innerHTML = `<h1><a href="${homeHref}" title="Home (Alt+H)">SDET Explainer</a></h1>`;
+      hdr.className = "chapter-top";
+
+      const brand = document.createElement("a");
+      brand.className = "brand";
+      brand.href = homeHref;
+      brand.title = "Home (Alt+H)";
+      brand.textContent = "SDET Explainer";
+      hdr.appendChild(brand);
+
+      const sep = document.createElement("span");
+      sep.className = "nav-sep";
+      sep.textContent = "|";
+      hdr.appendChild(sep);
+
+      if (firstP) {
+        const backDiv = document.createElement("div");
+        backDiv.className = "back-links";
+        backDiv.innerHTML = firstP.innerHTML;
+        firstP.remove();
+        hdr.appendChild(backDiv);
+      }
+
       document.body.insertBefore(hdr, document.body.firstChild);
-    } else {
+    } else if (document.querySelector("header.top")) {
       const h1 = document.querySelector("header.top h1");
       if (h1 && !h1.querySelector("a")) {
         h1.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)">${h1.textContent}</a>`;
       }
       const homeLink = document.querySelector("header.top h1 a");
-      if (homeLink && !inTopicsDir) {
+      if (homeLink) {
         homeLink.addEventListener("click", e => {
           if (selectTrackFn) {
             e.preventDefault();
@@ -250,20 +273,23 @@
     let wrap;
 
     if (!input) {
+      const chapterHdr = document.querySelector("header.chapter-top");
       const container = document.querySelector(".wrap");
-      if (!container) return;
-      const firstP = container.querySelector("p");
-      const bar = document.createElement("div");
-      bar.className = "top-search";
-      if (firstP) bar.appendChild(firstP);
+      if (!chapterHdr && !container) return;
       wrap = document.createElement("div");
       wrap.className = "search-wrap";
       input = document.createElement("input");
       input.id = "search";
       input.placeholder = "Type anywhere to jump (e.g. heap, null, jdk)...";
       wrap.appendChild(input);
-      bar.appendChild(wrap);
-      container.insertBefore(bar, container.firstChild);
+      if (chapterHdr) {
+        chapterHdr.appendChild(wrap);
+      } else {
+        const bar = document.createElement("div");
+        bar.className = "top-search";
+        bar.appendChild(wrap);
+        container.insertBefore(bar, container.firstChild);
+      }
     } else {
       wrap = document.createElement("div");
       wrap.className = "search-wrap";
