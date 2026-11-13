@@ -25,9 +25,10 @@ header.chapter-top .back-links .qa-chip{margin-top:0;padding:3px 10px;font-size:
 header.chapter-top .search-wrap{max-width:360px;flex:1;min-width:200px}
 header.chapter-top .search-wrap input{padding:5px 10px;font-size:.86rem;border:1px solid var(--border);background:var(--bg)}
 header.chapter-top .search-wrap input:focus{border-color:var(--accent)}
-body.in-chapter .wrap{max-width:960px;padding:18px 20px 28px}
-body.in-chapter article{background:var(--code-bg);border:1px solid var(--sheet-border);border-top:2px solid var(--accent);border-radius:0;padding:26px 34px;animation:folderReveal .38s cubic-bezier(.22,1,.36,1)}
-@keyframes folderReveal{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+body.in-chapter .wrap{max-width:960px;padding:14px 20px 28px}
+body.in-chapter .top-search{margin-bottom:10px}
+body.in-chapter .top-search p{margin:0;font-size:.88rem}
+body.in-chapter article{background:var(--code-bg);border:1px solid var(--sheet-border);border-top:2px solid var(--accent);border-radius:0;padding:24px 32px}
 .search-row{margin-bottom:10px;position:relative}
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;position:relative}
 .search-wrap{width:100%;position:relative}
@@ -76,10 +77,10 @@ article p,article ul,article ol{margin:10px 0}
 article ol,article ul{padding-left:24px}
 article li{margin:6px 0}
 b,th{color:var(--bold);font-weight:600}
-.def{display:block;color:var(--bold);font-weight:400;border-left:3px solid var(--accent);background:rgba(88,166,255,.07);padding:10px 14px;margin:10px 0 14px;border-radius:0 4px 4px 0}
-pre{background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:12px 14px;margin:12px 0;overflow:auto;position:relative;font-size:.9rem;line-height:1.55}
+.def{display:block;color:var(--bold);font-weight:400;border-left:3px solid var(--accent);background:rgba(255,77,0,.06);padding:10px 14px;margin:10px 0 14px;border-radius:0}
+pre{background:var(--code-bg);border:1px solid var(--border);border-radius:0;padding:12px 14px;margin:12px 0;overflow:auto;position:relative;font-size:.9rem;line-height:1.55}
 code{font-family:Consolas,"Cascadia Mono","Courier New",monospace}
-p code,li code,td code{color:var(--accent);background:rgba(88,166,255,.12);padding:1px 5px;border-radius:3px;font-size:.9em}
+p code,li code,td code{color:var(--accent);background:rgba(255,77,0,.09);padding:1px 5px;border-radius:0;font-size:.9em}
 table{border-collapse:collapse;margin:12px 0;width:100%;font-size:.94rem}
 th,td{padding:8px 16px 8px 0;text-align:left;border-bottom:1px dashed var(--border);vertical-align:top}
 th{color:var(--bold);border-bottom:2px solid var(--border);font-weight:700}

@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.1";
+  const SITE_VERSION = "v1.9.2";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -85,72 +85,7 @@
 
     if (inTopicsDir) {
       document.body.classList.add("in-chapter");
-      // Build flush-left single-row chapter top bar: SDET Explainer > <- All topics [search]
-      const container = document.querySelector(".wrap");
-      const firstP = container ? container.querySelector(":scope > p") : null;
-      const hdr = document.createElement("header");
-      hdr.className = "chapter-top";
-
-      const brand = document.createElement("a");
-      brand.className = "brand";
-      brand.href = homeHref;
-      brand.title = "Home (Alt+H)";
-      brand.textContent = "SDET Explainer";
-      hdr.appendChild(brand);
-
-      const sep = document.createElement("span");
-      sep.className = "nav-sep entering";
-      sep.textContent = ">";
-      hdr.appendChild(sep);
-
-      let backDiv = null;
-      if (firstP) {
-        backDiv = document.createElement("div");
-        backDiv.className = "back-links entering";
-        backDiv.innerHTML = firstP.innerHTML;
-        firstP.remove();
-        hdr.appendChild(backDiv);
-      }
-
-      document.body.insertBefore(hdr, document.body.firstChild);
-
-      // FLIP animation: animate SDET Explainer from Homepage position to flush-left, then reveal '>' folder chevron
-      const prevRectRaw = sessionStorage.getItem("sdet-brand-rect");
-      sessionStorage.removeItem("sdet-brand-rect");
-      if (prevRectRaw) {
-        try {
-          const prev = JSON.parse(prevRectRaw);
-          const cur = brand.getBoundingClientRect();
-          const dx = prev.left - cur.left;
-          const dy = prev.top - cur.top;
-          brand.style.transform = `translate(${dx}px, ${dy}px)`;
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              brand.style.transition = "transform 0.42s cubic-bezier(0.22, 1, 0.36, 1)";
-              brand.style.transform = "translate(0, 0)";
-              sep.classList.remove("entering");
-              if (backDiv) backDiv.classList.remove("entering");
-            });
-          });
-        } catch (_) {
-          sep.classList.remove("entering");
-          if (backDiv) backDiv.classList.remove("entering");
-        }
-      } else {
-        requestAnimationFrame(() => {
-          sep.classList.remove("entering");
-          if (backDiv) backDiv.classList.remove("entering");
-        });
-      }
-
-      // Save chapter brand rect when returning Home so Home animates back cleanly
-      hdr.addEventListener("click", e => {
-        const a = e.target.closest("a");
-        if (a && a.getAttribute("href") === homeHref) {
-          const r = brand.getBoundingClientRect();
-          sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
-        }
-      });
+      // No sticky header bar in chapter mode — page starts cleanly right at the top
     } else if (document.querySelector("header.top")) {
       const h1 = document.querySelector("header.top h1");
       if (h1 && !h1.querySelector("a")) {
