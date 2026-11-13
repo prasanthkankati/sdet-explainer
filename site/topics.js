@@ -502,10 +502,11 @@ const TOPICS = [
     section: "S1. Architecture, Setup & Browser Control",
     order: 2,
     title: "1.2 Environment Setup: Selenium Manager vs WebDriverManager vs System.setProperty",
-    file: "",
-    summary: "Setting up drivers with built-in Selenium Manager (4.6+), bonigarcia WebDriverManager, and manual driver binary paths.",
-    keywords: "Selenium Manager, WebDriverManager, System.setProperty, chromedriver, environment setup",
-    status: "planned"
+    file: "selenium-s1-2-setup-managers.html",
+    summary: "Built-in Selenium Manager (4.6+) Rust mechanics, ~/.cache/selenium vs ~/.m2, Chrome for Testing, proxy & air-gapped CI/CD.",
+    keywords: "Selenium Manager, WebDriverManager, System.setProperty, chromedriver, environment setup, SE_PROXY, Chrome for Testing",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Selenium",
@@ -916,6 +917,17 @@ const TOPICS = [
     file: "interview-s1-1-qa.html",
     summary: "35 questions across 5 tiers: W3C vs JSON Wire, driver hierarchy, ThreadLocal DriverFactory, Selenium Manager vs proxy, and port/session exceptions.",
     keywords: "Selenium interview questions, W3C WebDriver, JSON Wire Protocol, ThreadLocal WebDriver, Selenium Manager, driver.close vs driver.quit, SearchContext",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-S1. Selenium: Architecture, Setup & Protocol Q&A",
+    order: 2,
+    title: "S1.2 Q&A: Selenium Manager vs WebDriverManager vs System.setProperty (35 Questions)",
+    file: "interview-s1-2-qa.html",
+    summary: "35 questions: Rust binary mechanics, ~/.cache/selenium, CfT JSON APIs, SE_PROXY firewalls, air-gapped Docker, and port/session traps.",
+    keywords: "Selenium Manager interview questions, WebDriverManager vs Selenium Manager, System.setProperty, SE_PROXY, Chrome for Testing, ThreadLocal WebDriver",
     status: "done",
     date: "2026-11-13"
   },

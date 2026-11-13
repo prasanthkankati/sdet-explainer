@@ -1,6 +1,10 @@
-# Progress Tracker (Current Version: `v2.3.0`)
+# Progress Tracker (Current Version: `v2.4.0`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
+
+## Published Selenium Track Topics (S1: Architecture & Setup)
+- **S1.1:** Done + 35 Q&As (`v2.3.0`)
+- **S1.2:** Done + 35 Q&As (`v2.4.0`)
 
 ## Manual Testing Track: 100% Complete (15/15 Concept Pages + 15 Question Banks = 525 Questions!)
 - **M1 (1.1&ndash;1.4):** Done + 140 Q&amp;As (`v1.1.0`–`v1.3.0`)

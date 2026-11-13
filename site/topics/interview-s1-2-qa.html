@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: S1.2 Environment Setup: Selenium Manager vs WebDriverManager vs System.setProperty</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>S1.2 Question Bank: Selenium Manager vs WebDriverManager vs System.setProperty (35 Questions)</h1>
+  <p><a class="qa-chip" href="selenium-s1-2-setup-managers.html">&larr; Back to Concept Page</a></p>
+
+  <section><h2>Tier 1: Core Definitions, Evolution &amp; Technical Mechanics (Q1&ndash;Q7)</h2>
+    <ol>
+      <li><b>What is Selenium Manager?</b><br>Selenium Manager is an official command-line utility written in Rust and bundled directly inside Selenium 4.6.0+ client language bindings that automatically detects installed browser versions, downloads matching driver binaries into <code>~/.cache/selenium</code>, and configures their paths at runtime with zero setup code.</li>
+
+      <li><b>What is Boni Garcia's WebDriverManager?</b><br>WebDriverManager is an open-source Java library (<code>io.github.bonigarcia:webdrivermanager</code>) that was widely used prior to Selenium 4.6.0 to programmatically query vendor APIs, download browser drivers into <code>~/.m2/repository/webdriver</code>, and set Java system properties before session startup.</li>
+
+      <li><b>What is the legacy <code>System.setProperty()</code> approach in Selenium?</b><br>It is the manual approach where an engineer downloaded driver binaries by hand, placed them in a local directory, and wrote <code>System.setProperty("webdriver.chrome.driver", "path/to/chromedriver.exe")</code> to inform the JVM where the binary resided.</li>
+
+      <li><b>Why was <code>System.setProperty()</code> phased out of modern automation frameworks?</b><br>Because browsers update automatically every 4 weeks. Hardcoded driver paths inevitably resulted in version mismatch errors (<code>SessionNotCreatedException</code>), broke portability across Windows/Linux operating systems, and required continuous manual maintenance.</li>
+
+      <li><b>In what programming language is Selenium Manager developed and why?</b><br>Selenium Manager is written in <b>Rust</b>. Rust was chosen because it compiles into a standalone, high-performance native binary with zero external runtime dependencies, safe memory management, and cross-compilation support for Windows, macOS (Intel &amp; Apple Silicon), and Linux.</li>
+
+      <li><b>Where does Selenium Manager store downloaded driver and browser binaries?</b><br>On Windows systems: <code>C:\Users\&lt;Username&gt;\.cache\selenium\</code>; on Linux and macOS: <code>~/.cache/selenium/</code>.</li>
+
+      <li><b>What is Chrome for Testing (CfT) and how does Selenium Manager use it?</b><br>Chrome for Testing is Google's dedicated browser flavor designed specifically for automated testing without silent auto-updates. Selenium Manager queries Google's public CfT JSON metadata endpoints to pinpoint and download the exact matching ChromeDriver for any installed Chrome version.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 2: Deep Comparisons &amp; Architectural Trade-Offs (Q8&ndash;Q14)</h2>
+    <ol start="8">
+      <li><b>What are the major advantages of Selenium Manager over Boni Garcia's WebDriverManager?</b><br>Selenium Manager requires zero external Maven dependencies, zero boilerplate code lines, suffers zero GitHub API rate-limiting issues (HTTP 403), executes natively via Rust rather than Java reflection, and is officially maintained by the Selenium project.</li>
+
+      <li><b>Does Selenium 4.6.0+ still require <code>WebDriverManager.chromedriver().setup()</code>?</b><br>No. Including that call in Selenium 4.6.0+ is redundant and adds unnecessary network latency, as Selenium Manager executes automatically whenever a driver constructor is invoked.</li>
+
+      <li><b>What happens if both <code>System.setProperty()</code> and Selenium Manager are available in a project?</b><br><code>System.setProperty()</code> takes precedence. Selenium's <code>DriverService</code> first checks if the system property contains a valid path; only when that property is null or unset does it trigger Selenium Manager.</li>
+
+      <li><b>Why did WebDriverManager frequently encounter HTTP 403 Forbidden errors?</b><br>WebDriverManager queried GitHub REST APIs to locate driver releases. Unauthenticated GitHub API requests are capped at 60 requests per hour per IP address. In large corporate offices sharing a single public IP, teams routinely hit this rate limit, breaking CI builds.</li>
+
+      <li><b>Can Selenium Manager download the browser itself if not installed?</b><br>Yes. Starting in Selenium 4.11.0, Selenium Manager can download automated builds of Chrome for Testing and Firefox into <code>~/.cache/selenium</code> if no compatible browser is found on the host machine.</li>
+
+      <li><b>How does Selenium Manager detect the installed version of Google Chrome on Windows?</b><br>It queries the Windows Registry key <code>HKLM\Software\Google\Chrome\BLBeacon</code> (or <code>HKCU</code>) and reads the <code>version</code> string without launching the browser application.</li>
+
+      <li><b>How does Selenium Manager detect the installed version of Chrome on Linux?</b><br>It queries the system PATH using shell commands such as <code>which google-chrome</code>, <code>google-chrome --version</code>, or inspects default package directories (<code>/usr/bin/google-chrome</code>).</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 3: Enterprise Proxies, Air-Gapped Networks &amp; Corporate CI/CD (Q15&ndash;Q21)</h2>
+    <ol start="15">
+      <li><b>What happens when Selenium Manager runs inside a corporate network behind an authenticating proxy without configuration?</b><br>The network request times out or receives an HTTP 407 Proxy Authentication Required error, causing Selenium to throw a <code>NoSuchDriverException: Unable to obtain driver for chrome</code>.</li>
+
+      <li><b>How do you configure a corporate proxy for Selenium Manager?</b><br>Set the <code>SE_PROXY</code> operating system environment variable: <code>export SE_PROXY="http://corp-proxy.internal:8080"</code>, or pass the JVM property <code>-Dse.proxy=http://corp-proxy.internal:8080</code> via Maven Surefire.</li>
+
+      <li><b>How do you run Selenium tests in an air-gapped environment with zero internet access?</b><br>Pre-populate the <code>~/.cache/selenium</code> directory inside your Docker container base image during build time, or explicitly supply pre-installed binary paths via <code>ChromeOptions.setBinary()</code> and <code>System.setProperty()</code>.</li>
+
+      <li><b>Why is the <code>--no-sandbox</code> flag mandatory when running Chrome inside Docker in CI/CD?</b><br>Docker containers typically execute processes as the <code>root</code> user. Google Chrome's operating system security sandbox refuses to run with root privileges and will crash immediately unless <code>--no-sandbox</code> is passed.</li>
+
+      <li><b>What problem does <code>--disable-dev-shm-usage</code> solve in CI/CD containers?</b><br>By default, Docker allocates only 64MB of shared memory (<code>/dev/shm</code>). Modern web browsers quickly exceed 64MB while rendering complex pages, causing random browser tab crashes. This flag forces Chrome to use the standard <code>/tmp</code> disk partition instead.</li>
+
+      <li><b>What is the difference between <code>--headless</code> and <code>--headless=new</code>?</b><br><code>--headless</code> was the old legacy headless implementation that used an alternate browser rendering engine with known rendering discrepancies. <code>--headless=new</code> (introduced in Chrome 109) uses Chrome's full, authentic browser rendering engine headlessly, guaranteeing 100% parity with headed execution.</li>
+
+      <li><b>How do you configure viewport size in headless CI/CD execution?</b><br>Pass <code>options.addArguments("--window-size=1920,1080")</code> to ensure all responsive web elements and navigation menus render identically to standard desktop screens.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 4: Parallelism, ThreadLocal, Exceptions &amp; Memory Leaks (Q22&ndash;Q28)</h2>
+    <ol start="22">
+      <li><b>Why must <code>WebDriver</code> instances never be declared as static variables in a parallel test framework?</b><br>A <code>static</code> variable is shared across all threads in the JVM. When tests run in parallel, concurrent threads overwrite the single driver instance, causing race conditions, erratic test failures, and <code>NoSuchSessionException</code>.</li>
+
+      <li><b>How does <code>ThreadLocal&lt;WebDriver&gt;</code> resolve concurrency issues?</b><br><code>ThreadLocal</code> maintains an isolated, independent copy of the <code>WebDriver</code> reference for each executing thread, ensuring no thread can interfere with another thread's browser session.</li>
+
+      <li><b>Why is calling <code>ThreadLocal.remove()</code> strictly mandatory in test teardown?</b><br>Thread pools (such as those used by TestNG or Maven Surefire) reuse worker threads. If <code>remove()</code> is omitted, references to dead driver instances remain in the thread's local map, preventing garbage collection and causing <code>OutOfMemoryError: Java heap space</code>.</li>
+
+      <li><b>What is the difference between <code>driver.close()</code> and <code>driver.quit()</code>?</b><br><code>driver.close()</code> closes only the active browser tab or window, leaving the driver executable running in the operating system. <code>driver.quit()</code> destroys all browser windows and cleanly terminates the background <code>chromedriver.exe</code> process.</li>
+
+      <li><b>What causes the error <code>SessionNotCreatedException: This version of ChromeDriver only supports Chrome version X</code>?</b><br>The installed Google Chrome browser version is incompatible with the driver binary being executed (typically caused by an outdated manual driver configured via <code>System.setProperty</code>).</li>
+
+      <li><b>What causes <code>WebDriverException: address already in use: bind</code>?</b><br>An earlier test crashed or failed to call <code>driver.quit()</code>, leaving an orphaned <code>chromedriver</code> process running that continues to lock default TCP port 9515.</li>
+
+      <li><b>How do you terminate orphaned driver processes on Windows and Linux?</b><br>On Windows: <code>taskkill /F /IM chromedriver.exe /T</code>; on Linux/macOS: <code>pkill -f chromedriver</code>.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q29&ndash;Q35)</h2>
+    <ol start="29">
+      <li><b>Does Selenium Manager require an active internet connection on every test run?</b><br>No. It checks the local <code>~/.cache/selenium</code> directory first; if a matching driver binary is already cached, it executes completely offline without network requests.</li>
+
+      <li><b>Can you use Selenium Manager with Firefox and Microsoft Edge?</b><br>Yes. Selenium Manager automatically resolves and downloads <code>geckodriver</code> for Firefox and <code>msedgedriver</code> for Microsoft Edge.</li>
+
+      <li><b>Should <code>chromedriver.exe</code> ever be committed into a Git repository?</b><br>No. Committing binary executables into Git is a violation of version control best practices and causes repository bloat.</li>
+
+      <li><b>Can you override Selenium Manager if you need to test a custom patched driver binary?</b><br>Yes. Explicitly calling <code>System.setProperty("webdriver.chrome.driver", path)</code> overrides Selenium Manager completely.</li>
+
+      <li><b>Does <code>WebDriverManager.chromedriver().setup()</code> work in Selenium 4?</b><br>Yes, it still functions technically, but it is deprecated, redundant, and introduces unnecessary third-party dependency overhead.</li>
+
+      <li><b>What happens if you invoke <code>driver.findElement()</code> after calling <code>driver.quit()</code>?</b><br>Selenium throws <code>NoSuchSessionException: Session ID is null. Using WebDriver after calling quit()?</code>.</li>
+
+      <li><b>What is the recommended Selenium 4 version to use for enterprise test automation?</b><br>Selenium 4.28.1 (or the latest stable release published on Maven Central), running on Java 17 LTS or Java 21 LTS.</li>
+    </ol>
+  </section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>
