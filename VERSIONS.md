@@ -24,6 +24,7 @@ Every feature change, UI improvement, or syllabus chapter build is tracked with 
 | **v1.9.2** | 2026-11-13 | Headerless Chapter Reading View | Removed the sticky top header bar inside chapters so the reading page starts right from the top; updated `.def` and inline `code` tints to `#FF4D00`. | `site/app.js`, `site/style.css`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
 | **v1.9.3** | 2026-11-13 | Remove Search Box from Chapters | Removed the injected `Type anywhere to jump` search box inside chapter pages so only the clean `← All topics` link and reading sheet appear. | `site/app.js`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
 | **v1.9.4** | 2026-11-13 | Unified Button/Page Borders & Inline Top-Left Brand | Placed `SDET Explainer > ← All topics` flush top-left on the exact same horizontal line as the top-right `light [Alt+L]` button (no full-width bar), and unified ALL button borders (`.qa-chip`, `.chip`, `.theme`) and page borders (`article`) to the clean neutral `1px solid var(--border)` (`#2B2B2B` / `#CCCCCC`). | `site/style.css`, `site/app.js`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
+| **v1.9.5** | 2026-11-13 | Compact Heroic Homepage & Hover-to-Expand Syllabus | Added compact heroic header with live published counter & `#FF4D00` progress bar, and turned homepage syllabus sections into 1-line `.sec-group` rows that smoothly expand on hover (`grid-template-rows: 0fr -> 1fr`) with click-to-pin and auto-expand on search. | `site/index.html`, `site/style.css`, `site/app.js`, `VERSIONS.md`, `PROGRESS.md` |
 
 ---
 

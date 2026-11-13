@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.4";
+  const SITE_VERSION = "v1.9.5";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -277,10 +277,16 @@
 
     function render() {
       const q = search.value.trim().toLowerCase();
+      const totalDone = TOPICS.filter(t => t.file).length;
+      const heroBadge = document.getElementById("hero-badge");
+      const heroFill = document.getElementById("hero-bar-fill");
+      if (heroBadge) heroBadge.textContent = `${totalDone} / ${TOPICS.length} published`;
+      if (heroFill) heroFill.style.width = `${TOPICS.length ? Math.round((totalDone / TOPICS.length) * 100) : 0}%`;
+
       const list = TOPICS.filter(t => (track === "All" || t.track === track) &&
         (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
       const doneCount = list.filter(t => t.file).length;
-      stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued)`;
+      stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued) · hover section to expand, click to pin`;
 
       if (list.length === 0) {
         grid.innerHTML = "<p>No syllabus topics in this track yet.</p>";
@@ -299,18 +305,34 @@
       groups.forEach((items, sec) => {
         items.sort((a, b) => (a.order || 99) - (b.order || 99));
         const secDone = items.filter(x => x.file).length;
-        html += `<div class="sec-hdr">${esc(sec)}<span>${secDone}/${items.length} done</span></div>`;
-        html += items.map(t => {
-          if (t.file) {
-            return `<a class="card" href="topics/${t.file}"><div class="card-top"><span class="tag ${t.track}">${t.track}</span>` +
-              `<h3>${esc(t.title)}</h3><span class="status-pill" style="color:var(--fn)">[ready]</span></div><p>${esc(t.summary)}</p></a>`;
-          } else {
-            return `<div class="card planned"><div class="card-top"><span class="tag ${t.track}">${t.track}</span>` +
-              `<h3>${esc(t.title)}</h3><span class="status-pill">[queued]</span></div><p>${esc(t.summary)}</p></div>`;
-          }
-        }).join("");
+        const secTrack = items[0] ? items[0].track : "";
+        const openCls = q ? " open" : "";
+        html += `<div class="sec-group${openCls}">` +
+          `<div class="sec-hdr" title="Hover to preview · Click to pin">` +
+            `<span class="sec-chev">&gt;</span>` +
+            `<span class="tag ${secTrack}">${secTrack}</span>` +
+            `<span class="sec-title">${esc(sec)}</span>` +
+            `<span class="sec-count">${secDone}/${items.length} done</span>` +
+          `</div>` +
+          `<div class="sec-body"><div class="sec-inner">` +
+          items.map(t => {
+            if (t.file) {
+              return `<a class="card" href="topics/${t.file}"><div class="card-top"><span class="tag ${t.track}">${t.track}</span>` +
+                `<h3>${esc(t.title)}</h3><span class="status-pill" style="color:var(--fn)">[ready]</span></div><p>${esc(t.summary)}</p></a>`;
+            } else {
+              return `<div class="card planned"><div class="card-top"><span class="tag ${t.track}">${t.track}</span>` +
+                `<h3>${esc(t.title)}</h3><span class="status-pill">[queued]</span></div><p>${esc(t.summary)}</p></div>`;
+            }
+          }).join("") +
+          `</div></div></div>`;
       });
       grid.innerHTML = html;
+
+      grid.querySelectorAll(".sec-hdr").forEach(hdr => {
+        hdr.addEventListener("click", () => {
+          hdr.parentElement.classList.toggle("pinned");
+        });
+      });
     }
 
     search.addEventListener("input", render);
