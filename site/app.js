@@ -70,7 +70,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.0.4";
+  const SITE_VERSION = "v2.1.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -238,8 +238,7 @@
     const controls = document.getElementById("controls");
     const search = document.getElementById("search");
     const stats = document.getElementById("stats");
-    let track = "Manual";
-    let slideDir = "anim-up";
+    let track = "All";
 
     // Build track filter chips dynamically from TRACKS
     const tracksList = typeof TRACKS !== "undefined" ? TRACKS : [
@@ -274,89 +273,25 @@
     });
 
     selectTrackFn = function (newTrack) {
-      const oldIdx = tracksList.findIndex(t => t.id === track);
-      const newIdx = tracksList.findIndex(t => t.id === newTrack);
-      slideDir = newIdx >= oldIdx ? "anim-up" : "anim-down";
       track = newTrack;
       controls.querySelectorAll(".chip").forEach(x => {
         x.classList.toggle("active", x.dataset.track === track);
       });
-      render(true);
+      render();
     };
 
-    const slideOrder = tracksList.filter(t => t.id !== "All").map(t => t.id);
-    let lastWheelAt = 0;
-    function stepTrack(delta) {
-      const idx = slideOrder.indexOf(track);
-      const curIdx = idx === -1 ? 0 : idx;
-      const nextIdx = curIdx + delta;
-      if (nextIdx >= 0 && nextIdx < slideOrder.length) {
-        selectTrackFn(slideOrder[nextIdx]);
-      }
-    }
-
-    const stageEl = document.getElementById("slide-stage");
-    if (stageEl) {
-      stageEl.addEventListener("wheel", e => {
-        const now = Date.now();
-        if (now - lastWheelAt < 420) return;
-        const atBottom = grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 4;
-        const atTop = grid.scrollTop <= 4;
-        if (e.deltaY > 24 && atBottom) {
-          e.preventDefault();
-          lastWheelAt = now;
-          stepTrack(1);
-        } else if (e.deltaY < -24 && atTop) {
-          e.preventDefault();
-          lastWheelAt = now;
-          stepTrack(-1);
-        }
-      }, { passive: false });
-
-      let touchStartY = null;
-      stageEl.addEventListener("touchstart", e => {
-        if (e.touches && e.touches.length === 1) touchStartY = e.touches[0].clientY;
-      }, { passive: true });
-      stageEl.addEventListener("touchend", e => {
-        if (touchStartY === null || !e.changedTouches || !e.changedTouches.length) return;
-        const dy = touchStartY - e.changedTouches[0].clientY;
-        touchStartY = null;
-        const atBottom = grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 4;
-        const atTop = grid.scrollTop <= 4;
-        if (dy > 48 && atBottom) stepTrack(1);
-        else if (dy < -48 && atTop) stepTrack(-1);
-      }, { passive: true });
-    }
-
-    function render(animate) {
+    function render() {
       const q = (search ? search.value : "").trim().toLowerCase();
       const totalDone = TOPICS.filter(t => t.file).length;
       const specTotal = document.getElementById("spec-total");
       const meterFill = document.getElementById("hero-meter-fill");
-      if (specTotal) specTotal.textContent = `${totalDone} / ${TOPICS.length} LIVE`;
+      if (specTotal) specTotal.textContent = `${totalDone} / ${TOPICS.length} PUBLISHED`;
       if (meterFill) meterFill.style.width = `${TOPICS.length ? Math.round((totalDone / TOPICS.length) * 100) : 0}%`;
 
       const list = TOPICS.filter(t => (track === "All" || t.track === track) &&
         (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
       const doneCount = list.filter(t => t.file).length;
-      if (stats) stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued) · hover section to expand, click to pin`;
-
-      const stageLbl = document.getElementById("stage-track-label");
-      const stageCnt = document.getElementById("stage-track-count");
-      const curTr = tracksList.find(t => t.id === track);
-      if (stageLbl) stageLbl.textContent = curTr ? curTr.label : track;
-      if (stageCnt) {
-        const sIdx = slideOrder.indexOf(track);
-        const nextHint = sIdx >= 0 && sIdx < slideOrder.length - 1 ? ` · SLIDE UP FOR ${slideOrder[sIdx + 1].toUpperCase()}` : "";
-        stageCnt.textContent = `${doneCount}/${list.length} PUBLISHED${nextHint}`;
-      }
-
-      if (animate) {
-        grid.classList.remove("anim-up", "anim-down");
-        void grid.offsetWidth;
-        grid.classList.add(slideDir);
-      }
-      grid.scrollTop = 0;
+      if (stats) stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued)`;
 
       if (list.length === 0) {
         grid.innerHTML = "<p>No syllabus topics in this track yet.</p>";
@@ -371,50 +306,27 @@
         groups.get(sec).push(t);
       });
 
-      const secKeys = Array.from(groups.keys());
-      let activeSec = secKeys[0] || "";
-
-      function renderCards(secName) {
-        const items = (groups.get(secName) || []).slice().sort((a, b) => (a.order || 99) - (b.order || 99));
-        const secDone = items.filter(x => x.file).length;
-        return `<div class="deck-chapters-hdr"><b>${esc(secName)}</b><span>${secDone}/${items.length} done</span></div>` +
-          `<div class="deck-chapters-list fade-in">` +
-          items.map(t => {
-            if (t.file) {
-              return `<a class="card" href="topics/${t.file}"><div class="card-top"><span class="tag ${t.track}">${t.track}</span>` +
-                `<h3>${esc(t.title)}</h3><span class="status-pill" style="color:var(--fn)">[ready]</span></div><p>${esc(t.summary)}</p></a>`;
-            } else {
-              return `<div class="card planned"><div class="card-top"><span class="tag ${t.track}">${t.track}</span>` +
-                `<h3>${esc(t.title)}</h3><span class="status-pill">[queued]</span></div><p>${esc(t.summary)}</p></div>`;
-            }
-          }).join("") +
-          `</div>`;
-      }
-
-      let secHtml = "";
+      let html = "";
       groups.forEach((items, sec) => {
+        items.sort((a, b) => (a.order || 99) - (b.order || 99));
         const secDone = items.filter(x => x.file).length;
         const secTrack = items[0] ? items[0].track : "";
-        const actCls = sec === activeSec ? " active" : "";
-        secHtml += `<button type="button" class="sec-row${actCls}" data-sec="${esc(sec)}">` +
-          `<div class="sec-row-top"><span class="tag ${secTrack}">${secTrack}</span><span class="sec-row-count">${secDone}/${items.length}</span></div>` +
-          `<div class="sec-row-title">${esc(sec)}</div>` +
-        `</button>`;
+        html += `<section class="sec-card">` +
+          `<div class="sec-card-hdr">` +
+            `<span class="tag ${secTrack}">${secTrack}</span>` +
+            `<span class="sec-card-title">${esc(sec)}</span>` +
+            `<span class="sec-card-cnt">${secDone}/${items.length}</span>` +
+          `</div>` +
+          items.map(t => {
+            if (t.file) {
+              return `<a class="topic-row" href="topics/${t.file}"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill">[ready]</span></a>`;
+            } else {
+              return `<div class="topic-row planned"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill">[queued]</span></div>`;
+            }
+          }).join("") +
+          `</section>`;
       });
-
-      grid.innerHTML = `<div class="deck-split">` +
-        `<div class="deck-sections">${secHtml}</div>` +
-        `<div class="deck-chapters" id="deck-chapters">${renderCards(activeSec)}</div>` +
-      `</div>`;
-
-      const chaptersEl = document.getElementById("deck-chapters");
-      grid.querySelectorAll(".sec-row").forEach(btn => {
-        btn.addEventListener("click", () => {
-          activeSec = btn.dataset.sec;
-          grid.querySelectorAll(".sec-row").forEach(b => b.classList.toggle("active", b === btn));
-          if (chaptersEl) chaptersEl.innerHTML = renderCards(activeSec);
-        });
-      });
+      grid.innerHTML = html;
     }
 
     if (search) search.addEventListener("input", render);

@@ -9,43 +9,49 @@ body{margin:0;font:15.5px/1.72 "Segoe UI",system-ui,-apple-system,sans-serif;bac
 header.top,header.chapter-top,nav,.controls,.stats,.tag,.status-pill,.kbd-hint,.ac-kw,.phase-num,.phase-role,.v-hdr,.v-mid,footer,pre,code,.chip,.qa-chip{font-family:Consolas,"Cascadia Mono","Courier New",monospace}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .wrap,header.top{max-width:940px;margin:0 auto;padding:24px 24px}
-.home-wrap{max-width:1120px;padding:18px 20px 10px}
+.home-wrap{max-width:1080px;padding:18px 24px 28px}
 body.home-page .theme,body.home-page .cmd-trigger{display:none !important}
-.hero-meter-wrap{margin:12px 0 18px}
-.hero-meter{height:4px;width:100%;background:rgba(0,0,0,.22);overflow:hidden}
-.hero-meter-fill{height:100%;width:0;background:#000000;transition:width .45s cubic-bezier(.22,1,.36,1)}
-.brand-hero{display:grid;grid-template-columns:.85fr 1.35fr;border:1px solid var(--border);background:var(--bg);min-height:calc(100vh - 88px)}
-.hero-col-left{background:var(--accent);color:#000000;padding:24px 26px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--border)}
-.hero-meta-row{display:flex;justify-content:space-between;align-items:center;font-family:Consolas,"Cascadia Mono",monospace;font-size:.74rem;letter-spacing:.6px;text-transform:uppercase;opacity:.9}
-.hero-col-left h1{margin:18px 0 12px;font-size:2.35rem;line-height:1.02;letter-spacing:-.5px;font-weight:800;font-family:"Segoe UI",system-ui,-apple-system,sans-serif}
-.hero-col-left h1 a{color:#FFFFFF;text-decoration:none;display:inline-block}
-.hero-col-left h1 a:hover{color:#000000;text-decoration:none}
-.hero-col-left .hero-sub{margin:0 0 14px;color:#111111;font-size:.92rem;line-height:1.5;font-weight:500;max-width:34ch}
-.hero-cta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
-.hero-cta{display:inline-flex;align-items:center;padding:8px 12px;background:#000000;color:#FFFFFF;border:1px solid #000000;font-family:Consolas,"Cascadia Mono",monospace;font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.4px}
-.hero-cta:hover{background:#FFFFFF;color:#000000;border-color:#000000;text-decoration:none}
-.hero-cta.ghost{background:transparent;color:#000000;border:1px solid #000000}
-.hero-cta.ghost:hover{background:#000000;color:#FFFFFF}
-.hero-col-right{display:grid;grid-template-rows:auto 1fr;min-height:0}
-.hero-block-white{background:#F2F2F2;color:#000000;padding:14px 20px;border-bottom:1px solid var(--border)}
-.hero-block-white .hero-meta-row{color:#595959;margin-bottom:8px}
-.hero-block-white .controls{margin-bottom:0;gap:6px}
-.hero-block-white .chip{background:#FFFFFF;color:#111111;border:1px solid #CCCCCC;font-size:.78rem;padding:4px 9px}
-.hero-block-white .chip:hover{border-color:#FF4D00;color:#FF4D00}
-.hero-block-white .chip.active{background:#FF4D00;color:#000000;border-color:#FF4D00}
-.hero-block-stage{background:var(--bg);padding:14px 20px 18px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
-.stage-hdr{padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--border);color:var(--accent);font-weight:700}
-.slide-viewport{flex:1;overflow-y:auto;padding-right:2px;max-height:calc(100vh - 220px)}
-.slide-viewport.anim-up{animation:slideUpIn .36s cubic-bezier(.22,1,.36,1) both}
-.slide-viewport.anim-down{animation:slideDownIn .36s cubic-bezier(.22,1,.36,1) both}
-@keyframes slideUpIn{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideDownIn{from{opacity:0;transform:translateY(-28px)}to{opacity:1;transform:translateY(0)}}
+.home-nav{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:16px;margin-bottom:18px;border-bottom:1px solid var(--border);font-family:Consolas,"Cascadia Mono",monospace}
+.home-brand{font-size:1.02rem;font-weight:700;color:var(--bold);letter-spacing:.4px;border-left:3px solid var(--accent);padding:2px 0 2px 10px;text-decoration:none}
+.home-brand:hover{color:var(--accent);text-decoration:none}
+.home-nav-actions{display:flex;gap:8px;flex-wrap:wrap}
+.nav-btn{padding:5px 11px;border:1px solid var(--border);background:var(--code-bg);color:var(--text);font:12.5px/1.4 Consolas,"Cascadia Mono",monospace;cursor:pointer}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.hero-banner{display:grid;grid-template-columns:1.25fr 1fr;border:1px solid var(--border);margin-bottom:22px}
+.hero-left{background:var(--accent);color:#000000;padding:28px 30px;display:flex;flex-direction:column;justify-content:space-between;border-right:1px solid var(--border)}
+.hero-kicker{font-family:Consolas,"Cascadia Mono",monospace;font-size:.74rem;letter-spacing:.6px;text-transform:uppercase;opacity:.85}
+.hero-left h1{margin:14px 0 10px;font-size:2.4rem;line-height:1.02;letter-spacing:-.6px;font-weight:800;color:#FFFFFF;font-family:"Segoe UI",system-ui,-apple-system,sans-serif}
+.hero-left .hero-sub{margin:0 0 20px;color:#111111;font-size:.94rem;line-height:1.5;max-width:44ch;font-weight:500}
+.hero-cta-row{display:flex;gap:10px;flex-wrap:wrap}
+.hero-cta{display:inline-flex;align-items:center;padding:9px 15px;background:#000000;color:#FFFFFF;border:1px solid #000000;font-family:Consolas,"Cascadia Mono",monospace;font-size:.8rem;font-weight:700;text-decoration:none;letter-spacing:.4px}
+.hero-cta:hover{background:#FFFFFF;color:#000000;text-decoration:none}
+.hero-right{background:#000000;color:#F2F2F2;padding:24px 26px;display:flex;flex-direction:column;justify-content:space-between}
+.hero-right-hdr{display:flex;justify-content:space-between;align-items:center;font-family:Consolas,"Cascadia Mono",monospace;font-size:.76rem;color:#8E8E8E;margin-bottom:8px}
+.hero-meter{height:4px;width:100%;background:#2B2B2B;margin-bottom:18px;overflow:hidden}
+.hero-meter-fill{height:100%;width:0;background:var(--accent);transition:width .45s cubic-bezier(.22,1,.36,1)}
+.hero-kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi-cell{border:1px solid #2B2B2B;background:#0A0A0A;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.kpi-cell span{font-family:Consolas,"Cascadia Mono",monospace;font-size:.72rem;color:#8E8E8E;letter-spacing:.4px}
+.kpi-cell b{font-family:Consolas,"Cascadia Mono",monospace;font-size:1.05rem;color:#FFFFFF}
+.home-tabs{margin-bottom:16px}
+.bento-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:14px}
+.sec-card{border:1px solid var(--border);background:var(--code-bg);padding:16px 18px;display:flex;flex-direction:column}
+.sec-card-hdr{display:flex;align-items:center;gap:8px;padding-bottom:10px;margin-bottom:8px;border-bottom:1px solid var(--border);font-family:Consolas,"Cascadia Mono",monospace}
+.sec-card-title{font-size:.92rem;font-weight:700;color:var(--bold);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sec-card-cnt{font-size:.76rem;color:var(--muted);flex-shrink:0}
+.topic-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 4px;border-bottom:1px dashed var(--border);color:var(--text);font-size:.9rem;transition:padding-left .14s ease}
+.topic-row:last-child{border-bottom:0}
+a.topic-row:hover{color:var(--accent);text-decoration:none;padding-left:8px}
+.topic-row.planned{opacity:.52;cursor:default}
+.topic-row-title{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topic-row-pill{font-family:Consolas,"Cascadia Mono",monospace;font-size:.74rem;color:var(--muted);flex-shrink:0}
+a.topic-row .topic-row-pill{color:var(--fn)}
 @media (max-width:860px){
-  .home-wrap{padding:12px 12px 16px}
-  .brand-hero{grid-template-columns:1fr;min-height:auto}
-  .hero-col-left{border-right:0;border-bottom:1px solid var(--border)}
-  .hero-col-left h1{font-size:1.9rem}
-  .slide-viewport{max-height:none}
+  .home-wrap{padding:14px 14px 24px}
+  .hero-banner{grid-template-columns:1fr}
+  .hero-left{border-right:0;border-bottom:1px solid var(--border);padding:22px 20px}
+  .hero-left h1{font-size:1.9rem}
+  .bento-grid{grid-template-columns:1fr}
 }
 header.top h1{margin:0;font-size:1.45rem;color:var(--accent);letter-spacing:.4px}
 header.top h1 a{color:var(--bold);text-decoration:none;cursor:pointer}
