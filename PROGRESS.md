@@ -1,8 +1,8 @@
-# Progress Tracker (Current Version: `v1.5.0`)
+# Progress Tracker (Current Version: `v1.6.0`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
 
-## Published Topic & Question Bank Pages
+## Published Topic & Question Bank Pages (17 Pages Live &middot; 245 Interview Questions)
 
 | # | Version | Date | Track | Topic | File | Status |
 |---|---|---|---|---|---|---|
@@ -17,18 +17,25 @@ See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) rele
 | 9 | `v1.1.0` | 2026-11-13 | Interview | M1.3 Q&A: STLC Phases & RTM (35 Questions) | `site/topics/interview-m1-3-qa.html` | Done |
 | 10 | `v1.3.0` | 2026-11-13 | Manual | 1.4 The 7 Testing Principles & Shift-Left Testing | `site/topics/manual-m1-4-testing-principles.html` | Done |
 | 11 | `v1.1.0` | 2026-11-13 | Interview | M1.4 Q&A: 7 Testing Principles & Shift-Left (35 Questions) | `site/topics/interview-m1-4-qa.html` | Done |
+| 12 | `v1.6.0` | 2026-11-13 | Manual | 2.1 Levels of Testing: Unit, Integration, System & UAT | `site/topics/manual-m2-1-test-levels.html` | Done (with 4-Level Pipeline & Stub/Driver Trace) |
+| 13 | `v1.6.0` | 2026-11-13 | Interview | M2.1 Q&A: Levels of Testing — Unit, Integration, System & UAT (35 Questions) | `site/topics/interview-m2-1-qa.html` | Done |
+| 14 | `v1.6.0` | 2026-11-13 | Manual | 2.2 Functional Testing: Smoke vs Sanity & Regression vs Retesting | `site/topics/manual-m2-2-functional-testing-types.html` | Done (with Build Drop Pipeline & TestNG Groups) |
+| 15 | `v1.6.0` | 2026-11-13 | Interview | M2.2 Q&A: Smoke vs Sanity & Regression vs Retesting (35 Questions) | `site/topics/interview-m2-2-qa.html` | Done |
+| 16 | `v1.6.0` | 2026-11-13 | Manual | 2.3 Non-Functional Testing: Performance, Security, Usability & Compatibility | `site/topics/manual-m2-3-non-functional-testing.html` | Done (with 5-Performance Pipeline & SLA/a11y Trace) |
+| 17 | `v1.6.0` | 2026-11-13 | Interview | M2.3 Q&A: Non-Functional Testing (35 Questions) | `site/topics/interview-m2-3-qa.html` | Done |
 
 ---
 
 ## Next Up in Syllabus
-- **Manual Section M2 (`Test Levels & Testing Types`):**
-  - `2.1 Levels of Testing: Unit, Integration, System & UAT` + `interview-m2-1-qa.html` (35+ Qs)
-  - `2.2 Functional Testing: Smoke vs Sanity & Regression vs Retesting` + `interview-m2-2-qa.html` (35+ Qs)
-  - `2.3 Non-Functional Testing: Performance, Load, Stress, Security, Usability & Compatibility` + `interview-m2-3-qa.html` (35+ Qs)
+- **Manual Section M3 (`Test Design Techniques & Artifacts`):**
+  - `3.1 Black-Box Techniques: Equivalence Partitioning & Boundary Value Analysis` + `interview-m3-1-qa.html` (35+ Qs)
+  - `3.2 Decision Table, State Transition & Use Case Testing` + `interview-m3-2-qa.html` (35+ Qs)
+  - `3.3 Test Strategy vs Test Plan, Test Scenario vs Test Case & RTM` + `interview-m3-3-qa.html` (35+ Qs)
 
 ---
 
 ## Feature & Build Version Log
+- **2026-11-13 (`v1.6.0`):** Published Manual **Section M2** (3 concept pages + 3 connected Interview Question Banks = 105 new Q&As; 245 total Q&As) and expanded `glossary.js`.
 - **2026-11-13 (`v1.5.0`):** Readability overhaul (block `h2` headers, `.def` callouts, sans-serif prose + monospace code, table row borders, boxed code blocks, raw markdown cleaner) + `Alt+L` Light/Dark theme toggle shortcut.
 - **2026-11-13 (`v1.4.0`):** Added clickable `> SDET Explainer` Home link, global `Alt+<First Letter>` track/home shortcuts (`Alt+H/A/M/J/S/T/P/I`), and SVM (`VERSIONS.md` + Git version tagging workflow).
 - **2026-11-13 (`v1.3.0`):** Added `site/glossary.js` + inline `.term-pop` hover/click definition & properties card; updated all M1 pages to define prerequisite terms and exact properties before use.

@@ -63,30 +63,33 @@ const TOPICS = [
     section: "M2. Test Levels & Testing Types",
     order: 1,
     title: "2.1 Levels of Testing: Unit, Integration, System & UAT",
-    file: "",
+    file: "manual-m2-1-test-levels.html",
     summary: "Component testing, Top-Down vs Bottom-Up Integration (Stubs vs Drivers), End-to-End System testing, and Alpha vs Beta UAT.",
-    keywords: "unit testing, integration testing, stubs, drivers, system testing, UAT, alpha, beta",
-    status: "planned"
+    keywords: "unit testing, integration testing, stubs, drivers, sandwich integration, big bang, system testing, UAT, alpha, beta, test pyramid",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M2. Test Levels & Testing Types",
     order: 2,
     title: "2.2 Functional Testing: Smoke vs Sanity & Regression vs Retesting",
-    file: "",
-    summary: "Build verification (Smoke), narrow deep check (Sanity), confirming a bug fix (Retesting), and guarding existing features (Regression).",
-    keywords: "smoke testing, sanity testing, regression testing, retesting, exploratory, ad-hoc",
-    status: "planned"
+    file: "manual-m2-2-functional-testing-types.html",
+    summary: "Build verification (Smoke), narrow deep check (Sanity), confirming a bug fix (Retesting), guarding existing features (Regression), Exploratory & Ad-Hoc.",
+    keywords: "smoke testing, sanity testing, regression testing, retesting, confirmation testing, unit regional full regression, exploratory, ad-hoc, monkey",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M2. Test Levels & Testing Types",
     order: 3,
     title: "2.3 Non-Functional Testing: Performance, Security, Usability & Compatibility",
-    file: "",
-    summary: "Load vs Stress vs Spike vs Endurance testing, cross-browser compatibility, accessibility, and localization/globalization.",
-    keywords: "non-functional, load testing, stress testing, spike, endurance, compatibility, usability",
-    status: "planned"
+    file: "manual-m2-3-non-functional-testing.html",
+    summary: "Load vs Stress vs Spike vs Endurance (Soak) vs Volume testing, Security (401/403/IDOR/SQLi), Accessibility (a11y), Compatibility & I18n/L10n.",
+    keywords: "non-functional, load testing, stress testing, spike, endurance, soak, volume testing, security, IDOR, compatibility, usability, accessibility, I18n, L10n",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
@@ -772,6 +775,39 @@ const TOPICS = [
     file: "interview-m1-4-qa.html",
     summary: "35 questions across 5 tiers: All 7 principles, Pesticide Paradox in Selenium, Defect Clustering 80/20, Shift-Left vs Shift-Right.",
     keywords: "7 testing principles interview questions, pesticide paradox, defect clustering, pairwise testing, shift left vs shift right",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M2. Manual Testing: Test Levels & Testing Types Q&A",
+    order: 1,
+    title: "M2.1 Q&A: Levels of Testing — Unit, Integration, System & UAT (35 Questions)",
+    file: "interview-m2-1-qa.html",
+    summary: "35 questions across 5 tiers: Unit vs Integration vs System vs UAT, Stub vs Driver, Top-Down vs Bottom-Up, Alpha vs Beta & Test Pyramid.",
+    keywords: "levels of testing interview questions, stub vs driver, top down vs bottom up integration, alpha vs beta testing, test automation pyramid",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M2. Manual Testing: Test Levels & Testing Types Q&A",
+    order: 2,
+    title: "M2.2 Q&A: Functional Testing — Smoke vs Sanity & Regression vs Retesting (35 Questions)",
+    file: "interview-m2-2-qa.html",
+    summary: "35 questions across 5 tiers: Wide/Shallow vs Narrow/Deep, Retesting before Regression, Unit/Regional/Full Regression, Exploratory & Ad-Hoc.",
+    keywords: "smoke vs sanity interview questions, regression vs retesting, confirmation testing, regional regression, impact analysis, exploratory testing",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M2. Manual Testing: Test Levels & Testing Types Q&A",
+    order: 3,
+    title: "M2.3 Q&A: Non-Functional Testing — Performance, Security, Usability & Compatibility (35 Questions)",
+    file: "interview-m2-3-qa.html",
+    summary: "35 questions across 5 tiers: Load vs Stress vs Spike vs Endurance vs Volume, p95/p99, 401 vs 403, IDOR, WCAG a11y, I18n vs L10n.",
+    keywords: "non functional testing interview questions, load vs stress testing, spike vs soak endurance, volume testing, I18n vs L10n, accessibility axe-core",
     status: "done",
     date: "2026-11-13"
   },

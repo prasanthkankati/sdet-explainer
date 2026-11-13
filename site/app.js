@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.5.0";
+  const SITE_VERSION = "v1.6.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",

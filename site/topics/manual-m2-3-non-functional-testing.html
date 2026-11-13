@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 2.3 Non-Functional Testing (Performance, Security, Usability, Compatibility)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>2.3 Non-Functional Testing: Performance, Security, Usability &amp; Compatibility</h1>
+
+  <section><h2>1. The Base: What is Non-Functional Testing and Why Does It Exist?</h2>
+    <p class="def">Non-Functional Testing is the branch of Dynamic Testing that evaluates HOW WELL the software performs its functions—measuring speed, scalability under concurrent user load, security against attacks, usability, cross-browser compatibility, and crash recovery against measurable SLAs.</p>
+    <p><b>The Problem It Solves (In Plain Words):</b> Suppose an e-commerce checkout feature passes 100% of Functional Testing when 1 QA engineer clicks "Pay Now" in Chrome. On Black Friday, 50,000 customers click "Pay Now" simultaneously: the server takes 45 seconds to respond, leaks database connections after 4 hours, breaks on Safari iOS, or allows an attacker to view another user's invoice by changing `?orderId=101` to `?orderId=102` in the URL. Functional Testing checks **WHAT** the button does for 1 user; Non-Functional Testing guarantees **HOW WELL, HOW FAST, and HOW SAFELY** it works in the real world.</p></section>
+
+  <section><h2>2. Core Terms &amp; Their Properties Defined First (Throughput, Latency, SLA, I18n vs L10n)</h2>
+    <p>Before exploring each Non-Functional testing type, understand the <b>5 core engineering metrics and properties</b> used to measure them:</p>
+    <ul>
+      <li><b>1. Response Time (Latency) &amp; Percentiles (`p95`, `p99`):</b> The total time taken from sending an HTTP request to receiving the response (e.g., `p95 < 500ms` means 95% of all user requests complete in under 500 milliseconds).</li>
+      <li><b>2. Throughput (RPS / TPS):</b> The number of **Requests Per Second (RPS)** or **Transactions Per Second (TPS)** the server successfully processes under load.</li>
+      <li><b>3. Concurrent Users (Virtual Users / VUs):</b> The number of simulated users simultaneously active on the system at the same instant.</li>
+      <li><b>4. SLA (Service Level Agreement):</b> The formal contract defining exact pass/fail thresholds for non-functional metrics (e.g., <i>"99.9% uptime, p95 response time &le; 800ms at 5,000 concurrent users, 0% HTTP 5xx error rate"</i>).</li>
+      <li><b>5. I18n (Internationalization) vs L10n (Localization):</b>
+        <ul>
+          <li><b>Internationalization (`I18n` &mdash; 18 letters between `I` and `n`):</b> Designing the application's architecture so it *can* support multiple languages, UTF-8 characters, time zones, and currencies without hardcoding English strings in code.</li>
+          <li><b>Localization (`L10n` &mdash; 10 letters between `L` and `n`):</b> Adapting and testing the product for a *specific target locale/region* (e.g., Japanese `ja-JP` translation, `¥` Yen currency, `YYYY/MM/DD` date format, or Arabic Right-to-Left UI layout).</li>
+        </ul>
+      </li>
+    </ul></section>
+
+  <section><h2>3. Classification Tree: The 5 Pillars of Non-Functional Testing</h2>
+    <p>Based on <b>which quality attribute of the system is being measured</b>, Non-Functional Testing splits into <b>5 major families</b>:</p>
+    <ol>
+      <li><b>Family 1: Performance Testing</b> &mdash; Speed, scalability, and stability under traffic.
+        <ul>
+          <li><i>5 Sub-Types:</i> <b>1. Load Testing</b>, <b>2. Stress Testing</b>, <b>3. Spike Testing</b>, <b>4. Endurance (Soak) Testing</b>, <b>5. Volume (Flood) Testing</b>.</li>
+        </ul>
+      </li>
+      <li><b>Family 2: Security Testing (Penetration &amp; Vulnerability Testing)</b> &mdash; Protecting data, authentication, and APIs against attacks.</li>
+      <li><b>Family 3: Compatibility Testing</b> &mdash; Verifying behavior across Browsers, OS, Devices, Networks, and API versions (<i>Forward vs Backward Compatibility</i>).</li>
+      <li><b>Family 4: Usability &amp; Accessibility (a11y) Testing</b> &mdash; Ease of use, user experience, and WCAG screen-reader compliance.</li>
+      <li><b>Family 5: Reliability, Recovery &amp; Globalization Testing</b> &mdash; Failover recovery (`RTO/RPO`) and `I18n / L10n`.</li>
+    </ol>
+
+    <div class="arch">
+      <div class="lbl">THE 5 PERFORMANCE TESTING SUB-TYPES <small>Visualizing How Load, Stress, Spike, Endurance &amp; Volume Differ</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">P1</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Load Testing (Expected Peak SLA Check)</b><span class="phase-role">Users: Up to 100% Expected Peak &middot; JMeter / k6</span></div>
+            <div class="phase-meta">
+              <div><span>Traffic Profile</span>Gradually ramp up from 0 to expected peak (e.g., 5,000 users)</div>
+              <div><span>Core Goal</span>Verify response time (`p95 &lt; 500ms`) &amp; 0% errors within SLA</div>
+              <div><span>Breaking Point?</span><b>No</b> &mdash; stays strictly within normal &amp; peak designed capacity</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>What happens if traffic exceeds the designed 5,000-user limit?</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">P2</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Stress Testing (Beyond Limit &rarr; Breaking Point &amp; Recovery)</b><span class="phase-role">Users: 120% &rarr; 300%+ Beyond Capacity</span></div>
+            <div class="phase-meta">
+              <div><span>Traffic Profile</span>Push load relentlessly above peak (5k &rarr; 10k &rarr; 20k) until failure</div>
+              <div><span>Core Goal</span>Find exact <b>breaking point</b>, check graceful failure &amp; auto-recovery</div>
+              <div><span>Key Check</span>Does the DB corrupt data when crashing, and does it recover when load drops?</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>What if the surge happens in 1 second instead of a gradual ramp-up?</span></div>
+        <div class="phase-card">
+          <div class="phase-num">P3</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Spike Testing (Sudden Flash-Sale Surge)</b><span class="phase-role">Users: Instant Vertical Jump (500 &rarr; 25,000 in 2s)</span></div>
+            <div class="phase-meta">
+              <div><span>Traffic Profile</span>Instantaneous massive spike up and sudden drop back down</div>
+              <div><span>Core Goal</span>Verify Kubernetes auto-scaling speed &amp; rate-limiting queues</div>
+              <div><span>Real Case</span>IPL ticket sale opening, Flash Sale at 12:00 PM, exam result release</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>What if normal traffic runs continuously for 48 hours straight?</span></div>
+        <div class="phase-card">
+          <div class="phase-num">P4</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Endurance / Soak Testing (Long-Duration Memory Leak Check)</b><span class="phase-role">Duration: 12 to 72 Hours Continuous</span></div>
+            <div class="phase-meta">
+              <div><span>Traffic Profile</span>Sustained moderate/normal load over many hours or days</div>
+              <div><span>Core Goal</span>Detect <b>Java Heap Memory Leaks (`OutOfMemoryError`)</b> &amp; unclosed DB connections</div>
+              <div><span>Key Check</span>Does response time degrade at Hour 24 compared to Hour 1?</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>What if the database table grows from 10,000 rows to 500 Million rows?</span></div>
+        <div class="phase-card">
+          <div class="phase-num">P5</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Volume / Flood Testing (Massive Database Data Size)</b><span class="phase-role">Focus: DB Records / File Payload Size</span></div>
+            <div class="phase-meta">
+              <div><span>Data Profile</span>Seed DB with 100M+ rows or upload 5GB CSV files</div>
+              <div><span>Core Goal</span>Check SQL index performance, disk I/O bottlenecks &amp; table locks</div>
+              <div><span>Key Distinction</span>Load = Concurrent <b>Users</b>; Volume = Massive <b>Database Data Volume</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. Each Non-Functional Family Explained in Order</h2>
+
+    <p><b>① Performance Testing (Load, Stress, Spike, Endurance, Volume)</b></p>
+    <ul>
+      <li><b>Load Testing:</b> Tests system behavior under expected normal and peak concurrent user load (e.g., 5,000 VUs) to verify SLA compliance.</li>
+      <li><b>Stress Testing:</b> Tests system behavior **beyond** normal peak capacity (e.g., 15,000 VUs) to find the exact breaking point and verify whether the system fails gracefully (returning `HTTP 429/503`) and recovers automatically once load subsides.</li>
+      <li><b>Spike Testing:</b> Tests an instantaneous extreme surge and drop in user traffic (e.g., Flash Sale at midnight).</li>
+      <li><b>Endurance (Soak) Testing:</b> Runs continuous load for 12–72 hours to catch slow **memory leaks**, connection pool exhaustion, and log-disk saturation.</li>
+      <li><b>Volume (Flood) Testing:</b> Populates the database with massive data volumes (hundreds of millions of rows) to test query indexing and storage performance.</li>
+    </ul>
+
+    <p><b>② Security Testing (Authentication vs Authorization &amp; OWASP Top Risks)</b></p>
+    <ul>
+      <li><b>Definition:</b> Evaluating the application to uncover vulnerabilities that could allow unauthorized access, data theft, or service disruption.</li>
+      <li><b>Core Security Checks Every SDET Must Know:</b>
+        <ol>
+          <li><b>Authentication (`401 Unauthorized` &mdash; "Who are you?"):</b> Verifying password hashing, MFA/OTP expiration, brute-force account lockout, and JWT token signature validation.</li>
+          <li><b>Authorization (`403 Forbidden` &mdash; "What are you allowed to do?"):</b> Verifying a standard user cannot access `/admin` endpoints or view another customer's order (`IDOR` — Insecure Direct Object Reference).</li>
+          <li><b>SQL Injection (SQLi) &amp; Cross-Site Scripting (XSS):</b> Ensuring malicious inputs like <code>' OR 1=1 --</code> or <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> are sanitized and parameterized.</li>
+        </ol>
+      </li>
+      <li><b>Tools:</b> OWASP ZAP, Burp Suite, SonarQube SAST.</li>
+    </ul>
+
+    <p><b>③ Compatibility Testing (Cross-Browser, Device &amp; Backward/Forward)</b></p>
+    <ul>
+      <li><b>Browser &amp; OS Compatibility:</b> Running Selenium Grid / BrowserStack / Playwright projects across **Chromium (Chrome/Edge), WebKit (Safari), and Gecko (Firefox)** on Windows, macOS, iOS, and Android.</li>
+      <li><b>Backward Compatibility:</b> Verifying that a new backend API v2 or new app version still works seamlessly with older mobile app clients or legacy database data.</li>
+      <li><b>Forward Compatibility:</b> Verifying that the current system works smoothly on upcoming OS/Browser beta versions (e.g., Chrome Beta / iOS Beta).</li>
+    </ul>
+
+    <p><b>④ Usability &amp; Accessibility (`a11y`) Testing</b></p>
+    <ul>
+      <li><b>Usability Testing:</b> Evaluating how intuitive and frictionless the UI is for humans (clear error messages, logical tab order, minimal clicks to checkout).</li>
+      <li><b>Accessibility (`a11y`) Testing:</b> Verifying the app is usable by people with disabilities per **WCAG (Web Content Accessibility Guidelines)**—checking `aria-label` attributes, keyboard-only navigation (`Tab`/`Enter`), color contrast ratios, and screen-reader compatibility (automated in Selenium/Playwright via `@axe-core`).</li>
+    </ul>
+
+    <p><b>⑤ Reliability, Recovery (Failover) &amp; Globalization (`I18n` / `L10n`)</b></p>
+    <ul>
+      <li><b>Recovery / Failover Testing:</b> Intentionally killing a microservice pod or primary DB node to verify how fast the standby replica takes over (`RTO` — Recovery Time Objective) without losing committed transactions (`RPO` — Recovery Point Objective).</li>
+      <li><b>Globalization (`I18n` + `L10n`):</b> Testing multi-language UTF-8 rendering, currency conversions, and date/number formatting across global regions.</li>
+    </ul>
+    <p><b>Interview Answer:</b> <i>"Functional testing checks WHAT the software does against business rules, whereas Non-Functional testing checks HOW WELL it performs—covering Load testing (expected peak users), Stress testing (pushing beyond capacity to find the breaking point), Spike testing (sudden traffic surge), Endurance testing (long duration for memory leaks), Volume testing (huge DB records), Security, Accessibility, and Cross-Browser Compatibility."</i></p></section>
+
+  <section><h2>5. Side-by-Side Comparison Tables</h2>
+
+    <p><b>Comparison 1: Functional Testing vs Non-Functional Testing</b></p>
+    <table>
+      <tr><th>Parameter</th><th>Functional Testing</th><th>Non-Functional Testing</th></tr>
+      <tr><td>Core Question</td><td><i>"<b>WHAT</b> does the software do?"</i></td><td><i>"<b>HOW WELL</b> does the software perform?"</i></td></tr>
+      <tr><td>Validation Basis</td><td>Business Rules &amp; Functional Specs (SRS)</td><td>Performance SLAs, Security Standards, WCAG</td></tr>
+      <tr><td>Execution Order</td><td>Executed <b>first</b> on a feature</td><td>Executed <b>after</b> core functional flows work</td></tr>
+      <tr><td>Example Requirement</td><td><i>"Clicking 'Login' with valid credentials opens Dashboard."</i></td><td><i>"Dashboard must load in &le; 1.2s for 10,000 concurrent users."</i></td></tr>
+      <tr><td>SDET Tools</td><td>Selenium, Playwright, RestAssured, TestNG</td><td>JMeter, k6, Gatling, OWASP ZAP, Axe-Core, BrowserStack</td></tr>
+    </table>
+
+    <p><b>Comparison 2: Load vs Stress vs Spike vs Endurance vs Volume Testing</b></p>
+    <table>
+      <tr><th>Sub-Type</th><th>Primary Variable</th><th>Traffic / Data Pattern</th><th>What Defect It Catches</th></tr>
+      <tr><td><b>Load Testing</b></td><td>Concurrent Users (Up to Peak)</td><td>Gradual ramp up to 100% expected peak</td><td>Slow SQL queries, SLA response time breaches</td></tr>
+      <tr><td><b>Stress Testing</b></td><td>Concurrent Users (Beyond Peak)</td><td>Relentless ramp to 200%&ndash;300%+ until crash</td><td>Exact breaking point, ungraceful crash, failed auto-recovery</td></tr>
+      <tr><td><b>Spike Testing</b></td><td>Sudden Rate of Traffic Change</td><td>Instant jump (500 &rarr; 25,000 users in seconds)</td><td>Slow auto-scaler boot time, connection queue drops</td></tr>
+      <tr><td><b>Endurance (Soak)</b></td><td>Duration (12&ndash;72 Hours)</td><td>Steady normal load over days</td><td><b>Memory leaks (`OutOfMemoryError`)</b>, unclosed DB connections</td></tr>
+      <tr><td><b>Volume (Flood)</b></td><td>Database Data Size</td><td>100M+ DB rows or multi-GB file payloads</td><td>Missing DB indexes, full-table scan locks, disk exhaustion</td></tr>
+    </table></section>
+
+  <section><h2>6. Real SDET Code Trace: Cross-Browser Compatibility, Response SLA &amp; Accessibility in Selenium</h2>
+    <p>While dedicated load tests run in **JMeter / k6**, SDETs enforce **Cross-Browser Compatibility**, **API/UI Response Time SLAs**, and **Accessibility (`aria-label`)** directly inside automated TestNG suites:</p>
+<pre><code>import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
+import org.testng.annotations.Parameters;
+import org.testng.annotations.Test;
+
+public class NonFunctionalChecksTest {
+
+    // 1. CROSS-BROWSER COMPATIBILITY + RESPONSE TIME SLA CHECK
+    @Test
+    @Parameters({"browser"})
+    public void verifyDashboardLoadTimeAndAccessibility(String browser) {
+        WebDriver driver = switch (browser.toLowerCase()) {
+            case "firefox" -&gt; new FirefoxDriver();
+            case "edge"    -&gt; new EdgeDriver();
+            default        -&gt; new ChromeDriver();
+        };
+        try {
+            long startMs = System.currentTimeMillis();
+            driver.get("https://qa-shop.internal/login");
+            long loadTimeMs = System.currentTimeMillis() - startMs;
+
+            // Non-Functional SLA Assertion: Page load must be &lt;= 2000ms
+            Assert.assertTrue(loadTimeMs &lt;= 2000,
+                "SLA Breach on " + browser + ": Load took " + loadTimeMs + "ms");
+
+            // Accessibility (a11y) Assertion: Submit button must have aria-label for screen readers
+            WebElement loginBtn = driver.findElement(By.id("login-btn"));
+            Assert.assertNotNull(loginBtn.getAttribute("aria-label"),
+                "a11y Violation: login-btn is missing aria-label attribute!");
+        } finally {
+            driver.quit();
+        }
+    }
+}</code></pre></section>
+
+  <section><h2>7. Self-Check</h2>
+    <ol>
+      <li>Which performance testing type runs a steady load for 24–48 hours specifically to detect **memory leaks** and unclosed database connections? <i>(Endurance / Soak Testing)</i></li>
+      <li>What is the difference between **Load Testing** and **Volume Testing**? <i>(Load Testing tests concurrent user traffic up to expected peak; Volume Testing tests massive amounts of data stored in the database.)</i></li>
+      <li>What is the difference between `I18n` (Internationalization) and `L10n` (Localization)? <i>(`I18n` is engineering the codebase to support multiple languages/locales without code changes; `L10n` is translating and adapting UI/currency/dates for one specific locale like `ja-JP`.)</i></li>
+    </ol></section>
+
+  <section><h2>8. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m2-3-qa.html"><span class="tag Interview">Interview</span>M2.3 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

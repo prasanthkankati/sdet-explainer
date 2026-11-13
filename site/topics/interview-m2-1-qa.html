@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: M2.1 Levels of Testing — Unit, Integration, System &amp; UAT (35 Questions)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a class="qa-chip" href="manual-m2-1-test-levels.html"><span class="tag Manual">Manual</span>&larr; Back to 2.1 Test Levels Concept Page</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>M2.1 Question Bank: Levels of Testing — Unit, Integration, System &amp; UAT (35 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Sequence &amp; Classification (Q1&ndash;Q10)</h2>
+    <ol>
+      <li><b>Q1: What are the 4 levels of software testing in exact sequential order?</b><br>
+        <b>A:</b> (1) <b>Unit Testing</b> (Component Testing), (2) <b>Integration Testing</b>, (3) <b>System Testing</b>, and (4) <b>User Acceptance Testing (UAT)</b>.</li>
+      <li><b>Q2: Why are they called "Levels" of testing instead of "Types" of testing?</b><br>
+        <b>A:</b> <b>Levels</b> define <i>where in the architecture hierarchy and SDLC</i> we test (Method &rarr; Service Interface &rarr; Full App &rarr; Business User), whereas <b>Types</b> (Smoke, Regression, Performance, Security) define <i>what quality attribute or objective</i> we are testing. In fact, Regression or Smoke testing can be executed at <i>any</i> level (Unit, API Integration, or UI System level).</li>
+      <li><b>Q3: What is Unit Testing and who performs it?</b><br>
+        <b>A:</b> Unit Testing is white-box testing of the smallest isolated piece of code (a single Java method or class) performed by **Developers** using JUnit or TestNG, with external dependencies (DB, network) mocked out via tools like Mockito.</li>
+      <li><b>Q4: What is Integration Testing and what specific defects does it target?</b><br>
+        <b>A:</b> Integration Testing verifies the interaction, data flow, and contract between two or more connected modules or microservices. It targets interface defects: mismatched JSON field names, wrong HTTP status codes, SQL schema mismatches, serialization failures, and timeout propagation.</li>
+      <li><b>Q5: What are the 2 main categories and 4 sub-types of Integration Testing?</b><br>
+        <b>A:</b> (1) <b>Incremental Integration</b> (where modules are added and tested one by one: <i>Top-Down</i>, <i>Bottom-Up</i>, and <i>Sandwich/Hybrid</i>), and (2) <b>Non-Incremental Integration</b> (<i>Big Bang Integration</i>, where all modules are coupled at once).</li>
+      <li><b>Q6: What is a Stub vs what is a Driver in Integration Testing?</b><br>
+        <b>A:</b> A <b>Stub</b> is a passive dummy component used in <b>Top-Down Integration</b> to replace a missing lower-level <i>called</i> child module (returning hardcoded responses). A <b>Driver</b> is an active test harness used in <b>Bottom-Up Integration</b> to replace a missing higher-level <i>calling</i> parent module (invoking the child module under test).</li>
+      <li><b>Q7: What is System Testing and what specification document does it validate against?</b><br>
+        <b>A:</b> System Testing is black-box end-to-end testing of the completely integrated software application in a production-like QA environment. It validates both functional and non-functional behavior against the <b>SRS (System Requirement Specification)</b>.</li>
+      <li><b>Q8: What is User Acceptance Testing (UAT) and who owns it?</b><br>
+        <b>A:</b> UAT is the final testing level performed by **Business Stakeholders, Product Owners, Clients, or real End-Users** to verify that the system satisfies business needs (<b>BRS</b>) and is ready for production go-live.</li>
+      <li><b>Q9: What are the 2 types of UAT and how do they differ?</b><br>
+        <b>A:</b> <b>Alpha Testing</b> is performed in-house at the developer's site (controlled UAT staging environment) by internal staff/client reps before public release. <b>Beta Testing</b> is performed by real external end-users in their own real-world environments using a pre-release build.</li>
+      <li><b>Q10: How do the 4 Test Levels map to the left side of the V-Model?</b><br>
+        <b>A:</b> <b>Unit Testing</b> &harr; LLD (Low-Level Design); <b>Integration Testing</b> &harr; HLD (High-Level Design); <b>System Testing</b> &harr; SRS (System Requirement Spec); <b>UAT</b> &harr; BRS (Business Requirement Spec).</li>
+    </ol></section>
+
+  <section><h2>Tier 2: Why / Why Not &amp; Deep Comparisons (Q11&ndash;Q18)</h2>
+    <ol start="11">
+      <li><b>Q11: Why can't we skip Unit and Integration testing and just test everything at the System (UI) level with Selenium?</b><br>
+        <b>A:</b> This is the **"Ice-Cream Cone Anti-Pattern"**: (1) UI tests are 50x&ndash;100x slower than unit/API tests, (2) a failing UI test doesn't tell you which backend class or microservice failed, (3) combinatorially testing every `if/else` branch through a browser UI is impossible, and (4) bugs caught at the System level cost 10x more to debug and fix than at the Unit level.</li>
+      <li><b>Q12: Why is Incremental Integration always preferred over Big Bang Integration?</b><br>
+        <b>A:</b> In Incremental Integration, you connect one module at a time—if a test fails after connecting Module C to Module B, you know immediately that the bug is in the B&harr;C interface. In Big Bang, you connect 30 modules at once; when it crashes, isolating the faulty interface requires debugging the entire system.</li>
+      <li><b>Q13: Why can all Unit tests pass 100% while the application still crashes during Integration Testing?</b><br>
+        <b>A:</b> Because Unit tests use <b>mocks</b> based on a developer's *assumptions* of how other services behave. For example, `OrderService` unit tests might mock `PaymentService` returning `"amount": 100.00` (number), whereas the real `PaymentService` returns `"amount": "$100.00"` (String), causing a `JsonParseException` when integrated!</li>
+      <li><b>Q14: Why is System Testing considered Black-Box while Unit Testing is White-Box and Integration is Grey-Box?</b><br>
+        <b>A:</b> Unit Testing inspects internal code lines and `if/else` branches (White-Box). Integration Testing uses knowledge of API schemas, HTTP headers, and DB tables without reading internal method loops (Grey-Box). System Testing interacts strictly with the external UI/public endpoints as an end user without touching internal code (Black-Box).</li>
+      <li><b>Q15: Why do we need UAT if the QA team already executed 100% of System Testing with zero open bugs?</b><br>
+        <b>A:</b> Because QA tests against the <b>SRS</b> (how the system was specified to work), whereas business users in UAT validate against real-world <b>business workflows (BRS)</b>. A feature can match the SRS 100% and still be awkward or unusable for an actual bank teller or warehouse operator (Principle #7: Absence-of-errors fallacy).</li>
+      <li><b>Q16: What is the difference between Component Integration Testing and System Integration Testing (SIT)?</b><br>
+        <b>A:</b> <b>Component Integration Testing</b> tests interactions between classes/packages inside the *same* application binary (after Unit Testing). <b>System Integration Testing (SIT)</b> tests end-to-end interactions across *separate* enterprise systems, microservices, and third-party gateways (e.g., E-Commerce App &harr; SAP ERP &harr; Stripe Gateway).</li>
+      <li><b>Q17: When should you choose Top-Down Integration vs Bottom-Up Integration?</b><br>
+        <b>A:</b> Choose <b>Top-Down</b> when user interface and top-level business orchestration logic are high-risk and need early validation (using Stubs for DB/utilities). Choose <b>Bottom-Up</b> when low-level database engines, hardware drivers, or financial math libraries are already built and must be verified first (using Drivers).</li>
+      <li><b>Q18: What is Operational Acceptance Testing (OAT) vs Contract/Regulatory Acceptance Testing inside UAT?</b><br>
+        <b>A:</b> <b>OAT</b> validates operational readiness for DevOps/SRE (backup/restore, disaster recovery failover, log monitoring, alerting). <b>Regulatory Acceptance Testing</b> validates legal/government compliance (PCI-DSS for payments, HIPAA for healthcare, GDPR for data privacy).</li>
+    </ol></section>
+
+  <section><h2>Tier 3: Real-World Tricky &amp; Edge-Case Scenarios (Q19&ndash;Q25)</h2>
+    <ol start="19">
+      <li><b>Q19: Scenario: You are testing an `OrderController` module that calls `InventoryService` and `EmailNotificationService`. `InventoryService` is ready, but `EmailNotificationService` is still being built by another team. Which test double do you create: a Stub or a Driver?</b><br>
+        <b>A:</b> A <b>Stub</b> for `EmailNotificationService`, because `OrderController` (parent) calls `EmailNotificationService` (child). The stub simulates the missing child module and returns a dummy `200 OK / true` so `OrderController` + `InventoryService` integration can be tested immediately.</li>
+      <li><b>Q20: Scenario: The backend team finished building the `InterestRateCalculator` utility class, but the Loan Application Web UI won't be ready for 2 sprints. How do you test `InterestRateCalculator` now?</b><br>
+        <b>A:</b> Write a <b>Driver</b> (a TestNG/JUnit test class or RestAssured test harness) that acts as the calling parent module, passes boundary loan amounts/tenures into `InterestRateCalculator`, and asserts the returned interest figures (Bottom-Up approach).</li>
+      <li><b>Q21: Scenario: During System Testing in QA, a third-party Credit Bureau API charges $2 per API call and rate-limits after 50 calls. How do you run 1,000 automated System &amp; Integration tests without paying $2,000 or getting blocked?</b><br>
+        <b>A:</b> Replace the live third-party endpoint in the QA environment with a **Service Virtualization / API Stub server** (using **WireMock** or **MockServer**) configured with realistic response payloads and latency, and run only 2–3 final smoke tests against the third-party sandbox.</li>
+      <li><b>Q22: Scenario: During UAT, the Client raises a defect saying "We need a 'Bulk Export to PDF' button on the dashboard", which was never in the SRS or Sprint backlog. Is this a System Testing bug leak or a Change Request (CR)?</b><br>
+        <b>A:</b> It is a **Change Request (CR) / New Enhancement**, NOT a QA Defect Leakage—because the feature was never specified in the SRS. QA triages it with the Product Owner to schedule it into a future sprint rather than blocking the current release as a QA bug.</li>
+      <li><b>Q23: Scenario: A bug is found in Production where mobile Safari users on iOS 17 cannot tap the "Confirm" button because a cookie banner overlaps it. Which Test Level missed this bug?</b><br>
+        <b>A:</b> **Level 3: System Testing** (specifically Cross-Browser / Mobile Compatibility Testing inside System Testing), because Unit and API Integration tests do not render CSS layouts or viewports.</li>
+      <li><b>Q24: Scenario: Microservice A sends a `"userId": 10452` (Long) to Microservice B, which recently changed its DTO to expect `"user_id": "USR-10452"` (String). Which Test Level should catch this fastest in CI/CD before deploying to QA?</b><br>
+        <b>A:</b> **Level 2: Integration Testing**—specifically **Consumer-Driven Contract Testing** (using tools like **Pact** or Spring Cloud Contract) or automated API schema tests in the PR pipeline.</li>
+      <li><b>Q25: Scenario: Can QA engineers participate in Unit and Integration testing, or is QA strictly restricted to System Testing?</b><br>
+        <b>A:</b> In modern SDET teams, SDETs actively participate in **Level 1 &amp; 2**: reviewing developer unit test coverage in PRs, writing boundary cases developers missed, and owning **Level 2 Automated API Integration &amp; Contract test suites** (`RestAssured` / `Testcontainers`) alongside **Level 3 Selenium/Playwright System suites**.</li>
+    </ol></section>
+
+  <section><h2>Tier 4: SDET, Automation (Selenium / API) &amp; CI/CD Application (Q26&ndash;Q30)</h2>
+    <ol start="26">
+      <li><b>Q26: What is Mike Cohn's Test Automation Pyramid and what are its exact percentages?</b><br>
+        <b>A:</b> The Test Automation Pyramid structures automated tests into 3 layers by speed and maintenance cost: **70% Unit Tests** at the base (fastest, cheapest, isolated), **20% Service / API Integration Tests** in the middle (RestAssured/Postman), and **10% UI End-to-End System Tests** at the top (Selenium/Playwright).</li>
+      <li><b>Q27: How do you separate Unit, Integration, and System tests in a Maven + TestNG project so CI/CD runs them in stages?</b><br>
+        <b>A:</b> Use TestNG groups (`@Test(groups = "unit")`, `@Test(groups = "integration")`, `@Test(groups = "system")`) or Maven plugins (`maven-surefire-plugin` for `*Test.java` unit tests during `mvn test`, and `maven-failsafe-plugin` for `*IT.java` integration/system tests during `mvn verify`).</li>
+      <li><b>Q28: In a Jenkins CI/CD pipeline, in what order do the Test Levels execute and why?</b><br>
+        <b>A:</b> **Stage 1:** Static Analysis + Unit Tests (`< 2 mins`) &rarr; **Stage 2:** API Integration &amp; Contract Tests (`< 5 mins`) &rarr; **Stage 3:** Deploy to QA &amp; run Selenium Smoke + System E2E Tests (`10–20 mins`). This enforces **Fail-Fast**: if a 10ms Unit test fails, Jenkins aborts immediately without wasting 20 minutes spinning up Selenium Grid browsers.</li>
+      <li><b>Q29: How do you perform true database Integration Testing in Java without polluting a shared QA database?</b><br>
+        <b>A:</b> Use **Testcontainers** (which spins up a disposable Docker PostgreSQL/MySQL container during `mvn verify`) or an in-memory database / transactional rollback (`@Transactional`) so every integration test starts with a clean schema and leaves zero dirty data behind.</li>
+      <li><b>Q30: In Playwright or Selenium 4, how can you combine Integration stubbing with UI System testing for faster execution?</b><br>
+        <b>A:</b> Use network interception (`page.route()` in Playwright or Chrome DevTools Protocol `Network.interceptRequest` in Selenium 4) to stub slow/third-party backend API responses while testing the frontend UI state transitions in a real browser.</li>
+    </ol></section>
+
+  <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q31&ndash;Q35)</h2>
+    <ol start="31">
+      <li><b>Q31: Is a Stub used in Bottom-Up or Top-Down Integration?</b><br>
+        <b>A:</b> <b>Top-Down Integration</b> (it replaces a called lower-level child module).</li>
+      <li><b>Q32: Is a Driver passive or active?</b><br>
+        <b>A:</b> <b>Active</b>—it calls the module under test (used in Bottom-Up Integration).</li>
+      <li><b>Q33: Is Beta Testing performed at the developer's premise or the end-user's premise?</b><br>
+        <b>A:</b> At the <b>end-user's own premise/environment</b> (Alpha is at the developer's premise).</li>
+      <li><b>Q34: Which testing level performs both Functional and Non-Functional testing of the whole application?</b><br>
+        <b>A:</b> <b>Level 3: System Testing</b>.</li>
+      <li><b>Q35: What is Sandwich Integration Testing?</b><br>
+        <b>A:</b> A hybrid integration approach combining **Top-Down** (using Stubs) and **Bottom-Up** (using Drivers) simultaneously to converge on a middle target layer.</li>
+    </ol></section>
+
+  <section><h2>Back to Concept Page</h2>
+    <p><a class="qa-chip" href="manual-m2-1-test-levels.html"><span class="tag Manual">Manual</span>&larr; Back to 2.1 Levels of Testing</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

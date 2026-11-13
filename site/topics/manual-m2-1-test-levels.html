@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 2.1 Levels of Testing (Unit, Integration, System &amp; UAT)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>2.1 Levels of Testing: Unit, Integration, System &amp; UAT</h1>
+
+  <section><h2>1. The Base: What is a "Test Level" and Why Do We Need Levels?</h2>
+    <p class="def">A Test Level is a specific stage of dynamic software testing defined by the size and scope of the software under test—progressing from a single isolated method/class (Unit), to connected modules/APIs (Integration), to the complete end-to-end application (System), and finally to real business user sign-off (UAT).</p>
+    <p><b>The Problem It Solves (In Plain Words):</b> Imagine an e-commerce app with 500 Java classes, 40 REST APIs, a database, and a web UI. If you wait until the entire app is assembled and only test through the browser UI, when a checkout button fails you have no idea whether the bug is inside a 3-line tax formula, a broken JSON field between two services, a database timeout, or a browser JavaScript error. Testing in <b>4 progressive levels</b> catches each bug at the smallest, fastest, and cheapest layer where it originates.</p></section>
+
+  <section><h2>2. Core Terms &amp; Their Properties Defined First (Stubs, Drivers, Contracts &amp; Environments)</h2>
+    <p>Before walking through the 4 Test Levels, you must know the exact meaning and properties of the <b>4 building blocks</b> used during level-by-level testing:</p>
+    <ul>
+      <li><b>1. Module / Component (Unit):</b> The smallest independently testable piece of source code—such as a single Java method (<code>calculateTax()</code>), a Java class (<code>CartService</code>), or a UI component.</li>
+      <li><b>2. Stub (Top-Down Dummy Called Module):</b> When a high-level parent module (e.g., <code>CheckoutController</code>) is ready to be tested, but the lower-level child module it calls (e.g., <code>PaymentGatewayService</code>) is not built yet, developers replace the missing child with a <b>Stub</b>—a lightweight dummy object hardcoded to return a canned response (e.g., <code>return "PAYMENT_SUCCESS"</code>).
+        <ul>
+          <li><b>Properties of a Stub:</b> (a) Used in <b>Top-Down Integration</b>, (b) Replaces a <b>called (lower-level) child module</b>, (c) Passive—it waits to be called and returns static dummy data.</li>
+        </ul>
+      </li>
+      <li><b>3. Driver (Bottom-Up Dummy Caller Module):</b> When a low-level child module (e.g., <code>TaxCalculationDao</code>) is ready, but the top-level UI/Controller that calls it is not built yet, a <b>Driver</b> is a small test harness/main program written to invoke the child module, pass test parameters, and print/assert its return value.
+        <ul>
+          <li><b>Properties of a Driver:</b> (a) Used in <b>Bottom-Up Integration</b>, (b) Replaces a <b>calling (higher-level) parent module</b>, (c) Active—it initiates the call into the module under test (e.g., a TestNG/JUnit test runner or RestAssured script).</li>
+        </ul>
+      </li>
+      <li><b>4. Test Automation Pyramid (Mike Cohn's Cost vs Speed Law):</b> The architectural rule governing how many automated tests belong at each level:
+        <ul>
+          <li><b>Base (70% &mdash; Unit Tests):</b> Milliseconds to run, zero network/browser overhead, pinpoints exact line of failure.</li>
+          <li><b>Middle (20% &mdash; Integration / API Tests):</b> Milliseconds to seconds, verifies service-to-service and database contracts without slow UI rendering.</li>
+          <li><b>Top (10% &mdash; System / UI E2E Tests):</b> Seconds to minutes per test (Selenium / Playwright), validates critical end-to-end user journeys in a real browser.</li>
+        </ul>
+      </li>
+    </ul></section>
+
+  <section><h2>3. Classification Tree: The 4 Levels of Testing &amp; Their Sub-Types</h2>
+    <p>Based on <b>granularity of scope and who performs the validation</b>, Dynamic Testing is structured into <b>4 sequential levels</b>:</p>
+    <ol>
+      <li><b>Level 1: Unit Testing (Component Testing)</b> &mdash; Testing a single method/class in complete isolation.</li>
+      <li><b>Level 2: Integration Testing</b> &mdash; Testing data flow and contracts between connected modules/services.
+        <ul>
+          <li><i>Sub-Types:</i> <b>1. Incremental Integration</b> (<i>Top-Down, Bottom-Up, Sandwich/Hybrid</i>) and <b>2. Non-Incremental Integration</b> (<i>Big Bang</i>).</li>
+        </ul>
+      </li>
+      <li><b>Level 3: System Testing (End-to-End QA Testing)</b> &mdash; Testing the fully integrated application against the SRS.</li>
+      <li><b>Level 4: User Acceptance Testing (UAT)</b> &mdash; Business/End-Users validating fitness for release.
+        <ul>
+          <li><i>Sub-Types:</i> <b>1. Alpha Testing</b> (In-house simulated environment) and <b>2. Beta Testing</b> (Real users in real world).</li>
+        </ul>
+      </li>
+    </ol>
+    <div class="arch">
+      <div class="lbl">THE 4 LEVELS OF TESTING PIPELINE <small>Bottom-Up Progression from Code Method to Production Sign-Off</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">L1</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Unit Testing (Component Level)</b><span class="phase-role">Owner: Developers &middot; White-Box</span></div>
+            <div class="phase-meta">
+              <div><span>Scope Under Test</span>Single Java method / class in isolation (dependencies mocked)</div>
+              <div><span>Design Spec Reference</span><b>LLD</b> (Low-Level Design)</div>
+              <div><span>Tools &amp; Exit Gate</span>JUnit 5, TestNG, Mockito &middot; &ge;80% Line/Branch Coverage</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Verified classes/modules are wired together via APIs &amp; DB</span></div>
+        <div class="phase-card">
+          <div class="phase-num">L2</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Integration Testing (Interface &amp; API Level)</b><span class="phase-role">Owner: Dev + SDET &middot; Grey-Box</span></div>
+            <div class="phase-meta">
+              <div><span>Scope Under Test</span>Communication between microservices, REST APIs, queues &amp; DB</div>
+              <div><span>Design Spec Reference</span><b>HLD</b> (High-Level Design) &amp; Swagger Contracts</div>
+              <div><span>Tools &amp; Exit Gate</span>RestAssured, Postman, WireMock, Testcontainers</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>All services + Frontend UI deployed as one complete system in QA Env</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">L3</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>System Testing (End-to-End Application Level)</b><span class="phase-role">Owner: Manual QA &amp; SDET &middot; Black-Box</span></div>
+            <div class="phase-meta">
+              <div><span>Scope Under Test</span>Complete integrated application (Functional + Non-Functional)</div>
+              <div><span>Design Spec Reference</span><b>SRS</b> (System Requirement Specification) / User Stories</div>
+              <div><span>Tools &amp; Exit Gate</span><b>Selenium WebDriver</b>, Playwright, JMeter, Jira RTM</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>QA Sign-Off complete &rarr; Handed to Business / Client in UAT Staging</span></div>
+        <div class="phase-card">
+          <div class="phase-num">L4</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>User Acceptance Testing (UAT &mdash; Business Level)</b><span class="phase-role">Owner: Product / Client / End-Users &middot; Black-Box</span></div>
+            <div class="phase-meta">
+              <div><span>Scope Under Test</span>Real-world business workflows, compliance &amp; user readiness</div>
+              <div><span>Design Spec Reference</span><b>BRS</b> (Business Requirement Specification)</div>
+              <div><span>Sub-Types &amp; Gate</span><b>Alpha Testing</b> &amp; <b>Beta Testing</b> &rarr; Final Go-Live Approval</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. Each Test Level &amp; Sub-Type Explained in Order</h2>
+
+    <p><b>① Level 1: Unit Testing (Component Testing)</b></p>
+    <ul>
+      <li><b>Definition:</b> Testing the smallest testable unit of code (a single method or class) in isolation from databases, networks, or external APIs by using mocks/stubs (`Mockito`).</li>
+      <li><b>Technique:</b> <b>White-Box Testing</b>—the developer inspects internal `if/else` branches, loops, and exception paths.</li>
+      <li><b>In what exact cases we perform it:</b> Every time a developer writes or modifies a class (`CartCalculator.java`) before opening a Git Pull Request.</li>
+    </ul>
+
+    <p><b>② Level 2: Integration Testing (And All 4 Sub-Types)</b></p>
+    <ul>
+      <li><b>Definition:</b> Testing the interfaces, data contracts, JSON serialization, and error propagation when two or more tested units/services are combined (e.g., `OrderService` calling `PaymentService` and writing to `PostgreSQL`).</li>
+      <li><b>The 4 Sub-Types of Integration Testing Explained in Order:</b>
+        <ol>
+          <li><b>Top-Down Integration:</b> Testing starts from the top-level parent module (UI / Controller) downward. Lower-level modules that aren't ready yet are simulated using <b>Stubs</b>.
+            <br><i>When used:</i> When critical control logic sits at the top layer and needs early verification.</li>
+          <li><b>Bottom-Up Integration:</b> Testing starts from the lowest-level database/utility modules upward. Because the parent caller isn't ready yet, a <b>Driver</b> invokes the lower modules.
+            <br><i>When used:</i> When core database/calculation engines must be rock-solid before building controllers.</li>
+          <li><b>Sandwich (Hybrid / Bi-Directional) Integration:</b> Combines Top-Down (using Stubs for bottom layers) and Bottom-Up (using Drivers for middle layers) simultaneously, meeting at the middle target layer.
+            <br><i>When used:</i> Large enterprise microservice systems where UI and DB teams work in parallel.</li>
+          <li><b>Big Bang Integration (Non-Incremental):</b> Waiting until 100% of modules are coded, coupling all of them together at once, and testing the whole bundle.
+            <br><i>Why risky:</i> When a failure occurs, isolating which interface among 20 coupled modules caused the bug is extremely difficult.</li>
+        </ol>
+      </li>
+    </ul>
+
+    <p><b>③ Level 3: System Testing (End-to-End Testing)</b></p>
+    <ul>
+      <li><b>Definition:</b> Testing the fully integrated software product as a whole in a production-like QA environment to verify both <b>Functional requirements</b> (UI workflows, validations, edge cases) and <b>Non-Functional requirements</b> (performance, security, compatibility) against the <b>SRS</b>.</li>
+      <li><b>Technique:</b> Primarily <b>Black-Box Testing</b>—QA and SDETs test through the real Browser UI (`Selenium WebDriver` / `Playwright`) and public APIs as an end user would.</li>
+      <li><b>In what exact cases we perform it:</b> Inside every Sprint once features are deployed to the QA environment and pass the Phase 4 Smoke Gate.</li>
+    </ul>
+
+    <p><b>④ Level 4: User Acceptance Testing (UAT &mdash; Alpha vs Beta)</b></p>
+    <ul>
+      <li><b>Definition:</b> The final validation level performed by the **Client, Product Owner, Business Stakeholders, or real End-Users** to confirm the software satisfies business goals (<b>BRS</b>) and is ready for commercial go-live.</li>
+      <li><b>The 2 Sub-Types of UAT Explained in Order:</b>
+        <ol>
+          <li><b>Alpha Testing:</b> Performed <b>in-house at the developer's organization</b> (in a dedicated UAT staging environment) by internal business staff, product teams, or client representatives before external release. Both white-box and black-box insights can be used, and critical bugs are fixed immediately before public exposure.</li>
+          <li><b>Beta Testing:</b> Performed by <b>real external customers in their own real-world hardware/network environments</b> using a pre-release ("Beta") version of the product. It is strictly <b>Black-Box</b>; feedback and crash telemetry are collected to polish the final General Availability (GA) release.</li>
+        </ol>
+      </li>
+    </ul>
+    <p><b>Interview Answer:</b> <i>"The 4 levels of testing are Unit, Integration, System, and UAT. Unit testing is white-box testing of individual methods by developers. Integration testing checks interfaces and APIs between modules using Top-Down (Stubs) or Bottom-Up (Drivers) approaches. System testing is black-box end-to-end validation of the full app in QA by SDETs using Manual, Selenium, and API suites. UAT is business validation via Alpha (in-house staging) and Beta (real customer environment) testing before go-live."</i></p></section>
+
+  <section><h2>5. Side-by-Side Comparison: Unit vs Integration vs System vs UAT</h2>
+    <table>
+      <tr><th>Dimension</th><th>1. Unit Testing</th><th>2. Integration Testing</th><th>3. System Testing</th><th>4. UAT</th></tr>
+      <tr><td>Scope Tested</td><td>Single method / class</td><td>Interfaces between modules / APIs / DB</td><td>Complete integrated application</td><td>End-to-end business workflows</td></tr>
+      <tr><td>Performed By</td><td>Developers</td><td>Developers &amp; SDETs</td><td><b>Manual QA &amp; SDET Team</b></td><td>Client / Business / End-Users</td></tr>
+      <tr><td>V-Model Spec</td><td><b>LLD</b> (Low-Level Design)</td><td><b>HLD</b> (High-Level Design)</td><td><b>SRS</b> (System Spec)</td><td><b>BRS</b> (Business Spec)</td></tr>
+      <tr><td>Testing Box Type</td><td>White-Box</td><td>Grey-Box (Black + White)</td><td>Black-Box</td><td>Black-Box</td></tr>
+      <tr><td>Environment</td><td>Local Dev IDE / CI container</td><td>Dev / Integration / API Env</td><td><b>Dedicated QA Environment</b></td><td>UAT Staging (Alpha) / Real World (Beta)</td></tr>
+      <tr><td>SDET Tools</td><td>JUnit 5, TestNG, Mockito</td><td>RestAssured, Postman, WireMock</td><td><b>Selenium WebDriver</b>, Playwright</td><td>Business Scenarios, Production Telemetry</td></tr>
+    </table>
+
+    <p><b>Comparison 2: Stub vs Driver (Classic Interview Favorite)</b></p>
+    <table>
+      <tr><th>Parameter</th><th>Stub</th><th>Driver</th></tr>
+      <tr><td>Integration Approach</td><td><b>Top-Down Integration</b></td><td><b>Bottom-Up Integration</b></td></tr>
+      <tr><td>What It Simulates</td><td>Replaces a missing <b>called (lower-level child)</b> module</td><td>Replaces a missing <b>calling (higher-level parent)</b> module</td></tr>
+      <tr><td>Control Flow Role</td><td><b>Passive</b> &mdash; gets called by the module under test and returns hardcoded dummy data</td><td><b>Active</b> &mdash; invokes the module under test, passes arguments, and checks return values</td></tr>
+      <tr><td>Real Java Example</td><td>A WireMock server or Mockito stub returning <code>{"status":"PAID"}</code> when <code>OrderService</code> calls payment</td><td>A TestNG <code>@Test</code> method or <code>main()</code> harness calling <code>TaxDao.computeGst(1000)</code> directly</td></tr>
+    </table>
+
+    <p><b>Comparison 3: Alpha Testing vs Beta Testing</b></p>
+    <table>
+      <tr><th>Parameter</th><th>Alpha Testing</th><th>Beta Testing</th></tr>
+      <tr><td>Who Performs It</td><td>Internal business/product staff &amp; client reps</td><td>Real external end-users / customers</td></tr>
+      <tr><td>Where Performed</td><td>Developer's organization (controlled UAT Staging)</td><td>User's own real-world devices &amp; networks</td></tr>
+      <tr><td>Timing</td><td>Executed <b>before</b> Beta release</td><td>Executed <b>after</b> Alpha sign-off, right before GA launch</td></tr>
+      <tr><td>Defect Fix Cycle</td><td>Immediate fixes during the Alpha cycle</td><td>Feedback collected for final GA patch or next release</td></tr>
+    </table></section>
+
+  <section><h2>6. Real Runnable Java &amp; Selenium Code Trace Across All Levels</h2>
+    <p>Here is a complete, runnable Java program demonstrating <b>Level 1 (Unit Test)</b> and <b>Level 2 (Top-Down Integration using a Stub + Bottom-Up Driver)</b>, followed by how <b>Level 3 (System Test in Selenium)</b> validates the exact same checkout flow:</p>
+<pre><code>// 1. Interface for the lower-level child module (Payment Gateway)
+interface PaymentGateway {
+    boolean chargeCard(String cardNo, double amount);
+}
+
+// 2. High-level parent module (OrderService) that depends on PaymentGateway
+class OrderService {
+    private final PaymentGateway gateway;
+    public OrderService(PaymentGateway gateway) { this.gateway = gateway; }
+
+    // Pure calculation unit
+    public double calculateTotalWithTax(double price, double taxPct) {
+        return price + (price * taxPct / 100.0);
+    }
+
+    // Integration flow calling child module
+    public String placeOrder(String cardNo, double price, double taxPct) {
+        double total = calculateTotalWithTax(price, taxPct);
+        boolean paid = gateway.chargeCard(cardNo, total);
+        return paid ? "ORDER_CONFIRMED:$" + total : "PAYMENT_DECLINED";
+    }
+}
+
+// 3. STUB (Replaces the unbuilt child PaymentGateway for Top-Down Integration)
+class PaymentGatewayStub implements PaymentGateway {
+    @Override
+    public boolean chargeCard(String cardNo, double amount) {
+        return amount &lt;= 5000.0; // Dummy rule: approve up to $5000
+    }
+}
+
+// 4. DRIVER (Main test harness that drives Unit + Integration tests)
+public class TestLevelsDemo {
+    public static void main(String[] args) {
+        OrderService service = new OrderService(new PaymentGatewayStub());
+
+        // LEVEL 1 — UNIT TEST: Test calculateTotalWithTax() in isolation
+        double unitResult = service.calculateTotalWithTax(100.0, 18.0);
+        System.out.println("L1 Unit Test (100 + 18% tax) : " + unitResult);
+
+        // LEVEL 2 — TOP-DOWN INTEGRATION TEST: OrderService -> PaymentGatewayStub
+        String intResult = service.placeOrder("4111-XXXX", 100.0, 18.0);
+        System.out.println("L2 Integration (with Stub)   : " + intResult);
+    }
+}</code></pre>
+<pre><code class="bash">L1 Unit Test (100 + 18% tax) : 118.0
+L2 Integration (with Stub)   : ORDER_CONFIRMED:$118.0</code></pre>
+    <p><b>Level 3 (System Testing in Selenium WebDriver):</b> Once the real frontend, backend, and payment sandbox are deployed to the QA environment, SDET runs the end-to-end browser System Test:</p>
+<pre><code>@Test(groups = {"system"})
+public void verifyEndToEndOrderPlacement() {
+    WebDriver driver = getDriver();
+    driver.get("https://qa-shop.internal/checkout");
+    driver.findElement(By.id("card-input")).sendKeys("4111222233334444");
+    driver.findElement(By.id("place-order-btn")).click();
+
+    String banner = driver.findElement(By.id("order-status")).getText();
+    Assert.assertEquals(banner, "ORDER_CONFIRMED:$118.0");
+}</code></pre></section>
+
+  <section><h2>7. Self-Check</h2>
+    <ol>
+      <li>In Top-Down Integration, when a lower-level child module is missing, do we write a <b>Stub</b> or a <b>Driver</b>? <i>(A Stub — because it replaces the called child module.)</i></li>
+      <li>Which level of testing maps directly to <b>HLD (High-Level Design)</b>, and which maps to <b>SRS</b>? <i>(HLD &rarr; Integration Testing; SRS &rarr; System Testing.)</i></li>
+      <li>Why should a project have 70% Unit tests, 20% Integration/API tests, and 10% Selenium UI System tests instead of 100% Selenium UI tests? <i>(The Test Automation Pyramid: UI tests are slowest and most brittle; Unit and API tests run in milliseconds and isolate exact root causes.)</i></li>
+    </ol></section>
+
+  <section><h2>8. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m2-1-qa.html"><span class="tag Interview">Interview</span>M2.1 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

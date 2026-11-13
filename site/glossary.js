@@ -189,5 +189,82 @@ const GLOSSARY = {
       "Execution Required: Zero — parses source text directly"
     ],
     example: "SonarQube parses the AST of LoginPage.java during a PR check and flags a blocker because Thread.sleep(5000) was used instead of WebDriverWait."
+  },
+  "stub": {
+    title: "Stub (Top-Down Test Double)",
+    aliases: ["Stubs", "Stub"],
+    def: "A passive dummy component used in Top-Down Integration Testing to replace a missing lower-level (called) child module and return hardcoded responses.",
+    props: [
+      "Integration Approach: Top-Down Integration",
+      "Replaces: Missing lower-level called child module (e.g., PaymentGateway or EmailService)",
+      "Control Flow: Passive — gets invoked by the parent module under test and returns canned data"
+    ],
+    example: "PaymentGatewayStub returns 'true' when OrderService calls chargeCard(), allowing OrderService to be tested before the real bank integration exists."
+  },
+  "driver": {
+    title: "Driver (Bottom-Up Test Harness)",
+    aliases: ["Drivers", "Driver"],
+    def: "An active test harness or caller program used in Bottom-Up Integration Testing to invoke a lower-level child module when the top-level parent UI/Controller is not built yet.",
+    props: [
+      "Integration Approach: Bottom-Up Integration",
+      "Replaces: Missing higher-level calling parent module",
+      "Control Flow: Active — initiates calls into the child module, passes test inputs, and asserts outputs"
+    ],
+    example: "A TestNG @Test class or main() method that calls TaxCalculationDao.computeGst(1000) before the Checkout UI exists."
+  },
+  "sanity-test": {
+    title: "Sanity Testing",
+    aliases: ["Sanity Testing", "Sanity Test"],
+    def: "A narrow and deep functional check focused on 1–2 recently modified or bug-fixed modules on a stable build to verify the new logic works rationally before full regression.",
+    props: [
+      "Coverage Shape: Narrow & Deep (tests positive, negative & boundary rules of only the changed module)",
+      "When Executed: On stable builds after minor code changes or bug fixes",
+      "Relationship: Subset of Regression Testing; strictly performed by QA"
+    ],
+    example: "Running 18 deep coupon test cases ('mvn test -Dgroups=sanity-coupon') right after a developer updates the discount rounding formula."
+  },
+  "retesting": {
+    title: "Retesting (Confirmation Testing)",
+    aliases: ["Confirmation Testing", "Retesting"],
+    def: "Re-executing a previously failed test case using the exact same steps and input data on a new build to verify that a reported defect has been fixed.",
+    props: [
+      "Target Cases: Only previously FAILED test cases linked to fixed defects",
+      "Execution Order: Always runs BEFORE Regression Testing on a bug-fix build",
+      "Outcome: Marks the Jira bug as CLOSED (if pass) or REOPENED (if still failing)"
+    ],
+    example: "Re-running TC_44 with input '$99.99' on Build #15 to confirm Jira BUG-409 is fixed."
+  },
+  "regression-testing": {
+    title: "Regression Testing",
+    aliases: ["Regression Testing", "Full Regression", "Regional Regression"],
+    def: "Re-executing previously passing test cases across existing modules after a code change or bug fix to ensure old working features did not break as a side effect.",
+    props: [
+      "Target Cases: Previously PASSED test cases covering existing features",
+      "3 Sub-Types: 1. Unit Regression, 2. Regional (Partial) Regression, 3. Full Regression",
+      "Automation Priority: #1 candidate for Selenium / Playwright / RestAssured CI/CD automation"
+    ],
+    example: "Running 600 automated Selenium + API tests overnight via Jenkins after merging a new Checkout feature."
+  },
+  "endurance-testing": {
+    title: "Endurance / Soak Testing",
+    aliases: ["Endurance Testing", "Soak Testing", "Endurance (Soak) Testing"],
+    def: "A non-functional performance test where the system is subjected to a continuous moderate load for an extended duration (12 to 72 hours) to uncover memory leaks and resource exhaustion.",
+    props: [
+      "Duration: 12 to 72+ hours continuous execution",
+      "Primary Target Bugs: JVM Heap Memory Leaks (OutOfMemoryError), unclosed DB connections, disk log saturation",
+      "Tools: Apache JMeter, Grafana k6, Gatling + Prometheus/JVM heap profiler"
+    ],
+    example: "Running 1,500 concurrent users for 36 hours in k6 reveals JVM heap usage climbing from 2GB to 8GB due to unclosed HTTP client streams."
+  },
+  "i18n-l10n": {
+    title: "I18n (Internationalization) vs L10n (Localization)",
+    aliases: ["Internationalization", "Localization", "I18n", "L10n"],
+    def: "I18n is engineering the software architecture to support multiple locales without code changes; L10n is adapting and testing the UI, currency, and dates for one specific target region.",
+    props: [
+      "Why '18' and '10': 18 letters between I and n in Internationalization; 10 letters between L and n in Localization",
+      "I18n Checks: Externalized resource bundles, UTF-8 encoding, no hardcoded English text",
+      "L10n Checks: Translated strings, currency symbols (₹, €, ¥), date formats, Right-to-Left (RTL) layout"
+    ],
+    example: "Testing the app in Japanese (ja-JP) with '¥' prices and in Arabic (ar-SA) with mirrored Right-to-Left navigation."
   }
 };
