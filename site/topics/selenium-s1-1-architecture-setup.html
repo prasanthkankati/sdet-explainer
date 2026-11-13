@@ -10,146 +10,199 @@
 <div class="wrap">
 <article>
   <span class="tag Selenium">Selenium</span>
-  <h1>S1.1 Selenium WebDriver Architecture, The W3C Protocol &amp; Driver Setup</h1>
-  <p class="hero-sub" style="margin-top:-10px;margin-bottom:20px;font-weight:600;color:var(--muted)">Learning Goal: Explain the internal architecture and protocols of Selenium WebDriver, configure a Maven or Gradle project from scratch across operating systems, write a thread-safe browser initialization factory, and execute a verified test session.</p>
+  <h1>S1.1 Selenium WebDriver: Architecture, Protocols, and Setup</h1>
+  <p class="hero-sub" style="margin-top:-10px;margin-bottom:20px;font-weight:600;color:var(--muted)">Learning Goal: Explain what WebDriver is and how it works internally, set up a Java + Maven/Gradle + TestNG project, run a browser test locally, in CI/CD, and on a remote Grid, and answer the setup questions asked in interviews.</p>
 
   <section><h2>1. Definition (3 Distinct Styles)</h2>
     <div class="def">
       <p style="margin-top:0"><b>Style A &mdash; The 1-Sentence High-Impact Definition:</b><br>
-      <b>Selenium WebDriver</b> is an open-source, multi-language automation library that controls web browsers out-of-process through browser-vendor driver executables using the W3C WebDriver HTTP standard.</p>
+      <b>Selenium WebDriver</b> is an open-source, multi-language browser-automation API that sends HTTP requests with JSON bodies to browser driver executables, which control real browsers through their own automation interfaces.</p>
 
       <p><b>Style B &mdash; The Architectural / Mechanical Definition:</b><br>
-      <b>Selenium WebDriver</b> is a client-server remote control system where client language bindings serialize user actions into standardized W3C JSON HTTP REST requests over TCP/IP to a local driver daemon process (e.g., <code>chromedriver</code>), which forwards the instructions via native debugging protocols (CDP/Marionette) to the browser rendering engine to trigger native hardware input events.</p>
+      <b>Selenium WebDriver</b> is a client-server remote control architecture where client language bindings serialize user actions into standardized W3C JSON HTTP REST requests over TCP/IP to a local driver daemon process (such as <code>chromedriver</code>), which forwards the instructions via native debugging protocols (CDP, Marionette, WebKit) to the browser rendering engine to trigger native hardware input events.</p>
 
       <p style="margin-bottom:0"><b>Style C &mdash; The Professional Plain-English Mental Model:</b><br>
-      <b>Selenium WebDriver</b> is an automated software controller that replaces a human sitting at a computer. Instead of a person manually opening Chrome, typing text, and clicking buttons, a Java program writes instructions that the browser executes natively at machine speed across any operating system without being constrained by web page security sandboxes.</p>
+      <b>Selenium WebDriver</b> is an automated software controller that replaces a human sitting at a computer. Instead of a person manually opening a browser, typing text, and clicking buttons, a program writes instructions that the browser executes natively at machine speed across any operating system without being constrained by web page security sandboxes.</p>
     </div>
 
-    <h3>The History and the Problem It Solved</h3>
-    <p>In 2004, Jason Huggins created <b>Selenium Core</b> at ThoughtWorks. Selenium Core was a pure JavaScript library injected directly into the web page under test. It suffered from a fatal constraint: the <b>Same-Origin Policy (RFC 6454)</b> enforced by web browsers. The Same-Origin Policy prevents JavaScript running on one origin (<code>protocol + domain + port</code>) from accessing content on a different origin. If an application under test redirected a user to an external domain (for example, from <code>app.company.com</code> to <code>login.okta.com</code> or <code>checkout.stripe.com</code>), the injected JavaScript test runner was locked out by browser security and execution crashed.</p>
+    <h3>Why It Is Widely Used</h3>
+    <p>It is the standard open-source tool for browser automation, it supports five official language bindings, it works on all major desktop browsers, and it is the most common UI-automation skill listed in SDET job descriptions.</p>
 
-    <p>In 2006, Paul Hammant created <b>Selenium 1.0 (Selenium Remote Control / RC)</b>. Selenium RC attempted to bypass the Same-Origin Policy by introducing a local proxy server written in Java. The browser was configured to route all traffic through <code>127.0.0.1:4444</code>. The proxy server intercepted requests, rewritten headers, and injected the JavaScript runner so the browser believed the test engine and the web application shared the same origin. Selenium RC had two major flaws:
-    <br>1. <b>High network latency:</b> Every single HTTP request, image, and stylesheet had to pass through the local proxy server.
-    <br>2. <b>Synthetic event limitations:</b> It could only simulate JavaScript events (<code>element.dispatchEvent()</code>). It could not generate operating-system-level hardware scan codes for keystrokes, could not upload files via native operating system file dialogs, and could not handle browser security alerts.</p>
+    <h3>Why It Is Asked in Interviews</h3>
+    <p>Interviewers use it to check whether a candidate understands the browser-control layer: driver binaries, sessions, locators, waits, and failure modes.</p>
 
-    <p>In 2006, Simon Stewart started the <b>WebDriver</b> project. WebDriver abandoned JavaScript injection entirely. Instead of operating from inside the browser, it commanded the browser from the outside by starting the browser as an operating system subprocess and controlling it through the operating system's native input interfaces (for example, <code>user32.dll</code> on Windows and X11 calls on Linux).</p>
-
-    <p>In 2011, <b>Selenium 2.0</b> merged Selenium RC and WebDriver into a unified library. In 2016, <b>Selenium 3.0</b> completely removed the legacy Selenium RC code and standardized driver communication on the <b>JSON Wire Protocol</b>. In 2021, <b>Selenium 4.0</b> removed the JSON Wire Protocol, replaced it with the official <b>W3C WebDriver Specification</b>, and introduced bidirectional events over WebSockets (the <b>BiDi</b> standard).</p>
+    <h3>Official Language Bindings (Exactly 5)</h3>
+    <table>
+      <tr><th>#</th><th>Language</th><th>Package / Artifact</th></tr>
+      <tr><td>1</td><td><b>Java</b></td><td><code>org.seleniumhq.selenium:selenium-java</code> (Maven)</td></tr>
+      <tr><td>2</td><td><b>Python</b></td><td><code>selenium</code> (PyPI)</td></tr>
+      <tr><td>3</td><td><b>C#</b></td><td><code>Selenium.WebDriver</code> (NuGet)</td></tr>
+      <tr><td>4</td><td><b>JavaScript / Node.js</b></td><td><code>selenium-webdriver</code> (npm)</td></tr>
+      <tr><td>5</td><td><b>Ruby</b></td><td><code>selenium-webdriver</code> (RubyGems)</td></tr>
+    </table>
   </section>
 
-  <section><h2>2. Why It Matters</h2>
-    <ul>
-      <li><b>Universal Web Standard:</b> The W3C WebDriver specification is an official web standard. Browser vendors (Google, Mozilla, Apple, Microsoft) author and maintain the driver binaries for their own browsers.</li>
-      <li><b>Core Career Gate:</b> Over 80% of test automation job listings require WebDriver proficiency in Java, Python, or C#.</li>
-      <li><b>Senior Interview Differentiator:</b> Senior SDET interviewers use WebDriver internals (client bindings, driver binaries, HTTP endpoints, thread safety) to distinguish engineers who understand architecture from candidates who merely copy scripts.</li>
-    </ul>
+  <section><h2>2. History: How WebDriver Came to Exist</h2>
+    <table>
+      <tr><th>Year</th><th>Project</th><th>Author / Origin</th><th>How It Worked</th><th>Limitation That Led to the Next Step</th></tr>
+      <tr><td>2004</td><td><b>Selenium Core</b></td><td>Jason Huggins, ThoughtWorks</td><td>JavaScript injected into the page under test</td><td>Same-Origin Policy blocked cross-domain pages</td></tr>
+      <tr><td>2006</td><td><b>Selenium RC (Remote Control)</b></td><td>Paul Hammant and team, ThoughtWorks</td><td>Java server acting as an HTTP proxy that rewrote responses</td><td>Slow (all traffic proxied); JavaScript events are synthetic, not real input</td></tr>
+      <tr><td>2006&ndash;2009</td><td><b>WebDriver</b></td><td>Simon Stewart</td><td>Drove the browser through native, browser-specific automation interfaces</td><td>Each browser needed its own driver</td></tr>
+      <tr><td>2011</td><td><b>Selenium 2.0</b></td><td>Selenium Project</td><td>Merged RC and WebDriver into a unified API</td><td>Multiple wire protocols</td></tr>
+      <tr><td>2016</td><td><b>Selenium 3.0</b></td><td>Selenium Project</td><td>RC code removed; JSON Wire Protocol used</td><td>Custom protocol, browser-vendor differences</td></tr>
+      <tr><td>2021</td><td><b>Selenium 4.0</b></td><td>Selenium Project</td><td>W3C WebDriver standard; BiDi (WebSocket) added; JSON Wire Protocol removed</td><td>Current standard</td></tr>
+    </table>
+
+    <p><b>Same-Origin Policy (SOP):</b> A browser security rule (RFC 6454). Scripts from one origin (protocol + host + port) cannot read or change the DOM of another origin. Selenium Core ran inside the page, so it was blocked when a test moved to a different domain such as an identity provider or payment portal.</p>
   </section>
 
-  <section><h2>3. Architecture and Internals</h2>
+  <section><h2>3. Architecture</h2>
+    <h3>3.1 Components</h3>
+    <table>
+      <tr><th>Component</th><th>What It Is</th><th>Role</th></tr>
+      <tr><td><b>Client binding</b></td><td>Your Java code plus <code>selenium-java</code> library</td><td>Builds commands such as <code>findElement</code> and <code>sendKeys</code> and sends them over HTTP.</td></tr>
+      <tr><td><b>Transport</b></td><td>HTTP/1.1 with JSON bodies</td><td>Carries commands and responses over TCP/IP network sockets.</td></tr>
+      <tr><td><b>Browser driver</b></td><td>Executable such as <code>chromedriver</code></td><td>Runs an HTTP server, receives W3C commands, translates them to browser-native commands.</td></tr>
+      <tr><td><b>Browser</b></td><td>Chrome, Firefox, Edge, Safari</td><td>Renders pages and executes input events on the native OS window.</td></tr>
+      <tr><td><b>Session</b></td><td>Identifier returned when a driver starts a browser</td><td>Every later command includes this session ID in the URL path.</td></tr>
+      <tr><td><b>Selenium Manager</b></td><td>Built into Selenium 4.6.0+</td><td>Finds the browser version and downloads the matching driver automatically.</td></tr>
+    </table>
+
+    <h3>3.2 Diagram</h3>
     <div class="arch">
       <div class="lbl">SELENIUM WEBDRIVER 3-TIER ARCHITECTURE</div>
-      <pre><code>+----------------------------------------------------------------------------------------------------+
-| TIER 1: CLIENT LANGUAGE BINDINGS                                                                   |
-| Libraries: Java (selenium-java), Python (selenium), C# (Selenium.WebDriver),                       |
-|            JavaScript (selenium-webdriver), Ruby (selenium-webdriver)                             |
-| Action: driver.findElement(By.id("loginButton")).click();                                          |
-| Function: Serializes Java method call into W3C JSON payload:                                        |
-|           POST http://127.0.0.1:9515/session/{sessionId}/element/{elementId}/click                 |
-+----------------------------------------------------------------------------------------------------+
-                                           │
-                         Transport: HTTP/1.1 REST over TCP/IP
-                         Network: Localhost (127.0.0.1) across an assigned port
-                                           ▼
-+----------------------------------------------------------------------------------------------------+
-| TIER 2: BROWSER DRIVER EXECUTABLE                                                                  |
-| Binaries: chromedriver.exe, geckodriver.exe, msedgedriver.exe, safaridriver                        |
-| Function: Runs as a lightweight local HTTP server.                                                 |
-|           Receives W3C JSON request -> Validates syntax -> Translates command to                   |
-|           internal browser control commands (Chrome DevTools Protocol, Marionette, or WebKit).     |
-+----------------------------------------------------------------------------------------------------+
-                                           │
-                         Transport: Named Pipes / Local Unix Sockets / WebSockets
-                                           ▼
-+----------------------------------------------------------------------------------------------------+
-| TIER 3: BROWSER RENDERING ENGINE                                                                   |
-| Engines: Blink / V8 (Chrome, Edge), Gecko / SpiderMonkey (Firefox), WebKit (Safari)                |
-| Function: Executes physical hardware event on the operating system window.                         |
-|           Updates the DOM -> Returns W3C JSON response payload back to Driver:                     |
-|           {"value": null} -> Driver sends HTTP 200 OK back to Java Client.                         |
-+----------------------------------------------------------------------------------------------------+</code></pre>
+      <pre><code>+--------------------------------------------------------------+
+| TIER 1: Client (your Java test)                              |
+|   new ChromeDriver() -> driver.get(url)                       |
+|   findElement(By.id("email")).sendKeys("a@b.com")            |
+|   Sends: HTTP POST http://localhost:9515/session/{id}/...    |
++--------------------------------------------------------------+
+                  | HTTP/1.1, JSON, W3C WebDriver commands
+                  v
++--------------------------------------------------------------+
+| TIER 2: Browser driver process (chromedriver)                |
+|   Runs an HTTP server on a port (default 9515)               |
+|   Translates W3C commands into browser-internal commands     |
++--------------------------------------------------------------+
+                  | Chromium: Chrome DevTools Protocol (CDP)
+                  | Firefox: Marionette
+                  v
++--------------------------------------------------------------+
+| TIER 3: Browser (Chrome / Firefox / Edge / Safari)           |
+|   Renders the page, applies real input events                |
+|   Returns results back up the same chain                     |
++--------------------------------------------------------------+</code></pre>
     </div>
+  </section>
 
-    <h3>Components Explained</h3>
+  <section><h2>4. Protocols: What Exists and Why W3C</h2>
+    <table>
+      <tr><th>Protocol</th><th>Owner</th><th>Status</th><th>Notes</th></tr>
+      <tr><td><b>JSON Wire Protocol</b></td><td>Selenium Project</td><td>Deprecated in 3.x, removed in Selenium 4</td><td>Custom format; each driver interpreted it differently with capability wrappers.</td></tr>
+      <tr><td><b>W3C WebDriver</b></td><td>World Wide Web Consortium (W3C)</td><td>Standard, used by Selenium 4</td><td>Same commands for every browser vendor with zero translation layer.</td></tr>
+      <tr><td><b>Chrome DevTools Protocol (CDP)</b></td><td>Google / Chromium</td><td>Used internally by ChromeDriver and EdgeDriver</td><td>Lower-level, Chromium-only JSON-RPC protocol over WebSockets.</td></tr>
+      <tr><td><b>Marionette</b></td><td>Mozilla</td><td>Used internally by geckodriver</td><td>Firefox-only TCP socket protocol for controlling Gecko.</td></tr>
+      <tr><td><b>WebDriver BiDi</b></td><td>W3C (supported in Selenium 4)</td><td>WebSocket, bidirectional</td><td>Lets the browser push events (console logs, network responses) to the test asynchronously.</td></tr>
+    </table>
+
+    <p><b>Why W3C:</b> One standard means the same Java code works across browsers, vendors implement the same commands, and the protocol is publicly documented. Use CDP or Marionette only through the driver, never directly, unless you are building custom tooling.</p>
+  </section>
+
+  <section><h2>5. Browsers and Driver Executables</h2>
+    <table>
+      <tr><th>Browser</th><th>Vendor</th><th>Driver Executable</th><th>Windows File Name</th><th>Default Port</th><th>Notes</th></tr>
+      <tr><td><b>Google Chrome</b></td><td>Google</td><td><code>chromedriver</code></td><td><code>chromedriver.exe</code></td><td>9515</td><td>Selenium Manager downloads it automatically.</td></tr>
+      <tr><td><b>Microsoft Edge</b></td><td>Microsoft</td><td><code>msedgedriver</code></td><td><code>msedgedriver.exe</code></td><td>9515</td><td>Chromium-based engine.</td></tr>
+      <tr><td><b>Mozilla Firefox</b></td><td>Mozilla</td><td><code>geckodriver</code></td><td><code>geckodriver.exe</code></td><td>4444</td><td>Marionette protocol.</td></tr>
+      <tr><td><b>Apple Safari</b></td><td>Apple</td><td><code>safaridriver</code></td><td>Not applicable (macOS)</td><td>Dynamic</td><td>Pre-installed; enable once via: <code>sudo safaridriver --enable</code></td></tr>
+    </table>
+    <p><i>Advanced Note:</i> Other Chromium-based browsers (Brave, Opera) can use <code>chromedriver</code> by configuring <code>ChromeOptions.setBinaryPath("/path/to/browser")</code>.</p>
+  </section>
+
+  <section><h2>6. Language Bindings and Java Class Hierarchy</h2>
+    <h3>6.1 Java Interface and Class Hierarchy</h3>
+    <pre><code><<interface>> SearchContext         findElement(), findElements()
+      ^
+      | extends
+<<interface>> WebDriver             get(), getTitle(), getCurrentUrl(), close(), quit(),
+      ^                             switchTo(), navigate(), manage(), getWindowHandle()
+      |
+<<interface>> JavascriptExecutor    executeScript()
+<<interface>> TakesScreenshot       getScreenshotAs()
+      ^         ^
+      |         |  (RemoteWebDriver implements WebDriver, JavascriptExecutor, TakesScreenshot)
+RemoteWebDriver (class)             sends HTTP commands, manages the session
+      ^
+      | extends
+ChromiumDriver (class)              shared base for Chromium browsers
+      ^
+      | extends
+ChromeDriver / EdgeDriver (classes) browser-specific startup
+FirefoxDriver (class)               extends RemoteWebDriver</code></pre>
+
+    <h3>6.2 Role of Each Class (Setup-Related)</h3>
+    <table>
+      <tr><th>Class / Type</th><th>Package</th><th>Role in Setup</th></tr>
+      <tr><td><code>WebDriver</code></td><td><code>org.openqa.selenium</code></td><td>The type you declare in tests for browser control.</td></tr>
+      <tr><td><code>SearchContext</code></td><td><code>org.openqa.selenium</code></td><td>Parent of <code>WebDriver</code>; provides <code>findElement</code> and <code>findElements</code>.</td></tr>
+      <tr><td><code>RemoteWebDriver</code></td><td><code>org.openqa.selenium.remote</code></td><td>Base class that performs HTTP communication; used directly for Selenium Grid.</td></tr>
+      <tr><td><code>ChromeDriver</code></td><td><code>org.openqa.selenium.chrome</code></td><td>Starts Chrome browser locally.</td></tr>
+      <tr><td><code>FirefoxDriver</code></td><td><code>org.openqa.selenium.firefox</code></td><td>Starts Firefox browser locally.</td></tr>
+      <tr><td><code>EdgeDriver</code></td><td><code>org.openqa.selenium.edge</code></td><td>Starts Edge browser locally.</td></tr>
+      <tr><td><code>SafariDriver</code></td><td><code>org.openqa.selenium.safari</code></td><td>Starts Safari browser locally on macOS.</td></tr>
+      <tr><td><code>ChromeOptions</code></td><td><code>org.openqa.selenium.chrome</code></td><td>Manages Chrome-specific startup arguments and capabilities.</td></tr>
+      <tr><td><code>FirefoxOptions</code> / <code>EdgeOptions</code></td><td>Respective packages</td><td>Manages browser-specific startup arguments.</td></tr>
+      <tr><td><code>MutableCapabilities</code></td><td><code>org.openqa.selenium</code></td><td>Base class of all browser Options classes.</td></tr>
+      <tr><td><code>By</code></td><td><code>org.openqa.selenium</code></td><td>Locator strategy object (<code>By.id</code>, <code>By.cssSelector</code>, <code>By.xpath</code>).</td></tr>
+      <tr><td><code>WebElement</code></td><td><code>org.openqa.selenium</code></td><td>Represents an identified DOM element.</td></tr>
+      <tr><td><code>Duration</code></td><td><code>java.time</code></td><td>Defines time values for timeouts and polling intervals.</td></tr>
+      <tr><td><code>WebDriverWait</code></td><td><code>org.openqa.selenium.support.ui</code></td><td>Implements explicit wait polling loops.</td></tr>
+      <tr><td><code>ExpectedConditions</code></td><td><code>org.openqa.selenium.support.ui</code></td><td>Predefined conditions used with explicit waits.</td></tr>
+    </table>
+  </section>
+
+  <section><h2>7. Installation and Setup: Local, Step by Step</h2>
+    <h3>7.1 Prerequisites</h3>
+    <table>
+      <tr><th>Tool</th><th>Exact Version</th><th>Check Command (Windows PowerShell)</th><th>Check Command (macOS/Linux)</th></tr>
+      <tr><td><b>JDK</b></td><td>17 or 21 (LTS)</td><td><code>java -version</code></td><td><code>java -version</code></td></tr>
+      <tr><td><b>Maven</b></td><td>3.9.x</td><td><code>mvn -version</code></td><td><code>mvn -version</code></td></tr>
+      <tr><td><b>Gradle (optional)</b></td><td>8.x</td><td><code>gradle -version</code></td><td><code>gradle -version</code></td></tr>
+      <tr><td><b>Git</b></td><td>Current stable</td><td><code>git --version</code></td><td><code>git --version</code></td></tr>
+      <tr><td><b>Browser</b></td><td>Current stable Chrome, Edge, or Firefox</td><td>Check About page in browser</td><td>Same</td></tr>
+      <tr><td><b>IDE</b></td><td>IntelliJ IDEA Community</td><td>Launch application</td><td>Same</td></tr>
+    </table>
+
+    <p><b>Setting JAVA_HOME:</b><br>
+    - Windows (PowerShell, Current User):<br>
+    <code>[Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Program Files\Java\jdk-17", "User")</code><br>
+    - macOS / Linux (bash/zsh):<br>
+    <code>export JAVA_HOME=$(/usr/libexec/java_home -v 17)</code> (add to <code>~/.zshrc</code> or <code>~/.bashrc</code>)</p>
+
+    <h3>7.2 Create a Maven Project in IntelliJ</h3>
     <ol>
-      <li><b>Client Language Bindings:</b> The compiled software library (e.g. <code>selenium-java-4.28.1.jar</code>) installed in your project. It contains an internal HTTP client (<code>java.net.http.HttpClient</code>) that converts each method call into an HTTP request.</li>
-      <li><b>HTTP/JSON Transport:</b> The network protocol that links the Java client to the driver binary. Every browser action corresponds to an HTTP verb and URL path:
-        <ul>
-          <li>Starting a session: <code>POST /session</code></li>
-          <li>Opening a URL: <code>POST /session/{id}/url</code></li>
-          <li>Finding an element: <code>POST /session/{id}/element</code></li>
-          <li>Clicking an element: <code>POST /session/{id}/element/{id}/click</code></li>
-          <li>Getting page title: <code>GET /session/{id}/title</code></li>
-          <li>Terminating a session: <code>DELETE /session/{id}</code></li>
-        </ul>
-      </li>
-      <li><b>Browser Driver Executable:</b> A compiled binary running as an independent operating system process. It acts as an HTTP server that listens on a dedicated port (default <code>9515</code> for ChromeDriver).</li>
-      <li><b>Browser Rendering Engine:</b> The actual browser software containing two sub-engines: a rendering engine that parses HTML/CSS to construct the layout, and a JavaScript engine that executes scripts.</li>
+      <li>Open IntelliJ &rarr; <b>File &rarr; New &rarr; Project</b>.</li>
+      <li>Select <b>Maven</b> from the left menu.</li>
+      <li>Set GroupId: <code>com.sdet.mastery</code>, ArtifactId: <code>selenium-core-engine</code>, JDK: <code>17</code>.</li>
+      <li>Click <b>Create</b> and open <code>pom.xml</code>.</li>
     </ol>
 
-    <h3>Protocols Detailed</h3>
-    <table>
-      <tr><th>Protocol Name</th><th>Status</th><th>Transport</th><th>Key Characteristic</th></tr>
-      <tr><td><b>JSON Wire Protocol</b></td><td>Legacy (Removed in v4)</td><td>HTTP REST</td><td>Custom JSON envelope with desiredCapabilities; required driver translation layers.</td></tr>
-      <tr><td><b>W3C WebDriver Protocol</b></td><td>Universal Standard</td><td>HTTP REST</td><td>Official W3C web standard; zero translation overhead between client and driver.</td></tr>
-      <tr><td><b>Chrome DevTools Protocol (CDP)</b></td><td>Vendor-Specific (Chromium)</td><td>WebSockets</td><td>JSON-RPC protocol for deep browser instrumentation, network throttling, and performance profiling.</td></tr>
-      <tr><td><b>Marionette Protocol</b></td><td>Vendor-Specific (Mozilla)</td><td>TCP Sockets</td><td>Internal protocol used by geckodriver to control Firefox's Gecko engine.</td></tr>
-      <tr><td><b>WebDriver BiDi</b></td><td>Next-Gen W3C Standard</td><td>WebSockets</td><td>Bidirectional asynchronous protocol streaming console logs, network events, and DOM mutations in real time.</td></tr>
-    </table>
-
-    <h3>Supported Desktop Browsers, Driver Binaries, and Default Ports</h3>
-    <table>
-      <tr><th>Browser</th><th>Vendor</th><th>Driver Executable Name</th><th>Default Port</th><th>Internal Protocol</th></tr>
-      <tr><td><b>Google Chrome</b></td><td>Google</td><td><code>chromedriver.exe</code> (Win) / <code>chromedriver</code> (macOS/Linux)</td><td><code>9515</code></td><td>W3C + CDP</td></tr>
-      <tr><td><b>Mozilla Firefox</b></td><td>Mozilla</td><td><code>geckodriver.exe</code> (Win) / <code>geckodriver</code> (macOS/Linux)</td><td><code>4444</code></td><td>W3C + Marionette</td></tr>
-      <tr><td><b>Microsoft Edge</b></td><td>Microsoft</td><td><code>msedgedriver.exe</code> (Win) / <code>msedgedriver</code> (macOS/Linux)</td><td><code>9515</code></td><td>W3C + CDP</td></tr>
-      <tr><td><b>Apple Safari</b></td><td>Apple</td><td><code>safaridriver</code> (Pre-installed in macOS at <code>/usr/bin/safaridriver</code>)</td><td>Dynamic</td><td>W3C Native</td></tr>
-    </table>
-  </section>
-
-  <section><h2>4. Variants and Alternatives</h2>
-    <table>
-      <tr><th>Feature / Dimension</th><th>Selenium WebDriver (v4.28.1)</th><th>Playwright (v1.49.0)</th><th>Cypress (v13.17.0)</th></tr>
-      <tr><td><b>Underlying Architecture</b></td><td>W3C WebDriver over HTTP + BiDi WebSockets</td><td>Chrome DevTools Protocol / BiDi WebSockets</td><td>In-browser JavaScript runtime inside an <code>&lt;iframe&gt;</code></td></tr>
-      <tr><td><b>Language Support</b></td><td>Exactly 5: Java, Python, C#, JavaScript, Ruby</td><td>Exactly 4: TypeScript/JavaScript, Python, Java, C#</td><td>Exactly 1: JavaScript / TypeScript</td></tr>
-      <tr><td><b>Cross-Origin Navigation</b></td><td>Supported natively without restrictions</td><td>Supported natively via isolated browser contexts</td><td>Limited; requires explicit <code>cy.origin()</code> commands</td></tr>
-      <tr><td><b>Multiple Tabs and Windows</b></td><td>Supported natively via <code>driver.switchTo().window()</code></td><td>Supported natively via <code>BrowserContext.newPage()</code></td><td>Not supported natively (single tab only)</td></tr>
-      <tr><td><b>Browser Execution Model</b></td><td>Runs out-of-process via external driver binary</td><td>Runs out-of-process via internal WebSocket driver</td><td>Runs in-process inside the browser DOM alongside the app</td></tr>
-      <tr><td><b>Ecosystem Maturity</b></td><td>Oldest (2004), largest community, enterprise-standard</td><td>Modern (2020), rapidly growing</td><td>Established (2015), web-frontend focused</td></tr>
-    </table>
-  </section>
-
-  <section><h2>5. Prerequisites</h2>
-    <ul>
-      <li><b>Java Development Kit (JDK):</b> Version 17 LTS or Version 21 LTS installed. Verify in terminal: <code>java -version</code> (Expected: <code>openjdk version "17.0.x"</code>).</li>
-      <li><b>Build Tool:</b> Apache Maven (version 3.8.0 or higher) OR Gradle (version 8.0 or higher). Verify in terminal: <code>mvn -version</code>.</li>
-      <li><b>Web Browser:</b> Google Chrome Version 115 or higher installed at default system path.</li>
-    </ul>
-  </section>
-
-  <section><h2>6. Setup (Local, CI/CD, and Driver Management)</h2>
-    <h3>6.1 Exact Dependencies: Maven (<code>pom.xml</code>)</h3>
-<pre><code>&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
+    <h3>7.3 Maven <code>pom.xml</code> (Full Production File)</h3>
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd"&gt;
     &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
     &lt;groupId&gt;com.sdet.mastery&lt;/groupId&gt;
-    &lt;artifactId&gt;selenium-core&lt;/artifactId&gt;
+    &lt;artifactId&gt;selenium-core-engine&lt;/artifactId&gt;
     &lt;version&gt;1.0.0&lt;/version&gt;
 
     &lt;properties&gt;
+        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
         &lt;maven.compiler.source&gt;17&lt;/maven.compiler.source&gt;
         &lt;maven.compiler.target&gt;17&lt;/maven.compiler.target&gt;
-        &lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
         &lt;selenium.version&gt;4.28.1&lt;/selenium.version&gt;
         &lt;testng.version&gt;7.10.2&lt;/testng.version&gt;
     &lt;/properties&gt;
@@ -167,68 +220,94 @@
             &lt;scope&gt;test&lt;/scope&gt;
         &lt;/dependency&gt;
     &lt;/dependencies&gt;
+
+    &lt;build&gt;
+        &lt;plugins&gt;
+            &lt;plugin&gt;
+                &lt;groupId&gt;org.apache.maven.plugins&lt;/groupId&gt;
+                &lt;artifactId&gt;maven-surefire-plugin&lt;/artifactId&gt;
+                &lt;version&gt;3.2.5&lt;/version&gt;
+                &lt;configuration&gt;
+                    &lt;suiteXmlFiles&gt;
+                        &lt;suiteXmlFile&gt;testng.xml&lt;/suiteXmlFile&gt;
+                    &lt;/suiteXmlFiles&gt;
+                &lt;/configuration&gt;
+            &lt;/plugin&gt;
+        &lt;/plugins&gt;
+    &lt;/build&gt;
 &lt;/project&gt;</code></pre>
 
-    <h3>6.2 Exact Dependencies: Gradle (<code>build.gradle</code>)</h3>
+    <table>
+      <tr><th>Entry</th><th>Role</th><th>If Removed</th></tr>
+      <tr><td><code>maven.compiler.source/target 17</code></td><td>Enforces Java 17 language level during compilation.</td><td>Compiler defaults to older Java versions; modern <code>switch</code> expressions fail.</td></tr>
+      <tr><td><code>selenium-java</code></td><td>Downloads all WebDriver, driver, and By classes.</td><td><code>ClassNotFoundException</code>; package <code>org.openqa.selenium</code> not found.</td></tr>
+      <tr><td><code>testng</code> with <code>&lt;scope&gt;test&lt;/scope&gt;</code></td><td>Test execution framework, scoped strictly to test compilation.</td><td>Annotations like <code>@Test</code> and <code>@BeforeMethod</code> are not found.</td></tr>
+      <tr><td><code>maven-surefire-plugin</code></td><td>Executes the TestNG XML suite file during <code>mvn test</code>.</td><td><code>mvn test</code> runs no tests or ignores custom suite parameters.</td></tr>
+    </table>
+
+    <h3>7.4 Gradle <code>build.gradle</code> (Alternative)</h3>
 <pre><code>plugins { id 'java' }
 group = 'com.sdet.mastery'
 version = '1.0.0'
+java {
+    toolchain { languageVersion = JavaLanguageVersion.of(17) }
+}
 repositories { mavenCentral() }
 dependencies {
     implementation 'org.seleniumhq.selenium:selenium-java:4.28.1'
     testImplementation 'org.testng:testng:7.10.2'
 }
-test { useTestNG() }</code></pre>
+test {
+    useTestNG()
+    useTestNG { suites 'src/test/resources/testng.xml' }
+}</code></pre>
+    <p>Run via terminal: <code>./gradlew test</code> (macOS/Linux) or <code>gradlew.bat test</code> (Windows).</p>
 
-    <h3>6.3 Driver Management: The 3 Eras</h3>
-    <ul>
-      <li><b>Era 1: Manual Driver Binary (Avoid):</b> <code>System.setProperty("webdriver.chrome.driver", "path")</code>. Fails when browser auto-updates every 4 weeks.</li>
-      <li><b>Era 2: Boni Garcia's WebDriverManager (Avoid):</b> <code>WebDriverManager.chromedriver().setup()</code>. Fails when corporate proxy firewalls block GitHub/Google API calls.</li>
-      <li><b>Era 3: Built-In Selenium Manager (Selenium 4.6.0+ &mdash; Preferred Standard):</b> <code>WebDriver driver = new ChromeDriver()</code>. Automatically detects local browser version, checks <code>~/.cache/selenium</code>, and downloads matching binaries with zero manual setup.</li>
-    </ul>
+    <h3>7.5 Maven vs Gradle Comparison</h3>
+    <table>
+      <tr><th>Aspect</th><th>Maven</th><th>Gradle</th></tr>
+      <tr><td>Configuration File</td><td><code>pom.xml</code> (XML)</td><td><code>build.gradle</code> (Groovy / Kotlin DSL)</td></tr>
+      <tr><td>Dependency Syntax</td><td>Structured <code>&lt;dependency&gt;</code> XML blocks</td><td>Concise one-line string declarations</td></tr>
+      <tr><td>Scope Words</td><td><code>compile</code>, <code>test</code>, <code>provided</code></td><td><code>implementation</code>, <code>testImplementation</code></td></tr>
+      <tr><td>Execution Speed</td><td>Standard serial build lifecycle</td><td>Faster incremental builds and build caching</td></tr>
+      <tr><td>Industry Preference</td><td>Enterprise SDET teams, standard stability</td><td>Large multi-module enterprise codebases, Android</td></tr>
+    </table>
+    <p><i>Recommendation for this Track:</i> <b>Maven</b>, due to its explicit declarative XML structure and universal adoption in SDET hiring interviews.</p>
 
-    <h3>6.4 Headless CI/CD &amp; Docker Setup</h3>
-<pre><code>ChromeOptions options = new ChromeOptions();
-options.addArguments("--headless=new");          // Mandatory for servers without GUI monitors
-options.addArguments("--window-size=1920,1080"); // Enforces standard desktop viewport
-options.addArguments("--no-sandbox");             // Required for Linux root/Docker containers
-options.addArguments("--disable-dev-shm-usage");  // Prevents /dev/shm memory exhaustion crashes
-WebDriver driver = new ChromeDriver(options);</code></pre>
-  </section>
+    <h3>7.6 Your First Runnable Test</h3>
+    <p>Create <code>src/test/resources/testng.xml</code>:</p>
+<pre><code>&lt;!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd"&gt;
+&lt;suite name="S1 Suite"&gt;
+  &lt;test name="Chrome Test"&gt;
+    &lt;classes&gt;
+      &lt;class name="com.sdet.mastery.FirstTest"/&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt;
+&lt;/suite&gt;</code></pre>
 
-  <section><h2>7. Hands-on Steps</h2>
-    <p><b>Step 1: Create Project Structure</b></p>
-    <p>On Windows PowerShell: <code>mkdir -p selenium-project\src\test\java\com\sdet</code><br>
-    On macOS / Linux: <code>mkdir -p selenium-project/src/test/java/com/sdet</code></p>
-
-    <p><b>Step 2: Create the Test File (<code>BasicNavigationTest.java</code>)</b></p>
-<pre><code>package com.sdet;
+    <p>Create <code>src/test/java/com/sdet/mastery/FirstTest.java</code>:</p>
+<pre><code>package com.sdet.mastery;
 
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import java.time.Duration;
 
-public class BasicNavigationTest {
+public class FirstTest {
     private WebDriver driver;
 
     @BeforeMethod
     public void setUp() {
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--start-maximized");
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        driver = new ChromeDriver();
     }
 
     @Test
-    public void testOpenWebsite() {
-        driver.get("https://prasanthkankati.github.io/sdet-explainer/");
-        String title = driver.getTitle();
-        Assert.assertEquals(title, "SDET Explainer");
+    public void verifyTitle() {
+        driver.get("https://www.selenium.dev/");
+        Assert.assertTrue(driver.getTitle().contains("Selenium"),
+                "Title did not contain 'Selenium'");
     }
 
     @AfterMethod
@@ -239,52 +318,120 @@ public class BasicNavigationTest {
     }
 }</code></pre>
 
-    <p><b>Step 3: Run the Test via Terminal</b></p>
-    <p>Execute: <code>mvn clean test</code></p>
-
-    <p><b>Step 4: Expected Terminal Output</b></p>
-<pre><code>[INFO] Running com.sdet.BasicNavigationTest
-[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.512 s
-[INFO] BUILD SUCCESS</code></pre>
+    <p>Run command in terminal: <code>mvn test</code><br>
+    Expected output ends with: <code>Tests run: 1, Failures: 0, Errors: 0, Skipped: 0</code> and <code>BUILD SUCCESS</code>.</p>
   </section>
 
-  <section><h2>8. Code Breakdown</h2>
+  <section><h2>8. Browser Context, Pages, and Windows</h2>
     <table>
-      <tr><th>Code Line / Fragment</th><th>Role in Code</th><th>What Breaks If It Is Removed</th></tr>
-      <tr><td><code>private WebDriver driver;</code></td><td>Declares an instance variable using interface type <code>WebDriver</code>.</td><td>Cannot reference <code>driver</code> across separate <code>@BeforeMethod</code>, <code>@Test</code>, and <code>@AfterMethod</code> blocks.</td></tr>
-      <tr><td><code>ChromeOptions options = new ChromeOptions();</code></td><td>Instantiates configuration manager for Chrome-specific binary switches.</td><td>Cannot supply command-line arguments like window size or headless flags.</td></tr>
-      <tr><td><code>options.addArguments("--start-maximized");</code></td><td>Passes maximized switch to Chrome binary process on launch.</td><td>Browser opens in small default 800x600 window, collapsing desktop menus into mobile menus.</td></tr>
-      <tr><td><code>driver = new ChromeDriver(options);</code></td><td>Boots <code>chromedriver</code> binary, opens HTTP session, and launches Chrome.</td><td>Browser never opens. <code>driver</code> remains <code>null</code>, causing <code>NullPointerException</code>.</td></tr>
-      <tr><td><code>driver.manage().timeouts().implicitlyWait(...);</code></td><td>Configures driver to poll DOM for up to 10 seconds during <code>findElement</code>.</td><td>Driver defaults to 0-second wait. Elements requiring 50ms to render throw instant <code>NoSuchElementException</code>.</td></tr>
-      <tr><td><code>driver.get("https://...");</code></td><td>Sends HTTP POST requesting URL navigation and waits for DOM load.</td><td>Browser remains on <code>about:blank</code>.</td></tr>
-      <tr><td><code>String title = driver.getTitle();</code></td><td>Sends HTTP GET requesting <code>&lt;title&gt;</code> content of current DOM document.</td><td>No actual data retrieved from browser to evaluate.</td></tr>
-      <tr><td><code>Assert.assertEquals(title, "SDET Explainer");</code></td><td>TestNG assertion comparing actual string with expected string.</td><td>If title is wrong or page fails to load, test still passes, hiding a software bug.</td></tr>
-      <tr><td><code>driver.quit();</code></td><td>Closes all open windows and terminates the <code>chromedriver</code> operating system process.</td><td>Browser windows remain open and <code>chromedriver.exe</code> lingers in memory, causing resource exhaustion.</td></tr>
+      <tr><th>Term</th><th>Meaning in Selenium</th><th>Exact Code Method</th></tr>
+      <tr><td><b>Browser Session</b></td><td>An active browser instance controlled by one <code>WebDriver</code> object.</td><td><code>new ChromeDriver()</code></td></tr>
+      <tr><td><b>Window Handle</b></td><td>Unique alpha-numeric string ID assigned to each tab or window.</td><td><code>driver.getWindowHandle()</code> / <code>getWindowHandles()</code></td></tr>
+      <tr><td><b>Switching Windows</b></td><td>Transfers WebDriver's focus to another browser tab or popup.</td><td><code>driver.switchTo().window(handle)</code></td></tr>
+      <tr><td><b>Frame / IFrame</b></td><td>An embedded HTML document nested inside the parent page.</td><td><code>driver.switchTo().frame("frameName")</code></td></tr>
+      <tr><td><b>Alert</b></td><td>A native browser JavaScript dialog (alert, confirm, prompt).</td><td><code>driver.switchTo().alert().accept()</code></td></tr>
+      <tr><td><b>Browser Context (Isolated)</b></td><td>Isolated browser profile with unique cookies, cache, and session data.</td><td><code>options.addArguments("--incognito")</code> or custom <code>--user-data-dir</code></td></tr>
+    </table>
+    <p><i>State Reset:</i> Call <code>driver.manage().deleteAllCookies()</code> before each test method to guarantee no shared state or session contamination between executions.</p>
+  </section>
+
+  <section><h2>9. TestNG Setup Annotations and Execution Order</h2>
+    <h3>9.1 Exact Execution Order</h3>
+    <table>
+      <tr><th>Order</th><th>Annotation</th><th>Runs When</th><th>Typical SDET Framework Use</th></tr>
+      <tr><td>1</td><td><code>@BeforeSuite</code></td><td>Once per <code>&lt;suite&gt;</code> XML tag</td><td>Initialize HTML ExtentReports, read global environment properties.</td></tr>
+      <tr><td>2</td><td><code>@BeforeTest</code></td><td>Once per <code>&lt;test&gt;</code> XML tag</td><td>Read XML parameters (e.g. target browser name).</td></tr>
+      <tr><td>3</td><td><code>@BeforeClass</code></td><td>Once per Java test class</td><td>Initialize page object dependencies shared across class methods.</td></tr>
+      <tr><td>4</td><td><code>@BeforeMethod</code></td><td>Before every <code>@Test</code> method</td><td>Launch a fresh browser session: <code>DriverFactory.initDriver("chrome")</code>.</td></tr>
+      <tr><td>5</td><td><code>@Test</code></td><td>For each test method</td><td>Execute automated test actions and assertions.</td></tr>
+      <tr><td>6</td><td><code>@AfterMethod</code></td><td>After every <code>@Test</code> method</td><td>Close browser and terminate process: <code>DriverFactory.quitDriver()</code>.</td></tr>
+      <tr><td>7</td><td><code>@AfterClass</code></td><td>Once per Java test class</td><td>Clean up class-level objects.</td></tr>
+      <tr><td>8</td><td><code>@AfterTest</code></td><td>Once per <code>&lt;test&gt;</code> XML tag</td><td>Flush test-block logs.</td></tr>
+      <tr><td>9</td><td><code>@AfterSuite</code></td><td>Once per suite completion</td><td>Flush ExtentReports, send automated Slack / Email CI alerts.</td></tr>
+    </table>
+
+    <h3>9.2 Parameterized Execution via <code>testng.xml</code></h3>
+<pre><code>&lt;suite name="Browser Suite"&gt;
+  &lt;test name="Chrome"&gt;
+    &lt;parameter name="browser" value="chrome"/&gt;
+    &lt;classes&gt;
+      &lt;class name="com.sdet.mastery.FirstTest"/&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt;
+&lt;/suite&gt;</code></pre>
+    <p>In Java: Decorate <code>@BeforeMethod</code> with <code>@Parameters("browser")</code> and accept <code>String browser</code> in the method signature.</p>
+  </section>
+
+  <section><h2>10. Driver Management: Evolution and Preferred Way</h2>
+    <h3>10.1 The Three Eras</h3>
+    <table>
+      <tr><th>Era</th><th>Setup Code</th><th>Problem &amp; Failure Mode</th></tr>
+      <tr><td><b>Manual Path (Selenium 2&ndash;3)</b></td><td><code>System.setProperty("webdriver.chrome.driver", "path")</code></td><td>Browser auto-updates caused version mismatches; paths broke across machines. Error: <code>SessionNotCreatedException</code>.</td></tr>
+      <tr><td><b>WebDriverManager (Boni Garcia, 2018&ndash;2022)</b></td><td><code>WebDriverManager.chromedriver().setup()</code></td><td>Heavy third-party library; downloads failed behind corporate enterprise firewalls.</td></tr>
+      <tr><td><b>Selenium Manager (Built-in, 4.6.0+)</b></td><td><code>new ChromeDriver()</code></td><td>Standardized, built directly into Selenium; automatically manages binaries. Fails when offline or behind an unconfigured proxy.</td></tr>
+    </table>
+
+    <p><b>Preferred Way:</b> Use Selenium 4.6.0+ with <b>zero driver path code</b>. Selenium Manager detects the installed browser and manages the driver cache.<br>
+    <b>Cache Locations:</b> Windows: <code>%USERPROFILE%\.cache\selenium</code>; macOS/Linux: <code>~/.cache/selenium</code>.<br>
+    <b>Offline / Corporate Proxy Workaround:</b> If offline or blocked by a proxy, set the proxy variable (<code>$env:SE_PROXY="http://proxy:8080"</code>) or download the matching driver manually and configure <code>System.setProperty("webdriver.chrome.driver", "path")</code>.</p>
+  </section>
+
+  <section><h2>11. Local, CI/CD, and Remote Setup</h2>
+    <h3>11.1 Local Execution</h3>
+    <p>Run via terminal from the project root: <code>mvn clean test</code> (or click the Run gutter icon in IntelliJ IDEA).</p>
+
+    <h3>11.2 Headless Execution (Mandatory in CI/CD)</h3>
+<pre><code>ChromeOptions options = new ChromeOptions();
+options.addArguments("--headless=new");          // Chrome 109+ full headless engine
+options.addArguments("--no-sandbox");             // Required when running as root in Docker
+options.addArguments("--disable-dev-shm-usage");  // Overcomes limited shared memory (/dev/shm)
+options.addArguments("--window-size=1920,1080"); // Enforces standard desktop viewport
+WebDriver driver = new ChromeDriver(options);</code></pre>
+
+    <h3>11.3 CI/CD Integration: GitHub Actions Workflow (<code>.github/workflows/test.yml</code>)</h3>
+<pre><code>name: Selenium Tests
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - uses: browser-actions/setup-chrome@v1
+      - run: mvn -B test</code></pre>
+
+    <h3>11.4 Remote Execution: Selenium Grid &amp; Docker</h3>
+    <p>Start a standalone Selenium Grid container on port 4444:</p>
+<pre><code>docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g" selenium/standalone-chrome:latest</code></pre>
+    <p>Java code for remote connection:</p>
+<pre><code>import org.openqa.selenium.remote.RemoteWebDriver;
+import java.net.URI;
+import java.net.URL;
+
+URL gridUrl = URI.create("http://localhost:4444/wd/hub").toURL();
+ChromeOptions options = new ChromeOptions();
+WebDriver driver = new RemoteWebDriver(gridUrl, options);</code></pre>
+  </section>
+
+  <section><h2>12. Common Errors During Setup and Initialization</h2>
+    <table>
+      <tr><th>Exception / Message</th><th>Phase</th><th>Exact Cause</th><th>Exact Fix</th></tr>
+      <tr><td><code>SessionNotCreatedException: This version of ChromeDriver only supports Chrome version X</code></td><td>Initialization</td><td>Installed browser version does not match driver binary.</td><td>Remove manual <code>System.setProperty</code>; let Selenium Manager auto-fetch matching binary.</td></tr>
+      <tr><td><code>NoSuchDriverException: Unable to obtain driver for chrome</code></td><td>Initialization</td><td>Selenium Manager blocked by corporate proxy or offline machine.</td><td>Configure <code>SE_PROXY</code> environment variable or set manual binary path.</td></tr>
+      <tr><td><code>IllegalStateException: The path to the driver executable must be set...</code></td><td>Initialization</td><td>Selenium 3 code executed without configuring driver path.</td><td>Upgrade to Selenium 4.28.1 and remove manual path code.</td></tr>
+      <tr><td><code>WebDriverException: address already in use: bind</code></td><td>Initialization</td><td>Orphan <code>chromedriver</code> process from earlier crashed test locks port 9515.</td><td>Windows: <code>taskkill /F /IM chromedriver.exe /T</code><br>macOS/Linux: <code>pkill -f chromedriver</code></td></tr>
+      <tr><td><code>SessionNotCreatedException: Chrome failed to start: crashed</code></td><td>Initialization (CI)</td><td>Missing <code>--no-sandbox</code> or memory exhaustion in Docker.</td><td>Add <code>--no-sandbox</code> and <code>--disable-dev-shm-usage</code> flags to <code>ChromeOptions</code>.</td></tr>
+      <tr><td><code>package org.openqa.selenium does not exist</code></td><td>Build</td><td>Maven dependencies failed to download or project not reloaded.</td><td>Right-click <code>pom.xml</code> &rarr; Maven &rarr; Reload Project.</td></tr>
+      <tr><td><code>java.net.ConnectException: Connection refused</code></td><td>Remote</td><td>Selenium Grid is not running or port 4444 is unreachable.</td><td>Verify container status with <code>docker ps</code>; check grid URL.</td></tr>
+      <tr><td><code>Tests run: 0</code></td><td>TestNG</td><td>Test class missing from <code>testng.xml</code> or wrong package name.</td><td>Check <code>&lt;class name="com.sdet.mastery.FirstTest"/&gt;</code> in <code>testng.xml</code>.</td></tr>
     </table>
   </section>
 
-  <section><h2>9. Declaration and Initialization</h2>
-    <ul>
-      <li><b>Interface Hierarchy:</b> <code>SearchContext</code> &rarr; <code>WebDriver</code> &rarr; <code>RemoteWebDriver</code> &rarr; <code>ChromeDriver</code>.</li>
-      <li><b>Declaration:</b> Declare at class level as <code>private WebDriver driver;</code> or <code>private static final ThreadLocal&lt;WebDriver&gt; DRIVER = new ThreadLocal&lt;&gt;();</code> for parallel suites.</li>
-      <li><b>Initialization:</b> Inside <code>@BeforeMethod</code> right before each test execution starts.</li>
-      <li><b>Nullification &amp; Teardown:</b> Inside <code>@AfterMethod</code>, invoke <code>driver.quit()</code>, then set <code>driver = null</code> (or invoke <code>DRIVER.remove()</code> if using <code>ThreadLocal</code>) so the JVM Garbage Collector cleans up heap memory.</li>
-    </ul>
-  </section>
-
-  <section><h2>10. Failures and Exceptions</h2>
-    <table>
-      <tr><th>Phase</th><th>Exception Class</th><th>Exact Cause</th><th>Exact Fix</th></tr>
-      <tr><td><b>Setup</b></td><td><code>NoSuchDriverException</code></td><td>Selenium Manager cannot reach Google endpoints behind an offline network or unconfigured corporate proxy.</td><td>Set proxy: <code>$env:SE_PROXY="http://proxy:8080"</code> or place binary in local cache.</td></tr>
-      <tr><td><b>Initialization</b></td><td><code>SessionNotCreatedException</code></td><td>Installed Chrome version (e.g. v133) does not match cached chromedriver (e.g. v131).</td><td>Remove manual <code>System.setProperty()</code> and clear cache (<code>~/.cache/selenium</code>).</td></tr>
-      <tr><td><b>Initialization</b></td><td><code>IllegalStateException</code></td><td>Driver binary path missing from PATH or system property (Legacy Selenium 3).</td><td>Upgrade to Selenium 4.28.1 which resolves binaries automatically.</td></tr>
-      <tr><td><b>Initialization</b></td><td><code>WebDriverException (bind error)</code></td><td>Orphan <code>chromedriver.exe</code> process from earlier crashed test is already locking port <code>9515</code>.</td><td>Kill orphan binary: <code>taskkill /F /IM chromedriver.exe /T</code> (Win) or <code>pkill -f chromedriver</code> (Linux).</td></tr>
-      <tr><td><b>Teardown</b></td><td><code>NoSuchSessionException</code></td><td>Attempted to call driver commands after <code>driver.quit()</code> was already executed.</td><td>Ensure driver commands only run between setup and teardown lifecycle boundaries.</td></tr>
-    </table>
-  </section>
-
-  <section><h2>11. Best Practice and Preferred Way: ThreadLocal Driver Factory</h2>
-    <p>In enterprise test automation, tests run in parallel across multiple threads. Using a single <code>static WebDriver driver;</code> causes tests on Thread 1 and Thread 2 to overwrite each other's session. The preferred pattern is a thread-isolated <code>DriverFactory</code>:</p>
+  <section><h2>13. Best Practice: ThreadLocal Driver Factory &amp; Rules</h2>
+    <h3>Preferred Setup in Enterprise Frameworks</h3>
 <pre><code>package com.sdet.factory;
 
 import org.openqa.selenium.WebDriver;
@@ -330,55 +477,58 @@ public final class DriverFactory {
     public static void quitDriver() {
         if (DRIVER.get() != null) {
             DRIVER.get().quit();
-            DRIVER.remove(); // Purges thread memory to prevent memory leaks in thread pools
+            DRIVER.remove(); // CRITICAL: Purges thread memory to prevent memory leaks
         }
     }
 }</code></pre>
-  </section>
 
-  <section><h2>12. Always-Do and Never-Do Rules</h2>
+    <h3>Always-Do Rules</h3>
     <ol>
-      <li><b>Always invoke <code>driver.quit()</code> inside <code>@AfterMethod</code>:</b> Closes all browser tabs and kills the driver binary process.</li>
-      <li><b>Always call <code>ThreadLocal.remove()</code>:</b> Prevents heap memory leaks in Java thread pools.</li>
-      <li><b>Always use built-in Selenium Manager:</b> Avoid hardcoding binary paths with <code>System.setProperty()</code>.</li>
-      <li><b>Never use <code>Thread.sleep()</code>:</b> Pauses Java threads unconditionally, causing slow and flaky builds.</li>
-      <li><b>Never share a single static WebDriver instance across parallel tests:</b> Causes race conditions where threads collide in the same browser window.</li>
+      <li><b>Always</b> pin Selenium (<code>4.28.1</code>) and TestNG (<code>7.10.2</code>) versions in <code>pom.xml</code>.</li>
+      <li><b>Always</b> call <code>driver.quit()</code> in <code>@AfterMethod</code> to terminate both browser and driver processes.</li>
+      <li><b>Always</b> use <code>ThreadLocal&lt;WebDriver&gt;</code> when tests execute in parallel.</li>
+      <li><b>Always</b> call <code>DRIVER.remove()</code> in teardown to prevent thread pool memory leaks.</li>
+    </ol>
+
+    <h3>Never-Do Rules</h3>
+    <ol>
+      <li><b>Never</b> use <code>Thread.sleep()</code> to wait for elements. Always use <code>WebDriverWait</code>.</li>
+      <li><b>Never</b> store hardcoded local driver paths with <code>System.setProperty()</code> on Selenium 4.6.0+.</li>
+      <li><b>Never</b> share a single static <code>WebDriver</code> object across concurrent test threads.</li>
+      <li><b>Never</b> use <code>driver.close()</code> as a substitute for <code>driver.quit()</code>.</li>
     </ol>
   </section>
 
-  <section><h2>13. Interview Section</h2>
+  <section><h2>14. Interview Section</h2>
     <h3>30-Second Spoken Readout</h3>
-    <p><i>"Selenium WebDriver 4 operates as a client-server architecture over the W3C WebDriver protocol. When test code calls a method like <code>driver.get()</code>, the client library serializes the command into an HTTP REST request and sends it over a local TCP port to a driver executable, such as <code>chromedriver</code>. The driver executable receives the request and commands the browser engine natively using interfaces like the Chrome DevTools Protocol. In modern frameworks, we manage driver binaries automatically using Selenium Manager, configure parallel thread safety using a <code>ThreadLocal&lt;WebDriver&gt;</code> Driver Factory, and invoke <code>driver.quit()</code> followed by <code>ThreadLocal.remove()</code> in teardown to prevent orphaned processes and memory leaks."</i></p>
+    <p><i>"Selenium WebDriver sends W3C-standard HTTP JSON commands from my Java test to a browser driver such as chromedriver, which controls the browser through its own automation interface. In Selenium 4.6 and later, Selenium Manager downloads the matching driver automatically, so I do not set driver paths. For parallel execution I keep each driver in a ThreadLocal, and I always call quit in teardown so sessions do not leak."</i></p>
 
-    <h3>Linked Interview Questions &amp; Detailed Answers</h3>
+    <h3>Questions &amp; High-Impact Answers</h3>
     <ol>
-      <li><b>[Common] What is the architectural difference between the JSON Wire Protocol and the W3C WebDriver Protocol?</b><br>
-      The JSON Wire Protocol was a custom specification used in Selenium 2 and 3 where all client commands were wrapped in a proprietary JSON envelope. Because browsers did not implement this protocol natively, the driver binary had to decode the JSON Wire request, convert it into browser-native commands, and translate the response back into the custom envelope. The W3C WebDriver Protocol is an official international web standard implemented directly by browser vendors. In Selenium 4, client libraries and browser drivers communicate using the exact same W3C endpoints and parameters, eliminating the translation layer and reducing latency.</li>
+      <li><b>[Common] What is Selenium WebDriver?</b><br>
+      WebDriver is an open-source browser automation API. The client sends W3C WebDriver commands over HTTP to a browser driver executable, which controls the browser. It officially supports Java, Python, C#, JavaScript, and Ruby. For example, calling <code>driver.get()</code> sends an HTTP POST request to the driver binary to navigate the browser.</li>
 
-      <li><b>[Common] What is the difference between <code>driver.close()</code> and <code>driver.quit()</code>?</b><br>
-      <code>driver.close()</code> sends an HTTP POST command that closes only the currently focused browser window or tab. If other tabs remain open, the session remains active and the operating system driver binary process (for example, <code>chromedriver.exe</code>) continues to run. <code>driver.quit()</code> sends an HTTP DELETE command to the session endpoint, closing all open windows and tabs associated with that session and terminating the background driver binary process. Failing to call <code>driver.quit()</code> causes orphaned driver processes to accumulate in system memory, eventually leading to out-of-memory errors on test execution machines.</li>
+      <li><b>[Common] Why did WebDriver replace Selenium RC?</b><br>
+      RC injected an HTTP proxy server and JavaScript runner, which was slow and blocked by the browser's Same-Origin Policy when navigating cross-domain. WebDriver controls the browser natively through operating system interfaces, producing authentic hardware events without a proxy. For example, WebDriver can handle native OS file upload dialogs that RC could not reach.</li>
 
-      <li><b>[Common] What is the role of <code>SearchContext</code> in the WebDriver interface hierarchy?</b><br>
-      <code>SearchContext</code> is the super-interface at the top of the Selenium Java hierarchy. It defines only two core methods: <code>findElement(By by)</code> and <code>findElements(By by)</code>. The <code>WebDriver</code> interface extends <code>SearchContext</code>, which means every <code>WebDriver</code> implementation inherits the ability to locate elements. Additionally, the <code>WebElement</code> interface also extends <code>SearchContext</code>, allowing engineers to perform chained element searches (for example, <code>parentDiv.findElement(By.tagName("a"))</code>) to locate child elements relative to a parent container.</li>
+      <li><b>[Common] What is the difference between W3C and JSON Wire Protocol?</b><br>
+      JSON Wire was a Selenium-defined custom protocol where commands required special envelope wrapping and driver-level translation layers. W3C is the official web standard implemented directly by browser vendors, allowing language bindings to communicate directly without translation. In Selenium 4, the JSON Wire Protocol was completely removed.</li>
 
-      <li><b>[Advanced] How does Selenium Manager resolve driver binaries, and what are its failure modes?</b><br>
-      Selenium Manager is an internal tool compiled in Rust and embedded inside Selenium 4.6.0+. When a driver object such as <code>new ChromeDriver()</code> is initialized, Selenium Manager queries the local operating system to discover the installed browser version. It then checks the local cache directory (<code>~/.cache/selenium</code>) to see if a matching driver binary is already present. If the binary is missing, it sends an outbound HTTPS request to official vendor endpoints (like the Chrome for Testing repository), downloads the exact matching binary, extracts it into the cache, and exposes its path to the driver. Its primary failure mode occurs in air-gapped corporate networks where outbound internet access is blocked by an unconfigured proxy, resulting in a <code>NoSuchDriverException</code>.</li>
+      <li><b>[Common] What is Selenium Manager and what are its failure modes?</b><br>
+      Selenium Manager is built into Selenium 4.6.0 and later. It detects the installed browser version and automatically downloads the matching driver binary into a local cache directory (<code>~/.cache/selenium</code>). However, it fails in air-gapped networks or behind corporate firewalls unless configured with proxy variables (<code>SE_PROXY</code>) or supplied with a manual driver path.</li>
 
-      <li><b>[Advanced] Why must <code>ThreadLocal.remove()</code> be called after <code>driver.quit()</code> in parallel TestNG execution?</b><br>
-      In parallel execution, TestNG uses thread pools to manage and reuse worker threads. While <code>driver.quit()</code> terminates the browser window and driver process, the <code>ThreadLocal</code> object still holds an active reference to the destroyed driver instance in its internal <code>ThreadLocalMap</code>. Because thread pool workers are not destroyed between test classes, these unreferenced driver objects cannot be collected by the JVM Garbage Collector. Over a large test suite of hundreds of tests, these lingering references cause a severe memory leak that can crash the test runner with <code>java.lang.OutOfMemoryError: Java heap space</code>. Calling <code>remove()</code> deletes the thread's key-value pair from memory.</li>
+      <li><b>[Common] Why do you use <code>driver.quit()</code> instead of <code>driver.close()</code>?</b><br>
+      <code>driver.close()</code> closes only the currently focused browser window or tab, leaving the driver binary process running in the operating system. <code>driver.quit()</code> terminates the entire session, closes all open windows, and kills the driver binary process. If a framework uses only <code>close()</code>, orphaned processes accumulate and cause out-of-memory errors on execution machines.</li>
+
+      <li><b>[Common] How do you configure tests for CI/CD pipeline execution?</b><br>
+      Configure Chrome to run headlessly using <code>--headless=new</code>, <code>--no-sandbox</code>, and <code>--disable-dev-shm-usage</code> with an explicit window size of 1920x1080 inside <code>ChromeOptions</code>. In GitHub Actions or Jenkins, install the browser and execute tests headlessly via <code>mvn test</code>. For example, running in Docker without <code>--disable-dev-shm-usage</code> leads to immediate browser crashes.</li>
+
+      <li><b>[Advanced] What is a <code>ThreadLocal&lt;WebDriver&gt;</code> and why is it mandatory?</b><br>
+      <code>ThreadLocal</code> creates a dedicated, isolated copy of the <code>WebDriver</code> reference for each executing CPU thread. This prevents race conditions where multiple parallel test threads overwrite each other's driver variable and send conflicting commands to the same browser window. After quitting the driver, <code>ThreadLocal.remove()</code> must be called to purge thread memory.</li>
+
+      <li><b>[Advanced] What is Selenium Grid and how does it work?</b><br>
+      Selenium Grid distributes browser sessions across multiple machines, virtual environments, or Docker containers. Tests connect to the Grid Hub endpoint using <code>RemoteWebDriver</code> with browser options, and the Grid routes commands to available Node containers running the requested browser on port 4444.</li>
     </ol>
-  </section>
-
-  <section><h2>14. Checklist for the Reader</h2>
-    <ul>
-      <li>[ ] I can verify that Java 17+ and Maven (or Gradle) are installed on my computer.</li>
-      <li>[ ] I can explain the 3 tiers (Client Binding &rarr; Driver Binary &rarr; Browser Engine) without using childlike analogies.</li>
-      <li>[ ] I know which driver executable belongs to each of the 4 supported desktop browsers.</li>
-      <li>[ ] I have configured a working <code>pom.xml</code> or <code>build.gradle</code> file with Selenium 4.28.1 and TestNG 7.10.2.</li>
-      <li>[ ] I can write and run a complete test class that launches Chrome, verifies a page title, and closes the browser cleanly.</li>
-      <li>[ ] I can explain why <code>ThreadLocal&lt;WebDriver&gt;</code> is mandatory for parallel test execution.</li>
-      <li>[ ] I know the terminal commands to kill orphaned driver processes on my operating system.</li>
-    </ul>
   </section>
 
   <section><h2>15. Q&amp;A</h2>
