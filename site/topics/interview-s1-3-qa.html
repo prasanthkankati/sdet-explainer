@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: S1.3 Browser Configuration (ChromeOptions) &amp; close() vs quit()</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>S1.3 Question Bank: ChromeOptions &amp; Browser Lifecycle (35 Questions)</h1>
+  <p><a class="qa-chip" href="selenium-s1-3-chromeoptions-lifecycle.html">&larr; Back to Concept Page</a></p>
+
+  <section><h2>Tier 1: Core Definitions, Class Hierarchy &amp; Lifecycle (Q1&ndash;Q7)</h2>
+    <ol>
+      <li><b>What is ChromeOptions in Selenium WebDriver?</b><br>ChromeOptions is a capability configuration class in Selenium Java (extending <code>ChromiumOptions</code> and <code>MutableCapabilities</code>) that aggregates command-line launch arguments, user preferences, and W3C capabilities to configure Google Chrome prior to session initialization.</li>
+
+      <li><b>Where does ChromeOptions sit in the Selenium class hierarchy?</b><br>It extends <code>ChromiumOptions&lt;ChromeOptions&gt;</code>, which extends <code>AbstractDriverOptions&lt;DO&gt;</code>, which extends <code>MutableCapabilities</code>, which implements <code>Capabilities</code>.</li>
+
+      <li><b>What happens if you modify a ChromeOptions instance after instantiating ChromeDriver?</b><br>It has zero effect on the running browser. ChromeOptions are evaluated strictly at startup during operating system process creation; runtime options cannot be dynamically mutated after the session begins.</li>
+
+      <li><b>What is the fundamental difference between driver.close() and driver.quit()?</b><br><code>driver.close()</code> closes only the currently focused browser tab or window, leaving the driver executable and session alive. <code>driver.quit()</code> terminates all open windows, invalidates the session, and kills the background <code>chromedriver.exe</code> process.</li>
+
+      <li><b>What W3C command is dispatched when driver.close() is executed?</b><br>It dispatches the W3C <code>Close Window</code> command via an HTTP DELETE request to <code>/session/{session id}/window</code>.</li>
+
+      <li><b>What W3C command is dispatched when driver.quit() is executed?</b><br>It dispatches the W3C <code>Delete Session</code> command via an HTTP DELETE request to <code>/session/{session id}</code>.</li>
+
+      <li><b>What is MutableCapabilities and why does ChromeOptions inherit from it?</b><br><code>MutableCapabilities</code> is a thread-safe map-like structure for storing arbitrary W3C capabilities. ChromeOptions inherits from it so it can be passed anywhere a generic <code>Capabilities</code> interface is expected, such as <code>RemoteWebDriver</code>.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 2: Deep Comparisons &amp; Mechanical Trade-Offs (Q8&ndash;Q14)</h2>
+    <ol start="8">
+      <li><b>Why is calling driver.close() in teardown considered a catastrophic anti-pattern?</b><br>Because <code>close()</code> does not terminate the <code>chromedriver.exe</code> operating system daemon. In automated CI/CD pipelines executing hundreds of tests, orphaned driver processes accumulate in memory, eventually causing server OutOfMemory crashes.</li>
+
+      <li><b>What is the difference between PageLoadStrategy NORMAL, EAGER, and NONE?</b><br><code>NORMAL</code> waits for the window <code>load</code> event (all images, scripts, and stylesheets downloaded); <code>EAGER</code> unblocks as soon as DOM parsing completes at <code>DOMContentLoaded</code>; <code>NONE</code> unblocks immediately after the initial HTTP navigation request is dispatched.</li>
+
+      <li><b>How does --headless=new differ from the legacy --headless argument?</b><br><code>--headless=new</code> (introduced in Chrome 109) utilizes the authentic desktop Chrome Blink rendering engine without a visible display, ensuring 100% feature parity. The old <code>--headless</code> used an alternate, stripped-down headless browser implementation that had documented layout and extension differences.</li>
+
+      <li><b>What is the difference between addArguments() and setExperimentalOption()?</b><br><code>addArguments()</code> passes command-line flags to the Chrome executable during OS process startup (e.g. <code>--start-maximized</code>). <code>setExperimentalOption()</code> writes configuration settings into Chrome's JSON user preferences file (e.g. download folder locations and notification permissions).</li>
+
+      <li><b>How does setAcceptInsecureCerts(true) compare to the argument --ignore-certificate-errors?</b><br><code>setAcceptInsecureCerts(true)</code> is an official W3C WebDriver standard capability properly scoped to the session. <code>--ignore-certificate-errors</code> is an aggressive Chromium CLI switch that globally disables all SSL validation and can mask real security bugs.</li>
+
+      <li><b>What occurs if you call driver.getTitle() after driver.close() when two tabs were open?</b><br>Selenium throws <code>NoSuchWindowException: no such window: target window already closed</code> because WebDriver does not automatically switch focus to the remaining tab; you must explicitly call <code>driver.switchTo().window(handle)</code>.</li>
+
+      <li><b>What occurs if you call driver.getTitle() after driver.quit()?</b><br>Selenium throws <code>NoSuchSessionException: Session ID is null. Using WebDriver after calling quit()?</code> because the automation session was destroyed.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 3: Arguments, Prefs &amp; Docker Headless Flags (Q15&ndash;Q21)</h2>
+    <ol start="15">
+      <li><b>Why is the --no-sandbox flag required when running Chrome in Docker?</b><br>Docker containers typically execute as the <code>root</code> user. Chrome's operating system security sandbox refuses to run with root privileges and will immediately crash the browser process on launch unless <code>--no-sandbox</code> is supplied.</li>
+
+      <li><b>Why is --disable-dev-shm-usage mandatory in containerized CI/CD pipelines?</b><br>Docker assigns a default shared memory size of only 64MB to <code>/dev/shm</code>. Modern websites quickly exceed 64MB of RAM during rendering, causing Chrome to crash with <code>session deleted because of page crash</code>. This flag forces Chrome to use the larger <code>/tmp</code> disk partition.</li>
+
+      <li><b>Why must you specify --window-size=1920,1080 during headless test execution?</b><br>In headless mode without a physical monitor, Chrome defaults to a small resolution (typically 800x600). This causes responsive websites to collapse into mobile navigation drawers or hamburger menus, causing standard desktop locators to fail with <code>ElementNotInteractableException</code>.</li>
+
+      <li><b>How do you block notification popups using Chrome preferences?</b><br>Populate the preference key <code>profile.default_content_setting_values.notifications</code> with integer value <code>2</code> (which represents <code>Block</code>) inside the <code>prefs</code> dictionary passed to <code>options.setExperimentalOption("prefs", map)</code>.</li>
+
+      <li><b>How do you set a custom file download directory in ChromeOptions?</b><br>Add <code>prefs.put("download.default_directory", "/custom/download/path")</code> and <code>prefs.put("download.prompt_for_download", false)</code> to the experimental <code>prefs</code> map.</li>
+
+      <li><b>What problem does --remote-allow-origins=* resolve?</b><br>Chrome 111 introduced strict WebSocket origin checks for security. When Selenium connects to the Chrome DevTools Protocol (CDP), the connection was rejected with <code>ConnectionFailedException</code> unless <code>--remote-allow-origins=*</code> was provided.</li>
+
+      <li><b>Why should you never use --disable-web-security in enterprise test automation?</b><br>It disables the browser's Same-Origin Policy and Cross-Origin Resource Sharing (CORS) rules. Tests will pass in automation that will fail for real users in production, concealing critical security defects.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 4: SDET Code, Popups &amp; Multi-Window Switching (Q22&ndash;Q28)</h2>
+    <ol start="22">
+      <li><b>When is it appropriate to call driver.close() inside a test method?</b><br>When a user interaction opens a child window or popup tab. You switch to the child tab, verify its contents, execute <code>driver.close()</code> to dismiss it, and switch back to the parent window handle.</li>
+
+      <li><b>How do you switch back to the main window after closing a popup?</b><br>Store the main window handle using <code>String parent = driver.getWindowHandle()</code> before the popup opens. After closing the popup with <code>driver.close()</code>, invoke <code>driver.switchTo().window(parent)</code>.</li>
+
+      <li><b>Why should ChromeOptions never be declared as a public static field in a framework?</b><br>Static variables are shared across all executing threads. In parallel test runs, multiple threads would concurrently modify the same options object, causing race conditions and unpredictable browser configurations.</li>
+
+      <li><b>What is the purpose of options.setBinary("/path/to/chrome")?</b><br>It allows the tester to specify an explicit path to a non-standard Chrome installation, such as a custom enterprise build, beta channel, or Chrome for Testing executable.</li>
+
+      <li><b>How do you automatically download PDF files instead of viewing them in Chrome?</b><br>Inject <code>prefs.put("plugins.always_open_pdf_externally", true)</code> into the <code>prefs</code> map of <code>ChromeOptions</code>.</li>
+
+      <li><b>How do you load a custom browser extension (.crx) into a ChromeDriver session?</b><br>Use <code>options.addExtensions(new File("/path/to/extension.crx"))</code> before starting the session.</li>
+
+      <li><b>What is the expected result if you call driver.quit() inside a try block without finally?</b><br>If any assertion or command inside the <code>try</code> block throws an exception, the execution skips <code>driver.quit()</code>, leaving the browser window open and the driver executable running in RAM. Always place <code>quit()</code> inside a <code>finally</code> block or TestNG <code>@AfterMethod</code>.</li>
+    </ol>
+  </section>
+
+  <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q29&ndash;Q35)</h2>
+    <ol start="29">
+      <li><b>Does driver.close() release the TCP communication port used by ChromeDriver?</b><br>No. Only <code>driver.quit()</code> releases the TCP loopback port.</li>
+
+      <li><b>Can you add arguments to ChromeOptions as a chained call?</b><br>Yes. <code>options.addArguments("flag1").addArguments("flag2")</code> returns the same <code>ChromeOptions</code> instance.</li>
+
+      <li><b>Does ChromeOptions support incognito mode?</b><br>Yes, via <code>options.addArguments("--incognito")</code>.</li>
+
+      <li><b>Can you use ChromeOptions when instantiating a RemoteWebDriver?</b><br>Yes. <code>RemoteWebDriver(url, options)</code> directly accepts <code>ChromeOptions</code> because it implements <code>Capabilities</code>.</li>
+
+      <li><b>Does PageLoadStrategy.NONE wait for document.readyState to become interactive?</b><br>No. <code>NONE</code> does not wait for any document ready state; it returns immediately after navigation starts.</li>
+
+      <li><b>Will setting driver = null terminate the background chromedriver process?</b><br>No. Nullifying the Java reference only makes the variable eligible for garbage collection; the external <code>chromedriver.exe</code> operating system process continues running until killed or quit.</li>
+
+      <li><b>What is the default PageLoadStrategy in Selenium WebDriver?</b><br><code>PageLoadStrategy.NORMAL</code>.</li>
+    </ol>
+  </section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

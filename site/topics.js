@@ -513,10 +513,11 @@ const TOPICS = [
     section: "S1. Architecture, Setup & Browser Control",
     order: 3,
     title: "1.3 Browser Configuration (ChromeOptions) & close() vs quit()",
-    file: "",
-    summary: "Headless mode, incognito, accepting insecure SSL certs, get() vs navigate().to(), and driver.close() vs driver.quit().",
-    keywords: "ChromeOptions, headless, SSL, get vs navigate, driver.close, driver.quit, NoSuchSessionException",
-    status: "planned"
+    file: "selenium-s1-3-chromeoptions-lifecycle.html",
+    summary: "ChromeOptions class hierarchy, CLI flags, experimental prefs, PageLoadStrategy (NORMAL vs EAGER vs NONE), and close() vs quit() lifecycle.",
+    keywords: "ChromeOptions, headless new, SSL, PageLoadStrategy, driver.close, driver.quit, NoSuchSessionException, NoSuchWindowException, Docker flags",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Selenium",
@@ -928,6 +929,17 @@ const TOPICS = [
     file: "interview-s1-2-qa.html",
     summary: "35 questions: Rust binary mechanics, ~/.cache/selenium, CfT JSON APIs, SE_PROXY firewalls, air-gapped Docker, and port/session traps.",
     keywords: "Selenium Manager interview questions, WebDriverManager vs Selenium Manager, System.setProperty, SE_PROXY, Chrome for Testing, ThreadLocal WebDriver",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-S1. Selenium: Architecture, Setup & Protocol Q&A",
+    order: 3,
+    title: "S1.3 Q&A: ChromeOptions, PageLoadStrategy & close() vs quit() (35 Questions)",
+    file: "interview-s1-3-qa.html",
+    summary: "35 questions: Class hierarchy, CLI switches, experimental prefs, PageLoadStrategy NORMAL vs EAGER vs NONE, Docker flags, and close() vs quit() leaks.",
+    keywords: "ChromeOptions interview questions, close vs quit, PageLoadStrategy, headless new, no sandbox, disable dev shm usage, NoSuchWindowException",
     status: "done",
     date: "2026-11-13"
   },
