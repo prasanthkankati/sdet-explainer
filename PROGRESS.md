@@ -1,4 +1,4 @@
-# Progress Tracker (Current Version: `v1.9.2`)
+# Progress Tracker (Current Version: `v1.9.3`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
 

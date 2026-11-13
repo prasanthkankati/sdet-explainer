@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.2";
+  const SITE_VERSION = "v1.9.3";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -273,32 +273,12 @@
     const prefix = inTopicsDir ? "" : "topics/";
 
     let input = document.getElementById("search");
-    let wrap;
+    if (!input) return; // Search box lives on Homepage only
 
-    if (!input) {
-      const chapterHdr = document.querySelector("header.chapter-top");
-      const container = document.querySelector(".wrap");
-      if (!chapterHdr && !container) return;
-      wrap = document.createElement("div");
-      wrap.className = "search-wrap";
-      input = document.createElement("input");
-      input.id = "search";
-      input.placeholder = "Type anywhere to jump (e.g. heap, null, jdk)...";
-      wrap.appendChild(input);
-      if (chapterHdr) {
-        chapterHdr.appendChild(wrap);
-      } else {
-        const bar = document.createElement("div");
-        bar.className = "top-search";
-        bar.appendChild(wrap);
-        container.insertBefore(bar, container.firstChild);
-      }
-    } else {
-      wrap = document.createElement("div");
-      wrap.className = "search-wrap";
-      input.parentNode.insertBefore(wrap, input);
-      wrap.appendChild(input);
-    }
+    const wrap = document.createElement("div");
+    wrap.className = "search-wrap";
+    input.parentNode.insertBefore(wrap, input);
+    wrap.appendChild(input);
 
     const listEl = document.createElement("div");
     listEl.className = "ac-list";
