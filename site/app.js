@@ -90,7 +90,21 @@
 
     if (inTopicsDir) {
       document.body.classList.add("in-chapter");
-      // Top-left brand + '>' + <- All topics on the exact same line as top-right [light/dark] button (no full-width header bar)
+
+      // Floating fixed Home button at the middle-left of the screen
+      const floatHome = document.createElement("a");
+      floatHome.className = "floating-home-btn";
+      floatHome.href = homeHref;
+      floatHome.title = "Home (Alt+H)";
+      floatHome.innerHTML = `<span class="btn-arrow">&larr;</span> SDET EXPLAINER`;
+      document.body.appendChild(floatHome);
+
+      floatHome.addEventListener("click", () => {
+        const r = floatHome.getBoundingClientRect();
+        sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
+      });
+
+      // Top bar for back-links and utility actions (search, theme)
       const container = document.querySelector(".wrap");
       const firstP = container ? container.querySelector(":scope > p") : null;
       const nav = document.createElement("div");
@@ -99,22 +113,10 @@
       const navLeft = document.createElement("div");
       navLeft.className = "chapter-nav-left";
 
-      const brand = document.createElement("a");
-      brand.className = "brand";
-      brand.href = homeHref;
-      brand.title = "Home (Alt+H)";
-      brand.textContent = "SDET EXPLAINER";
-      navLeft.appendChild(brand);
-
       if (firstP) {
         firstP.querySelectorAll("a[href*='index.html']").forEach(a => a.remove());
         const remainingLinks = firstP.querySelectorAll("a");
         if (remainingLinks.length > 0) {
-          const sep = document.createElement("span");
-          sep.className = "nav-sep";
-          sep.textContent = ">";
-          navLeft.appendChild(sep);
-
           const backDiv = document.createElement("div");
           backDiv.className = "back-links";
           remainingLinks.forEach(a => backDiv.appendChild(a));
