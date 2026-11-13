@@ -1,4 +1,4 @@
-# Progress Tracker (Current Version: `v1.4.0`)
+# Progress Tracker (Current Version: `v1.5.0`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
 
@@ -29,6 +29,7 @@ See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) rele
 ---
 
 ## Feature & Build Version Log
+- **2026-11-13 (`v1.5.0`):** Readability overhaul (block `h2` headers, `.def` callouts, sans-serif prose + monospace code, table row borders, boxed code blocks, raw markdown cleaner) + `Alt+L` Light/Dark theme toggle shortcut.
 - **2026-11-13 (`v1.4.0`):** Added clickable `> SDET Explainer` Home link, global `Alt+<First Letter>` track/home shortcuts (`Alt+H/A/M/J/S/T/P/I`), and SVM (`VERSIONS.md` + Git version tagging workflow).
 - **2026-11-13 (`v1.3.0`):** Added `site/glossary.js` + inline `.term-pop` hover/click definition & properties card; updated all M1 pages to define prerequisite terms and exact properties before use.
 - **2026-11-13 (`v1.2.0`):** Added visual 6-phase SDLC pipeline, stepped V-Model diagram, and 6-phase STLC pipeline diagram in `style.css`, `manual-m1-2-sdlc-models.html`, and `manual-m1-3-stlc-phases.html`.

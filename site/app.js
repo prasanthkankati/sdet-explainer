@@ -3,11 +3,44 @@
   const inTopicsDir = location.pathname.replace(/\\/g, "/").includes("/topics/");
   const assetPrefix = inTopicsDir ? "../" : "";
 
+  // Theme toggle (dark/light), saved in localStorage, defaults to system setting, Shortcut: Alt+L
+  const root = document.documentElement;
+  const saved = localStorage.getItem("theme");
+  const sys = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  const btn = document.createElement("button");
+  btn.className = "theme";
+  btn.title = "Toggle Light/Dark Mode (Alt+L)";
+  const setTheme = t => {
+    root.setAttribute("data-theme", t);
+    btn.textContent = (t === "light" ? "dark" : "light") + " [Alt+L]";
+    localStorage.setItem("theme", t);
+  };
+  const toggleTheme = () => setTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
+  btn.onclick = toggleTheme;
+  document.body.appendChild(btn);
+  setTheme(saved || sys);
+
   function initAll() {
+    cleanMarkdownInArticle();
     initHeaderAndShortcuts();
     initIndex();
     initTypeahead();
     initGlossary();
+  }
+
+  // Convert any residual **bold** or `code` in article HTML into proper <b> and <code> tags
+  function cleanMarkdownInArticle() {
+    const article = document.querySelector("article");
+    if (!article) return;
+    article.querySelectorAll("p, li, td").forEach(el => {
+      if (el.querySelector("pre")) return;
+      const html = el.innerHTML;
+      if (html.includes("**") || html.includes("`")) {
+        el.innerHTML = html
+          .replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+          .replace(/`([^`]+)`/g, "<code>$1</code>");
+      }
+    });
   }
 
   function loadGlossaryThenInit() {
@@ -31,21 +64,11 @@
     loadGlossaryThenInit();
   }
 
-  // Theme toggle (dark/light), saved in localStorage, defaults to system setting
-  const root = document.documentElement;
-  const saved = localStorage.getItem("theme");
-  const sys = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-  const set = t => { root.setAttribute("data-theme", t); btn.textContent = t === "light" ? "dark" : "light"; localStorage.setItem("theme", t); };
-  const btn = document.createElement("button");
-  btn.className = "theme";
-  btn.onclick = () => set(root.getAttribute("data-theme") === "light" ? "dark" : "light");
-  document.body.appendChild(btn);
-  set(saved || sys);
-
-  // Global Header Brand Link + Alt+<Letter> Track & Home Shortcuts
-  const SITE_VERSION = "v1.4.0";
+  // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
+  const SITE_VERSION = "v1.5.0";
   const SHORTCUT_MAP = {
     h: "HOME",
+    l: "THEME",
     a: "All",
     m: "Manual",
     j: "Java",
@@ -88,7 +111,7 @@
     // Make footer 'SDET Explainer' clickable to navigate Home + show version & shortcuts
     const footer = document.querySelector("footer");
     if (footer && inTopicsDir) {
-      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview`;
+      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview`;
     }
 
     // Global Alt+<Key> listener across all pages
@@ -98,6 +121,11 @@
       const targetTrack = SHORTCUT_MAP[key];
       if (!targetTrack) return;
       e.preventDefault();
+
+      if (targetTrack === "THEME") {
+        toggleTheme();
+        return;
+      }
 
       if (targetTrack === "HOME") {
         if (!inTopicsDir && selectTrackFn) {
