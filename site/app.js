@@ -70,7 +70,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.0.3";
+  const SITE_VERSION = "v2.0.4";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -371,20 +371,14 @@
         groups.get(sec).push(t);
       });
 
-      let html = "";
-      groups.forEach((items, sec) => {
-        items.sort((a, b) => (a.order || 99) - (b.order || 99));
+      const secKeys = Array.from(groups.keys());
+      let activeSec = secKeys[0] || "";
+
+      function renderCards(secName) {
+        const items = (groups.get(secName) || []).slice().sort((a, b) => (a.order || 99) - (b.order || 99));
         const secDone = items.filter(x => x.file).length;
-        const secTrack = items[0] ? items[0].track : "";
-        const openCls = q ? " open" : "";
-        html += `<div class="sec-group${openCls}">` +
-          `<div class="sec-hdr" title="Hover to preview · Click to pin">` +
-            `<span class="sec-chev">&gt;</span>` +
-            `<span class="tag ${secTrack}">${secTrack}</span>` +
-            `<span class="sec-title">${esc(sec)}</span>` +
-            `<span class="sec-count">${secDone}/${items.length} done</span>` +
-          `</div>` +
-          `<div class="sec-body"><div class="sec-inner">` +
+        return `<div class="deck-chapters-hdr"><b>${esc(secName)}</b><span>${secDone}/${items.length} done</span></div>` +
+          `<div class="deck-chapters-list fade-in">` +
           items.map(t => {
             if (t.file) {
               return `<a class="card" href="topics/${t.file}"><div class="card-top"><span class="tag ${t.track}">${t.track}</span>` +
@@ -394,13 +388,31 @@
                 `<h3>${esc(t.title)}</h3><span class="status-pill">[queued]</span></div><p>${esc(t.summary)}</p></div>`;
             }
           }).join("") +
-          `</div></div></div>`;
-      });
-      grid.innerHTML = html;
+          `</div>`;
+      }
 
-      grid.querySelectorAll(".sec-hdr").forEach(hdr => {
-        hdr.addEventListener("click", () => {
-          hdr.parentElement.classList.toggle("pinned");
+      let secHtml = "";
+      groups.forEach((items, sec) => {
+        const secDone = items.filter(x => x.file).length;
+        const secTrack = items[0] ? items[0].track : "";
+        const actCls = sec === activeSec ? " active" : "";
+        secHtml += `<button type="button" class="sec-row${actCls}" data-sec="${esc(sec)}">` +
+          `<div class="sec-row-top"><span class="tag ${secTrack}">${secTrack}</span><span class="sec-row-count">${secDone}/${items.length}</span></div>` +
+          `<div class="sec-row-title">${esc(sec)}</div>` +
+        `</button>`;
+      });
+
+      grid.innerHTML = `<div class="deck-split">` +
+        `<div class="deck-sections">${secHtml}</div>` +
+        `<div class="deck-chapters" id="deck-chapters">${renderCards(activeSec)}</div>` +
+      `</div>`;
+
+      const chaptersEl = document.getElementById("deck-chapters");
+      grid.querySelectorAll(".sec-row").forEach(btn => {
+        btn.addEventListener("click", () => {
+          activeSec = btn.dataset.sec;
+          grid.querySelectorAll(".sec-row").forEach(b => b.classList.toggle("active", b === btn));
+          if (chaptersEl) chaptersEl.innerHTML = renderCards(activeSec);
         });
       });
     }
