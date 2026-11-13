@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: M3.1 Equivalence Partitioning &amp; Boundary Value Analysis (35 Questions)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a class="qa-chip" href="manual-m3-1-ep-bva.html"><span class="tag Manual">Manual</span>&larr; Back to 3.1 EP &amp; BVA Concept Page</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>M3.1 Question Bank: Equivalence Partitioning (EP) &amp; Boundary Value Analysis (BVA) (35 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Formulas &amp; Classification (Q1&ndash;Q10)</h2>
+    <ol>
+      <li><b>Q1: Under which category of test design techniques do Equivalence Partitioning (EP) and Boundary Value Analysis (BVA) fall?</b><br>
+        <b>A:</b> They fall under **Black-Box (Specification-Based / Behavioral) Test Design Techniques** because test cases are derived directly from requirement specifications without inspecting internal code structure.</li>
+      <li><b>Q2: What is Equivalence Partitioning (EP / ECP)?</b><br>
+        <b>A:</b> Equivalence Partitioning divides the input domain into valid and invalid classes (partitions) where every value inside a class is expected to be treated identically by the system, allowing QA to test just **1 representative value per partition**.</li>
+      <li><b>Q3: What is Boundary Value Analysis (BVA)?</b><br>
+        <b>A:</b> Boundary Value Analysis is a black-box technique that tests the **exact edges (boundaries)** of equivalence partitions (`min-1, min, min+1` and `max-1, max, max+1`) because defects cluster heavily at range boundaries.</li>
+      <li><b>Q4: What is the difference between 2-Value BVA and 3-Value BVA?</b><br>
+        <b>A:</b> **2-Value BVA** tests 2 points per boundary (`min-1, min` and `max, max+1` = **4 values** per range). **3-Value BVA** tests 3 points per boundary (`min-1, min, min+1` and `max-1, max, max+1` = **6 values** per range).</li>
+      <li><b>Q5: Which ISTQB Testing Principle directly justifies why we use EP and BVA?</b><br>
+        <b>A:</b> **Principle #2: Exhaustive testing is impossible.** EP and BVA mathematically reduce thousands of redundant inputs down to 6–9 high-yield test cases.</li>
+      <li><b>Q6: Why do bugs occur so frequently at boundaries in Java/TypeScript code?</b><br>
+        <b>A:</b> Because developers frequently make **off-by-one errors** in conditional operators—writing `<` instead of `<=`, `>` instead of `>=`, or starting array/loop indices at `1` instead of `0`.</li>
+      <li><b>Q7: For an input field accepting integers from `1` to `100`, list the exact EP partitions and 3-Value BVA test inputs.</b><br>
+        <b>A:</b> **EP Partitions:** Invalid Low (`<= 0`, e.g., `-5`), Valid (`1..100`, e.g., `50`), Invalid High (`>= 101`, e.g., `150`). **3-Value BVA Inputs:** `{0, 1, 2, 99, 100, 101}`.</li>
+      <li><b>Q8: Can BVA be used without first identifying Equivalence Partitions?</b><br>
+        <b>A:</b> No—boundaries are literally the **dividing lines between Equivalence Partitions**. You always identify the valid/invalid partitions first (even mentally) and then take their boundary edges.</li>
+      <li><b>Q9: What are Invalid Equivalence Partitions beyond numeric `< min` and `> max`?</b><br>
+        <b>A:</b> Non-numeric/format partitions: **Empty/Blank (`""`)**, **Alphabetic (`"abc"`)**, **Special Characters (`"@#$"`)**, **Decimal/Float (`18.5` when integer required)**, and **Null/Whitespace (`"   "`)**.</li>
+      <li><b>Q10: What is Weak vs Robust Boundary Value Analysis?</b><br>
+        <b>A:</b> Standard BVA tests `{min-1, min, min+1, max-1, max, max+1}`. In multi-variable forms, **Single-Fault (Normal) BVA** holds all other variables at their nominal middle value while varying one variable at its boundary; **Robust/Worst-Case BVA** tests combinations where multiple variables hit extreme boundaries simultaneously.</li>
+    </ol></section>
+
+  <section><h2>Tier 2: Why / Why Not &amp; Deep Comparisons (Q11&ndash;Q18)</h2>
+    <ol start="11">
+      <li><b>Q11: Why is 2-Value BVA (`min-1, min, max, max+1`) sometimes insufficient compared to 3-Value BVA?</b><br>
+        <b>A:</b> Suppose a developer accidentally wrote `if (age == 18 || age == 60)` instead of `if (age >= 18 && age <= 60)`. 2-Value BVA tests `{17, 18, 60, 61}`—all 4 pass! Only 3-Value BVA (`19` and `59`) or a middle EP value (`35`) exposes that all interior values fail.</li>
+      <li><b>Q12: Why can't BVA be applied to a "Country" dropdown or "Gender" radio button?</b><br>
+        <b>A:</b> Because BVA requires an **ordered scale** (numbers, dates, times, string lengths, file sizes) where `min - 1` and `max + 1` exist. Unordered discrete sets (`{India, USA, Japan}`) have no boundary edges, so only **Equivalence Partitioning** applies.</li>
+      <li><b>Q13: If BVA catches boundary bugs, why do we still need Equivalence Partitioning (EP)?</b><br>
+        <b>A:</b> (1) EP covers unordered discrete sets where BVA cannot be used, (2) EP tests invalid data types (`"abc"`, `"@!"`, `null`), and (3) when multiple contiguous tax/discount slabs exist, EP verifies the formula inside each slab.</li>
+      <li><b>Q14: When a requirement has multiple contiguous slabs (e.g., Tax Slabs), how do you apply EP and BVA?</b><br>
+        <b>A:</b> Treat **every slab as its own Valid Partition** and calculate BVA at **every transition point** between slabs, plus below the lowest slab and above the highest slab.</li>
+      <li><b>Q15: What is Output Equivalence Partitioning (Output-Domain EP)?</b><br>
+        <b>A:</b> Designing test inputs based on the **distinct output classes** the system can produce. For example, if a credit score engine outputs `REJECTED`, `SILVER_CARD`, or `PLATINUM_CARD`, you select input combinations that force the system to generate each of the 3 output classes.</li>
+      <li><b>Q16: How do EP and BVA apply to String Length validation (e.g., Username must be 6 to 12 characters)?</b><br>
+        <b>A:</b> The ordered metric is `str.length()`. **EP:** length `3` (invalid short), length `9` (valid), length `15` (invalid long). **3-Value BVA:** strings of exact lengths **`{5, 6, 7, 11, 12, 13}`** plus `0` (empty string).</li>
+      <li><b>Q17: How do EP and BVA apply to File Upload features (e.g., "Upload PDF/PNG up to 5 MB")?</b><br>
+        <b>A:</b> **File Format (EP):** `.pdf` (Valid), `.png` (Valid), `.exe` (Invalid), `.txt` (Invalid). **File Size (BVA around 5 MB = 5,242,880 bytes):** `0 bytes` (empty file), `1 byte`, `4.99 MB`, `5.00 MB` (exact max), and `5.01 MB` (max + 1).</li>
+      <li><b>Q18: How do EP and BVA apply to Date/Time ranges (e.g., "Promo code valid from Jan 1, 2026 00:00:00 to Jan 31, 2026 23:59:59")?</b><br>
+        <b>A:</b> Test timestamps at exact 1-second boundaries: `Dec 31, 2025 23:59:59` (`min-1`), `Jan 1, 2026 00:00:00` (`min`), `Jan 31, 2026 23:59:59` (`max`), and `Feb 1, 2026 00:00:00` (`max+1`).</li>
+    </ol></section>
+
+  <section><h2>Tier 3: Real-World Tricky &amp; Calculation Scenarios (Q19&ndash;Q25)</h2>
+    <ol start="19">
+      <li><b>Q19: Scenario (Classic Interview Calculation): An e-commerce cart gives: 0% discount for orders `$1–$99`, 10% discount for `$100–$499`, and 20% discount for `$500–$1000`. Orders `< $1` or `> $1000` are rejected. List all EP partitions and 2-Value BVA test points (assuming whole dollars).</b><br>
+        <b>A:</b>
+        <br>&bull; **5 EP Partitions:** Invalid Low (`<= $0`, pick `$0`), Valid Slab 1 (`$1–$99`, pick `$50`), Valid Slab 2 (`$100–$499`, pick `$250`), Valid Slab 3 (`$500–$1000`, pick `$750`), Invalid High (`>= $1001`, pick `$1200`).
+        <br>&bull; **BVA Cut-Points:** At `$1` (`$0, $1`), at `$99/$100` (`$99, $100`), at `$499/$500` (`$499, $500`), and at `$1000` (`$1000, $1001`) &rarr; **`{ 0, 1, 99, 100, 499, 500, 1000, 1001 }`**.</li>
+      <li><b>Q20: Scenario: In Q19 above, what changes if the cart accepts cents (2 decimal places, e.g., `$99.99`) instead of whole dollars?</b><br>
+        <b>A:</b> The smallest unit increment ($\Delta$) is now **`0.01`**, NOT `1`! Therefore, `min - 1` at the `$100.00` boundary is **`$99.99`** (NOT `$99.00`), and `max + 1` at `$1000.00` is **`$1000.01`**! Interviewers love testing whether you adjust BVA step size to the field's precision (`0.01`).</li>
+      <li><b>Q21: Scenario: A bank OTP field accepts a 6-digit numeric PIN (`000000` to `999999`). Why is testing `0` and `999999` as integers not enough in UI/API testing?</b><br>
+        <b>A:</b> Because a 6-digit OTP is a **fixed-length numeric string**, not an arithmetic integer! If the backend parses it as an `int`, an OTP starting with a leading zero (`"045821"`) gets truncated to `45821` (5 digits) and fails validation! Always test leading-zero boundaries (`"000000"`, `"012345"`) alongside length boundaries (`5 digits`, `6 digits`, `7 digits`).</li>
+      <li><b>Q22: Scenario: Frontend HTML has `<input type="number" min="18" max="60">` which blocks typing `17` or `61` in the browser. Does that mean BVA is done?</b><br>
+        <b>A:</b> **Never!** Client-side HTML attributes (`min`, `max`, `maxlength`) can be bypassed in 2 seconds via Chrome DevTools or by calling the REST API directly via Postman/RestAssured. SDETs must execute BVA (`17` and `61`) directly against the **Backend REST API** (`POST /api/loan`) to verify server-side validation returns `400 Bad Request`.</li>
+      <li><b>Q23: Scenario: An API pagination endpoint accepts `pageSize` (min `1`, max `100`, default `20`). What BVA inputs do you test in RestAssured?</b><br>
+        <b>A:</b> Test `pageSize` = `-1`, `0` (`min-1`), `1` (`min`), `2` (`min+1`), `99` (`max-1`), `100` (`max`), `101` (`max+1`), plus omitted parameter (verifying default `20`), `Integer.MAX_VALUE` (`2147483647`), and `"abc"`.</li>
+      <li><b>Q24: Scenario: You test `max = 100` items in a shopping cart and it passes. What hidden boundary exists in Java backend code when multiplying `quantity * unitPrice`?</b><br>
+        <b>A:</b> **Data Type Overflow Boundary (`Integer.MAX_VALUE = 2,147,483,647`)** or floating-point precision boundary (`double` vs `BigDecimal`). Always check system-level data type boundaries alongside business boundaries.</li>
+      <li><b>Q25: Scenario: A requirement says "Users can book up to 4 tickets per transaction." It does not mention the minimum. What are the implicit boundaries you must test?</b><br>
+        <b>A:</b> The implicit minimum for purchasing tickets is **`1`**. Therefore, the valid partition is `1..4`, and the BVA test set is **`{ -1, 0, 1, 2, 3, 4, 5 }`**.</li>
+    </ol></section>
+
+  <section><h2>Tier 4: SDET, Automation (Selenium / TestNG / RestAssured) Application (Q26&ndash;Q30)</h2>
+    <ol start="26">
+      <li><b>Q26: How do you implement EP and BVA cleanly in a Selenium + TestNG framework without writing 10 separate `@Test` methods?</b><br>
+        <b>A:</b> Write **1 parameterized `@Test(dataProvider = "bvaData")` method** and supply the EP + BVA matrix (`{input, expectedResult, expectedErrorMsg}`) via a `@DataProvider` method or an external JSON/Excel file.</li>
+      <li><b>Q27: When automating UI tests with Selenium vs API tests with RestAssured, where should the bulk of EP and BVA permutations run?</b><br>
+        <b>A:</b> Run **all 10–15 EP/BVA boundary permutations at the Unit &amp; RestAssured API level** (where 15 calls finish in `300 milliseconds`), and run only **2–3 representative valid/invalid checks in Selenium UI** to verify the UI error banner renders properly.</li>
+      <li><b>Q28: How do you test the `5.01 MB` (`max + 1`) file upload boundary in Selenium without storing giant binary files in your Git repository?</b><br>
+        <b>A:</b> Generate a temporary file of exact byte length dynamically in Java before the test using `RandomAccessFile f = new RandomAccessFile(tempFile, "rw"); f.setLength(5 * 1024 * 1024 + 1);` and pass `tempFile.getAbsolutePath()` to `fileInput.sendKeys()`, deleting it in `@AfterMethod`.</li>
+      <li><b>Q29: In TestNG, if row 3 of a 10-row BVA `@DataProvider` fails, do rows 4–10 still execute?</b><br>
+        <b>A:</b> **Yes!** Each row of a TestNG `@DataProvider` executes as an independent test invocation, so a failure at `min` (`18`) will not block testing `max` (`60`).</li>
+      <li><b>Q30: How do you verify multiple boundary assertions inside a single test run without aborting on the first failure?</b><br>
+        <b>A:</b> Use TestNG's **`SoftAssert`** (`SoftAssert soft = new SoftAssert(); soft.assertEquals(...); ... soft.assertAll();`) so all boundary failures are collected and reported together.</li>
+    </ol></section>
+
+  <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q31&ndash;Q35)</h2>
+    <ol start="31">
+      <li><b>Q31: Are EP and BVA White-Box or Black-Box techniques?</b><br>
+        <b>A:</b> <b>Black-Box techniques</b>.</li>
+      <li><b>Q32: How many test cases does 2-Value BVA vs 3-Value BVA generate for a single range `[min, max]`?</b><br>
+        <b>A:</b> 2-Value BVA = <b>4 test cases</b>; 3-Value BVA = <b>6 test cases</b>.</li>
+      <li><b>Q33: For a range `10.0 to 20.0` with 1 decimal place precision, what is `min - 1` and `max + 1`?</b><br>
+        <b>A:</b> `min - 1` = <b>`9.9`</b>; `max + 1` = <b>`20.1`</b>.</li>
+      <li><b>Q34: Which technique is best for testing a dropdown of 5 payment methods: EP or BVA?</b><br>
+        <b>A:</b> <b>Equivalence Partitioning (EP)</b>.</li>
+      <li><b>Q35: Does `0` count as a boundary value for positive quantity fields?</b><br>
+        <b>A:</b> <b>Yes</b> (`0` is `min - 1` when `min = 1`).</li>
+    </ol></section>
+
+  <section><h2>Back to Concept Page</h2>
+    <p><a class="qa-chip" href="manual-m3-1-ep-bva.html"><span class="tag Manual">Manual</span>&larr; Back to 3.1 Equivalence Partitioning &amp; BVA</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 3.3 Test Strategy vs Test Plan, Test Scenario vs Test Case &amp; RTM</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>3.3 Test Strategy vs Test Plan, Test Scenario vs Test Case &amp; RTM</h1>
+
+  <section><h2>1. The Base: What Are Test Artifacts and How Do They Connect from Top to Bottom?</h2>
+    <p class="def">Test Artifacts are the formal engineering documents and work products created across the STLC—flowing top-down from an organization-wide Test Strategy, to a project-specific Test Plan, down to high-level Test Scenarios, granular step-by-step Test Cases, and connected via the Requirement Traceability Matrix (RTM).</p>
+    <p><b>The Problem They Solve (In Plain Words):</b> Without a clear hierarchy of test documents, every project team reinvents quality standards from scratch, new QA engineers don't know which browsers or environments are in scope, and test execution relies on memory instead of reproducible steps. Organizing artifacts into a **4-level top-down hierarchy** ensures consistency from the VP of Engineering down to individual `@Test` methods.</p></section>
+
+  <section><h2>2. Visual Hierarchy Pipeline: How All 5 QA Artifacts Flow Top-Down</h2>
+    <div class="arch">
+      <div class="lbl">QA DOCUMENTATION HIERARCHY <small>From Organization Standards Down to Atomic Execution Steps</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">01</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Strategy (Organization / Program Level)</b><span class="phase-role">Owner: QA Director / Architect &middot; Static</span></div>
+            <div class="phase-meta">
+              <div><span>Scope</span>Company-wide quality standards, tools, CI/CD gates &amp; test levels</div>
+              <div><span>Change Frequency</span><b>Rarely changes</b> (Updated once a year or across major tech shifts)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Tailored for a specific Project / Release / Sprint</span></div>
+        <div class="phase-card">
+          <div class="phase-num">02</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Plan (Project / Release Level)</b><span class="phase-role">Owner: QA Lead / Test Manager &middot; Dynamic</span></div>
+            <div class="phase-meta">
+              <div><span>Scope</span><i>What</i> is in/out of scope, <i>Who</i> tests what, <i>When</i> (schedule), Risks &amp; Entry/Exit gates</div>
+              <div><span>Change Frequency</span><b>Dynamic</b> (Updated every release/sprint as scope or resources shift)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Breaks each In-Scope Requirement ID into high-level "WHAT to test"</span></div>
+        <div class="phase-card">
+          <div class="phase-num">03</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Scenario (High-Level "WHAT to Test")</b><span class="phase-role">1 Requirement &rarr; Many Scenarios</span></div>
+            <div class="phase-meta">
+              <div><span>Definition</span>A 1-line user workflow headline (e.g., <i>"TS_01: Verify user login functionality"</i>)</div>
+              <div><span>Purpose</span>Quickly validate end-to-end business coverage before writing 100 steps</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Expands each 1-line Scenario into detailed positive/negative "HOW to test"</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">04</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Test Case (Step-by-Step "HOW to Test")</b><span class="phase-role">1 Scenario &rarr; Many Test Cases</span></div>
+            <div class="phase-meta">
+              <div><span>Definition</span>Exact Preconditions, Step-by-Step Actions, Test Data, Expected vs Actual Result</div>
+              <div><span>1-to-Many Example</span>`TS_01 (Login)` expands into `TC_01 (Valid)`, `TC_02 (Wrong Pass)`, `TC_03 (Locked)`</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Every Req ID &harr; Scenario &harr; Test Case ID &harr; Bug ID is linked inside the RTM</span></div>
+        <div class="phase-card">
+          <div class="phase-num">05</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>RTM (Requirement Traceability Matrix)</b><span class="phase-role">Bi-Directional Coverage Proof</span></div>
+            <div class="phase-meta">
+              <div><span>Forward Traceability</span><code>Requirement ID &rarr; Test Case IDs</code> (Zero missed requirements)</div>
+              <div><span>Backward Traceability</span><code>Test Case ID &rarr; Requirement ID</code> (Zero unrequested extra tests)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>3. Pair 1 Explained: Test Strategy vs Test Plan (IEEE 829 Standard)</h2>
+    <ul>
+      <li><b>1. Test Strategy:</b> A high-level, static organizational document (owned by the QA Director / Principal SDET) that defines the company's overarching testing philosophy: which test levels exist, standard automation stack (`Java 21 + Selenium 4 + TestNG + RestAssured`), coding standards, defect severity definitions, and CI/CD merge gates.</li>
+      <li><b>2. Test Plan:</b> A dynamic, project-specific execution blueprint (owned by the QA Lead / SDET Lead) created during **STLC Phase 2** that specifies how a particular release or sprint will be tested.
+        <ul>
+          <li><b>Exact Sections (Properties) of an IEEE 829 Test Plan:</b>
+            <ol>
+              <li><b>Test Plan Identifier &amp; Objective</b></li>
+              <li><b>Scope: Features to be Tested (In-Scope) vs Not to be Tested (Out-of-Scope)</b></li>
+              <li><b>Test Approach / Types</b> (Smoke, Sanity, Regression, API, Performance)</li>
+              <li><b>Entry Criteria, Suspension Criteria &amp; Exit Criteria</b></li>
+              <li><b>Test Deliverables</b> (RTM, Test Cases, ExtentReports, Summary Report)</li>
+              <li><b>Test Environment &amp; Tool Requirements</b> (URLs, Browsers, Test Data)</li>
+              <li><b>Schedule, Effort Estimation &amp; Staffing Responsibilities</b></li>
+              <li><b>Risks, Assumptions &amp; Contingency/Mitigation Plan</b></li>
+            </ol>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <table>
+      <tr><th>Parameter</th><th>Test Strategy</th><th>Test Plan</th></tr>
+      <tr><td>Level of Operation</td><td><b>Organization / Company-Wide</b> (or Master Program)</td><td><b>Project / Release / Sprint Specific</b></td></tr>
+      <tr><td>Core Question Answered</td><td><i>"What are our standard quality rules, levels, and tools?"</i></td><td><i>"What, who, when, and how are we testing THIS release?"</i></td></tr>
+      <tr><td>Nature &amp; Stability</td><td><b>Static</b> (Rarely changes once defined)</td><td><b>Dynamic</b> (Updated whenever scope, schedule, or risks change)</td></tr>
+      <tr><td>Authored By</td><td>QA Director / Test Architect / VP of QA</td><td>QA Lead / Test Manager / Senior SDET</td></tr>
+      <tr><td>Relationship</td><td>Parent reference document (Can live inside Master Test Plan)</td><td>Derived from the Test Strategy for a specific project</td></tr>
+    </table></section>
+
+  <section><h2>4. Pair 2 Explained: Test Scenario vs Test Case (And Exact Test Case Fields)</h2>
+    <ul>
+      <li><b>1. Test Scenario ("WHAT to test"):</b> A high-level, single-sentence description of an end-to-end user functionality or business flow to be validated (e.g., <code>TS_Checkout_01: Verify user can complete purchase using a Credit Card</code>).</li>
+      <li><b>2. Test Case ("HOW to test"):</b> A detailed, atomic set of preconditions, exact inputs, step-by-step actions, and expected outcomes written to verify one specific positive or negative path of a Test Scenario.</li>
+      <li><b>The 10 Mandatory Fields (Properties) of a Standard Test Case:</b>
+        <ol>
+          <li><b>Test Case ID:</b> `TC_LOGIN_001`</li>
+          <li><b>Requirement / RTM ID &amp; Scenario ID:</b> `REQ_101 / TS_LOGIN_01`</li>
+          <li><b>Test Case Title / Description:</b> *Verify login with valid email and valid password*</li>
+          <li><b>Priority / Type:</b> `P0 (Smoke / Positive)`</li>
+          <li><b>Preconditions:</b> *User account `qa@shop.com` is registered and active; user is on `/login` page*</li>
+          <li><b>Test Steps:</b> *1. Enter email, 2. Enter password, 3. Click Login button*</li>
+          <li><b>Test Data:</b> `Email = qa@shop.com`, `Password = Pass#123`</li>
+          <li><b>Expected Result:</b> *User is redirected to `/dashboard` and greeting `"Welcome, QA"` is displayed*</li>
+          <li><b>Actual Result &amp; Status:</b> Filled during Phase 5 Execution (`PASS` / `FAIL` / `BLOCKED`)</li>
+          <li><b>Automation Status &amp; Defect ID:</b> `Automated (LoginTest#verifyValidLogin)` / `Defect ID` if failed</li>
+        </ol>
+      </li>
+    </ul>
+
+    <table>
+      <tr><th>Parameter</th><th>Test Scenario</th><th>Test Case</th></tr>
+      <tr><td>Core Focus</td><td><b>WHAT</b> to test (High-level business functionality)</td><td><b>HOW</b> to test (Granular step-by-step inputs &amp; expected results)</td></tr>
+      <tr><td>Documentation Length</td><td>1 single headline sentence</td><td>10 structured fields (Preconditions, Steps, Data, Expected Result)</td></tr>
+      <tr><td>Cardinality</td><td><b>1 Test Scenario</b> maps to <b>Multiple Test Cases</b></td><td><b>Many Test Cases</b> (Positive, Negative, BVA) belong to 1 Scenario</td></tr>
+      <tr><td>When Used Alone</td><td>When time is extremely tight or during exploratory sprints</td><td>For formal execution, auditing, onboarding &amp; Selenium scripting</td></tr>
+    </table></section>
+
+  <section><h2>5. Real SDET Code Trace: Mapping Test Scenario, Test Case ID &amp; RTM ID in TestNG</h2>
+<pre><code>import org.testng.Assert;
+import org.testng.annotations.Test;
+
+// TEST SCENARIO (TS_LOGIN_01): Verify User Login Functionality
+public class LoginScenarioTest extends BaseTest {
+
+    // TEST CASE 1 (TC_LOGIN_001 - Positive) -> Mapped to RTM REQ_101
+    @Test(priority = 1, groups = {"smoke", "regression"},
+          description = "RTM:REQ_101 | TC_LOGIN_001: Verify login with valid credentials")
+    public void verifyValidLogin() {
+        LoginPage loginPage = new LoginPage(getDriver());
+        DashboardPage dash = loginPage.loginAs("qa@shop.com", "Pass#123");
+        Assert.assertEquals(dash.getHeadingText(), "Welcome, QA");
+    }
+
+    // TEST CASE 2 (TC_LOGIN_002 - Negative) -> Mapped to RTM REQ_101
+    @Test(priority = 2, groups = {"regression"},
+          description = "RTM:REQ_101 | TC_LOGIN_002: Verify error banner on invalid password")
+    public void verifyInvalidPasswordError() {
+        LoginPage loginPage = new LoginPage(getDriver());
+        loginPage.loginAs("qa@shop.com", "WrongPass!");
+        Assert.assertEquals(loginPage.getErrorBanner(), "ERR_INVALID_CREDENTIALS");
+    }
+}</code></pre>
+    <p><b>Interview Answer:</b> <i>"Test Strategy vs Test Plan: Test Strategy is a static, organization-level document defining overall quality standards and tools, whereas a Test Plan is a dynamic, project-specific document defining scope, schedule, resources, risks, and entry/exit criteria for a release. Test Scenario vs Test Case: A Test Scenario is a high-level one-liner stating WHAT to test, whereas a Test Case details HOW to test with exact preconditions, steps, test data, and expected results."</i></p></section>
+
+  <section><h2>6. Self-Check</h2>
+    <ol>
+      <li>Which document is static at the organization level, and which is dynamic at the project/release level? <i>(Test Strategy is static/organization-level; Test Plan is dynamic/project-level.)</i></li>
+      <li>What is **Suspension Criteria** inside a Test Plan? <i>(The threshold condition under which QA temporarily halts all test execution—for example, if the staging environment goes down or >40% of core test cases are blocked by a critical defect.)</i></li>
+      <li>How does **Forward Traceability** differ from **Backward Traceability** in an RTM? <i>(Forward maps `Requirement -> Test Case` to ensure 100% of requirements are tested; Backward maps `Test Case -> Requirement` to ensure no extra unrequested features/tests are being built.)</i></li>
+    </ol></section>
+
+  <section><h2>7. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m3-3-qa.html"><span class="tag Interview">Interview</span>M3.3 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

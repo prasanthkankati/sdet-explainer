@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 4.2 Severity vs Priority (4x4 Matrix with Real Examples)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>4.2 Severity vs Priority (4&times;4 Matrix with Real Examples)</h1>
+
+  <section><h2>1. The Base: What Are Severity and Priority?</h2>
+    <p class="def"><b>Severity</b> measures the <b>technical impact</b> of a defect on the system's functionality (assigned by QA). <b>Priority</b> measures the <b>business urgency</b> of how soon the defect must be fixed (assigned by Product / Triage Lead).</p>
+    <p><b>The Problem It Solves (In Plain Words):</b> A typo in a company logo on the home page causes zero technical crashes, yet the CEO demands it fixed before tonight's launch. Meanwhile, a crash inside an obsolete "Export to Fax" page used by 0.01% of users is technically severe, yet business won't delay a release for it. Separating **Severity (Technical Impact)** from **Priority (Fix Order)** prevents engineering teams from fixing the wrong bugs first.</p></section>
+
+  <section><h2>2. Severity Levels &amp; Priority Levels Listed in Order</h2>
+    <ul>
+      <li><b>4 Standard Severity Levels (Technical Impact &mdash; QA Owns):</b>
+        <ol>
+          <li><b>S1 &mdash; Blocker / Showstopper:</b> Entire app or core module crashes/unusable; blocks all further testing (e.g., Login fails with HTTP 500).</li>
+          <li><b>S2 &mdash; Critical:</b> Major business feature fails with no workaround (e.g., Checkout fails to process payments).</li>
+          <li><b>S3 &mdash; Major / Medium:</b> Feature fails partially or is inconvenient, but a valid workaround exists.</li>
+          <li><b>S4 &mdash; Minor / Trivial:</b> Cosmetic UI alignment, typo, color mismatch; zero impact on core functionality.</li>
+        </ol>
+      </li>
+      <li><b>4 Standard Priority Levels (Business Urgency &mdash; Product / Lead Owns):</b>
+        <ol>
+          <li><b>P1 &mdash; Urgent / High:</b> Must be fixed immediately (within hours / current hotfix) before release.</li>
+          <li><b>P2 &mdash; High / Medium:</b> Must be fixed within the current Sprint before sign-off.</li>
+          <li><b>P3 &mdash; Normal / Low:</b> Fix when time permits or schedule for next sprint.</li>
+          <li><b>P4 &mdash; Low:</b> Cosmetic/nice-to-have; can be deferred to backlog.</li>
+        </ol>
+      </li>
+    </ul></section>
+
+  <section><h2>3. The Classic 2&times;2 Interview Matrix (With Real Production Examples)</h2>
+    <table>
+      <tr><th>Combination</th><th>Real-World Example</th><th>Why?</th></tr>
+      <tr><td><b>High Severity + High Priority</b></td><td>Clicking "Place Order" or "Login" throws HTTP 500 Server Error for all users.</td><td>Core functionality is completely broken (High Severity) AND blocks revenue immediately (High Priority).</td></tr>
+      <tr><td><b>High Severity + Low Priority</b></td><td>Application crashes when clicking a legacy "Print Monthly Statement (IE11)" button on an archived FAQ page visited by &lt; 0.01% users.</td><td>A full system crash is technically High Severity, but almost no real user hits that rare edge path today (Low Priority).</td></tr>
+      <tr><td><b>Low Severity + High Priority</b></td><td>Company brand name misspelled ("Amzon" instead of "Amazon") on the Homepage banner or wrong helpline phone number shown.</td><td>Zero technical failure or crash (Low Severity), but huge brand/legal embarrassment requiring an immediate fix (High Priority).</td></tr>
+      <tr><td><b>Low Severity + Low Priority</b></td><td>1-pixel padding misalignment on the "Terms &amp; Conditions" footer link.</td><td>Zero functional impact (Low Severity) and negligible business urgency (Low Priority).</td></tr>
+    </table>
+    <p><b>Interview Answer:</b> <i>"Severity is the technical impact of a defect on the application, usually set by QA. Priority is the business urgency of how soon it should be fixed, set by the Product Owner or Triage Lead. A homepage logo typo is Low Severity / High Priority, whereas a crash on a rarely used legacy archive link is High Severity / Low Priority."</i></p></section>
+
+  <section><h2>4. Side-by-Side Comparison: Severity vs Priority</h2>
+    <table>
+      <tr><th>Parameter</th><th>Severity</th><th>Priority</th></tr>
+      <tr><td>Core Meaning</td><td><b>Technical degree of damage</b> to the software</td><td><b>Business urgency / order</b> in which the bug must be fixed</td></tr>
+      <tr><td>Who Assigns It</td><td><b>QA / SDET Engineer</b></td><td><b>Product Owner / Project Manager / Triage Lead</b></td></tr>
+      <tr><td>Basis of Decision</td><td>System functionality, data loss, crash impact</td><td>Revenue impact, release deadline, customer visibility</td></tr>
+      <tr><td>Typical Scale</td><td>Blocker, Critical, Major, Minor/Trivial</td><td>P1 (Urgent), P2 (High), P3 (Medium), P4 (Low)</td></tr>
+    </table></section>
+
+  <section><h2>5. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m4-2-qa.html"><span class="tag Interview">Interview</span>M4.2 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

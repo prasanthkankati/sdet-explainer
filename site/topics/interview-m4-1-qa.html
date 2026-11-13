@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: M4.1 Complete Bug Life Cycle &amp; Defect States (35 Questions)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a class="qa-chip" href="manual-m4-1-bug-lifecycle.html"><span class="tag Manual">Manual</span>&larr; Back to 4.1 Bug Life Cycle Page</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>M4.1 Question Bank: Complete Bug Life Cycle &amp; Defect States (35 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions &amp; States (Q1&ndash;Q10)</h2>
+    <ol>
+      <li><b>Q1: What is the Bug Life Cycle?</b><br><b>A:</b> The structured sequence of states a defect moves through from discovery (`New`) to assignment (`Assigned`), debugging (`Open`), resolution (`Fixed`), confirmation (`Pending Retest` / `Verified`), and completion (`Closed` or `Reopened`).</li>
+      <li><b>Q2: What is the difference between Error, Defect (Bug), and Failure?</b><br><b>A:</b> **Error** = human mistake; **Defect/Bug** = flaw inside code or specification; **Failure** = observable incorrect behavior at runtime when executing the program.</li>
+      <li><b>Q3: What are the mandatory fields in a Jira Defect Report?</b><br><b>A:</b> Defect ID, Summary, Environment &amp; Build #, Steps to Reproduce, Test Data, Expected vs Actual Result, Severity, Priority, and Evidence (Screenshot/Video/HAR/Logs).</li>
+      <li><b>Q4: What is the `Deferred` state?</b><br><b>A:</b> A valid defect intentionally postponed to a future sprint or release due to low business impact or tight release timelines.</li>
+      <li><b>Q5: What is the `Rejected` state?</b><br><b>A:</b> When a logged ticket is not actually a defect (e.g., misunderstood requirement, wrong test data, or working as designed in SRS).</li>
+      <li><b>Q6: What is the `Duplicate` state?</b><br><b>A:</b> When the exact same root-cause defect has already been logged by another team member; the new ticket is linked to the master ticket and closed as Duplicate.</li>
+      <li><b>Q7: What does `Reopened` mean and when is it triggered?</b><br><b>A:</b> Triggered by QA during Retesting when a developer's `Fixed` build still reproduces the original defect.</li>
+      <li><b>Q8: What is the difference between `Verified` and `Closed`?</b><br><b>A:</b> `Verified` means QA confirmed the fix passes on QA env; `Closed` is final sign-off once regression passes or the fix is deployed/merged cleanly.</li>
+      <li><b>Q9: What is a "Latent Defect" vs a "Masked Defect"?</b><br><b>A:</b> A **Latent Defect** sits hidden in the system for months/years until a specific rare condition triggers it. A **Masked Defect** is a bug hidden behind another blocking bug (once Bug A is fixed, Bug B becomes visible).</li>
+      <li><b>Q10: Who can change a bug's status from `Fixed` to `Closed`?</b><br><b>A:</b> Only **QA** (never the developer who fixed it), after verifying on a deployed QA build.</li>
+    </ol></section>
+
+  <section><h2>Tier 2: Why / Why Not &amp; Comparisons (Q11&ndash;Q18)</h2>
+    <ol start="11">
+      <li><b>Q11: Why should a developer NEVER directly mark their own bug `Closed`?</b><br><b>A:</b> Independent verification prevents bias, missing merge commits, environment config mismatches, and unverified regressions.</li>
+      <li><b>Q12: Why is "Build Version / Git Commit SHA" critical inside a defect report?</b><br><b>A:</b> Developers may push 5 builds a day; without knowing which exact build failed, a developer may test on a newer build and wrongly mark the bug `Cannot Reproduce`.</li>
+      <li><b>Q13: How do you handle a developer who repeatedly marks valid bugs as `Rejected` or `Cannot Reproduce`?</b><br><b>A:</b> Never argue over chat—attach indisputable evidence (screen recording, exact HAR network payload, server timestamp, curl command) and schedule a 5-minute pairing call or escalate to Bug Triage with the Product Owner.</li>
+      <li><b>Q14: What is Defect Age and Defect Reopen Rate?</b><br><b>A:</b> **Defect Age** = Time elapsed from `New` to `Closed` (measures turnaround speed). **Reopen Rate** = `(Reopened Bugs / Total Fixed Bugs) * 100` (high reopen rate signals poor developer unit testing before handoff).</li>
+      <li><b>Q15: What is a `Won't Fix` / `By Design` status?</b><br><b>A:</b> When Product Management confirms the behavior is intentional or the cost/risk of changing legacy code outweighs the minor inconvenience.</li>
+      <li><b>Q16: Why should you log two separate bugs instead of bundling 3 unrelated UI issues into 1 Jira ticket?</b><br><b>A:</b> Bundled bugs cannot be tracked or closed independently—if 2 issues are fixed and 1 fails, the whole ticket gets `Reopened` and metrics/routing to different Frontend vs Backend devs break.</li>
+      <li><b>Q17: What is Bug Triage?</b><br><b>A:</b> A recurring meeting (QA Lead, Dev Lead, Product Owner) to review `New` defects, validate root causes, assign Severity/Priority, and decide `Fix Now` vs `Defer`.</li>
+      <li><b>Q18: What is "Defect Clustering" in Defect Management?</b><br><b>A:</b> Roughly 80% of logged defects come from 20% of complex modules; tracking defect counts per component helps prioritize refactoring and Selenium regression coverage.</li>
+    </ol></section>
+
+  <section><h2>Tier 3: Real-World Tricky Scenarios (Q19&ndash;Q25)</h2>
+    <ol start="19">
+      <li><b>Q19: Scenario: A bug happens intermittently (1 out of 5 tries). Should you log it, and how?</b><br><b>A:</b> Yes! Log it with the exact reproduction ratio (`~20%`), attach timestamps, console/network logs, and suspected triggers (e.g., race condition, double-click, slow 3G).</li>
+      <li><b>Q20: Scenario: During Retesting, the original bug is fixed, but the fix broke another button on the same page. Do you `Reopen` the original ticket or log a new bug?</b><br><b>A:</b> Close the original ticket (its exact issue is fixed) and log a **new Regression Defect** linked to the original ticket (`relates to / caused by`).</li>
+      <li><b>Q21: Scenario: A bug is found in Production that only occurs on Safari iOS 17. Developer uses Windows Chrome and marks it `Cannot Reproduce`. What do you do?</b><br><b>A:</b> Provide a BrowserStack/device video recording, exact iOS Safari Web Inspector console error, and the exact API request/response payload.</li>
+      <li><b>Q22: Scenario: How do you verify a bug is not caused by stale browser cache or old QA test data before logging it?</b><br><b>A:</b> Re-test in a fresh **Incognito/Private browser window**, hard-reload (`Ctrl+Shift+R`), check Network tab (`200` vs `500`), and verify with a newly created test user.</li>
+      <li><b>Q23: Scenario: A `Deferred` bug from Sprint 4 suddenly starts blocking an enterprise client in Sprint 8. What happens?</b><br><b>A:</b> Product/Triage moves the ticket from `Deferred` back to `Open` / current Sprint backlog with elevated Priority (`P1`).</li>
+      <li><b>Q24: Scenario: What if a bug is confirmed in QA, but nobody knows whether it's Frontend or Backend?</b><br><b>A:</b> Open Chrome DevTools **Network Tab**: inspect the API request payload and HTTP response body. If the API returns wrong data or `500`, assign to Backend; if the API returns valid `200 JSON` and UI renders wrongly, assign to Frontend.</li>
+      <li><b>Q25: Scenario: Can an Automated Selenium test automatically log defects in Jira?</b><br><b>A:</b> Technically possible via Jira REST API, **but strongly discouraged** for flaky UI failures because it floods Jira with duplicate noise; instead, SDETs attach Allure/ExtentReports logs and triage failures before logging valid bugs.</li>
+    </ol></section>
+
+  <section><h2>Tier 4 &amp; 5: SDET &amp; Rapid-Fire Traps (Q26&ndash;Q35)</h2>
+    <ol start="26">
+      <li><b>Q26: How do you capture full evidence automatically when a Selenium test fails?</b><br><b>A:</b> Implement TestNG `ITestListener#onTestFailure`: capture `TakesScreenshot`, browser console logs (`driver.manage().logs().get(LogType.BROWSER)`), current URL, and attach them to ExtentReports/Allure.</li>
+      <li><b>Q27: How do you attach a failed API request/response automatically in RestAssured?</b><br><b>A:</b> Use `RestAssured.enableLoggingOfRequestAndResponseIfValidationFails()` or an Allure `AllureRestAssured` filter so every failed API assertion prints exact headers, URL, and JSON body.</li>
+      <li><b>Q28: What is `git bisect` and how do devs/SDETs use it for regression bugs?</b><br><b>A:</b> A binary-search Git command (`git bisect start`, `good`, `bad`) that automatically finds the exact commit that introduced a regression bug.</li>
+      <li><b>Q29: How do you link automated tests to fixed Jira bugs?</b><br><b>A:</b> Add `@Test(description = "BUG-409: ...")` or `@Issue("BUG-409")` in Allure so the regression suite documents why the test exists.</li>
+      <li><b>Q30: What is a "Blocker" defect in CI/CD?</b><br><b>A:</b> A defect that prevents the Smoke suite or downstream testing from running at all (e.g., Login API down).</li>
+      <li><b>Q31: Can a bug go directly from `New` to `Closed` without `Fixed`?</b><br><b>A:</b> Yes, if it is marked `Rejected` or `Duplicate`.</li>
+      <li><b>Q32: Is "Works on my machine" a valid final closure reason?</b><br><b>A:</b> No—it requires environment/data investigation.</li>
+      <li><b>Q33: Does a `Deferred` bug mean the bug is invalid?</b><br><b>A:</b> No—it is a valid bug postponed to a future release.</li>
+      <li><b>Q34: Who owns the `New` and `Closed` states?</b><br><b>A:</b> QA owns logging (`New`) and final verification (`Closed`).</li>
+      <li><b>Q35: What is the #1 rule for writing Steps to Reproduce?</b><br><b>A:</b> Write exact, minimal, deterministic steps with exact test data so anyone can reproduce it in under 1 minute.</li>
+    </ol></section>
+
+  <section><h2>Back to Concept Page</h2>
+    <p><a class="qa-chip" href="manual-m4-1-bug-lifecycle.html"><span class="tag Manual">Manual</span>&larr; Back to 4.1 Bug Life Cycle</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

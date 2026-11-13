@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: M3.3 Test Strategy vs Test Plan, Test Scenario vs Test Case &amp; RTM (35 Questions)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a class="qa-chip" href="manual-m3-3-strategy-plan-scenario-case-rtm.html"><span class="tag Manual">Manual</span>&larr; Back to 3.3 Strategy, Plan, Scenario, Case &amp; RTM Page</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>M3.3 Question Bank: Test Strategy vs Test Plan, Scenario vs Test Case &amp; RTM (35 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions &amp; Hierarchy (Q1&ndash;Q10)</h2>
+    <ol>
+      <li><b>Q1: What is the difference between a Test Strategy and a Test Plan?</b><br>
+        <b>A:</b> A **Test Strategy** is a high-level, static organizational document authored by the QA Director/Architect defining company-wide testing standards, levels, and automation tools. A **Test Plan** is a dynamic, project/release-specific document authored by the QA Lead defining scope, schedule, resources, risks, and entry/exit criteria for a specific release.</li>
+      <li><b>Q2: What are the key sections of an IEEE 829 Test Plan document?</b><br>
+        <b>A:</b> (1) Test Plan ID &amp; Objective, (2) In-Scope vs Out-of-Scope features, (3) Test Approach &amp; Types, (4) Entry, Suspension &amp; Resumption, and Exit Criteria, (5) Test Deliverables, (6) Environment &amp; Test Data Needs, (7) Effort Estimation, Schedule &amp; Roles, and (8) Risks &amp; Mitigation Plans.</li>
+      <li><b>Q3: What is the difference between a Test Scenario and a Test Case?</b><br>
+        <b>A:</b> A **Test Scenario** is a high-level one-line statement of **WHAT** user functionality to test (e.g., *"Verify fund transfer via NEFT"*). A **Test Case** is a detailed, step-by-step specification of **HOW** to test one specific condition of that scenario, including Preconditions, Test Steps, Test Data, and Expected Result.</li>
+      <li><b>Q4: What are the mandatory fields of a well-written Test Case?</b><br>
+        <b>A:</b> Test Case ID, Requirement/Scenario ID, Title, Priority/Severity, Preconditions, Test Steps, Test Data, Expected Result, Actual Result, Execution Status (`PASS/FAIL/BLOCKED`), and Automation/Defect reference.</li>
+      <li><b>Q5: What is a Test Script vs a Test Case?</b><br>
+        <b>A:</b> A **Test Case** is the human-readable logical specification of steps and expected results (in Jira Xray / TestRail). A **Test Script** is the executable code implementation (`@Test public void verifyLogin()` in Java Selenium or Playwright TS) that automates that Test Case.</li>
+      <li><b>Q6: What is a Test Suite (Test Set)?</b><br>
+        <b>A:</b> A logical collection or grouping of Test Cases/Scripts organized for a specific execution purpose—such as a `Smoke Suite` (`testng-smoke.xml`), a `Payment Sanity Suite`, or a `Nightly Regression Suite`.</li>
+      <li><b>Q7: What is Test Data and why is it separated from Test Steps?</b><br>
+        <b>A:</b> Test Data is the specific input values (`username`, `amount`, JSON payload) required to execute a test case. Separating Test Data from Test Steps (Data-Driven Testing) allows the exact same test steps to run against 20 different boundary/negative inputs without duplicating the test case.</li>
+      <li><b>Q8: What is Suspension Criteria vs Resumption Criteria in a Test Plan?</b><br>
+        <b>A:</b> **Suspension Criteria** defines when QA must formally pause testing (e.g., Login API returns HTTP 500 or >40% of tests are blocked). **Resumption Criteria** defines what must happen before QA resumes testing (e.g., Dev deploys fixed Build #15 and Smoke Test passes 100%).</li>
+      <li><b>Q9: What is an RTM (Requirement Traceability Matrix) and what are its 3 types?</b><br>
+        <b>A:</b> An RTM maps Requirements to Test Cases and Defects. Its 3 types are: (1) **Forward Traceability** (`Requirement -> Test Cases`), (2) **Backward/Reverse Traceability** (`Test Cases -> Requirement`), and (3) **Bi-Directional Traceability** (both directions).</li>
+      <li><b>Q10: What is a Test Summary Report (Test Closure Report)?</b><br>
+        <b>A:</b> The final deliverable of STLC Phase 6 summarizing total requirements covered, tests planned vs executed, pass/fail/blocked counts, open/waived defects by severity, DRE/Leakage metrics, and the formal QA Go/No-Go sign-off recommendation.</li>
+    </ol></section>
+
+  <section><h2>Tier 2: Why / Why Not &amp; Deep Comparisons (Q11&ndash;Q18)</h2>
+    <ol start="11">
+      <li><b>Q11: Why is a Test Plan called a "living / dynamic document"?</b><br>
+        <b>A:</b> Because software projects change mid-release: a requirement gets descoped, a staging server is delayed by 3 days, or a QA engineer goes on leave. The QA Lead must update the Test Plan's scope, schedule, and risk table to reflect reality.</li>
+      <li><b>Q12: Why do we need Backward Traceability (`Test Case -> Requirement`) if Forward Traceability already proves 100% of requirements have tests?</b><br>
+        <b>A:</b> Forward Traceability proves we didn't *miss* any requirements, but it doesn't stop developers or QA from building and testing **unrequested extra features ("Gold Plating")** or keeping orphaned test cases for deleted features. Backward Traceability ensures every single test case traces back to a valid business requirement.</li>
+      <li><b>Q13: Why should a Test Case be written so that a brand-new engineer on Day 1 can execute it without asking the author?</b><br>
+        <b>A:</b> Because during crunch releases, regressions, or audits, the original author may be on another team or on leave; ambiguous steps like *"Login and test checkout"* lead to inconsistent execution and missed bugs.</li>
+      <li><b>Q14: Why is defining "Out-of-Scope" in a Test Plan just as important as defining "In-Scope"?</b><br>
+        <b>A:</b> If a feature or browser (e.g., Internet Explorer or Load Testing for >50k users) is NOT explicitly listed under **Out-of-Scope** and signed off by Product/PM, stakeholders will assume QA tested it and blame QA if it fails in production.</li>
+      <li><b>Q15: What is the difference between a Master Test Plan and a Phase/Level Test Plan?</b><br>
+        <b>A:</b> A **Master Test Plan** covers the entire release across all test levels (Unit, API Integration, System, Performance, UAT). A **Level Test Plan** (e.g., *Performance Test Plan* or *UAT Test Plan*) dives deep into the tooling, workload models, and criteria for one specific testing phase.</li>
+      <li><b>Q16: How does Test Documentation change in fast-paced Agile Scrum teams compared to Waterfall?</b><br>
+        <b>A:</b> Instead of a 60-page Word Test Plan written once a year, Agile teams maintain a **1-page Confluence Sprint Test Plan** and write **BDD `Given-When-Then` Acceptance Criteria + lightweight Test Scenarios** directly inside Jira Xray/Zephyr linked to User Stories.</li>
+      <li><b>Q17: What is the difference between Preconditions and Test Steps inside a Test Case?</b><br>
+        <b>A:</b> **Preconditions** describe the required *starting state* before the test begins (e.g., *"User has $500 balance and 1 item in Cart"*—often set up via API/DB seed). **Test Steps** are the exact *actions under test* (e.g., *"Click 'Place Order' and verify receipt"*).</li>
+      <li><b>Q18: What makes a "Good Test Case" in an interview review?</b><br>
+        <b>A:</b> (1) **Atomic:** Tests exactly ONE clear objective (no chaining 5 unrelated features in 1 test case), (2) **Deterministic:** Exact test data and unambiguous Expected Result, (3) **Independent:** Does not rely on a previous test case's side effects, and (4) **Traceable:** Linked to an RTM Requirement ID.</li>
+    </ol></section>
+
+  <section><h2>Tier 3: Real-World Tricky &amp; Edge-Case Scenarios (Q19&ndash;Q25)</h2>
+    <ol start="19">
+      <li><b>Q19: Scenario: A requirement `REQ-204` ("User can cancel order within 30 minutes of booking") is changed by the Product Owner to "within 10 minutes of booking". How do you quickly find every manual test case and Selenium script that needs updating?</b><br>
+        <b>A:</b> Look up `REQ-204` in the **RTM (Requirement Traceability Matrix)**! The RTM immediately lists `TC_CANCEL_01, TC_CANCEL_02, TC_CANCEL_03` and `OrderCancelTest.java`—taking 30 seconds instead of searching through 2,000 test cases manually.</li>
+      <li><b>Q20: Scenario: You join a startup that has zero SRS document, zero Test Plan, and zero written Test Cases, and a release is in 5 days. What is your pragmatic action plan?</b><br>
+        <b>A:</b> (1) Write **high-level Test Scenarios** (not 10-field test cases) for the top P0 revenue/login/checkout flows in 2 hours by interviewing the PO/Devs and checking production analytics, (2) Draft a 1-page risk-based Test Plan defining what WILL and WILL NOT be tested in 5 days, (3) Execute Exploratory + Scenario testing on P0 flows first, and (4) Automate a 10-test Selenium Smoke suite.</li>
+      <li><b>Q21: Scenario: A test case has 35 steps testing `Signup -> Login -> Search -> Add to Cart -> Apply Coupon -> Checkout -> Refund`. Why is this a bad test case design, and how do you refactor it?</b><br>
+        <b>A:</b> If Step 4 (`Login`) fails, you have zero visibility into whether `Search`, `Cart`, `Coupon`, or `Refund` work (they all get hidden behind one failure). Refactor it into **atomic, independent test cases** (`TC_Signup`, `TC_Login`, `TC_Coupon`, `TC_Checkout`, `TC_Refund`) where `TC_Checkout` uses a pre-existing user/cart via API precondition setup.</li>
+      <li><b>Q22: Scenario: During Test Case Peer Review, you notice a teammate wrote Expected Result: *"System should work properly / Error message should be displayed."* Why do you reject this test case?</b><br>
+        <b>A:</b> *"Should work properly"* and *"Error message should be displayed"* are vague and untestable! If the app displays `" NullPointerException 500"` in red text, a naive tester might pass *"Error message displayed"*. The Expected Result must specify the **exact banner text, HTTP status code, and post-state** (e.g., *"HTTP 400 with banner 'Invalid promo code'; cart total remains $100"*).</li>
+      <li><b>Q23: Scenario: In your RTM, `REQ-301` has 8 mapped test cases (`7 PASS`, `1 FAIL` with Low cosmetic severity), and `REQ-305` has `0` mapped test cases. Which requirement is the bigger release blocker?</b><br>
+        <b>A:</b> **`REQ-305` (0 mapped test cases)** is a critical release blocker because its test coverage is **0%**—nobody knows if `REQ-305` even works or crashes the server!</li>
+      <li><b>Q24: Scenario: What is the difference between a Blocked test case and a Failed test case during Phase 5 Execution?</b><br>
+        <b>A:</b> A **Failed** test case was executed completely and the actual result violated the expected result. A **Blocked** test case *could not even be reached/executed* because a precondition or upstream flow failed (e.g., `"Verify Refund"` is `BLOCKED` because `"Place Order"` is currently failing with HTTP 500).</li>
+      <li><b>Q25: Scenario: How do you estimate test effort (in hours/days) when drafting a Test Plan in Phase 2?</b><br>
+        <b>A:</b> Use **Work Breakdown Structure (WBS) + 3-Point Estimation**: break the work into Test Design + Data Setup + Execution + Bug Retesting + Automation scripting, and calculate $E = \frac{\text{Optimistic} + 4(\text{Most Likely}) + \text{Pessimistic}}{6}$, adding a 15%–20% buffer for bug fix/retest cycles.</li>
+    </ol></section>
+
+  <section><h2>Tier 4: SDET, Automation (Allure / ExtentReports / Xray API) Application (Q26&ndash;Q30)</h2>
+    <ol start="26">
+      <li><b>Q26: How do you automatically link Selenium/TestNG test executions to Jira Xray / Zephyr RTM without updating Excel sheets manually?</b><br>
+        <b>A:</b> Annotate each `@Test` method with the Jira Test Case key (e.g., `@XrayTest(key = "PROJ-402")` or `@TmsLink("TC_101")` in Allure) and configure the Maven/Jenkins post-build step to upload `testng-results.xml` or `cucumber.json` directly to the Jira Xray REST API.</li>
+      <li><b>Q27: In a BDD Cucumber + Selenium framework, what serves as the Test Scenario, Test Case, and Test Data?</b><br>
+        <b>A:</b> The `.feature` file's `Scenario:` / `Scenario Outline:` is the **Test Scenario &amp; Test Case** (`Given` = Precondition, `When` = Test Step, `Then` = Expected Result), and the `Examples:` table at the bottom is the **Test Data**.</li>
+      <li><b>Q28: How do you map Preconditions in Selenium so UI tests don't waste 45 seconds logging in and adding items through the browser before testing Checkout?</b><br>
+        <b>A:</b> Execute the **Preconditions via fast Backend REST API calls (`RestAssured`) or DB inserts** inside `@BeforeMethod` (e.g., generate auth cookie + call `POST /api/cart/items` in `150ms`), inject the session cookie into `WebDriver`, and navigate directly to `/checkout`.</li>
+      <li><b>Q29: How does an Automated Test Summary Report (ExtentReports / Allure) map to the manual STLC Phase 6 Test Summary Report?</b><br>
+        <b>A:</b> ExtentReports/Allure automatically generates the execution pass/fail pie charts, duration timelines, browser/OS environment metadata, failure stack traces, and embedded base64 screenshots on failure (`TakesScreenshot`).</li>
+      <li><b>Q30: Where does the Automation Test Strategy live inside a real Git repository?</b><br>
+        <b>A:</b> In the repository's `README.md` / `ARCHITECTURE.md` and enforced via `pom.xml`, `testng.xml`, `.editorconfig`, Checkstyle/SonarQube rules, and the `Jenkinsfile` / GitHub Actions workflow.</li>
+    </ol></section>
+
+  <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q31&ndash;Q35)</h2>
+    <ol start="31">
+      <li><b>Q31: Which document is created at the Organization level: Test Plan or Test Strategy?</b><br>
+        <b>A:</b> <b>Test Strategy</b>.</li>
+      <li><b>Q32: Which artifact answers "WHAT to test" vs "HOW to test"?</b><br>
+        <b>A:</b> **Test Scenario** = WHAT to test; **Test Case** = HOW to test.</li>
+      <li><b>Q33: Does 1 Test Case map to many Test Scenarios, or 1 Test Scenario map to many Test Cases?</b><br>
+        <b>A:</b> <b>1 Test Scenario maps to many Test Cases</b> (Positive, Negative, BVA).</li>
+      <li><b>Q34: What IEEE standard originally defined the structure of Software Test Documentation (Test Plan, Test Case, Summary Report)?</b><br>
+        <b>A:</b> <b>IEEE 829</b> (later superseded by **ISO/IEC/IEEE 29119-3**).</li>
+      <li><b>Q35: Which RTM direction prevents "Gold Plating" (testing/building features nobody requested)?</b><br>
+        <b>A:</b> <b>Backward (Reverse) Traceability</b> (`Test Case -> Requirement`).</li>
+    </ol></section>
+
+  <section><h2>Back to Concept Page</h2>
+    <p><a class="qa-chip" href="manual-m3-3-strategy-plan-scenario-case-rtm.html"><span class="tag Manual">Manual</span>&larr; Back to 3.3 Strategy, Plan, Scenario, Case &amp; RTM</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

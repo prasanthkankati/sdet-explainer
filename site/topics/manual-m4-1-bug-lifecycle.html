@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 4.1 Complete Bug Life Cycle &amp; Defect States</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>4.1 Complete Bug Life Cycle &amp; Defect States</h1>
+
+  <section><h2>1. The Base: What is a Bug Life Cycle and Why Does It Exist?</h2>
+    <p class="def">The Bug Life Cycle (Defect Life Cycle) is the end-to-end state-machine workflow a software defect travels through from the moment QA discovers and logs it in a bug tracker (like Jira), through developer triage and fixing, to QA retesting and final closure.</p>
+    <p><b>The Problem It Solves (In Plain Words):</b> If a QA engineer simply messages a developer on Slack saying <i>"Checkout is broken"</i>, that bug gets forgotten when the sprint gets busy, nobody knows who is fixing it, whether the fix has been deployed to QA yet, or whether QA verified it before release. A strict state workflow (`New &rarr; Assigned &rarr; Open &rarr; Fixed &rarr; Pending Retest &rarr; Verified &rarr; Closed`) enforces accountability at every handoff.</p></section>
+
+  <section><h2>2. Core Terms &amp; Defect Report Properties Defined First</h2>
+    <ul>
+      <li><b>1. Error vs Defect (Bug) vs Failure:</b> A human mistake (<b>Error</b>) introduces a flaw in code/spec (<b>Defect / Bug</b>), which manifests as wrong runtime output (<b>Failure</b>).</li>
+      <li><b>2. The 10 Mandatory Fields of a Professional Jira Defect Report:</b>
+        <ol>
+          <li><b>Defect ID &amp; Summary Title:</b> Concise 1-line headline (`[Checkout] Applying expired coupon throws HTTP 500 instead of error banner`).</li>
+          <li><b>Environment &amp; Build Version:</b> `QA-Staging`, `Build #148`, `Chrome 130 / Windows 11`.</li>
+          <li><b>Steps to Reproduce:</b> Exact numbered steps so a developer can reproduce it in 30 seconds.</li>
+          <li><b>Expected Result vs Actual Result:</b> Clear contrast against the SRS/Acceptance Criteria.</li>
+          <li><b>Severity &amp; Priority:</b> Technical impact (`Critical`) vs Business fix urgency (`P1`).</li>
+          <li><b>Attachments / Evidence:</b> Screenshot, screen recording, HAR network log, browser console error, and backend stack trace.</li>
+        </ol>
+      </li>
+    </ul></section>
+
+  <section><h2>3. Visual Pipeline: Happy Path + Branching Defect States</h2>
+    <div class="arch">
+      <div class="lbl">COMPLETE DEFECT LIFE CYCLE <small>All 11 States from Discovery to Closure or Rejection</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">01</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>NEW</b><span class="phase-role">Owner: QA / SDET</span></div>
+            <div class="phase-meta">
+              <div><span>Action</span>QA discovers failure, verifies it is reproducible, and logs ticket in Jira</div>
+              <div><span>Next Gate</span>Triage Lead reviews validity &rarr; moves to <code>ASSIGNED</code> (or <code>REJECTED</code>/<code>DUPLICATE</code>)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Valid bug routed to the responsible engineering team / developer</span></div>
+        <div class="phase-card">
+          <div class="phase-num">02</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>ASSIGNED &rarr; OPEN (In Progress)</b><span class="phase-role">Owner: Developer</span></div>
+            <div class="phase-meta">
+              <div><span>ASSIGNED</span>Dev Lead assigns bug to the module owner</div>
+              <div><span>OPEN / IN PROGRESS</span>Developer reproduces locally, debugs root cause &amp; writes fix (or marks <code>DEFERRED</code> / <code>NOT REPRODUCIBLE</code>)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Code fix merged to QA branch &amp; new build deployed to QA server</span></div>
+        <div class="phase-card">
+          <div class="phase-num">03</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>FIXED &rarr; PENDING RETEST</b><span class="phase-role">Owner: Dev &rarr; QA</span></div>
+            <div class="phase-meta">
+              <div><span>FIXED</span>Developer commits fix and links PR/Build number in Jira comment</div>
+              <div><span>PENDING RETEST</span>Build #149 deployed to QA; QA picks up ticket for Confirmation Testing</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>QA executes Retesting (exact original steps + data)</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">04</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>VERIFIED &rarr; CLOSED (or REOPENED if still failing)</b><span class="phase-role">Owner: QA Only</span></div>
+            <div class="phase-meta">
+              <div><span>If Pass: VERIFIED &rarr; CLOSED</span>Bug no longer reproduces + Regression passed &rarr; QA closes ticket</div>
+              <div><span>If Fail: REOPENED</span>Bug still reproduces on QA build &rarr; sent straight back to <code>OPEN</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. The 4 Special / Non-Happy-Path Defect States Explained</h2>
+    <ol>
+      <li><b>REJECTED (Invalid / Not a Bug):</b> Developer or BA rejects the ticket because the software actually matches the SRS, or QA misunderstood the requirement / used wrong test data.</li>
+      <li><b>DUPLICATE:</b> Another QA engineer already logged the exact same defect earlier (`BUG-102` is linked as a duplicate of `BUG-088`).</li>
+      <li><b>DEFERRED (Postponed):</b> A valid bug, but Product/Triage decides to fix it in a <b>future sprint/release</b> because its Severity/Priority is Low or the release deadline is hours away.</li>
+      <li><b>CANNOT REPRODUCE (Works on My Machine):</b> Developer cannot trigger the bug locally—usually caused by environment differences, missing browser cache clear, or specific seed data. QA must attach exact HAR logs/video/user ID or re-verify on Staging.</li>
+    </ol>
+    <p><b>Interview Answer:</b> <i>"A defect moves from New &rarr; Assigned &rarr; Open &rarr; Fixed &rarr; Pending Retest &rarr; Retest &rarr; Verified &rarr; Closed. If retesting fails, QA moves it to Reopened. Non-standard terminal/hold states include Rejected (not a bug), Duplicate (already logged), Deferred (valid bug postponed to a future release), and Cannot Reproduce."</i></p></section>
+
+  <section><h2>5. Self-Check</h2>
+    <ol>
+      <li>Who has the final authority to move a defect to <b>CLOSED</b>—the Developer or QA? <i>(QA, after confirming the fix via Retesting on the deployed QA environment.)</i></li>
+      <li>What is the difference between <b>Rejected</b> and <b>Deferred</b>? <i>(Rejected = invalid/not a real bug; Deferred = valid real bug intentionally postponed to a later release.)</i></li>
+    </ol></section>
+
+  <section><h2>6. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m4-1-qa.html"><span class="tag Interview">Interview</span>M4.1 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 5.1 Agile &amp; Scrum Framework — Roles, Ceremonies &amp; Artifacts</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>5.1 Agile &amp; Scrum Framework: Roles, Ceremonies &amp; Artifacts</h1>
+
+  <section><h2>1. The Base: What is Agile vs Scrum and Why Do They Exist?</h2>
+    <p class="def"><b>Agile</b> is an iterative software mindset (4 Values, 12 Principles) that delivers working software in small frequent increments with continuous customer feedback. <b>Scrum</b> is the most popular lightweight Agile framework that organizes work into fixed time-boxes called <b>Sprints (typically 2 weeks)</b> using 3 Roles, 5 Events (Ceremonies), and 3 Artifacts.</p>
+    <p><b>The Problem They Solve (In Plain Words):</b> Traditional Waterfall locked requirements for 9 months before showing anything to the customer—so when market needs changed in Month 4, the final product was obsolete on launch day, and QA had to cram 9 months of testing into the last 2 weeks. Scrum delivers a tested, potentially shippable product increment every 2 weeks.</p></section>
+
+  <section><h2>2. The 3 Scrum Roles (Accountabilities)</h2>
+    <ol>
+      <li><b>1. Product Owner (PO):</b> Owns the <b>WHAT</b> and <b>WHY</b>—manages and prioritizes the Product Backlog, defines User Stories &amp; Acceptance Criteria, and represents business/customer ROI.</li>
+      <li><b>2. Scrum Master (SM):</b> Owns the <b>Scrum Process</b>—a servant-leader who coaches the team on Agile, facilitates ceremonies, shields the team from mid-sprint scope creep, and removes blockers/impediments.</li>
+      <li><b>3. Developers (Cross-Functional Delivery Team &mdash; Devs + Manual QA + SDETs):</b> Owns the <b>HOW</b>—self-organizing engineers who design, code, test, automate, and deliver a "Done" Increment every Sprint. *(Scrum recognizes no sub-titles inside the delivery team: QA/SDET is an equal Developer accountability.)*</li>
+    </ol></section>
+
+  <section><h2>3. Visual Pipeline: The 5 Scrum Events (Ceremonies) Inside a 2-Week Sprint</h2>
+    <div class="arch">
+      <div class="lbl">SCRUM SPRINT LIFECYCLE <small>5 Time-Boxed Events Producing a Tested Increment</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">E1</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Sprint Planning (Day 1 &mdash; Max 4h for 2-wk Sprint)</b><span class="phase-role">PO + SM + Devs/QA</span></div>
+            <div class="phase-meta">
+              <div><span>Purpose</span>Select top-priority Product Backlog items &amp; commit to the <b>Sprint Goal</b></div>
+              <div><span>QA / SDET Role</span>Call out test data needs, environment dependencies &amp; automation effort in estimation</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Every morning during the 2-week Sprint</span></div>
+        <div class="phase-card">
+          <div class="phase-num">E2</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Daily Scrum / Standup (15 mins Max &mdash; Same Time/Place)</b><span class="phase-role">Developers + QA (SM optional)</span></div>
+            <div class="phase-meta">
+              <div><span>Purpose</span>Inspect progress toward Sprint Goal &amp; adapt the daily plan</div>
+              <div><span>QA / SDET Focus</span>Report tested stories, QA build blockers, flaky CI tests &amp; pair with Devs</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Mid-sprint preparation for the next Sprint (Optional ongoing activity)</span></div>
+        <div class="phase-card">
+          <div class="phase-num">Ref</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Backlog Refinement (Grooming)</b><span class="phase-role">Shift-Left Static Verification</span></div>
+            <div class="phase-meta">
+              <div><span>Purpose</span>Clarify upcoming User Stories, edge cases &amp; Acceptance Criteria before Planning</div>
+              <div><span>QA / SDET Role</span>Ask negative/boundary questions early (1x bug prevention!)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>End of Sprint: Tested Increment ready to demonstrate</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">E3</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Sprint Review / Demo (Max 2h for 2-wk Sprint)</b><span class="phase-role">Scrum Team + Stakeholders</span></div>
+            <div class="phase-meta">
+              <div><span>Purpose</span>Demonstrate working, tested "Done" Increment &amp; gather stakeholder feedback</div>
+              <div><span>Output</span>Updated Product Backlog based on real business feedback</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>Final ceremony of the Sprint: Inspect &amp; Adapt the Team Process</span></div>
+        <div class="phase-card">
+          <div class="phase-num">E4</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Sprint Retrospective (Max 1.5h for 2-wk Sprint)</b><span class="phase-role">Scrum Team Internal Only</span></div>
+            <div class="phase-meta">
+              <div><span>Purpose</span>Inspect: <i>What went well? What didn't? What 1 action item will we improve next Sprint?</i></div>
+              <div><span>QA / SDET Focus</span>Address late Dev handoffs to QA, flaky locators, or missing API mocks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. The 3 Scrum Artifacts &amp; Their Commitments</h2>
+    <table>
+      <tr><th>Scrum Artifact</th><th>Commitment</th><th>What It Contains</th></tr>
+      <tr><td><b>1. Product Backlog</b></td><td><b>Product Goal</b></td><td>Single prioritized ordered list of all features, bugs &amp; tech debt owned by the PO</td></tr>
+      <tr><td><b>2. Sprint Backlog</b></td><td><b>Sprint Goal</b></td><td>Selected User Stories + action plan committed by the Developers/QA for the current Sprint</td></tr>
+      <tr><td><b>3. Product Increment</b></td><td><b>Definition of Done (DoD)</b></td><td>Sum of all completed, tested, integrated stories meeting quality standards at Sprint end</td></tr>
+    </table>
+    <p><b>Interview Answer:</b> <i>"Scrum has 3 Roles (Product Owner, Scrum Master, and cross-functional Developers including QA/SDET), 5 Events (The Sprint container, Sprint Planning, 15-min Daily Scrum, Sprint Review, and Sprint Retrospective), and 3 Artifacts (Product Backlog, Sprint Backlog, and Increment—each tied to Product Goal, Sprint Goal, and Definition of Done)."</i></p></section>
+
+  <section><h2>5. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m5-1-qa.html"><span class="tag Interview">Interview</span>M5.1 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

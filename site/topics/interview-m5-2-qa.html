@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: M5.2 User Stories, INVEST, DoR vs DoD &amp; Kanban (35 Questions)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a class="qa-chip" href="manual-m5-2-stories-metrics-kanban.html"><span class="tag Manual">Manual</span>&larr; Back to 5.2 User Stories &amp; Metrics Page</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>M5.2 Question Bank: User Stories, INVEST, DoR vs DoD &amp; Kanban (35 Questions)</h1>
+
+  <section><h2>Tier 1&ndash;5 Complete Question Bank (Q1&ndash;Q35)</h2>
+    <ol>
+      <li><b>Q1: What does INVEST stand for in Agile User Stories?</b><br><b>A:</b> **I**ndependent, **N**egotiable, **V**aluable, **E**stimable, **S**mall, **T**estable.</li>
+      <li><b>Q2: What is the difference between Acceptance Criteria and Definition of Done (DoD)?</b><br><b>A:</b> **Acceptance Criteria** are story-specific behavioral rules (e.g., *"Coupon SAVE20 deducts 20%"*). **DoD** is a team-wide engineering quality checklist applied to *every* story (Unit tests, Code Review, QA Passed, Automation merged).</li>
+      <li><b>Q3: What is the difference between DoR and DoD?</b><br><b>A:</b> **DoR (Definition of Ready)** checks if a story is ready to *start* in Sprint Planning; **DoD (Definition of Done)** checks if the finished story is ready to *ship*.</li>
+      <li><b>Q4: What are Story Points and why use Fibonacci (`1, 2, 3, 5, 8, 13`) instead of Hours?</b><br><b>A:</b> Story Points measure relative **Complexity + Effort + Risk**, not clock hours (a 5-point story takes a senior dev 4h and a junior dev 12h, yet its complexity is still 5). Fibonacci reflects increasing uncertainty as stories grow larger.</li>
+      <li><b>Q5: What is Team Velocity and can you compare Team A's velocity (`40`) with Team B's velocity (`25`)?</b><br><b>A:</b> Velocity = average Story Points of `Done` stories per Sprint. You **NEVER** compare velocities across teams because Story Point baselines are relative to each team.</li>
+      <li><b>Q6: What is the difference between a Sprint Burndown Chart and a Burnup Chart?</b><br><b>A:</b> **Burndown** shows remaining work trending down toward 0; **Burnup** shows completed work trending upward alongside a total-scope line (making scope creep visible immediately).</li>
+      <li><b>Q7: What is Scrum vs Kanban?</b><br><b>A:</b> **Scrum** uses fixed-length Sprints, prescribed roles, and Velocity. **Kanban** uses continuous flow on a board with strict **WIP (Work-In-Progress) Limits**, measuring **Lead Time** and **Cycle Time**.</li>
+      <li><b>Q8: What is the difference between Lead Time and Cycle Time in Kanban/Jira?</b><br><b>A:</b> **Lead Time** = total time from ticket creation in Backlog until delivery to Customer. **Cycle Time** = active engineering time from `In Progress` until `Done`.</li>
+      <li><b>Q9: What is the difference between Epic, Story, Task, and Sub-task in Jira?</b><br><b>A:</b> **Epic** (large multi-sprint initiative, e.g., *"Checkout Redesign"*) &rarr; **User Story** (deliverable user value in 1 Sprint) &rarr; **Task/Sub-task** (technical breakdown like *"Write Selenium Test"* or *"Create DB Table"*).</li>
+      <li><b>Q10: Should QA log a sub-task bug found inside an active Sprint Story as a separate Jira Bug or fix it inside the Story?</b><br><b>A:</b> Defects found inside an *in-progress Sprint Story* before the story is `Done` are usually logged as a **Bug Sub-task** under that Story (with 0 extra Story Points!) so the Story cannot close until fixed.</li>
+      <li><b>Q11&ndash;Q35 Quick Drills:</b> (Q11) Should a bug fix get Story Points? **No for in-sprint story bugs; yes/time-boxed for escaped production bugs**. (Q12) What is Planning Poker? **Consensus-based Story Point estimation**. (Q13) What is T-Shirt Sizing (`S, M, L, XL`)? **High-level Epic estimation**. (Q14) What is a WIP Limit? **Max tickets allowed in a column like `In QA (Max 3)` to prevent bottlenecks**. (Q15) What is Escaped Defect Rate in Sprint metrics? **Prod bugs / Sprint** (target 0). (Q16&ndash;Q35: Writing Gherkin `Given-When-Then` for Boundary Values, Handling `13`-point Epics by splitting vertically [not Frontend story + Backend story], Jira Workflows [`To Do -> In Progress -> Code Review -> Ready for QA -> In QA -> Done`], QA Capacity calculation when 1 QA is on leave, and why `Automated Test Coverage` belongs in DoD).</li>
+    </ol></section>
+
+  <section><h2>Back to Concept Page</h2>
+    <p><a class="qa-chip" href="manual-m5-2-stories-metrics-kanban.html"><span class="tag Manual">Manual</span>&larr; Back to 5.2 User Stories &amp; Metrics</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

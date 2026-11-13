@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 3.1 Black-Box Techniques — Equivalence Partitioning &amp; Boundary Value Analysis</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>3.1 Black-Box Techniques: Equivalence Partitioning (EP) &amp; Boundary Value Analysis (BVA)</h1>
+
+  <section><h2>1. The Base: What is a Test Design Technique and Why Do We Need It?</h2>
+    <p class="def">A Test Design Technique is a systematic mathematical method for selecting a small, high-yield set of test inputs from an infinite pool of possible inputs so that maximum defects are caught with minimum test cases.</p>
+    <p><b>The Problem It Solves (In Plain Words):</b> Suppose a banking app has an "Age" input field that accepts customers aged `18` to `60`. A tester could type `18, 19, 20, 21 ... 60`, plus negative numbers `-5, 0, 1, 2 ... 17`, plus `61, 62 ... 999`. Testing all integers takes thousands of test cases (violating Principle #2: Exhaustive testing is impossible), while picking 2 random numbers (`25` and `40`) misses the exact edge bug where a developer wrote `if (age > 18)` instead of `if (age >= 18)`. Test Design Techniques solve this mathematically.</p></section>
+
+  <section><h2>2. Core Terms &amp; Their Properties Defined First (Black-Box vs White-Box vs Grey-Box)</h2>
+    <p>Before learning EP and BVA, understand the <b>3 families of Test Design Techniques</b> classified by whether the tester sees internal source code:</p>
+    <ul>
+      <li><b>1. Black-Box Testing (Specification-Based / Behavioral):</b> Designing test cases strictly from external requirements (`SRS` / `User Stories`) by feeding inputs and checking outputs **without looking at internal source code**.
+        <ul>
+          <li><b>5 Core Black-Box Techniques:</b> (1) <b>Equivalence Partitioning (EP)</b>, (2) <b>Boundary Value Analysis (BVA)</b>, (3) <b>Decision Table Testing</b>, (4) <b>State Transition Testing</b>, (5) <b>Use Case Testing</b>.</li>
+        </ul>
+      </li>
+      <li><b>2. White-Box Testing (Structure-Based / Glass-Box / Clear-Box):</b> Designing test cases by inspecting internal Java/TS source code (`if/else` branches, `for` loops, method paths) to achieve **Statement Coverage** and **Branch/Decision Coverage**.</li>
+      <li><b>3. Grey-Box Testing (Experience + Contract-Based):</b> Combining Black-Box execution with knowledge of internal database schemas, REST API JSON contracts, and browser DevTools network logs.</li>
+    </ul></section>
+
+  <section><h2>3. Visual Pipeline: How Equivalence Partitioning (EP) &amp; Boundary Value Analysis (BVA) Work Together</h2>
+    <p>Whenever you test any input range (e.g., **Loan Tenure: `18` to `60` years**), you apply **EP first** to slice the infinite number line into partitions, and **BVA second** to target the exact cut-points between those partitions:</p>
+    <div class="arch">
+      <div class="lbl">EP + BVA NUMBER LINE PIPELINE <small>Rule: Accept Age 18 to 60 Inclusive (if age &gt;= 18 &amp;&amp; age &lt;= 60)</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">EP1</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Invalid Partition 1 (Below Minimum: &le; 17)</b><span class="phase-role">Expected: REJECTED</span></div>
+            <div class="phase-meta">
+              <div><span>Range</span>All integers <code>&le; 17</code> (e.g., <code>-5, 0, 10, 17</code>)</div>
+              <div><span>EP Representative</span>Pick <b>1 middle value</b>: <code>10</code> &rarr; Expect Error</div>
+              <div><span>Upper Boundary (min - 1)</span><b><code>17</code></b> (Highest invalid value just below 18)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>LOWER BOUNDARY CUT-POINT: 17 (Invalid) &harr; 18 (Valid) &harr; 19 (Valid)</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">EP2</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Valid Partition (Accepted Range: 18 to 60)</b><span class="phase-role">Expected: ACCEPTED</span></div>
+            <div class="phase-meta">
+              <div><span>Range</span>All integers from <code>18</code> to <code>60</code> inclusive</div>
+              <div><span>EP Representative</span>Pick <b>1 middle value</b>: <code>35</code> &rarr; Expect Success</div>
+              <div><span>4 Inside Boundaries</span><b><code>18</code></b> (<code>min</code>), <b><code>19</code></b> (<code>min+1</code>), <b><code>59</code></b> (<code>max-1</code>), <b><code>60</code></b> (<code>max</code>)</div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>UPPER BOUNDARY CUT-POINT: 59 (Valid) &harr; 60 (Valid) &harr; 61 (Invalid)</span></div>
+        <div class="phase-card">
+          <div class="phase-num">EP3</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>Invalid Partition 2 (Above Maximum: &ge; 61)</b><span class="phase-role">Expected: REJECTED</span></div>
+            <div class="phase-meta">
+              <div><span>Range</span>All integers <code>&ge; 61</code> (e.g., <code>61, 75, 120</code>)</div>
+              <div><span>EP Representative</span>Pick <b>1 middle value</b>: <code>75</code> &rarr; Expect Error</div>
+              <div><span>Lower Boundary (max + 1)</span><b><code>61</code></b> (Lowest invalid value just above 60)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>4. Technique 1 &amp; Technique 2 Defined &amp; Explained in Order</h2>
+
+    <p><b>① Technique 1: Equivalence Partitioning (EP / Equivalence Class Partitioning &mdash; ECP)</b></p>
+    <ul>
+      <li><b>Definition:</b> Dividing the input domain of a software program into **Equivalence Classes (Partitions)** such that every value inside a given partition is processed identically by the code—meaning if **1 value** in the partition passes (or fails), all other values in that same partition will also pass (or fail).</li>
+      <li><b>Core Rule of EP:</b> Pick **exactly 1 representative value from the center** of each Valid Partition and each Invalid Partition.
+        <ul>
+          <li>For `Age 18..60`: **3 test cases total** &rarr; `10` (Invalid Low), `35` (Valid Middle), `75` (Invalid High).</li>
+        </ul>
+      </li>
+      <li><b>In what exact cases we apply EP:</b>
+        <ol>
+          <li>Numeric ranges (Age, Transfer Amount, Item Quantity).</li>
+          <li>Discrete non-numeric sets/dropdowns where BVA does not apply (e.g., User Role = `{Admin, Member, Guest}` or Card Type = `{Visa, MasterCard}`).</li>
+        </ol>
+      </li>
+    </ul>
+
+    <p><b>② Technique 2: Boundary Value Analysis (BVA &mdash; 2-Value vs 3-Value BVA)</b></p>
+    <ul>
+      <li><b>Definition:</b> Testing the **exact boundary edges** between valid and invalid equivalence partitions because developers most frequently introduce **off-by-one defects** (writing `<` instead of `<=`, or `>` instead of `>=`) at the boundary edges.</li>
+      <li><b>The 2 Standard Forms of BVA (ISTQB Standard):</b>
+        <ol>
+          <li><b>2-Value BVA (4 Boundary Points per range):</b> Tests the boundary value itself and the closest invalid neighbor:
+            <br><code>{ min - 1, min, max, max + 1 }</code> &rarr; For `18..60`: <b>`{ 17, 18, 60, 61 }`</b>.</li>
+          <li><b>3-Value BVA (6 Boundary Points per range &mdash; Complete Industry Standard):</b> Tests the boundary value plus one step on **both** sides:
+            <br><code>{ min - 1, min, min + 1, max - 1, max, max + 1 }</code> &rarr; For `18..60`: <b>`{ 17, 18, 19, 59, 60, 61 }`</b>.</li>
+        </ol>
+      </li>
+      <li><b>Why 3-Value BVA (`min+1`, `max-1`) is needed:</b> If a developer accidentally coded `if (age == 18 || age == 60)`, then 2-Value BVA `{17, 18, 60, 61}` would pass `18` and `60` while `19` and `59` fail! Adding `min+1` and `max-1` catches this immediately.</li>
+    </ul>
+    <p><b>Interview Answer:</b> <i>"Equivalence Partitioning divides inputs into valid and invalid groups where all values in a group behave the same, so we test 1 representative value per group. Boundary Value Analysis tests the exact edges of those groups (`min-1, min, min+1` and `max-1, max, max+1`) because off-by-one bugs (`<` vs `<=`) happen at boundaries."</i></p></section>
+
+  <section><h2>5. Side-by-Side Comparison: Equivalence Partitioning (EP) vs Boundary Value Analysis (BVA)</h2>
+    <table>
+      <tr><th>Parameter</th><th>Equivalence Partitioning (EP)</th><th>Boundary Value Analysis (BVA)</th></tr>
+      <tr><td>Core Focus</td><td>Representative <b>middle values</b> of each valid/invalid class</td><td>Exact <b>cutoff edges</b> between valid and invalid classes</td></tr>
+      <tr><td>Values Selected (for `18..60`)</td><td><b>3 values:</b> `10` (Invalid), `35` (Valid), `75` (Invalid)</td><td><b>6 values (3-Value BVA):</b> `17, 18, 19` and `59, 60, 61`</td></tr>
+      <tr><td>Applicable Input Types</td><td>Both <b>Ordered Ranges</b> AND <b>Discrete Sets</b> (dropdowns, roles)</td><td>Only <b>Ordered / Numeric / Length / Date Ranges</b> with a min/max</td></tr>
+      <tr><td>Primary Bug Caught</td><td>Missing entire validation rules or wrong partition routing</td><td>Off-by-one operator bugs (`<` instead of `<=`, `>` instead of `>=`)</td></tr>
+      <tr><td>Relationship</td><td>Performed <b>first</b> to identify the partitions</td><td>Performed <b>second</b> on the edges of EP partitions</td></tr>
+    </table></section>
+
+  <section><h2>6. Real Runnable Java &amp; TestNG Code Trace: Catching an Off-By-One Bug with BVA</h2>
+    <p>Look at how a developer's tiny `< 60` typo passes Equivalence Partitioning (`age = 35`), passes `min` (`age = 18`), and is **caught immediately by BVA at `max = 60`**:</p>
+<pre><code>public class LoanEligibilityValidator {
+    // REQUIREMENT: Eligible if age is between 18 and 60 (inclusive)
+    public static boolean isEligible(int age) {
+        // DEFECT: Developer wrote '&lt; 60' instead of '&lt;= 60'
+        return age &gt;= 18 &amp;&amp; age &lt; 60;
+    }
+
+    public static void main(String[] args) {
+        int[][] testMatrix = {
+            // { inputAge, expected (1=true, 0=false) }
+            { 10, 0 }, // EP Invalid Low
+            { 35, 1 }, // EP Valid Middle
+            { 75, 0 }, // EP Invalid High
+            { 17, 0 }, // BVA min - 1
+            { 18, 1 }, // BVA min
+            { 19, 1 }, // BVA min + 1
+            { 59, 1 }, // BVA max - 1
+            { 60, 1 }, // BVA max  <-- CATCHES THE '< 60' BUG!
+            { 61, 0 }  // BVA max + 1
+        };
+
+        for (int[] row : testMatrix) {
+            int age = row[0];
+            boolean expected = row[1] == 1;
+            boolean actual = isEligible(age);
+            String status = (actual == expected) ? "PASS" : "FAIL (BUG CAUGHT!)";
+            System.out.printf("Age: %2d | Expected: %-5b | Actual: %-5b | %s%n",
+                age, expected, actual, status);
+        }
+    }
+}</code></pre>
+<pre><code class="bash">Age: 10 | Expected: false | Actual: false | PASS
+Age: 35 | Expected: true  | Actual: true  | PASS
+Age: 75 | Expected: false | Actual: false | PASS
+Age: 17 | Expected: false | Actual: false | PASS
+Age: 18 | Expected: true  | Actual: true  | PASS
+Age: 19 | Expected: true  | Actual: true  | PASS
+Age: 59 | Expected: true  | Actual: true  | PASS
+Age: 60 | Expected: true  | Actual: false | FAIL (BUG CAUGHT!)
+Age: 61 | Expected: false | Actual: false | PASS</code></pre>
+    <p><b>In Selenium + TestNG:</b> We feed this exact 9-row EP + BVA matrix into `@DataProvider(name = "ageEpBva")` and run `driver.findElement(By.id("age-input")).sendKeys(String.valueOf(age))` to validate both frontend JavaScript validation and backend API validation.</p></section>
+
+  <section><h2>7. Self-Check</h2>
+    <ol>
+      <li>A password field requires **8 to 16 characters**. What are the **6 BVA length values** (3-Value BVA) you must test? <i>(`7, 8, 9` and `15, 16, 17` characters.)</i></li>
+      <li>Why did `Age = 35` (EP) miss the `age < 60` bug in the code trace above while `Age = 60` (BVA) caught it? <i>(Because off-by-one operator errors (`<` vs `<=`) only manifest at the exact boundary edge `60`, never in the middle of the partition.)</i></li>
+      <li>Can you apply BVA to a dropdown containing `{India, USA, UK}`? <i>(No — unordered discrete sets have no numeric/sequential boundary; use Equivalence Partitioning.)</i></li>
+    </ol></section>
+
+  <section><h2>8. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m3-1-qa.html"><span class="tag Interview">Interview</span>M3.1 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

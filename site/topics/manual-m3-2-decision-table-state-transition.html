@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 3.2 Decision Table, State Transition, Use Case &amp; White-Box Techniques</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>3.2 Decision Table, State Transition, Use Case &amp; White-Box Techniques</h1>
+
+  <section><h2>1. The Base: Why Are EP and BVA Alone Not Enough?</h2>
+    <p class="def">While Equivalence Partitioning and BVA test a single input field's range in isolation, real business systems depend on combinations of multiple conditions (Decision Tables), sequences of state changes over time (State Transitions), end-to-end actor interactions (Use Cases), and internal code branch execution (White-Box Coverage).</p>
+    <p><b>The Problem They Solve (In Plain Words):</b></p>
+    <ul>
+      <li><b>Problem 1 (Multiple Interdependent Conditions):</b> A shipping discount depends on 3 conditions together: *Is user a Prime Member?* + *Is cart &ge; $50?* + *Is payment via Credit Card?* EP/BVA cannot model how 3 boolean conditions interact; **Decision Table Testing** solves this.</li>
+      <li><b>Problem 2 (History / Sequence of Events Matters):</b> Entering a wrong ATM PIN once shows a warning, twice shows a warning, and the **3rd consecutive time locks the card**. The input is identical all 3 times, so only **State Transition Testing** can model how past attempts change the system's state.</li>
+    </ul></section>
+
+  <section><h2>2. Core Terms &amp; Formulas Defined First</h2>
+    <ul>
+      <li><b>1. Decision Table Formula ($2^n$ Rule):</b> If a business feature has $n$ boolean (True/False) conditions, the total number of possible rule combinations (columns) in a full Decision Table is **$2^n$** (e.g., 3 conditions = $2^3 = 8$ test rules; 4 conditions = $2^4 = 16$ test rules).</li>
+      <li><b>2. The 4 Elements of a State Transition Machine:</b>
+        <ol>
+          <li><b>State (Circle):</b> The current condition/mode of the object (e.g., `NEW_ORDER`, `PAID`, `SHIPPED`, `CANCELLED`).</li>
+          <li><b>Event / Trigger (Arrow Input):</b> The action that initiates a change (e.g., `Click Pay`, `Click Cancel`).</li>
+          <li><b>Guard Condition:</b> A prerequisite boolean rule required for the event to succeed (e.g., `[Balance >= OrderTotal]`).</li>
+          <li><b>Action / Output:</b> The side effect produced during transition (e.g., `Send Invoice Email` and move to `PAID`).</li>
+        </ol>
+      </li>
+      <li><b>3. White-Box Coverage Formulas:</b>
+        <ul>
+          <li><b>Statement Coverage %:</b> `(Executed Statements / Total Statements) * 100`</li>
+          <li><b>Branch / Decision Coverage %:</b> `(Executed True & False Outcomes / Total Decision Outcomes) * 100` *(Note: 100% Branch Coverage guarantees 100% Statement Coverage, but NOT vice versa!)*</li>
+        </ul>
+      </li>
+    </ul></section>
+
+  <section><h2>3. Technique 1: Decision Table Testing (Cause-Effect Table)</h2>
+    <p><b>Definition:</b> A structured tabular Black-Box technique that lists all **Conditions (Inputs/Causes)** in the top rows and all **Actions (Outputs/Effects)** in the bottom rows, where every vertical column (`Rule 1 .. Rule 2^n`) becomes **1 Test Case**.</p>
+    <p><b>Real Example:</b> E-Commerce Shipping Fee Rules (`n = 3` Boolean Conditions &rarr; $2^3 = 8$ Rules; collapsed where "Don't Care `-`" applies):</p>
+    <table>
+      <tr><th>Conditions / Actions</th><th>Rule 1</th><th>Rule 2</th><th>Rule 3</th><th>Rule 4</th><th>Rule 5</th><th>Rule 6</th><th>Rule 7</th><th>Rule 8</th></tr>
+      <tr><td><b>C1: Prime Member?</b></td><td>T</td><td>T</td><td>T</td><td>T</td><td>F</td><td>F</td><td>F</td><td>F</td></tr>
+      <tr><td><b>C2: Cart &ge; $500?</b></td><td>T</td><td>T</td><td>F</td><td>F</td><td>T</td><td>T</td><td>F</td><td>F</td></tr>
+      <tr><td><b>C3: Express Coupon?</b></td><td>T</td><td>F</td><td>T</td><td>F</td><td>T</td><td>F</td><td>T</td><td>F</td></tr>
+      <tr><td><b>A1: Free Shipping?</b></td><td><b>YES</b></td><td><b>YES</b></td><td><b>YES</b></td><td><b>YES</b></td><td><b>YES</b></td><td><b>YES</b></td><td>NO</td><td>NO</td></tr>
+      <tr><td><b>A2: Extra 10% Off?</b></td><td><b>YES</b></td><td>NO</td><td>NO</td><td>NO</td><td><b>YES</b></td><td>NO</td><td>NO</td><td>NO</td></tr>
+    </table>
+    <ul>
+      <li><b>Collapsed Decision Table:</b> Notice in Rules 3 &amp; 4 that if `C1 (Prime) = T` and `C2 (Cart >= $500) = F`, the user gets Free Shipping with NO extra 10% off regardless of `C3`. When a condition does not affect the outcome, we mark it `-` (**Don't Care**) to collapse redundant test cases.</li>
+      <li><b>In what exact cases we use Decision Tables:</b> Insurance premium calculators, credit card approval matrices, tax/discount engines, and role-based access control (RBAC) permissions.</li>
+    </ul></section>
+
+  <section><h2>4. Technique 2: State Transition Testing</h2>
+    <p><b>Definition:</b> A Black-Box technique used when an application's output depends not only on the current input, but also on **previous inputs and the current internal state** of the system. We test both **Valid Transitions** (via a State Diagram) and **Invalid/Blocked Transitions** (via a State Table).</p>
+
+    <div class="arch">
+      <div class="lbl">STATE TRANSITION PIPELINE <small>Example: Account Login Lockout After 3 Failed Attempts</small></div>
+      <div class="phase-pipeline">
+        <div class="phase-card">
+          <div class="phase-num">S1</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>State: LOGIN_SCREEN (Attempt 1)</b><span class="phase-role">Counter: fails = 0</span></div>
+            <div class="phase-meta">
+              <div><span>Event A (Valid Password)</span>Transitions to &rarr; <b><code>DASHBOARD_OPEN</code></b></div>
+              <div><span>Event B (Wrong Password #1)</span>Increments `fails = 1` &rarr; Transitions to <b><code>RETRY_1</code></b></div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>User enters Wrong Password #2 from RETRY_1</span></div>
+        <div class="phase-card">
+          <div class="phase-num">S2</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>State: RETRY_2 (Final Warning State)</b><span class="phase-role">Counter: fails = 2</span></div>
+            <div class="phase-meta">
+              <div><span>Event A (Valid Password)</span>Resets `fails = 0` &rarr; Transitions to <b><code>DASHBOARD_OPEN</code></b></div>
+              <div><span>Event B (Wrong Password #3)</span>Increments `fails = 3` &rarr; Transitions to <b><code>ACCOUNT_LOCKED</code></b></div>
+            </div>
+          </div>
+        </div>
+        <div class="phase-conn">&darr; <span>3rd wrong password triggers Security Lockout</span></div>
+        <div class="phase-card gate">
+          <div class="phase-num">S3</div>
+          <div class="phase-body">
+            <div class="phase-hdr"><b>State: ACCOUNT_LOCKED (Terminal / Blocked State)</b><span class="phase-role">Counter: fails = 3</span></div>
+            <div class="phase-meta">
+              <div><span>Negative State Test</span>Even if user now enters a <b>100% VALID Password</b>, system MUST stay in <code>ACCOUNT_LOCKED</code>!</div>
+              <div><span>Recovery Event</span>Only `Admin Unlock` or `24h Timer Expiry` transitions back to <code>LOGIN_SCREEN</code></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div></section>
+
+  <section><h2>5. Technique 3 (Use Case &amp; Error Guessing) &amp; Technique 4 (White-Box Coverage)</h2>
+    <ul>
+      <li><b>Use Case Testing (Black-Box):</b> Designing end-to-end test scenarios based on Actor &harr; System interactions, covering the **Main Success Scenario (Basic Flow)**, **Alternative Flows** (e.g., user pays by UPI instead of Card), and **Exception Flows** (e.g., bank server times out).</li>
+      <li><b>Error Guessing (Experience-Based):</b> Using a tester's past experience of common developer mistakes to attack weak spots (`null`, empty string, `0`, negative numbers, emojis, double-clicking submit, SQL quotes `'`).</li>
+      <li><b>White-Box Statement vs Branch Coverage (With Proof):</b></li>
+    </ul>
+<pre><code>// Look at why 100% Statement Coverage DOES NOT mean 100% Branch Coverage:
+public class BonusCalculator {
+    public static int calculateBonus(int salary, boolean isTopPerformer) {
+        int bonus = 0;                       // Statement 1
+        if (isTopPerformer) {                // Decision Branch (True / False)
+            bonus = salary / 10;             // Statement 2
+        }
+        return bonus;                        // Statement 3
+    }
+}
+// If we run ONLY 1 test: calculateBonus(50000, true):
+// -> Statements 1, 2, and 3 ALL execute = 100% Statement Coverage!
+// -> But the 'false' branch of the if-statement was NEVER tested = only 50% Branch Coverage!</code></pre>
+    <p><b>Interview Answer:</b> <i>"Decision Table testing handles complex combinations of multiple conditions using the $2^n$ rule. State Transition testing validates systems where past history and state changes matter (testing both valid transitions and invalid transitions like paying for a cancelled order). In White-Box testing, 100% Branch Coverage guarantees 100% Statement Coverage, whereas 100% Statement Coverage does not guarantee 100% Branch Coverage."</i></p></section>
+
+  <section><h2>6. Side-by-Side Comparison Across All Test Design Techniques</h2>
+    <table>
+      <tr><th>Technique</th><th>Box Type</th><th>When to Use It</th><th>Primary Formula / Artifact</th></tr>
+      <tr><td><b>Equivalence Partitioning (EP)</b></td><td>Black-Box</td><td>Single input field divided into valid/invalid ranges or discrete sets</td><td>1 middle value per partition</td></tr>
+      <tr><td><b>Boundary Value Analysis (BVA)</b></td><td>Black-Box</td><td>Ordered numeric, date, length, or size ranges</td><td>`min-1, min, min+1, max-1, max, max+1`</td></tr>
+      <tr><td><b>Decision Table Testing</b></td><td>Black-Box</td><td>Multiple business conditions (`if A and B but not C`)</td><td>$2^n$ rules table</td></tr>
+      <tr><td><b>State Transition Testing</b></td><td>Black-Box</td><td>Workflows with states, status changes, or retry limits</td><td>State Diagram + State-Event Table</td></tr>
+      <tr><td><b>Use Case Testing</b></td><td>Black-Box</td><td>End-to-end user journeys &amp; UAT scenarios</td><td>Main Flow + Alternate + Exception Flows</td></tr>
+      <tr><td><b>Statement &amp; Branch Coverage</b></td><td>White-Box</td><td>Developer Unit Testing &amp; JaCoCo/SonarQube PR gates</td><td>100% Branch &rArr; 100% Statement</td></tr>
+    </table></section>
+
+  <section><h2>7. Self-Check</h2>
+    <ol>
+      <li>If a loan approval rule depends on **4 boolean conditions**, how many columns exist in an uncollapsed Decision Table? <i>($2^4 = 16$ rules.)</i></li>
+      <li>In an e-commerce order lifecycle (`CREATED &rarr; PAID &rarr; SHIPPED &rarr; DELIVERED`), testing whether a user or API call can move an order directly from `CREATED` to `DELIVERED` without paying is an example of which technique? <i>(Negative / Invalid State Transition Testing.)</i></li>
+      <li>Does 100% Statement Coverage guarantee 100% Branch Coverage? <i>(No — an `if` statement without an `else` achieves 100% Statement Coverage with just the `true` path, leaving the `false` branch untested.)</i></li>
+    </ol></section>
+
+  <section><h2>8. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m3-2-qa.html"><span class="tag Interview">Interview</span>M3.2 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

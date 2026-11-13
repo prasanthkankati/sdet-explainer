@@ -1,8 +1,8 @@
-:root{--bg:#0d1117;--text:#c9d1d9;--bold:#f0f6fc;--muted:#8b949e;--accent:#58a6ff;--kw:#39c5cf;--type:#a371f7;--fn:#3fb950;--str:#ffa657;--cmt:#8b949e;--op:#ff7b72;--punc:#d2a8ff;--java:#f89820;--sel:#43b02a;--man:#39c5cf;--ts:#3178c6;--pw:#e05263;--int:#a371f7;--border:#262c36;--code-bg:#161b22;--sheet-border:#485b73}
-:root[data-theme=light]{--bg:#ffffff;--text:#24292f;--bold:#0f172a;--muted:#57606a;--accent:#0969da;--kw:#0550ae;--type:#6639ba;--fn:#116329;--str:#953800;--cmt:#6e7781;--op:#cf222e;--punc:#8250df;--java:#d97706;--sel:#2e8b1a;--man:#0b7ea3;--ts:#2563eb;--pw:#c83246;--int:#6d28d9;--border:#d8dee4;--code-bg:#f6f8fa;--sheet-border:#94a3b8}
-.theme{position:fixed;top:11px;right:18px;font:13px/1.4 Consolas,"Cascadia Mono",monospace;padding:4px 10px;border:1px solid var(--border);background:var(--bg);color:var(--muted);cursor:pointer;z-index:20;border-radius:4px}
-.theme:hover{color:var(--accent);border-color:var(--accent)}
-*{box-sizing:border-box}
+:root{--bg:#000000;--text:#ffffff;--bold:#ffffff;--muted:#a6a6a6;--accent:#6fc3df;--kw:#569cd6;--type:#4ec9b0;--fn:#dcdcaa;--str:#ce9178;--cmt:#7ca668;--op:#f48771;--punc:#ffd700;--java:#f38518;--sel:#89d185;--man:#6fc3df;--ts:#569cd6;--pw:#f48771;--int:#c586c0;--border:#6fc3df;--border-dim:#3c3c3c;--code-bg:#000000;--sheet-border:#6fc3df;--hc-amber:#f38518}
+:root[data-theme=light]{--bg:#ffffff;--text:#292929;--bold:#000000;--muted:#595959;--accent:#0f4a85;--kw:#0000ff;--type:#185e73;--fn:#5e2cbc;--str:#a31515;--cmt:#008000;--op:#b5200d;--punc:#0431fa;--java:#b5200d;--sel:#006400;--man:#0f4a85;--ts:#0000ff;--pw:#b5200d;--int:#5e2cbc;--border:#0f4a85;--border-dim:#666666;--code-bg:#ffffff;--sheet-border:#0f4a85;--hc-amber:#b5200d}
+.theme{position:fixed;top:11px;right:18px;font:13px/1.4 Consolas,"Cascadia Mono",monospace;padding:4px 10px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;z-index:20;border-radius:0}
+.theme:hover{color:var(--hc-amber);border-color:var(--hc-amber)}
+*{box-sizing:border-box;border-radius:0 !important}
 body{margin:0;font:15.5px/1.72 "Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
 header.top,header.chapter-top,nav,.controls,.stats,.tag,.status-pill,.kbd-hint,.ac-kw,.phase-num,.phase-role,.v-hdr,.v-mid,footer,pre,code,.chip,.qa-chip{font-family:Consolas,"Cascadia Mono","Courier New",monospace}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
@@ -13,15 +13,16 @@ header.top h1 a{color:var(--accent);text-decoration:none;cursor:pointer}
 header.top h1 a:hover{text-decoration:underline}
 header.top h1:before{content:"> "}
 header.top p{margin:2px 0 0;color:var(--muted)}
-header.chapter-top{width:100%;padding:10px 140px 10px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:rgba(13,17,23,.75);backdrop-filter:blur(8px);position:sticky;top:0;z-index:15}
-:root[data-theme=light] header.chapter-top{background:rgba(255,255,255,.88)}
+header.chapter-top{width:100%;padding:10px 140px 10px 22px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:15}
+:root[data-theme=light] header.chapter-top{background:var(--bg)}
 header.chapter-top .brand{font-weight:700;font-size:1rem;color:var(--bold);text-decoration:none;letter-spacing:.2px;white-space:nowrap}
-header.chapter-top .brand:hover{color:var(--accent);text-decoration:none}
-header.chapter-top .nav-sep{color:var(--border)}
+header.chapter-top .brand:hover{color:var(--hc-amber);text-decoration:none}
+header.chapter-top .nav-sep{color:var(--border-dim)}
 header.chapter-top .back-links{display:flex;align-items:center;gap:10px;font-size:.88rem;white-space:nowrap}
 header.chapter-top .back-links .qa-chip{margin-top:0;padding:3px 10px;font-size:.82rem}
 header.chapter-top .search-wrap{max-width:360px;flex:1;min-width:200px}
-header.chapter-top .search-wrap input{padding:5px 10px;font-size:.86rem;border-radius:4px}
+header.chapter-top .search-wrap input{padding:5px 10px;font-size:.86rem;border:1px solid var(--border)}
+header.chapter-top .search-wrap input:focus{border-color:var(--hc-amber)}
 body.in-chapter .wrap{max-width:960px;padding:18px 20px 28px}
 body.in-chapter article{background:transparent;border:1px solid var(--sheet-border);border-radius:0;padding:24px 32px}
 .search-row{margin-bottom:10px;position:relative}
@@ -42,9 +43,9 @@ body.in-chapter article{background:transparent;border:1px solid var(--sheet-bord
 .top-search .search-wrap{max-width:420px}
 .kbd-hint{color:var(--muted);font-size:.78em}
 .chip{padding:5px 12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font:inherit}
-.chip.active{color:var(--bold);border-color:var(--accent)}
+.chip.active{color:var(--bold);border-color:var(--hc-amber)}
 .qa-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid var(--int);color:var(--bold);background:transparent;font:inherit;cursor:pointer;text-decoration:none;margin-top:6px}
-.qa-chip:hover{border-color:var(--accent);color:var(--accent);text-decoration:none}
+.qa-chip:hover{border-color:var(--hc-amber);color:var(--hc-amber);text-decoration:none}
 .qa-chip .tag{margin:0}
 .stats{color:var(--muted);margin:0 0 8px;font-size:.85rem}
 .grid{display:block}

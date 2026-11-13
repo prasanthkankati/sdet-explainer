@@ -96,80 +96,88 @@ const TOPICS = [
     section: "M3. Test Design Techniques & Artifacts",
     order: 1,
     title: "3.1 Black-Box Techniques: Equivalence Partitioning & Boundary Value Analysis",
-    file: "",
+    file: "manual-m3-1-ep-bva.html",
     summary: "Reducing infinite inputs into valid/invalid partitions (EP) and testing exact min/max edges (BVA: min-1, min, min+1, max-1, max, max+1).",
-    keywords: "black box, equivalence partitioning, boundary value analysis, BVA, EP",
-    status: "planned"
+    keywords: "black box, equivalence partitioning, boundary value analysis, BVA, EP, 2-value BVA, 3-value BVA",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M3. Test Design Techniques & Artifacts",
     order: 2,
     title: "3.2 Decision Table, State Transition & Use Case Testing",
-    file: "",
-    summary: "Combinatorial business rules (Decision Tables), valid/invalid state flows (State Transition), and error guessing.",
-    keywords: "decision table, state transition, use case testing, error guessing, white box, branch coverage",
-    status: "planned"
+    file: "manual-m3-2-decision-table-state-transition.html",
+    summary: "Combinatorial business rules (Decision Tables 2^n), valid/invalid state flows (State Transition), Use Case, Error Guessing & Statement/Branch coverage.",
+    keywords: "decision table, state transition, use case testing, error guessing, white box, branch coverage, statement coverage, cyclomatic complexity",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M3. Test Design Techniques & Artifacts",
     order: 3,
     title: "3.3 Test Strategy vs Test Plan, Test Scenario vs Test Case & RTM",
-    file: "",
-    summary: "Organization-level Strategy vs project-level Plan, high-level Scenario vs step-by-step Test Case, and Requirement Traceability Matrix (forward/backward).",
-    keywords: "test strategy, test plan, test scenario, test case, RTM, requirement traceability matrix",
-    status: "planned"
+    file: "manual-m3-3-strategy-plan-scenario-case-rtm.html",
+    summary: "Organization-level Strategy vs project-level Plan (IEEE 829), high-level Scenario vs step-by-step Test Case, and Forward/Backward RTM.",
+    keywords: "test strategy, test plan, test scenario, test case, RTM, requirement traceability matrix, IEEE 829, suspension criteria",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M4. Defect Management & Bug Lifecycle",
     order: 1,
     title: "4.1 Complete Bug Life Cycle & Defect States",
-    file: "",
-    summary: "Error vs Defect vs Failure, states from New -> Assigned -> Open -> Fixed -> Retest -> Verified/Reopened -> Closed, plus Deferred/Rejected/Duplicate.",
-    keywords: "bug life cycle, defect life cycle, reopened, deferred, rejected, duplicate, error vs defect vs failure",
-    status: "planned"
+    file: "manual-m4-1-bug-lifecycle.html",
+    summary: "Error vs Defect vs Failure, states from New -> Assigned -> Open -> Fixed -> Pending Retest -> Verified/Reopened -> Closed, plus Deferred/Rejected/Duplicate.",
+    keywords: "bug life cycle, defect life cycle, reopened, deferred, rejected, duplicate, cannot reproduce, error vs defect vs failure",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M4. Defect Management & Bug Lifecycle",
     order: 2,
     title: "4.2 Severity vs Priority (4x4 Matrix with Real Examples)",
-    file: "",
+    file: "manual-m4-2-severity-priority.html",
     summary: "Technical impact (Severity) vs business urgency (Priority), with real examples of High Severity/Low Priority and Low Severity/High Priority bugs.",
-    keywords: "severity, priority, high severity low priority, low severity high priority, bug triage",
-    status: "planned"
+    keywords: "severity, priority, high severity low priority, low severity high priority, bug triage, showstopper, blocker",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M4. Defect Management & Bug Lifecycle",
     order: 3,
     title: "4.3 Defect Leakage, Defect Escape & Root Cause Analysis (RCA)",
-    file: "",
+    file: "manual-m4-3-defect-leakage-rca.html",
     summary: "Formulas for Defect Removal Efficiency (DRE), Defect Leakage, Defect Density, and 5-Whys / Fishbone RCA.",
-    keywords: "defect leakage, defect escape, DRE, defect density, root cause analysis, RCA",
-    status: "planned"
+    keywords: "defect leakage, defect escape, DRE, defect density, root cause analysis, RCA, 5-whys, fishbone",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M5. Agile, Scrum, Jira & QA Metrics",
     order: 1,
     title: "5.1 Agile & Scrum Framework: Roles, Ceremonies & Artifacts",
-    file: "",
+    file: "manual-m5-1-agile-scrum.html",
     summary: "PO, Scrum Master & Developers (including QA), Sprint Planning, Daily Standup, Sprint Review, Retrospective, Backlogs & Increment.",
-    keywords: "Agile, Scrum, sprint, product owner, scrum master, standup, retrospective, backlog",
-    status: "planned"
+    keywords: "Agile, Scrum, sprint, product owner, scrum master, standup, retrospective, backlog, increment, in-sprint automation",
+    status: "done",
+    date: "2026-11-13"
   },
   {
     track: "Manual",
     section: "M5. Agile, Scrum, Jira & QA Metrics",
     order: 2,
     title: "5.2 User Stories (INVEST), Acceptance Criteria, DoR vs DoD & Velocity",
-    file: "",
+    file: "manual-m5-2-stories-metrics-kanban.html",
     summary: "Writing Given-When-Then criteria, Definition of Ready vs Definition of Done, Story Points, Velocity, Burndown Chart, and Scrum vs Kanban.",
-    keywords: "user story, INVEST, acceptance criteria, DoR, DoD, story points, velocity, burndown, Kanban, Jira",
-    status: "planned"
+    keywords: "user story, INVEST, acceptance criteria, DoR, DoD, story points, velocity, burndown, Kanban, Jira, WIP limit",
+    status: "done",
+    date: "2026-11-13"
   },
 
   // ==================== TRACK 2: JAVA (J1 - J6) ====================
@@ -808,6 +816,94 @@ const TOPICS = [
     file: "interview-m2-3-qa.html",
     summary: "35 questions across 5 tiers: Load vs Stress vs Spike vs Endurance vs Volume, p95/p99, 401 vs 403, IDOR, WCAG a11y, I18n vs L10n.",
     keywords: "non functional testing interview questions, load vs stress testing, spike vs soak endurance, volume testing, I18n vs L10n, accessibility axe-core",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M3. Manual Testing: Test Design Techniques & Artifacts Q&A",
+    order: 1,
+    title: "M3.1 Q&A: Equivalence Partitioning & Boundary Value Analysis (35 Questions)",
+    file: "interview-m3-1-qa.html",
+    summary: "35 questions: EP vs BVA, 2-Value vs 3-Value BVA, decimal precision boundaries, leading-zero OTP traps & DataProvider automation.",
+    keywords: "EP BVA interview questions, boundary value analysis scenarios, equivalence partitioning examples",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M3. Manual Testing: Test Design Techniques & Artifacts Q&A",
+    order: 2,
+    title: "M3.2 Q&A: Decision Table, State Transition & White-Box Coverage (35 Questions)",
+    file: "interview-m3-2-qa.html",
+    summary: "35 questions: 2^n Decision Tables, Collapsed tables, State Diagrams vs Tables, Statement vs Branch coverage & Cyclomatic Complexity.",
+    keywords: "decision table interview questions, state transition testing, statement vs branch coverage, cyclomatic complexity",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M3. Manual Testing: Test Design Techniques & Artifacts Q&A",
+    order: 3,
+    title: "M3.3 Q&A: Test Strategy vs Test Plan, Scenario vs Test Case & RTM (35 Questions)",
+    file: "interview-m3-3-qa.html",
+    summary: "35 questions: IEEE 829 Test Plan, Strategy vs Plan, Scenario vs Test Case, Forward/Backward RTM, Blocked vs Failed & Xray/Allure.",
+    keywords: "test strategy vs test plan, test scenario vs test case, RTM interview questions, suspension criteria",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M4. Manual Testing: Defect Management & Bug Lifecycle Q&A",
+    order: 1,
+    title: "M4.1 Q&A: Complete Bug Life Cycle & Defect States (35 Questions)",
+    file: "interview-m4-1-qa.html",
+    summary: "35 questions: All defect states, Deferred vs Rejected vs Duplicate, Cannot Reproduce handling & Screenshot/HAR evidence.",
+    keywords: "bug life cycle interview questions, defect states, deferred vs rejected, cannot reproduce",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M4. Manual Testing: Defect Management & Bug Lifecycle Q&A",
+    order: 2,
+    title: "M4.2 Q&A: Severity vs Priority Matrix & Triage (35 Questions)",
+    file: "interview-m4-2-qa.html",
+    summary: "35 questions: High Sev/Low Pri & Low Sev/High Pri examples, bug triage conflicts & Allure @Severity tags.",
+    keywords: "severity vs priority interview questions, high severity low priority examples, bug triage",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M4. Manual Testing: Defect Management & Bug Lifecycle Q&A",
+    order: 3,
+    title: "M4.3 Q&A: Defect Leakage, DRE, Density & Root Cause Analysis (35 Questions)",
+    file: "interview-m4-3-qa.html",
+    summary: "35 questions: DRE & Defect Leakage formulas, Defect Density, Blameless 5-Whys & Fishbone RCA.",
+    keywords: "defect leakage formula, DRE interview questions, root cause analysis 5 whys",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M5. Manual Testing: Agile, Scrum & Jira Metrics Q&A",
+    order: 1,
+    title: "M5.1 Q&A: Agile & Scrum Roles, Ceremonies & Artifacts (35 Questions)",
+    file: "interview-m5-1-qa.html",
+    summary: "35 questions: PO vs SM, Daily Standup, Review vs Retro, In-Sprint vs N-1 Automation & Water-Scrum-Fall.",
+    keywords: "agile scrum interview questions, product owner vs scrum master, review vs retro, in-sprint automation",
+    status: "done",
+    date: "2026-11-13"
+  },
+  {
+    track: "Interview",
+    section: "I-M5. Manual Testing: Agile, Scrum & Jira Metrics Q&A",
+    order: 2,
+    title: "M5.2 Q&A: User Stories (INVEST), DoR vs DoD, Velocity & Kanban (35 Questions)",
+    file: "interview-m5-2-qa.html",
+    summary: "35 questions: INVEST, Given-When-Then, DoR vs DoD, Story Points Fibonacci, Velocity, Lead vs Cycle Time & Kanban WIP.",
+    keywords: "INVEST user story, DoR vs DoD, story points vs hours, velocity, kanban vs scrum",
     status: "done",
     date: "2026-11-13"
   },

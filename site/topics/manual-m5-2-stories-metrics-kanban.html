@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manual: 5.2 User Stories (INVEST), Acceptance Criteria, DoR vs DoD &amp; Kanban</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
+<article>
+  <span class="tag Manual">Manual</span>
+  <h1>5.2 User Stories (INVEST), Acceptance Criteria, DoR vs DoD &amp; Velocity</h1>
+
+  <section><h2>1. The Base: How Requirements &amp; Quality Gates Work in Agile Jira</h2>
+    <p class="def">In Agile, requirements are written as <b>User Stories</b> (following the <b>INVEST</b> standard) paired with testable <b>Given-When-Then Acceptance Criteria</b>, gated by <b>Definition of Ready (DoR)</b> before work starts and <b>Definition of Done (DoD)</b> before release, and tracked via <b>Story Points, Velocity &amp; Burndown Charts</b>.</p></section>
+
+  <section><h2>2. User Story Format, INVEST &amp; Given-When-Then Acceptance Criteria</h2>
+    <ul>
+      <li><b>Standard User Story Template:</b> <i>"As a <b>[Role]</b>, I want <b>[Action/Feature]</b>, so that <b>[Business Value]</b>."</i></li>
+      <li><b>INVEST Criteria (6 Rules of a Good User Story):</b>
+        <ol>
+          <li><b>I &mdash; Independent:</b> Can be developed &amp; tested without waiting on another story.</li>
+          <li><b>N &mdash; Negotiable:</b> Details can be refined collaboratively by PO, Dev &amp; QA.</li>
+          <li><b>V &mdash; Valuable:</b> Delivers visible value to end-users or business.</li>
+          <li><b>E &mdash; Estimable:</b> Clear enough for the team to estimate Story Points.</li>
+          <li><b>S &mdash; Small:</b> Fits comfortably inside 1 Sprint (with time for QA &amp; automation).</li>
+          <li><b>T &mdash; Testable:</b> Has exact, measurable Acceptance Criteria (e.g., <i>"Given-When-Then"</i>).</li>
+        </ol>
+      </li>
+      <li><b>BDD Acceptance Criteria (`Given - When - Then`):</b>
+        <br><code>Given</code> user has `$100` in cart &rarr; <code>When</code> user applies `SAVE20` &rarr; <code>Then</code> total updates to `$80` and discount row `-$20` displays.</li>
+    </ul></section>
+
+  <section><h2>3. Definition of Ready (DoR) vs Definition of Done (DoD)</h2>
+    <table>
+      <tr><th>Parameter</th><th>Definition of Ready (DoR)</th><th>Definition of Done (DoD)</th></tr>
+      <tr><td>When Checked</td><td><b>BEFORE</b> pulling a story into a Sprint (Planning)</td><td><b>AFTER</b> coding &amp; testing, before closing a story</td></tr>
+      <tr><td>Purpose</td><td>Prevents starting vague, unready stories (Entry Gate)</td><td>Guarantees production-grade quality (Exit Gate)</td></tr>
+      <tr><td>Checklist Examples</td><td>Clear Acceptance Criteria, UI mockups ready, API contract agreed, Story Pointed, Dependencies cleared</td><td>Code peer-reviewed, Unit tests &ge;80%, Manual + Automated Selenium/API tests passed, 0 S1/S2 bugs open, PO accepted</td></tr>
+    </table></section>
+
+  <section><h2>4. Story Points, Velocity, Burndown Chart &amp; Scrum vs Kanban</h2>
+    <ul>
+      <li><b>Story Points (Fibonacci: `1, 2, 3, 5, 8, 13`):</b> Relative effort estimate combining **Complexity + Effort + Risk/Uncertainty** (NOT hours!). QA participates in **Planning Poker** so testing &amp; automation effort is included in the Story Points.</li>
+      <li><b>Velocity:</b> Average number of Story Points of <b>100% "Done"</b> stories a team completes per Sprint (used to forecast future capacity, never to compare two different teams).</li>
+      <li><b>Sprint Burndown Chart:</b> Tracks **Remaining Work (Story Points/Hours)** on the Y-axis vs **Days in Sprint** on the X-axis against an ideal downward diagonal line.</li>
+      <li><b>Scrum vs Kanban:</b></li>
+    </ul>
+    <table>
+      <tr><th>Parameter</th><th>Scrum</th><th>Kanban</th></tr>
+      <tr><td>Cadence</td><td>Fixed 1&ndash;4 week <b>Sprints</b></td><td><b>Continuous flow</b> (No fixed Sprints)</td></tr>
+      <tr><td>WIP Control</td><td>Sprint Backlog commitment</td><td>Explicit **WIP (Work-In-Progress) Limits** per column</td></tr>
+      <tr><td>Key Metric</td><td><b>Velocity</b> &amp; Burndown Chart</td><td><b>Lead Time</b> &amp; <b>Cycle Time</b> + Cumulative Flow</td></tr>
+      <tr><td>Best Use Case</td><td>Product feature development</td><td>Production Support, DevOps, Bug-fix/Hotfix teams</td></tr>
+    </table>
+    <p><b>Interview Answer:</b> <i>"DoR is the Entry Gate ensuring a story has clear INVEST specs and Acceptance Criteria before entering a Sprint, while DoD is the Exit Gate ensuring code, unit tests, manual QA, and automation pass before a story is closed. Story Points estimate relative complexity/effort/risk using Fibonacci numbers, Velocity measures completed points per Sprint, and Kanban uses continuous flow with WIP limits instead of fixed Sprints."</i></p></section>
+
+  <section><h2>5. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-m5-2-qa.html"><span class="tag Interview">Interview</span>M5.2 Question Bank (35 Questions) &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

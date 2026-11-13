@@ -1,6 +1,16 @@
-# Progress Tracker (Current Version: `v1.7.2`)
+# Progress Tracker (Current Version: `v1.8.0`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
+
+## Manual Testing Track: 100% Complete (15/15 Concept Pages + 15 Question Banks = 525 Questions!)
+- **M1 (1.1&ndash;1.4):** Done + 140 Q&amp;As (`v1.1.0`–`v1.3.0`)
+- **M2 (2.1&ndash;2.3):** Done + 105 Q&amp;As (`v1.6.0`)
+- **M3 (3.1&ndash;3.3):** Done + 105 Q&amp;As (`v1.8.0`)
+- **M4 (4.1&ndash;4.3):** Done + 105 Q&amp;As (`v1.8.0`)
+- **M5 (5.1&ndash;5.2):** Done + 70 Q&amp;As (`v1.8.0`)
+
+## Next Up: Java Track (`J1`&ndash;`J6`)
+- Upgrade `J1.1` &amp; `J1.2` + add `J1.3 Stack vs Heap`, `J1.4 String Pool`, and `J1` Question Banks.
 
 ## Published Topic & Question Bank Pages (17 Pages Live &middot; 245 Interview Questions)
 
