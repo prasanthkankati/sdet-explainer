@@ -23,7 +23,7 @@ header.chapter-top .back-links .qa-chip{margin-top:0;padding:3px 10px;font-size:
 header.chapter-top .search-wrap{max-width:360px;flex:1;min-width:200px}
 header.chapter-top .search-wrap input{padding:5px 10px;font-size:.86rem;border-radius:4px}
 body.in-chapter .wrap{max-width:960px;padding:18px 20px 28px}
-body.in-chapter article{background:transparent;border:1px solid var(--sheet-border);border-radius:6px;padding:24px 32px}
+body.in-chapter article{background:transparent;border:1px solid var(--sheet-border);border-radius:0;padding:24px 32px}
 .search-row{margin-bottom:10px;position:relative}
 .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;position:relative}
 .search-wrap{width:100%;position:relative}
