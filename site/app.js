@@ -70,7 +70,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.0.2";
+  const SITE_VERSION = "v2.0.3";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -238,7 +238,8 @@
     const controls = document.getElementById("controls");
     const search = document.getElementById("search");
     const stats = document.getElementById("stats");
-    let track = "All";
+    let track = "Manual";
+    let slideDir = "anim-up";
 
     // Build track filter chips dynamically from TRACKS
     const tracksList = typeof TRACKS !== "undefined" ? TRACKS : [
@@ -273,14 +274,61 @@
     });
 
     selectTrackFn = function (newTrack) {
+      const oldIdx = tracksList.findIndex(t => t.id === track);
+      const newIdx = tracksList.findIndex(t => t.id === newTrack);
+      slideDir = newIdx >= oldIdx ? "anim-up" : "anim-down";
       track = newTrack;
       controls.querySelectorAll(".chip").forEach(x => {
         x.classList.toggle("active", x.dataset.track === track);
       });
-      render();
+      render(true);
     };
 
-    function render() {
+    const slideOrder = tracksList.filter(t => t.id !== "All").map(t => t.id);
+    let lastWheelAt = 0;
+    function stepTrack(delta) {
+      const idx = slideOrder.indexOf(track);
+      const curIdx = idx === -1 ? 0 : idx;
+      const nextIdx = curIdx + delta;
+      if (nextIdx >= 0 && nextIdx < slideOrder.length) {
+        selectTrackFn(slideOrder[nextIdx]);
+      }
+    }
+
+    const stageEl = document.getElementById("slide-stage");
+    if (stageEl) {
+      stageEl.addEventListener("wheel", e => {
+        const now = Date.now();
+        if (now - lastWheelAt < 420) return;
+        const atBottom = grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 4;
+        const atTop = grid.scrollTop <= 4;
+        if (e.deltaY > 24 && atBottom) {
+          e.preventDefault();
+          lastWheelAt = now;
+          stepTrack(1);
+        } else if (e.deltaY < -24 && atTop) {
+          e.preventDefault();
+          lastWheelAt = now;
+          stepTrack(-1);
+        }
+      }, { passive: false });
+
+      let touchStartY = null;
+      stageEl.addEventListener("touchstart", e => {
+        if (e.touches && e.touches.length === 1) touchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      stageEl.addEventListener("touchend", e => {
+        if (touchStartY === null || !e.changedTouches || !e.changedTouches.length) return;
+        const dy = touchStartY - e.changedTouches[0].clientY;
+        touchStartY = null;
+        const atBottom = grid.scrollTop + grid.clientHeight >= grid.scrollHeight - 4;
+        const atTop = grid.scrollTop <= 4;
+        if (dy > 48 && atBottom) stepTrack(1);
+        else if (dy < -48 && atTop) stepTrack(-1);
+      }, { passive: true });
+    }
+
+    function render(animate) {
       const q = (search ? search.value : "").trim().toLowerCase();
       const totalDone = TOPICS.filter(t => t.file).length;
       const specTotal = document.getElementById("spec-total");
@@ -292,6 +340,23 @@
         (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
       const doneCount = list.filter(t => t.file).length;
       if (stats) stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued) · hover section to expand, click to pin`;
+
+      const stageLbl = document.getElementById("stage-track-label");
+      const stageCnt = document.getElementById("stage-track-count");
+      const curTr = tracksList.find(t => t.id === track);
+      if (stageLbl) stageLbl.textContent = curTr ? curTr.label : track;
+      if (stageCnt) {
+        const sIdx = slideOrder.indexOf(track);
+        const nextHint = sIdx >= 0 && sIdx < slideOrder.length - 1 ? ` · SLIDE UP FOR ${slideOrder[sIdx + 1].toUpperCase()}` : "";
+        stageCnt.textContent = `${doneCount}/${list.length} PUBLISHED${nextHint}`;
+      }
+
+      if (animate) {
+        grid.classList.remove("anim-up", "anim-down");
+        void grid.offsetWidth;
+        grid.classList.add(slideDir);
+      }
+      grid.scrollTop = 0;
 
       if (list.length === 0) {
         grid.innerHTML = "<p>No syllabus topics in this track yet.</p>";

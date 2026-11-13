@@ -4,18 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SDET Explainer</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2.0.3">
 </head>
 <body class="home-page">
 <div class="wrap home-wrap">
-  <section class="brand-hero" aria-label="SDET Explainer Hero">
+  <section class="brand-hero" aria-label="SDET Explainer Single-Slide Hub">
     <div class="hero-col-left">
       <div class="hero-meta-row">
         <span class="hero-kicker">01 / SDET SYLLABUS</span>
-        <span class="hero-kicker">v2.0.2</span>
+        <span class="hero-kicker">v2.0.3</span>
       </div>
       <h1><a href="index.html" id="home-link" title="Home (Alt+H)">SDET<br>EXPLAINER</a></h1>
-      <p class="hero-sub">Engineering internals, architecture diagrams &amp; interview Q&amp;A banks.</p>
+      <p class="hero-sub">Engineering internals, architecture diagrams &amp; 525+ interview Q&amp;As.</p>
+      <div class="hero-meter-wrap">
+        <div class="hero-meta-row" style="margin-bottom:4px">
+          <span>OVERALL COVERAGE</span>
+          <span id="spec-total">--</span>
+        </div>
+        <div class="hero-meter"><div class="hero-meter-fill" id="hero-meter-fill"></div></div>
+      </div>
       <div class="hero-cta-row">
         <a class="hero-cta" href="topics/manual-m1-1-static-dynamic.html">START READING &rarr;</a>
         <button class="hero-cta ghost" type="button" id="hero-search-btn">SEARCH [/]</button>
@@ -23,34 +30,25 @@
       </div>
     </div>
     <div class="hero-col-right">
-      <div class="hero-block-black">
-        <div class="hero-meta-row">
-          <span class="hero-kicker">02 / ROADMAP</span>
-          <span class="hero-kicker" id="spec-total">--</span>
-        </div>
-        <h2 class="hero-block-title">FULL-STACK<br>QA &amp; SDET</h2>
-        <div class="hero-meter"><div class="hero-meter-fill" id="hero-meter-fill"></div></div>
-        <div class="hero-spec-grid" id="hero-spec">
-          <div><span>MANUAL</span><b>15/15</b></div>
-          <div><span>JAVA</span><b>3/30</b></div>
-          <div><span>Q&amp;A BANKS</span><b>525+</b></div>
-          <div><span>MODE</span><b>HOVER / PIN</b></div>
-        </div>
-      </div>
       <div class="hero-block-white">
         <div class="hero-meta-row">
-          <span class="hero-kicker">03 / TRACKS</span>
-          <span class="hero-kicker">ALT + KEY</span>
+          <span class="hero-kicker">02 / TRACK DECK</span>
+          <span class="hero-kicker">SCROLL / SWIPE &uarr;&darr;</span>
         </div>
         <div class="controls" id="controls"></div>
       </div>
+      <div class="hero-block-stage" id="slide-stage">
+        <div class="hero-meta-row stage-hdr">
+          <span class="hero-kicker" id="stage-track-label">MANUAL</span>
+          <span class="hero-kicker" id="stage-track-count">--</span>
+        </div>
+        <div class="grid slide-viewport" id="grid"></div>
+      </div>
     </div>
   </section>
-
-  <div class="grid" id="grid"></div>
 </div>
-<footer><b>v2.0.2</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview</footer>
-<script src="topics.js"></script>
-<script src="app.js"></script>
+<footer><b>v2.0.3</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview</footer>
+<script src="topics.js?v=2.0.3"></script>
+<script src="app.js?v=2.0.3"></script>
 </body>
 </html>
