@@ -68,12 +68,13 @@ body.in-chapter article{background:var(--code-bg);border:1px solid var(--border)
 :root[data-theme=light] .theme-toggle{background:#FFFFFF}
 .theme-toggle:hover{border-color:var(--accent);box-shadow:0 4px 14px rgba(255,77,0,.35);transform:scale(1.05)}
 .theme-icon{position:absolute;color:var(--bold);transition:transform .4s cubic-bezier(.22,1,.36,1),opacity .3s ease,color .2s ease}
-.theme-toggle:hover .theme-icon{color:var(--accent)}
 
-:root[data-theme=dark] .theme-icon.moon-icon{opacity:1;transform:rotate(0deg) scale(1);color:var(--accent)}
+:root[data-theme=dark] .theme-icon.moon-icon{opacity:1;transform:rotate(0deg) scale(1);color:#FFFFFF}
+:root[data-theme=dark] .theme-toggle:hover .theme-icon.moon-icon{color:#FFFFFF;filter:drop-shadow(0 0 8px rgba(255,255,255,.8))}
 :root[data-theme=dark] .theme-icon.sun-icon{opacity:0;transform:rotate(-90deg) scale(.35)}
 
 :root[data-theme=light] .theme-icon.sun-icon{opacity:1;transform:rotate(0deg) scale(1);color:var(--accent)}
+:root[data-theme=light] .theme-toggle:hover .theme-icon.sun-icon{color:var(--accent);filter:drop-shadow(0 0 8px rgba(255,77,0,.6))}
 :root[data-theme=light] .theme-icon.moon-icon{opacity:0;transform:rotate(90deg) scale(.35)}
 
 /* Floating Theme Toggle on Inner Pages */
