@@ -8,14 +8,30 @@
   const saved = localStorage.getItem("theme");
   const sys = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
   const btn = document.createElement("button");
-  btn.className = "theme";
-  btn.title = "Toggle Light/Dark Mode (Alt+L)";
+  btn.className = "theme-toggle";
+  btn.type = "button";
+  btn.title = "Toggle Light/Dark Theme (Alt+L)";
+  btn.setAttribute("aria-label", "Toggle Light/Dark Theme");
+  btn.innerHTML = `
+    <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+    <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+  `;
   const setTheme = t => {
     root.setAttribute("data-theme", t);
-    const label = (t === "light" ? "dark" : "light") + " [Alt+L]";
-    btn.textContent = label;
     const heroThemeBtn = document.getElementById("hero-theme-btn");
-    if (heroThemeBtn) heroThemeBtn.textContent = label.toUpperCase();
+    if (heroThemeBtn) heroThemeBtn.textContent = (t === "light" ? "DARK [Alt+L]" : "LIGHT [Alt+L]");
     localStorage.setItem("theme", t);
   };
   const toggleTheme = () => setTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
@@ -125,75 +141,6 @@
       spine.addEventListener("click", () => {
         const r = spine.getBoundingClientRect();
         sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
-      });
-
-      // Top bar for back-links and utility actions (search, theme)
-      const container = document.querySelector(".wrap");
-      const firstP = container ? container.querySelector(":scope > p") : null;
-      const nav = document.createElement("div");
-      nav.className = "chapter-nav";
-
-      const navLeft = document.createElement("div");
-      navLeft.className = "chapter-nav-left";
-
-      const navBrand = document.createElement("a");
-      navBrand.className = "nav-home-text";
-      navBrand.href = homeHref;
-      navBrand.title = "Home (Alt+H)";
-      navBrand.textContent = "SDET EXPLAINER";
-      navLeft.appendChild(navBrand);
-
-      if (firstP) {
-        firstP.querySelectorAll("a[href*='index.html']").forEach(a => a.remove());
-        const remainingLinks = firstP.querySelectorAll("a");
-        if (remainingLinks.length > 0) {
-          const sep = document.createElement("span");
-          sep.className = "nav-sep";
-          sep.textContent = ">";
-          navLeft.appendChild(sep);
-
-          const backDiv = document.createElement("div");
-          backDiv.className = "back-links";
-          remainingLinks.forEach(a => backDiv.appendChild(a));
-          navLeft.appendChild(backDiv);
-        }
-        firstP.remove();
-      }
-
-      const navRight = document.createElement("div");
-      navRight.className = "chapter-nav-right";
-      navRight.appendChild(btn);
-
-      const navInner = document.createElement("div");
-      navInner.className = "chapter-nav-inner";
-      navInner.appendChild(navLeft);
-      navInner.appendChild(navRight);
-      nav.appendChild(navInner);
-      document.body.insertBefore(nav, document.body.firstChild);
-
-      // FLIP animation when entering from Homepage
-      const prevRectRaw = sessionStorage.getItem("sdet-brand-rect");
-      sessionStorage.removeItem("sdet-brand-rect");
-      if (prevRectRaw) {
-        try {
-          const prev = JSON.parse(prevRectRaw);
-          const cur = brand.getBoundingClientRect();
-          brand.style.transform = `translate(${prev.left - cur.left}px, ${prev.top - cur.top}px)`;
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              brand.style.transition = "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
-              brand.style.transform = "translate(0, 0)";
-            });
-          });
-        } catch (_) {}
-      }
-
-      nav.addEventListener("click", e => {
-        const a = e.target.closest("a");
-        if (a && a.getAttribute("href") === homeHref) {
-          const r = brand.getBoundingClientRect();
-          sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
-        }
       });
     } else if (document.getElementById("home-link") || document.querySelector("header.top")) {
       const h1 = document.querySelector("header.top h1");
@@ -405,16 +352,6 @@
     const modal = backdrop.querySelector(".cmd-modal");
     const input = backdrop.querySelector(".cmd-input");
     const listEl = backdrop.querySelector(".ac-list");
-
-    const triggerBtn = document.createElement("button");
-    triggerBtn.className = "cmd-trigger";
-    triggerBtn.type = "button";
-    triggerBtn.title = "Search syllabus (/ or type anywhere)";
-    triggerBtn.textContent = "search [/]";
-    triggerBtn.addEventListener("click", () => openCmd(""));
-    const navRight = document.querySelector(".chapter-nav-right");
-    if (navRight) navRight.insertBefore(triggerBtn, navRight.firstChild);
-    else document.body.appendChild(triggerBtn);
 
     const heroSearchBtn = document.getElementById("hero-search-btn");
     if (heroSearchBtn) heroSearchBtn.addEventListener("click", () => openCmd(""));
