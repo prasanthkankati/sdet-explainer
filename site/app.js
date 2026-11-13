@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.3";
+  const SITE_VERSION = "v1.9.4";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -85,7 +85,58 @@
 
     if (inTopicsDir) {
       document.body.classList.add("in-chapter");
-      // No sticky header bar in chapter mode — page starts cleanly right at the top
+      // Top-left brand + '>' + <- All topics on the exact same line as top-right [light/dark] button (no full-width header bar)
+      const container = document.querySelector(".wrap");
+      const firstP = container ? container.querySelector(":scope > p") : null;
+      const nav = document.createElement("div");
+      nav.className = "chapter-nav";
+
+      const brand = document.createElement("a");
+      brand.className = "brand";
+      brand.href = homeHref;
+      brand.title = "Home (Alt+H)";
+      brand.textContent = "SDET Explainer";
+      nav.appendChild(brand);
+
+      const sep = document.createElement("span");
+      sep.className = "nav-sep";
+      sep.textContent = ">";
+      nav.appendChild(sep);
+
+      if (firstP) {
+        const backDiv = document.createElement("div");
+        backDiv.className = "back-links";
+        backDiv.innerHTML = firstP.innerHTML;
+        firstP.remove();
+        nav.appendChild(backDiv);
+      }
+
+      document.body.insertBefore(nav, document.body.firstChild);
+
+      // FLIP animation when entering from Homepage
+      const prevRectRaw = sessionStorage.getItem("sdet-brand-rect");
+      sessionStorage.removeItem("sdet-brand-rect");
+      if (prevRectRaw) {
+        try {
+          const prev = JSON.parse(prevRectRaw);
+          const cur = brand.getBoundingClientRect();
+          brand.style.transform = `translate(${prev.left - cur.left}px, ${prev.top - cur.top}px)`;
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              brand.style.transition = "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
+              brand.style.transform = "translate(0, 0)";
+            });
+          });
+        } catch (_) {}
+      }
+
+      nav.addEventListener("click", e => {
+        const a = e.target.closest("a");
+        if (a && a.getAttribute("href") === homeHref) {
+          const r = brand.getBoundingClientRect();
+          sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
+        }
+      });
     } else if (document.querySelector("header.top")) {
       const h1 = document.querySelector("header.top h1");
       if (h1 && !h1.querySelector("a")) {

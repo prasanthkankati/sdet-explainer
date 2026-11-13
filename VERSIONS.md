@@ -23,6 +23,7 @@ Every feature change, UI improvement, or syllabus chapter build is tracked with 
 | **v1.9.1** | 2026-11-13 | Folder-Open FLIP Transition & `>` Breadcrumb | Added FLIP slide-left transition on `SDET Explainer` when opening any chapter (`Home -> Chapter` and `Chapter -> Home`), placed `#FF4D00` **`>`** folder-open chevron to the right of `SDET Explainer`, and added folder-reveal animation on chapter sheets. | `site/app.js`, `site/style.css`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
 | **v1.9.2** | 2026-11-13 | Headerless Chapter Reading View | Removed the sticky top header bar inside chapters so the reading page starts right from the top; updated `.def` and inline `code` tints to `#FF4D00`. | `site/app.js`, `site/style.css`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
 | **v1.9.3** | 2026-11-13 | Remove Search Box from Chapters | Removed the injected `Type anywhere to jump` search box inside chapter pages so only the clean `← All topics` link and reading sheet appear. | `site/app.js`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
+| **v1.9.4** | 2026-11-13 | Unified Button/Page Borders & Inline Top-Left Brand | Placed `SDET Explainer > ← All topics` flush top-left on the exact same horizontal line as the top-right `light [Alt+L]` button (no full-width bar), and unified ALL button borders (`.qa-chip`, `.chip`, `.theme`) and page borders (`article`) to the clean neutral `1px solid var(--border)` (`#2B2B2B` / `#CCCCCC`). | `site/style.css`, `site/app.js`, `site/index.html`, `VERSIONS.md`, `PROGRESS.md` |
 
 ---
 
