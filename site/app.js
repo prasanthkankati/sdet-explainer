@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.6";
+  const SITE_VERSION = "v1.9.7";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -352,6 +352,14 @@
     const modal = backdrop.querySelector(".cmd-modal");
     const input = backdrop.querySelector(".cmd-input");
     const listEl = backdrop.querySelector(".ac-list");
+
+    const triggerBtn = document.createElement("button");
+    triggerBtn.className = "cmd-trigger";
+    triggerBtn.type = "button";
+    triggerBtn.title = "Search syllabus (/ or type anywhere)";
+    triggerBtn.textContent = "search [/]";
+    triggerBtn.addEventListener("click", () => openCmd(""));
+    document.body.appendChild(triggerBtn);
 
     let matches = [];
     let selIdx = 0;

@@ -2,6 +2,8 @@
 :root[data-theme=light]{--bg:#F2F2F2;--text:#111111;--bold:#000000;--muted:#595959;--accent:#FF4D00;--kw:#D93D00;--type:#111111;--fn:#005a32;--str:#a31515;--cmt:#666666;--op:#FF4D00;--punc:#595959;--java:#D93D00;--sel:#006400;--man:#D93D00;--ts:#0f4a85;--pw:#b5200d;--int:#111111;--border:#CCCCCC;--border-dim:#D4D4D4;--code-bg:#FFFFFF;--sheet-border:#CCCCCC;--hc-amber:#FF4D00}
 .theme{position:fixed;top:11px;right:18px;font:13px/1.4 Consolas,"Cascadia Mono",monospace;padding:4px 10px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;z-index:20;border-radius:0}
 .theme:hover{color:var(--hc-amber);border-color:var(--hc-amber)}
+.cmd-trigger{position:fixed;top:11px;right:134px;font:13px/1.4 Consolas,"Cascadia Mono",monospace;padding:4px 10px;border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;z-index:20;border-radius:0}
+.cmd-trigger:hover{color:var(--accent);border-color:var(--accent)}
 *{box-sizing:border-box;border-radius:0 !important}
 body{margin:0;font:15.5px/1.72 "Segoe UI",system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text)}
 header.top,header.chapter-top,nav,.controls,.stats,.tag,.status-pill,.kbd-hint,.ac-kw,.phase-num,.phase-role,.v-hdr,.v-mid,footer,pre,code,.chip,.qa-chip{font-family:Consolas,"Cascadia Mono","Courier New",monospace}
@@ -162,3 +164,17 @@ th{color:var(--bold);border-bottom:2px solid var(--border);font-weight:700}
 .term-pop-props li{margin:2px 0}
 .term-pop-ex{border-left:2px solid var(--fn);padding-left:8px;color:var(--muted);font-size:.84rem;margin-top:4px}
 footer{color:var(--muted);padding:20px 24px;font-size:.8rem;max-width:900px;margin:0 auto}
+@media (max-width:640px){
+  .wrap,header.top{padding:16px 14px}
+  header.top{padding-top:46px;padding-bottom:4px}
+  .theme{top:10px;right:12px;font-size:12px;padding:4px 8px}
+  .cmd-trigger{top:10px;right:114px;font-size:12px;padding:4px 8px}
+  .chapter-nav{padding:46px 14px 0 14px}
+  body.in-chapter .wrap{padding:10px 10px 24px}
+  body.in-chapter article{padding:16px 14px}
+  .v-hdr,.v-row{grid-template-columns:1fr;gap:4px}
+  .v-row.lv1,.v-row.lv2,.v-row.lv3,.v-row.lv4{padding:0}
+  .v-box.right{text-align:left;border-right:1px solid var(--border);border-left:3px solid var(--fn)}
+  .v-mid{text-align:left;padding:2px 0}
+  pre{font-size:.82rem;padding:10px}
+}
