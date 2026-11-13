@@ -12,12 +12,17 @@
   btn.title = "Toggle Light/Dark Mode (Alt+L)";
   const setTheme = t => {
     root.setAttribute("data-theme", t);
-    btn.textContent = (t === "light" ? "dark" : "light") + " [Alt+L]";
+    const label = (t === "light" ? "dark" : "light") + " [Alt+L]";
+    btn.textContent = label;
+    const heroThemeBtn = document.getElementById("hero-theme-btn");
+    if (heroThemeBtn) heroThemeBtn.textContent = label.toUpperCase();
     localStorage.setItem("theme", t);
   };
   const toggleTheme = () => setTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
   btn.onclick = toggleTheme;
   document.body.appendChild(btn);
+  const heroThemeBtn = document.getElementById("hero-theme-btn");
+  if (heroThemeBtn) heroThemeBtn.onclick = toggleTheme;
   setTheme(saved || sys);
 
   function initAll() {
@@ -65,7 +70,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.0.1";
+  const SITE_VERSION = "v2.0.2";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -278,15 +283,15 @@
     function render() {
       const q = (search ? search.value : "").trim().toLowerCase();
       const totalDone = TOPICS.filter(t => t.file).length;
-      const specDone = document.getElementById("spec-done");
-      const specQueued = document.getElementById("spec-queued");
-      if (specDone) specDone.textContent = String(totalDone);
-      if (specQueued) specQueued.textContent = String(TOPICS.length - totalDone);
+      const specTotal = document.getElementById("spec-total");
+      const meterFill = document.getElementById("hero-meter-fill");
+      if (specTotal) specTotal.textContent = `${totalDone} / ${TOPICS.length} LIVE`;
+      if (meterFill) meterFill.style.width = `${TOPICS.length ? Math.round((totalDone / TOPICS.length) * 100) : 0}%`;
 
       const list = TOPICS.filter(t => (track === "All" || t.track === track) &&
         (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
       const doneCount = list.filter(t => t.file).length;
-      stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued) · hover section to expand, click to pin`;
+      if (stats) stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued) · hover section to expand, click to pin`;
 
       if (list.length === 0) {
         grid.innerHTML = "<p>No syllabus topics in this track yet.</p>";
