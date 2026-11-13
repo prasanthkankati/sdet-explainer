@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.5";
+  const SITE_VERSION = "v1.9.6";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -276,13 +276,7 @@
     };
 
     function render() {
-      const q = search.value.trim().toLowerCase();
-      const totalDone = TOPICS.filter(t => t.file).length;
-      const heroBadge = document.getElementById("hero-badge");
-      const heroFill = document.getElementById("hero-bar-fill");
-      if (heroBadge) heroBadge.textContent = `${totalDone} / ${TOPICS.length} published`;
-      if (heroFill) heroFill.style.width = `${TOPICS.length ? Math.round((totalDone / TOPICS.length) * 100) : 0}%`;
-
+      const q = (search ? search.value : "").trim().toLowerCase();
       const list = TOPICS.filter(t => (track === "All" || t.track === track) &&
         (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
       const doneCount = list.filter(t => t.file).length;
@@ -335,27 +329,29 @@
       });
     }
 
-    search.addEventListener("input", render);
+    if (search) search.addEventListener("input", render);
     render();
   }
 
-  // Typeahead / Autocomplete + Global Key-Capture Quick Switcher
+  // Global Command Search Overlay (Type anywhere to open, blurs background, clears on collapse)
   function initTypeahead() {
     if (typeof TOPICS === "undefined") return;
     const inTopicsDir = location.pathname.replace(/\\/g, "/").includes("/topics/");
     const prefix = inTopicsDir ? "" : "topics/";
 
-    let input = document.getElementById("search");
-    if (!input) return; // Search box lives on Homepage only
+    const backdrop = document.createElement("div");
+    backdrop.className = "cmd-backdrop";
+    backdrop.innerHTML =
+      `<div class="cmd-modal" role="dialog" aria-label="Search syllabus">` +
+        `<div class="cmd-hdr"><span><b>&gt; SEARCH SYLLABUS</b> &middot; [Enter] open &middot; [&uarr;/&darr;] navigate</span><span>[Esc] close</span></div>` +
+        `<input class="cmd-input" id="cmd-search" type="text" autocomplete="off" placeholder="Type topic, keyword, exception...">` +
+        `<div class="ac-list"></div>` +
+      `</div>`;
+    document.body.appendChild(backdrop);
 
-    const wrap = document.createElement("div");
-    wrap.className = "search-wrap";
-    input.parentNode.insertBefore(wrap, input);
-    wrap.appendChild(input);
-
-    const listEl = document.createElement("div");
-    listEl.className = "ac-list";
-    wrap.appendChild(listEl);
+    const modal = backdrop.querySelector(".cmd-modal");
+    const input = backdrop.querySelector(".cmd-input");
+    const listEl = backdrop.querySelector(".ac-list");
 
     let matches = [];
     let selIdx = 0;
@@ -406,21 +402,37 @@
       listEl.classList.add("open");
     }
 
+    function openCmd(initialChar) {
+      backdrop.classList.add("open");
+      document.body.classList.add("cmd-open");
+      input.value = initialChar || "";
+      selIdx = 0;
+      input.focus();
+      renderDropdown();
+    }
+
+    function closeCmd() {
+      backdrop.classList.remove("open");
+      document.body.classList.remove("cmd-open");
+      input.value = "";
+      matches = [];
+      selIdx = 0;
+      listEl.classList.remove("open");
+      listEl.innerHTML = "";
+      input.blur();
+    }
+
     input.addEventListener("input", () => {
       selIdx = 0;
       renderDropdown();
     });
 
     input.addEventListener("keydown", e => {
-      if (!listEl.classList.contains("open")) {
-        if (e.key === "Escape") { input.value = ""; input.dispatchEvent(new Event("input")); input.blur(); }
-        return;
-      }
-      if (e.key === "ArrowDown") {
+      if (e.key === "ArrowDown" && matches.length) {
         e.preventDefault();
         selIdx = (selIdx + 1) % matches.length;
         renderDropdown();
-      } else if (e.key === "ArrowUp") {
+      } else if (e.key === "ArrowUp" && matches.length) {
         e.preventDefault();
         selIdx = (selIdx - 1 + matches.length) % matches.length;
         renderDropdown();
@@ -430,21 +442,32 @@
           location.href = prefix + matches[selIdx].topic.file;
         }
       } else if (e.key === "Escape") {
-        listEl.classList.remove("open");
+        e.preventDefault();
+        closeCmd();
       }
     });
 
     document.addEventListener("keydown", e => {
+      if (backdrop.classList.contains("open")) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          closeCmd();
+        }
+        return;
+      }
       const tag = (document.activeElement && document.activeElement.tagName) || "";
       if (tag === "INPUT" || tag === "TEXTAREA" || e.ctrlKey || e.metaKey || e.altKey) return;
-      if (e.key === "/" || (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key))) {
-        input.focus();
-        if (e.key === "/") e.preventDefault();
+      if (e.key === "/") {
+        e.preventDefault();
+        openCmd("");
+      } else if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
+        e.preventDefault();
+        openCmd(e.key);
       }
     });
 
-    document.addEventListener("click", e => {
-      if (!wrap.contains(e.target)) listEl.classList.remove("open");
+    backdrop.addEventListener("click", e => {
+      if (!modal.contains(e.target)) closeCmd();
     });
   }
 
