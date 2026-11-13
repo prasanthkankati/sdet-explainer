@@ -6,17 +6,49 @@
 <title>SDET Explainer</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
-<header class="top">
-  <h1><a href="index.html" id="home-link" title="Home (Alt+H)">SDET Explainer</a></h1>
-  <p class="hero-sub">Zero-fluff engineering notes, architecture diagrams &amp; interview Q&amp;A banks. Type anywhere to search &middot; hover any section to expand.</p>
-</header>
-<div class="wrap">
-  <div class="controls" id="controls"></div>
+<body class="home-page">
+<div class="wrap home-wrap">
+  <section class="brand-hero" aria-label="SDET Explainer Hero">
+    <div class="hero-col-left">
+      <div class="hero-meta-row">
+        <span class="hero-kicker">01 / ZERO-FLUFF SYLLABUS</span>
+        <span class="hero-kicker">v2.0.0</span>
+      </div>
+      <h1><a href="index.html" id="home-link" title="Home (Alt+H)">SDET<br>EXPLAINER</a></h1>
+      <p class="hero-sub">Engineering internals, architecture diagrams &amp; interview Q&amp;A banks. Type anywhere to search &middot; hover any section to expand.</p>
+      <div class="hero-cta-row">
+        <a class="hero-cta" href="topics/manual-m1-1-static-dynamic.html">START READING &rarr;</a>
+        <button class="hero-cta ghost" type="button" id="hero-search-btn">SEARCH [/]</button>
+      </div>
+    </div>
+    <div class="hero-col-right">
+      <div class="hero-block-black">
+        <div class="hero-meta-row">
+          <span class="hero-kicker">02 / LIVE SPEC</span>
+          <span class="hero-kicker">HEX #000000</span>
+        </div>
+        <h2 class="hero-block-title">FULL-STACK<br>QA &amp; SDET</h2>
+        <div class="hero-spec-grid" id="hero-spec">
+          <div><span>PUBLISHED</span><b id="spec-done">--</b></div>
+          <div><span>QUEUED</span><b id="spec-queued">--</b></div>
+          <div><span>Q&amp;A ITEMS</span><b>525+</b></div>
+          <div><span>SHORTCUTS</span><b>ALT + KEY</b></div>
+        </div>
+      </div>
+      <div class="hero-block-white">
+        <div class="hero-meta-row">
+          <span class="hero-kicker">03 / TRACK FILTER</span>
+          <span class="hero-kicker">HEX #F2F2F2</span>
+        </div>
+        <div class="controls" id="controls"></div>
+      </div>
+    </div>
+  </section>
+
   <p class="stats" id="stats"></p>
   <div class="grid" id="grid"></div>
 </div>
-<footer><b>v1.9.7</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview</footer>
+<footer><b>v2.0.0</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview</footer>
 <script src="topics.js"></script>
 <script src="app.js"></script>
 </body>

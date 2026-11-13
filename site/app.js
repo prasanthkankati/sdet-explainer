@@ -65,7 +65,7 @@
   }
 
   // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v1.9.7";
+  const SITE_VERSION = "v2.0.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -137,12 +137,12 @@
           sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
         }
       });
-    } else if (document.querySelector("header.top")) {
+    } else if (document.getElementById("home-link") || document.querySelector("header.top")) {
       const h1 = document.querySelector("header.top h1");
       if (h1 && !h1.querySelector("a")) {
         h1.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)">${h1.textContent}</a>`;
       }
-      const homeLink = document.querySelector("header.top h1 a");
+      const homeLink = document.getElementById("home-link") || document.querySelector("header.top h1 a");
       if (homeLink) {
         // Animate SDET Explainer back to Homepage position if returning from a chapter
         const prevRectRaw = sessionStorage.getItem("sdet-brand-rect");
@@ -277,6 +277,12 @@
 
     function render() {
       const q = (search ? search.value : "").trim().toLowerCase();
+      const totalDone = TOPICS.filter(t => t.file).length;
+      const specDone = document.getElementById("spec-done");
+      const specQueued = document.getElementById("spec-queued");
+      if (specDone) specDone.textContent = String(totalDone);
+      if (specQueued) specQueued.textContent = String(TOPICS.length - totalDone);
+
       const list = TOPICS.filter(t => (track === "All" || t.track === track) &&
         (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
       const doneCount = list.filter(t => t.file).length;
@@ -360,6 +366,9 @@
     triggerBtn.textContent = "search [/]";
     triggerBtn.addEventListener("click", () => openCmd(""));
     document.body.appendChild(triggerBtn);
+
+    const heroSearchBtn = document.getElementById("hero-search-btn");
+    if (heroSearchBtn) heroSearchBtn.addEventListener("click", () => openCmd(""));
 
     let matches = [];
     let selIdx = 0;

@@ -9,7 +9,39 @@ body{margin:0;font:15.5px/1.72 "Segoe UI",system-ui,-apple-system,sans-serif;bac
 header.top,header.chapter-top,nav,.controls,.stats,.tag,.status-pill,.kbd-hint,.ac-kw,.phase-num,.phase-role,.v-hdr,.v-mid,footer,pre,code,.chip,.qa-chip{font-family:Consolas,"Cascadia Mono","Courier New",monospace}
 a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 .wrap,header.top{max-width:940px;margin:0 auto;padding:24px 24px}
-header.top{padding-bottom:4px}
+.home-wrap{max-width:1060px;padding:48px 24px 24px}
+.brand-hero{display:grid;grid-template-columns:1.05fr 1fr;border:1px solid var(--border);margin-bottom:20px;background:var(--bg)}
+.hero-col-left{background:var(--accent);color:#000000;padding:24px 26px;display:flex;flex-direction:column;justify-content:space-between;min-height:310px;border-right:1px solid var(--border)}
+.hero-meta-row{display:flex;justify-content:space-between;align-items:center;font-family:Consolas,"Cascadia Mono",monospace;font-size:.74rem;letter-spacing:.6px;text-transform:uppercase;opacity:.85}
+.hero-col-left h1{margin:18px 0 12px;font-size:2.35rem;line-height:1.02;letter-spacing:-.5px;font-weight:800;font-family:"Segoe UI",system-ui,-apple-system,sans-serif}
+.hero-col-left h1 a{color:#FFFFFF;text-decoration:none;display:inline-block}
+.hero-col-left h1 a:hover{color:#000000;text-decoration:none}
+.hero-col-left .hero-sub{margin:0 0 18px;color:#111111;font-size:.92rem;line-height:1.5;font-weight:500;max-width:38ch}
+.hero-cta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:auto}
+.hero-cta{display:inline-flex;align-items:center;padding:8px 14px;background:#000000;color:#FFFFFF;border:1px solid #000000;font-family:Consolas,"Cascadia Mono",monospace;font-size:.82rem;font-weight:700;cursor:pointer;text-decoration:none;letter-spacing:.4px}
+.hero-cta:hover{background:#FFFFFF;color:#000000;border-color:#000000;text-decoration:none}
+.hero-cta.ghost{background:transparent;color:#000000;border:1px solid #000000}
+.hero-cta.ghost:hover{background:#000000;color:#FFFFFF}
+.hero-col-right{display:grid;grid-template-rows:1fr auto}
+.hero-block-black{background:#000000;color:#F2F2F2;padding:20px 24px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between}
+.hero-block-black .hero-meta-row{color:#8E8E8E}
+.hero-block-title{margin:10px 0 14px;font-size:1.55rem;line-height:1.08;font-weight:800;color:#FFFFFF;letter-spacing:-.3px}
+.hero-spec-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 18px;font-family:Consolas,"Cascadia Mono",monospace;font-size:.82rem;border-top:1px solid #2B2B2B;padding-top:12px}
+.hero-spec-grid div{display:flex;justify-content:space-between;align-items:baseline}
+.hero-spec-grid span{color:#8E8E8E}
+.hero-spec-grid b{color:#FFFFFF;font-weight:700}
+.hero-block-white{background:#F2F2F2;color:#000000;padding:18px 24px}
+.hero-block-white .hero-meta-row{color:#595959;margin-bottom:10px}
+.hero-block-white .controls{margin-bottom:0;gap:6px}
+.hero-block-white .chip{background:#FFFFFF;color:#111111;border:1px solid #CCCCCC;font-size:.8rem;padding:4px 10px}
+.hero-block-white .chip:hover{border-color:#FF4D00;color:#FF4D00}
+.hero-block-white .chip.active{background:#FF4D00;color:#000000;border-color:#FF4D00}
+@media (max-width:780px){
+  .home-wrap{padding:48px 14px 20px}
+  .brand-hero{grid-template-columns:1fr}
+  .hero-col-left{border-right:0;border-bottom:1px solid var(--border);min-height:auto}
+  .hero-col-left h1{font-size:1.95rem}
+}
 header.top h1{margin:0;font-size:1.45rem;color:var(--accent);letter-spacing:.4px}
 header.top h1 a{color:var(--bold);text-decoration:none;cursor:pointer}
 header.top h1 a:hover{color:var(--accent);text-decoration:none}
