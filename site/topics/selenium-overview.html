@@ -1,163 +1,186 @@
-<!doctype html>
-<html lang="en" class="no-js">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
-<title>Selenium Overview | Selenium Documentation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Selenium Overview | SDET Explainer</title>
 <link rel="stylesheet" href="../selenium-docs.css">
 </head>
-<body class="td-section">
-<header>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white flex-row td-navbar d-print-none">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="../index.html">
-        <span class="navbar-logo">
-          <svg id="Layer_1" data-name="Layer 1" viewBox="0 0 139.38 34" width="130" height="32">
-            <defs><style>.cls-1{fill:#43b02a}</style></defs>
-            <title>Selenium logo green</title>
-            <path class="cls-1" d="M46.2 26.37a18.85 18.85.0 01-2.57-.2 25 25 0 01-2.74-.53v-1.39a25.31 25.31.0 002.71.53 18 18 0 002.5.2 5.51 5.51.0 003.29-.84 2.79 2.79.0 001.14-2.39 2.85 2.85.0 00-1.24-2.49A6 6 0 0048 18.55q-.78-.29-1.67-.55A15.93 15.93.0 0144 17.13a5.92 5.92.0 01-1.58-1.05 3.6 3.6.0 01-.9-1.34A5 5 0 0141.23 13a4.46 4.46.0 01.41-1.93 4.31 4.31.0 011.17-1.5 5.26 5.26.0 011.82-1A8 8 0 0147 8.28a20.51 20.51.0 014.41.57v1.42a20 20 0 00-2.23-.44 15.2 15.2.0 00-2-.15 4.86 4.86.0 00-3.08.9A2.9 2.9.0 0042.88 13a3.25 3.25.0 00.21 1.21 2.61 2.61.0 00.7 1 4.83 4.83.0 001.27.79 14.31 14.31.0 002 .68q1.11.33 2.06.71a6.21 6.21.0 011.65.94 4.09 4.09.0 011.1 1.38 4.54 4.54.0 01.4 2 4.15 4.15.0 01-1.56 3.48A7.16 7.16.0 0146.2 26.37z"/>
-            <path class="cls-1" d="M60.62 26.32a5.46 5.46.0 01-4.28-1.62A6.9 6.9.0 0154.88 20a7.8 7.8.0 011.43-5 5 5 0 014.14-1.75 4.24 4.24.0 013.47 1.43A6.48 6.48.0 0165.1 18.8q0 .54.0.92a3.22 3.22.0 01-.09.64H56.44a5.39 5.39.0 001.17 3.5A4.18 4.18.0 0060.8 25a10.52 10.52.0 001.82-.17 11.77 11.77.0 001.93-.52l.12 1.27a10.68 10.68.0 01-2 .55A11.47 11.47.0 0160.62 26.32zM60.4 14.43q-3.68.0-3.94 4.74h7.15a6.49 6.49.0 00-.78-3.63A2.76 2.76.0 0060.4 14.43z"/>
-            <path class="cls-1" d="M68.64 7h1.58V26.11H68.64z"/>
-            <path class="cls-1" d="M79.56 26.32a5.46 5.46.0 01-4.28-1.62A6.9 6.9.0 0173.83 20a7.8 7.8.0 011.43-5 5 5 0 014.14-1.75 4.24 4.24.0 013.47 1.43A6.48 6.48.0 0184 18.8q0 .54.0.92a3.22 3.22.0 01-.09.64H75.38a5.4 5.4.0 001.17 3.5A4.18 4.18.0 0079.75 25a10.52 10.52.0 001.82-.17 11.8 11.8.0 001.93-.52l.12 1.27a10.68 10.68.0 01-2 .55A11.47 11.47.0 0179.56 26.32zm-.21-11.89q-3.68.0-3.94 4.74h7.15a6.49 6.49.0 00-.78-3.63A2.76 2.76.0 0079.35 14.43z"/>
-            <path class="cls-1" d="M87.51 13.37h1.32l.12 1.49h.12q.94-.45 1.72-.78t1.43-.54a8.42 8.42.0 011.2-.31 6.54 6.54.0 011.1-.09A3.3 3.3.0 0197 14a3.63 3.63.0 01.83 2.63v9.51H96.24v-9a3 3 0 00-.55-2 2.18 2.18.0 00-1.69-.6 7.25 7.25.0 00-2.24.41 20.1 20.1.0 00-2.67 1.12v10H87.51z"/>
-            <path class="cls-1" d="M102.75 10.52a.93.93.0 01-1.06-1 1.06 1.06.0 012.12.0.93.93.0 01-1.06 1zm-.8 2.85h1.58V26.11h-1.58z"/>
-            <path class="cls-1" d="M110.81 26.34q-3.14.0-3.14-3.47v-9.5h1.58v9a3.16 3.16.0 00.48 2 1.92 1.92.0 001.59.6 6.83 6.83.0 002.48-.48q1.25-.48 2.59-1.14V13.37H118V26.11h-1.32l-.12-1.58h-.09l-1.73.81q-.74.34-1.38.57a7.9 7.9.0 01-1.23.33A7.34 7.34.0 01110.81 26.34z"/>
-            <path class="cls-1" d="M122.18 13.37h1.3l.14 1.49h.09a19.53 19.53.0 012.58-1.31 5.51 5.51.0 012-.41 2.83 2.83.0 013 1.77h.12q.8-.5 1.45-.83a12.61 12.61.0 011.2-.54 6.17 6.17.0 011-.31 5.18 5.18.0 011-.09 3.3 3.3.0 012.45.84 3.63 3.63.0 01.83 2.63v9.51h-1.56v-9a2.9 2.9.0 00-.55-2 2.21 2.21.0 00-1.69-.59 5.14 5.14.0 00-1.78.38A14.45 14.45.0 00131.6 16v10.1H130v-9a2.9 2.9.0 00-.55-2 2.21 2.21.0 00-1.69-.59 5.24 5.24.0 00-1.86.4A14 14 0 00123.76 16V26.11h-1.58z"/>
-            <path class="cls-1" d="M21.45 21.51a2.49 2.49.0 00-2.55 2.21.08.08.0 00.08.1h4.95a.08.08.0 00.08-.09 2.41 2.41.0 00-2.56-2.22z"/>
-            <path class="cls-1" d="M32.06 4.91 21.56 16.7a.32.32.0 01-.47.0l-5.36-5.53a.32.32.0 010-.4L17.5 8.5a.32.32.0 01.52.0l3 3.32a.32.32.0 00.49.0L29.87.36A.23.23.0 0029.69.0H.25A.25.25.0 000 .25v33.5A.25.25.0 00.25 34h32a.25.25.0 00.25-.25V5.06A.23.23.0 0032.06 4.91zm-23 25.36a8.08 8.08.0 01-5.74-2 .31.31.0 010-.41l1.25-1.75A.31.31.0 015 26a6.15 6.15.0 004.2 1.64c1.64.0 2.44-.76 2.44-1.56.0-2.48-8.08-.78-8.08-6.06.0-2.33 2-4.27 5.32-4.27a7.88 7.88.0 015.25 1.76.31.31.0 010 .43L12.9 19.65a.31.31.0 01-.45.05 6.08 6.08.0 00-3.84-1.32c-1.28.0-2 .57-2 1.41.0 2.23 8.06.74 8.06 6C14.67 28.33 12.84 30.27 9.05 30.27zM26.68 25.4a.27.27.0 01-.28.28H19a.09.09.0 00-.08.1 2.81 2.81.0 003 2.32 4.62 4.62.0 002.56-.84.27.27.0 01.4.06l.9 1.31a.28.28.0 01-.06.37 6.67 6.67.0 01-4.1 1.28 5.28 5.28.0 01-5.57-5.48 5.31 5.31.0 015.4-5.46c3.11.0 5.22 2.33 5.22 5.74z"/>
-          </svg>
-        </span>
-      </a>
-      <div class="collapse navbar-collapse justify-content-end" id="main_navbar">
-        <ul class="navbar-nav me-4 mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="../index.html"><span>Documentation</span></a></li>
-          <li class="nav-item"><a class="nav-link" href="https://www.selenium.dev/projects"><span>Projects</span></a></li>
-          <li class="nav-item"><a class="nav-link" href="https://www.selenium.dev/downloads"><span>Downloads</span></a></li>
-          <li class="nav-item"><a class="nav-link" href="https://www.selenium.dev/support"><span>Support</span></a></li>
-          <li class="nav-item"><a class="nav-link" href="https://www.selenium.dev/blog"><span>Blog</span></a></li>
-          <li class="nav-item dropdown td-code-lang">
-            <a class="nav-link dropdown-toggle" href="#" id="td-code-lang-toggle" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Language of the code examples">
-              <i class="fa fa-code fa-fw me-1"></i><span>Java</span>
-            </a>
-          </li>
+<body class="in-chapter selenium-doc-page">
+
+<!-- Top Navbar (selenium.dev structure in SDET Explainer UI style) -->
+<nav class="se-navbar" aria-label="Selenium Documentation Navigation">
+  <div class="se-navbar-left">
+    <a href="../index.html" class="se-brand" title="Back to SDET Explainer Home (Alt+H)">SDET EXPLAINER</a>
+    <span class="se-brand-sub">[Selenium Docs]</span>
+    <ul class="se-navbar-links">
+      <li><a href="selenium-overview.html" class="active">Documentation</a></li>
+      <li><a href="selenium-webdriver-install.html">WebDriver</a></li>
+      <li><a href="#grid">Grid</a></li>
+      <li><a href="#ide">IDE</a></li>
+      <li><a href="../index.html">All Tracks</a></li>
+    </ul>
+  </div>
+  <div class="se-lang-pill" title="Code examples in Java">LANG: JAVA</div>
+</nav>
+
+<!-- 3-Column Documentation Layout: Left Sidebar Tree | Center Article | Right TOC -->
+<div class="se-layout">
+
+  <!-- Left Sidebar Tree -->
+  <aside class="se-sidebar" aria-label="Documentation Sections">
+    <div class="se-sidebar-hdr">Documentation Tree</div>
+    <ul class="se-tree">
+      <li>
+        <span class="se-sec-label">1. Overview</span>
+        <ul>
+          <li><a href="selenium-overview.html" class="active">1.1 Selenium Overview &amp; Components</a></li>
         </ul>
-      </div>
-    </div>
-  </nav>
-</header>
+      </li>
+      <li>
+        <span class="se-sec-label">2. WebDriver: Getting Started</span>
+        <ul>
+          <li><a href="selenium-webdriver-install.html" class="planned">2.1 Install Selenium Library</a></li>
+          <li><a href="selenium-webdriver-first-script.html" class="planned">2.2 First Selenium Script</a></li>
+          <li><a href="selenium-webdriver-test-runner.html" class="planned">2.3 Using a Test Runner</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">3. WebDriver: Drivers</span>
+        <ul>
+          <li><a href="selenium-webdriver-drivers-sessions.html" class="planned">3.1 Driver Sessions &amp; Capabilities</a></li>
+          <li><a href="selenium-webdriver-drivers-options.html" class="planned">3.2 Browser Options &amp; Strategy</a></li>
+          <li><a href="selenium-webdriver-remote-driver.html" class="planned">3.3 RemoteWebDriver &amp; Service</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">4. WebDriver: Elements</span>
+        <ul>
+          <li><a href="selenium-webdriver-elements-locators.html" class="planned">4.1 Locators (8 Strategies)</a></li>
+          <li><a href="selenium-webdriver-elements-relative.html" class="planned">4.2 Relative Locators</a></li>
+          <li><a href="selenium-webdriver-elements-info.html" class="planned">4.3 Element Information &amp; State</a></li>
+          <li><a href="selenium-webdriver-elements-interactions.html" class="planned">4.4 Element Interactions</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">5. Browser Interactions</span>
+        <ul>
+          <li><a href="selenium-webdriver-navigation-windows.html" class="planned">5.1 Navigation &amp; Windows</a></li>
+          <li><a href="selenium-webdriver-frames-alerts-cookies.html" class="planned">5.2 Frames, Alerts &amp; Cookies</a></li>
+          <li><a href="selenium-webdriver-screenshots-pdf.html" class="planned">5.3 Screenshots &amp; Print to PDF</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">6. WebDriver: Waits</span>
+        <ul>
+          <li><a href="selenium-webdriver-waits-implicit.html" class="planned">6.1 Implicit Waits</a></li>
+          <li><a href="selenium-webdriver-waits-explicit-fluent.html" class="planned">6.2 Explicit &amp; Fluent Waits</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">7. Actions API &amp; Support</span>
+        <ul>
+          <li><a href="selenium-webdriver-actions-api.html" class="planned">7.1 Actions API (Keyboard/Mouse)</a></li>
+          <li><a href="selenium-webdriver-support-js.html" class="planned">7.2 Select, JS &amp; Shadow DOM</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">8. BiDi &amp; DevTools</span>
+        <ul>
+          <li><a href="selenium-webdriver-bidi-cdp.html" class="planned">8.1 WebDriver BiDi &amp; CDP</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">9. Selenium Manager</span>
+        <ul>
+          <li><a href="selenium-manager.html" class="planned">9.1 Automated Driver &amp; Browser</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">10. Selenium Grid</span>
+        <ul>
+          <li><a href="selenium-grid-architecture.html" class="planned">10.1 Grid 4 Roles &amp; Docker</a></li>
+        </ul>
+      </li>
+      <li>
+        <span class="se-sec-label">11. Test Practices</span>
+        <ul>
+          <li><a href="selenium-test-practices-pom.html" class="planned">11.1 Page Object Model</a></li>
+          <li><a href="selenium-test-practices-guidelines.html" class="planned">11.2 Guidelines &amp; Exceptions</a></li>
+        </ul>
+      </li>
+    </ul>
+  </aside>
 
-<div class="container-fluid td-outer">
-  <div class="td-main">
-    <div class="row flex-xl-nowrap">
-      
-      <!-- Left Sidebar Nav -->
-      <aside class="col-12 col-md-3 col-xl-2 td-sidebar d-print-none">
-        <div id="td-sidebar-menu" class="td-sidebar__inner">
-          <nav class="td-sidebar-nav" id="td-section-nav">
-            <ul class="td-sidebar-nav__section pe-md-3 ul-0">
-              <li class="td-sidebar-nav__section-title td-sidebar-nav__section with-child active-path">
-                <a href="../index.html" class="align-left ps-0 td-sidebar-link td-sidebar-link__section tree-root"><span>Documentation</span></a>
-                <ul class="ul-1">
-                  <li class="td-sidebar-nav__section-title td-sidebar-nav__section with-child active-path">
-                    <a href="selenium-overview.html" class="align-left ps-0 active td-sidebar-link td-sidebar-link__section"><span class="td-sidebar-nav-active-item">Overview</span></a>
-                    <ul class="ul-2">
-                      <li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child">
-                        <a href="#webdriver" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>WebDriver</span></a>
-                      </li>
-                      <li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child">
-                        <a href="#ide" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>IDE</span></a>
-                      </li>
-                      <li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child">
-                        <a href="#grid" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Grid</span></a>
-                      </li>
-                    </ul>
-                  </li>
-                  <li class="td-sidebar-nav__section-title td-sidebar-nav__section with-child">
-                    <a href="selenium-webdriver-install.html" class="align-left ps-0 td-sidebar-link td-sidebar-link__section"><span>WebDriver</span></a>
-                    <ul class="ul-2">
-                      <li><a href="selenium-webdriver-install.html" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Getting Started</span></a></li>
-                      <li><a href="#drivers" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Drivers</span></a></li>
-                      <li><a href="#browsers" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Browsers</span></a></li>
-                      <li><a href="#elements" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Elements</span></a></li>
-                      <li><a href="#interactions" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Interactions</span></a></li>
-                      <li><a href="#waits" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Waits</span></a></li>
-                      <li><a href="#actions" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Actions API</span></a></li>
-                      <li><a href="#bidi" class="align-left ps-0 td-sidebar-link td-sidebar-link__page"><span>Bidirectional</span></a></li>
-                    </ul>
-                  </li>
-                  <li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child">
-                    <a href="#manager" class="align-left ps-0 td-sidebar-link td-sidebar-link__section"><span>Selenium Manager</span></a>
-                  </li>
-                  <li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child">
-                    <a href="#grid-section" class="align-left ps-0 td-sidebar-link td-sidebar-link__section"><span>Grid</span></a>
-                  </li>
-                  <li class="td-sidebar-nav__section-title td-sidebar-nav__section without-child">
-                    <a href="#test-practices" class="align-left ps-0 td-sidebar-link td-sidebar-link__section"><span>Test Practices</span></a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      </aside>
+  <!-- Center Main Content -->
+  <main class="se-main" role="main">
+    <article>
+      <span class="tag Selenium">Selenium</span>
+      <h1>Selenium Overview</h1>
+      <div class="se-lead">Is Selenium for you? See an overview of the different project components.</div>
 
-      <!-- Center Main Content -->
-      <main class="col-12 col-md-9 col-xl-8 ps-md-5" role="main">
-        <div class="td-content">
-          <h1>Selenium Overview</h1>
-          <div class="lead">Is Selenium for you? See an overview of the different project components.</div>
+      <p>Selenium is not just one tool or API; it comprises many tools. Selenium is an umbrella project for a suite of tools and libraries that enable and support the automation of web browsers. It provides extensions to emulate user interaction with browsers, a distribution server for scaling browser allocation, and the infrastructure to implement the W3C WebDriver specification. Selenium is used primarily for automated testing of web applications across multiple browsers and operating systems.</p>
 
-          <p>Selenium is not just one tool or API; it comprises many tools. It is an umbrella project for a range of tools and libraries that enable and support the automation of web browsers.</p>
-          <p>It provides extensions to emulate user interaction with browsers, a distribution server for scaling browser allocation, and the infrastructure for implementations of the W3C WebDriver specification that lets you write interchangeable code for all major web browsers.</p>
+      <section id="webdriver">
+        <h2>WebDriver</h2>
+        <p>If you are beginning with desktop website or mobile website test automation, then you are going to be using WebDriver APIs. <a href="selenium-webdriver-install.html">WebDriver</a> uses browser automation APIs provided by browser vendors to control the browser and run tests. This is as if a real user is operating the browser. Since WebDriver does not require its API to be compiled with application code, it is not intrusive. Hence, you are testing the same application which you push live.</p>
+      </section>
 
-          <h2 id="webdriver">WebDriver</h2>
-          <p>If you are beginning with desktop website or mobile website test automation, then you are going to be using WebDriver APIs. <a href="selenium-webdriver-install.html">WebDriver</a> uses browser automation APIs provided by browser vendors to control the browser and run tests. This is as if a real user is operating the browser. Since WebDriver does not require its API to be compiled with application code, it is not intrusive. Hence, you are testing the same application which you push live.</p>
+      <section id="ide">
+        <h2>IDE</h2>
+        <p>IDE (Integrated Development Environment) is the tool you use to develop your Selenium test cases. It is an easy-to-use Chrome and Firefox extension and is generally the most efficient way to develop test cases. It records the users' actions in the browser for you, using existing Selenium commands, with parameters defined by the context of that element. This is not only a time-saver but also an excellent way of learning Selenium script syntax.</p>
+      </section>
 
-          <h2 id="ide">IDE</h2>
-          <p><a href="https://www.selenium.dev/selenium-ide">IDE</a> (Integrated Development Environment) is the tool you use to develop your Selenium test cases. It’s an easy-to-use Chrome and Firefox extension and is generally the most efficient way to develop test cases. It records the users’ actions in the browser for you, using existing Selenium commands, with parameters defined by the context of that element. This is not only a time-saver but also an excellent way of learning Selenium script syntax.</p>
+      <section id="grid">
+        <h2>Grid</h2>
+        <p>Selenium Grid allows you to run test cases in different machines across different platforms. The control of triggering the test cases is on the local end, and when the test cases are triggered, they are automatically executed by the remote end. After the development of the WebDriver tests, you may face the need to run your tests on multiple browsers and operating system combinations. This is where Grid comes into the picture.</p>
+      </section>
 
-          <h2 id="grid">Grid</h2>
-          <p>Selenium Grid allows you to run test cases in different machines across different platforms. The control of triggering the test cases is on the local end, and when the test cases are triggered, they are automatically executed by the remote end.</p>
-          <p>After the development of the WebDriver tests, you may face the need to run your tests on multiple browsers and operating system combinations. This is where Grid comes into the picture.</p>
+      <section id="where-it-fits">
+        <h2>Where it fits</h2>
+        <p>Selenium forms the foundational execution engine in test automation architecture, translating high-level test assertions written in Java into native browser commands dispatched to Chrome, Firefox, Edge, and Safari.</p>
+      </section>
 
-          <h2 id="where-it-fits">Where it fits</h2>
-          <p>Selenium forms the foundational execution engine in test automation architecture, translating high-level test assertions written in Java into native browser commands dispatched to Chrome, Firefox, Edge, and Safari.</p>
+      <section id="key-points">
+        <h2>Key points</h2>
+        <ol>
+          <li>Selenium is not a single tool; it is an open-source suite composed of WebDriver, Selenium Grid, Selenium IDE, and Selenium Manager.</li>
+          <li>WebDriver drives browsers natively using browser vendor automation APIs and conforms to the official W3C WebDriver standard.</li>
+          <li>Selenium Manager is a built-in tool that automatically detects browser versions and downloads the matching driver binaries.</li>
+          <li>Selenium Grid allows parallel test execution across multiple remote machines, virtual environments, and container platforms.</li>
+          <li>Selenium IDE is a Chrome and Firefox browser extension used for recording, playing back, and prototyping automated scripts.</li>
+          <li>Selenium does not include a test runner or reporting tool; it integrates with Java testing frameworks such as TestNG and JUnit 5.</li>
+        </ol>
+      </section>
 
-          <h2 id="key-points">Key points</h2>
-          <ol>
-            <li>Selenium is not a single tool; it is an open-source suite composed of WebDriver, Selenium Grid, Selenium IDE, and Selenium Manager.</li>
-            <li>WebDriver drives browsers natively using browser vendor automation APIs and conforms to the official W3C WebDriver standard.</li>
-            <li>Selenium Manager is a built-in binary tool that automatically detects browser versions and downloads the matching driver binaries.</li>
-            <li>Selenium Grid allows parallel test execution across multiple remote machines, virtual environments, and container platforms.</li>
-            <li>Selenium IDE is a Chrome and Firefox browser extension used for recording, playing back, and prototyping automated scripts.</li>
-            <li>Selenium does not include a test runner or reporting tool; it integrates with Java testing frameworks such as TestNG and JUnit 5.</li>
-          </ol>
+      <section id="comparison-table">
+        <h2>Comparison table</h2>
+        <table>
+          <thead>
+            <tr><th>Component</th><th>Primary Purpose</th><th>Target User</th><th>Execution Mechanism</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>WebDriver</b></td><td>Programmatic browser automation</td><td>SDETs &amp; Automation Engineers</td><td>Direct W3C HTTP/WebSocket commands to native driver executables.</td></tr>
+            <tr><td><b>Selenium Grid</b></td><td>Distributed and parallel scaling</td><td>CI/CD Engineers &amp; QA Teams</td><td>Hub/Node router directing sessions across remote machines and Docker.</td></tr>
+            <tr><td><b>Selenium IDE</b></td><td>Record and playback prototyping</td><td>Manual Testers &amp; Beginners</td><td>Browser extension capturing and replaying DOM user actions.</td></tr>
+            <tr><td><b>Selenium Manager</b></td><td>Automated driver &amp; browser setup</td><td>All Selenium Developers</td><td>Integrated binary automatically managing drivers without manual setup.</td></tr>
+          </tbody>
+        </table>
+      </section>
 
-          <h2 id="comparison-table">Comparison table</h2>
-          <table>
-            <thead>
-              <tr><th>Component</th><th>Primary Purpose</th><th>Target User</th><th>Execution Mechanism</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><b>WebDriver</b></td><td>Programmatic browser automation</td><td>SDETs &amp; Automation Engineers</td><td>Direct W3C HTTP/WebSocket commands to native driver executables.</td></tr>
-              <tr><td><b>Selenium Grid</b></td><td>Distributed and parallel scaling</td><td>CI/CD Engineers &amp; QA Teams</td><td>Hub/Node router directing sessions across remote machines and Docker.</td></tr>
-              <tr><td><b>Selenium IDE</b></td><td>Record and playback prototyping</td><td>Manual Testers &amp; Beginners</td><td>Browser extension capturing and replaying DOM user actions.</td></tr>
-              <tr><td><b>Selenium Manager</b></td><td>Automated driver &amp; browser setup</td><td>All Selenium Developers</td><td>Integrated binary automatically managing drivers without manual setup.</td></tr>
-            </tbody>
-          </table>
+      <section id="how-it-works">
+        <h2>How it works</h2>
+        <ol>
+          <li>The test engineer writes browser automation steps in Java using the Selenium client bindings.</li>
+          <li>Selenium Manager checks the local system, identifies the installed browser version, and resolves the matching driver executable.</li>
+          <li>The driver executable launches on a local port and starts a browser session adhering to the W3C WebDriver protocol.</li>
+          <li>Test commands (navigation, element discovery, clicks, text input) are transmitted as HTTP requests to the driver endpoint.</li>
+          <li>The driver translates each W3C command into native internal browser operations and returns execution responses to the test script.</li>
+          <li>Upon test completion, <code>driver.quit()</code> destroys the browser session and terminates the driver process.</li>
+        </ol>
 
-          <h2 id="how-it-works">How it works</h2>
-          <ol>
-            <li>The test engineer writes browser automation steps in Java using the Selenium client bindings.</li>
-            <li>Selenium Manager checks the local system, identifies the installed browser version, and resolves the matching driver executable.</li>
-            <li>The driver executable launches on a local port and starts a browser session adhering to the W3C WebDriver protocol.</li>
-            <li>Test commands (navigation, element discovery, clicks, text input) are transmitted as HTTP requests to the driver endpoint.</li>
-            <li>The driver translates each W3C command into native internal browser operations and returns execution responses to the test script.</li>
-            <li>Upon test completion, <code>driver.quit()</code> destroys the browser session and terminates the driver process.</li>
-          </ol>
-
-          <p>Minimal Java WebDriver execution snippet:</p>
-<pre><code class="language-java">package dev.selenium.overview; // Declares the package structure
+        <p>Minimal Java WebDriver execution snippet:</p>
+<pre><code>package dev.selenium.overview; // Declares the package structure
 
 import org.openqa.selenium.WebDriver; // Imports the core WebDriver interface
 import org.openqa.selenium.chrome.ChromeDriver; // Imports the ChromeDriver class
@@ -173,200 +196,162 @@ public class SeleniumOverviewExample { // Declares the demonstration class
         } // Ends teardown block
     } // Ends main method
 } // Ends class</code></pre>
+      </section>
 
-          <h2 id="common-mistakes">Common mistakes</h2>
-          <ol>
-            <li>Assuming Selenium is a desktop automation or performance testing tool; fix by using Selenium strictly for web browser rendering and UI functional tests.</li>
-            <li>Manually downloading browser drivers and configuring system PATH variables; fix by relying on the built-in Selenium Manager to resolve drivers automatically.</li>
-            <li>Using Selenium IDE recordings directly in enterprise production test suites; fix by writing structured, maintainable code using WebDriver and the Page Object Model.</li>
-            <li>Omitting <code>driver.quit()</code> at the end of execution; fix by placing <code>quit()</code> inside a <code>finally</code> block or test runner teardown hook.</li>
-          </ol>
+      <section id="common-mistakes">
+        <h2>Common mistakes</h2>
+        <ol>
+          <li>Assuming Selenium is a desktop automation or performance testing tool; fix by using Selenium strictly for web browser rendering and UI functional tests.</li>
+          <li>Manually downloading browser drivers and configuring system PATH variables; fix by relying on the built-in Selenium Manager to resolve drivers automatically.</li>
+          <li>Using Selenium IDE recordings directly in enterprise production test suites; fix by writing structured, maintainable code using WebDriver and the Page Object Model.</li>
+          <li>Omitting <code>driver.quit()</code> at the end of execution; fix by placing <code>quit()</code> inside a <code>finally</code> block or test runner teardown hook.</li>
+        </ol>
+      </section>
 
-          <h2 id="terms-to-know">Terms to know</h2>
-          <table>
-            <thead>
-              <tr><th>Term</th><th>Meaning</th></tr>
-            </thead>
-            <tbody>
-              <tr><td><b>Selenium</b></td><td>An open-source umbrella project for tools and libraries that enable browser automation.</td></tr>
-              <tr><td><b>WebDriver</b></td><td>A W3C standard API that controls browsers natively through vendor-provided driver executables.</td></tr>
-              <tr><td><b>Selenium Manager</b></td><td>The built-in tool that automatically discovers, downloads, and configures driver and browser binaries.</td></tr>
-              <tr><td><b>Selenium Grid</b></td><td>A server infrastructure that routes and runs tests in parallel across multiple machines and environments.</td></tr>
-              <tr><td><b>Selenium IDE</b></td><td>A browser extension for Chrome and Firefox that provides record-and-playback test development.</td></tr>
-              <tr><td><b>W3C WebDriver Standard</b></td><td>The official World Wide Web Consortium specification governing browser automation interfaces.</td></tr>
-              <tr><td><b>ChromeDriver</b></td><td>The browser-specific binary created by the Chromium project that translates W3C calls to Chrome.</td></tr>
-              <tr><td><b>GeckoDriver</b></td><td>The browser-specific binary created by Mozilla that translates W3C calls to Firefox.</td></tr>
-              <tr><td><b>TestNG</b></td><td>A Java testing framework providing assertions, annotations, data-driven tests, and execution reports.</td></tr>
-              <tr><td><b>JUnit 5</b></td><td>The modern generation of the Java testing framework used to structure and execute test suites.</td></tr>
-            </tbody>
-          </table>
+      <section id="terms-to-know">
+        <h2>Terms to know</h2>
+        <table>
+          <thead>
+            <tr><th>Term</th><th>Meaning</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><b>Selenium</b></td><td>An open-source umbrella project for tools and libraries that enable browser automation.</td></tr>
+            <tr><td><b>WebDriver</b></td><td>A W3C standard API that controls browsers natively through vendor-provided driver executables.</td></tr>
+            <tr><td><b>Selenium Manager</b></td><td>The built-in tool that automatically discovers, downloads, and configures driver and browser binaries.</td></tr>
+            <tr><td><b>Selenium Grid</b></td><td>A server infrastructure that routes and runs tests in parallel across multiple machines and environments.</td></tr>
+            <tr><td><b>Selenium IDE</b></td><td>A browser extension for Chrome and Firefox that provides record-and-playback test development.</td></tr>
+            <tr><td><b>W3C WebDriver</b></td><td>The official World Wide Web Consortium specification governing browser automation communication.</td></tr>
+            <tr><td><b>Driver Binary</b></td><td>A browser-specific executable (such as <code>chromedriver</code> or <code>geckodriver</code>) that bridges Selenium and the browser.</td></tr>
+            <tr><td><b>Client Bindings</b></td><td>Language-specific libraries (Java, Python, C#, Ruby, JavaScript) that expose the WebDriver API.</td></tr>
+          </tbody>
+        </table>
+      </section>
 
-          <h2 id="interview-questions">Interview questions</h2>
-          
-          <div class="qa-group">
-            <h3>Basics</h3>
-            
-            <div class="qa-item">
-              <div class="qa-q">What is Selenium and what components constitute the project suite?</div>
-              <div class="qa-a">Selenium is an open-source umbrella project for automated web application testing across different browsers and platforms. The suite consists of Selenium WebDriver for programmatic browser automation, Selenium Grid for scaling parallel execution across distributed nodes, Selenium IDE for rapid record-and-playback prototyping, and Selenium Manager for automated driver binary management. In an enterprise automation pipeline, test scripts are written in Java using WebDriver APIs and run in parallel on Selenium Grid.</div>
-            </div>
+      <section id="interview-questions">
+        <h2>Interview questions</h2>
 
-            <div class="qa-item">
-              <div class="qa-q">How does Selenium WebDriver differ from Selenium IDE?</div>
-              <div class="qa-a">Selenium WebDriver is a programmatic code library that allows developers to write robust, maintainable, object-oriented test automation scripts in languages like Java. Selenium IDE is a browser extension limited to recording user interactions in the DOM and replaying them without enterprise logic. For example, WebDriver supports complex loops, custom database connections, and Page Object Models, whereas Selenium IDE is designed only for quick smoke test prototypes.</div>
-            </div>
+        <h3>Basics</h3>
+        <p><b>What is Selenium and what are its four core components?</b><br>
+        Selenium is an open-source umbrella project used to automate web browsers across multiple platforms. Its four core components are Selenium WebDriver for code-based browser automation, Selenium Grid for distributed parallel execution, Selenium IDE for record-and-playback prototyping, and Selenium Manager for automated driver binary management.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">Which programming languages and browsers does Selenium officially support?</div>
-              <div class="qa-a">Selenium officially provides client language bindings for Java, Python, C#, JavaScript, and Ruby. It supports all modern browsers including Google Chrome, Mozilla Firefox, Microsoft Edge, and Apple Safari through browser vendor-maintained drivers. For instance, a Java automation suite can run the same test method on both ChromeDriver and GeckoDriver without altering business logic.</div>
-            </div>
-          </div>
+        <p><b>Is Selenium a single testing tool or a complete testing framework?</b><br>
+        Selenium is a suite of browser automation libraries rather than an all-in-one testing framework. It provides the mechanism to drive browsers and interact with DOM elements, while test execution, assertions, and reporting are delegated to frameworks like TestNG or JUnit 5.</p>
 
-          <div class="qa-group">
-            <h3>How it works</h3>
+        <p><b>Which browsers and operating systems does Selenium support?</b><br>
+        Selenium supports all major web browsers including Google Chrome, Mozilla Firefox, Microsoft Edge, Apple Safari, and Internet Explorer. It runs across Windows, macOS, and Linux operating systems wherever the target browser is available.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">Explain the internal architecture and communication flow of Selenium 4 WebDriver.</div>
-              <div class="qa-a">Selenium 4 communicates directly with browser drivers using the standardized W3C WebDriver protocol over HTTP and WebSocket. When a Java test command like <code>driver.findElement()</code> executes, the Java client serializes the request into a standard JSON payload and sends an HTTP POST request to the local driver binary endpoint. The driver binary receives the W3C command, invokes native browser internal APIs, and returns an HTTP response containing execution results to the client.</div>
-            </div>
+        <p><b>What is the difference between Selenium IDE and Selenium WebDriver?</b><br>
+        Selenium IDE is a browser extension that records and replays user interactions without requiring programming knowledge, suitable for quick bug reproduction and prototyping. Selenium WebDriver is a programming interface that lets engineers build scalable, maintainable object-oriented test suites in languages like Java.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">What is Selenium Manager and how did it change test setup in Selenium 4?</div>
-              <div class="qa-a">Selenium Manager is an integrated cross-platform command-line utility built in Rust that automatically detects the installed browser versions on the host system and downloads the matching driver binaries. Prior to Selenium Manager, engineers had to manually download ChromeDriver executables, keep versions aligned with Chrome browser updates, and configure system PATH variables or third-party libraries like WebDriverManager. With Selenium Manager, executing <code>WebDriver driver = new ChromeDriver();</code> automatically resolves the correct driver binary without any third-party tools.</div>
-            </div>
+        <p><b>Can Selenium automate desktop applications or native mobile applications directly?</b><br>
+        No, Selenium is designed exclusively for web browsers and web documents rendered inside a browser context. Desktop and native mobile automation require companion projects such as Appium or WinAppDriver that extend the W3C WebDriver protocol to native platforms.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">What role does Selenium Grid play in an enterprise CI/CD pipeline?</div>
-              <div class="qa-a">Selenium Grid distributes test sessions across multiple machines, operating systems, and browser versions to enable high-volume parallel execution. In a CI/CD environment like Jenkins or GitHub Actions, a test suite sends commands to the Grid Router/Hub, which forwards sessions to available Node containers. For example, a suite of 200 tests can run concurrently across 10 Docker nodes, cutting total execution time from hours to minutes.</div>
-            </div>
-          </div>
+        <h3>How it works</h3>
+        <p><b>How does Selenium WebDriver communicate with a web browser in Selenium 4?</b><br>
+        In Selenium 4, the Java client bindings communicate directly with the browser driver executable using the W3C WebDriver protocol over HTTP. When a test invokes <code>driver.get("https://www.selenium.dev/")</code>, the command is serialized as a JSON payload and sent to the local driver server, which instructs the browser to navigate.</p>
 
-          <div class="qa-group">
-            <h3>Real situations</h3>
+        <p><b>What architectural change happened between Selenium 3 and Selenium 4 regarding the wire protocol?</b><br>
+        Selenium 3 relied on the legacy JSON Wire Protocol, which required encoding and decoding commands between the client and the browser driver. Selenium 4 removed the legacy protocol and standardized entirely on the official W3C WebDriver specification, enabling direct, more stable communication with modern browsers.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">How do you decide whether to run tests on a local browser or through Selenium Grid?</div>
-              <div class="qa-a">Local browser execution is ideal during test development, script authoring, and quick debugging where immediate visual feedback is needed. Selenium Grid is required when executing regression suites in continuous integration, running cross-browser matrix tests, or executing multiple tests in parallel. For example, an engineer authors a test locally in IntelliJ with Chrome, and the CI server runs the entire 500-test suite across a Kubernetes-backed Selenium Grid cluster.</div>
-            </div>
+        <p><b>How does Selenium Manager eliminate the need for manual <code>System.setProperty</code> driver configuration?</b><br>
+        When a test initializes <code>new ChromeDriver()</code> without a pre-configured driver path, Selenium Manager automatically inspects the machine's installed Chrome version, downloads the matching <code>chromedriver</code> binary into the local cache directory (<code>~/.cache/selenium</code>), and binds it to the session.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">When should a team use Selenium IDE instead of Selenium WebDriver?</div>
-              <div class="qa-a">Selenium IDE should be used for rapid exploratory prototyping, reproducing bug sequences reported by manual testers, or demonstrating proof-of-concept workflows without writing code. WebDriver must be chosen for any production automation project requiring maintainability, CI/CD integration, assertions, and test data management. For instance, a manual tester can record a bug reproduction step sequence in Selenium IDE and export it as a Java JUnit script for the automation team.</div>
-            </div>
+        <p><b>What is the role of the browser driver executable such as <code>chromedriver</code> or <code>geckodriver</code>?</b><br>
+        The browser driver acts as a local HTTP server that receives W3C WebDriver requests from the Java test script. It translates those standardized HTTP commands into proprietary internal automation calls understood by the specific browser engine and returns the execution result back to the client.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">Can Selenium automate desktop applications or native mobile apps?</div>
-              <div class="qa-a">Selenium is strictly engineered for web browser automation and cannot automate native desktop or mobile applications directly. However, the W3C WebDriver standard established by Selenium forms the foundation for tools like Appium, which automates native iOS and Android apps, and WinAppDriver for Windows desktop apps. For example, a team automating an Android app uses Appium client bindings, which inherit the same syntax and commands as Selenium WebDriver.</div>
-            </div>
-          </div>
+        <p><b>How does Selenium Grid route a test request to a remote browser instance?</b><br>
+        The Java test instantiates a <code>RemoteWebDriver</code> pointing to the Selenium Grid Hub or Router URL along with browser capabilities. The Grid matches the requested browser and platform capabilities against registered Nodes and forwards all subsequent WebDriver commands to the selected remote Node.</p>
 
-          <div class="qa-group">
-            <h3>Troubleshooting</h3>
+        <h3>Real situations</h3>
+        <p><b>Why is Selenium WebDriver considered non-intrusive when testing production web applications?</b><br>
+        WebDriver interacts with the browser through official vendor automation APIs from outside the application code. Because no testing libraries or hooks need to be compiled into the web application itself, the exact build tested in staging is identical to the build deployed to production.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">What causes a SessionNotCreatedException and how is it resolved?</div>
-              <div class="qa-a"><code>SessionNotCreatedException</code> occurs when the browser driver binary cannot establish a new session, most commonly because the driver version is incompatible with the installed browser version. In Selenium 4, this is resolved by allowing Selenium Manager to automatically fetch the matching driver version rather than hardcoding local driver binary paths in <code>System.setProperty</code>. For example, if Chrome updates to version 130 while an old ChromeDriver 128 is forced via system properties, removing the manual path allows Selenium Manager to supply the correct version 130 binary.</div>
-            </div>
+        <p><b>In an enterprise Java project, which component of Selenium is used for daily CI/CD regression pipelines?</b><br>
+        Enterprise teams combine Selenium WebDriver for test authoring with Selenium Grid (often deployed via Docker containers) for execution. When a build triggers in Jenkins or GitHub Actions, TestNG runs the WebDriver tests in parallel across the Grid nodes.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">Why must driver.quit() always be called, and what happens if it is omitted?</div>
-              <div class="qa-a"><code>driver.quit()</code> closes all open browser windows, terminates the remote session, and cleanly kills the background driver process executable. If it is omitted or if <code>driver.close()</code> is called instead, the driver executable continues running in memory, consuming system RAM and CPU. For example, in an automated regression run on a CI runner, omitting <code>driver.quit()</code> leaves dozens of orphan <code>chromedriver.exe</code> processes running until the machine runs out of memory.</div>
-            </div>
-          </div>
+        <p><b>When would a QA team choose to use Selenium IDE if the team already uses Java WebDriver?</b><br>
+        Manual testers can use Selenium IDE to record exact reproduction steps for a complex UI defect and export the recording as a Java WebDriver test snippet. This speeds up defect triage and provides automation engineers with a baseline locator structure.</p>
 
-          <div class="qa-group">
-            <h3>Design choices</h3>
+        <p><b>Can Selenium be used for load testing or performance benchmarking of a backend API?</b><br>
+        No, Selenium launches real browser processes that consume significant CPU and memory per instance, making it unsuitable for generating high-concurrency load. Performance and API load testing should be conducted with protocol-level tools such as JMeter, Gatling, or k6.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">Why does Selenium WebDriver not include its own assertion library or test runner?</div>
-              <div class="qa-a">Selenium follows the single-responsibility principle by focusing purely on browser automation and leaving test organization to dedicated testing frameworks. This design allows engineers to integrate Selenium seamlessly with industry-standard runners like TestNG, JUnit 5, or Cucumber. For example, a Java test uses Selenium to interact with web elements, while TestNG handles <code>Assert.assertEquals()</code>, <code>@DataProvider</code> annotations, and execution reporting.</div>
-            </div>
+        <p><b>How do you verify a page title on <code>https://qkart-qa-web.labs.crio.do/</code> using Selenium and Java?</b><br>
+        You initialize <code>WebDriver driver = new ChromeDriver()</code>, navigate via <code>driver.get("https://qkart-qa-web.labs.crio.do/")</code>, retrieve the title string with <code>String title = driver.getTitle()</code>, and pass that string to a TestNG assertion such as <code>Assert.assertEquals(title, "QKart")</code>.</p>
 
-            <div class="qa-item">
-              <div class="qa-q">Why was the JSON Wire Protocol replaced with the W3C WebDriver standard in Selenium 4?</div>
-              <div class="qa-a">The legacy JSON Wire Protocol required the Selenium client to encode commands and the driver to decode them, leading to inconsistencies and flakiness between different browser vendors. By making W3C WebDriver an official web standard, browser vendors implement the specification directly within their drivers, eliminating translation overhead and improving stability. For example, actions and window management execute natively across Chrome, Firefox, and Safari without intermediate translation discrepancies.</div>
-            </div>
-          </div>
+        <h3>Troubleshooting</h3>
+        <p><b>What happens if a test script finishes without calling <code>driver.quit()</code>?</b><br>
+        If <code>driver.quit()</code> is omitted, the underlying driver binary process (such as <code>chromedriver.exe</code>) remains active in the operating system memory. Over multiple test runs on a CI server, these orphaned processes accumulate and exhaust system RAM and file descriptors.</p>
 
-          <h2 id="quick-answers">Quick answers</h2>
-          <dl class="quick-answers-list">
-            <dt>What is Selenium?</dt>
-            <dd>An open-source suite of tools and libraries for automating web browsers.</dd>
-            
-            <dt>What is WebDriver?</dt>
-            <dd>A W3C standard API that drives browsers natively through vendor drivers.</dd>
-            
-            <dt>What is Selenium Manager?</dt>
-            <dd>A built-in utility in Selenium 4 that downloads and configures matching driver binaries automatically.</dd>
-            
-            <dt>What is Selenium Grid?</dt>
-            <dd>A distributed server infrastructure for running browser tests in parallel across remote machines.</dd>
-            
-            <dt>What is Selenium IDE?</dt>
-            <dd>A Chrome and Firefox extension for recording, playing back, and prototyping test cases.</dd>
-            
-            <dt>Does Selenium provide test assertions?</dt>
-            <dd>No; Selenium handles browser control, while frameworks like TestNG or JUnit 5 provide assertions.</dd>
-            
-            <dt>How do you terminate a WebDriver session cleanly?</dt>
-            <dd>Call <code>driver.quit()</code> inside a teardown or <code>finally</code> block.</dd>
-          </dl>
+        <p><b>What causes a <code>SessionNotCreatedException</code> during driver initialization?</b><br>
+        This exception occurs when the browser executable cannot be found, the browser crashes on launch, or the driver binary is incompatible with the installed browser. It frequently occurs in Docker environments when Chrome is run as root without the <code>--no-sandbox</code> option.</p>
 
-          <h2 id="next-topic">Next topic</h2>
-          <p><a href="selenium-webdriver-install.html">Install Selenium Library &rarr;</a></p>
-        </div>
-      </main>
+        <p><b>Why does Selenium throw <code>WebDriverException: connection refused</code> when connecting to a remote Grid?</b><br>
+        The test runner attempted to send an HTTP session request to a Grid URL where no server is listening, or network firewall rules blocked the port. The fix is to verify that the Grid hub process is running and accessible at the specified IP address and port.</p>
 
-      <!-- Right Sidebar TOC -->
-      <div class="d-none d-xl-block col-xl-2 td-sidebar-toc d-print-none">
-        <div class="td-toc">
-          <div class="td-toc-title">On this page</div>
-          <nav id="TableOfContents">
-            <ul>
-              <li><a href="#webdriver">WebDriver</a></li>
-              <li><a href="#ide">IDE</a></li>
-              <li><a href="#grid">Grid</a></li>
-              <li><a href="#where-it-fits">Where it fits</a></li>
-              <li><a href="#key-points">Key points</a></li>
-              <li><a href="#comparison-table">Comparison table</a></li>
-              <li><a href="#how-it-works">How it works</a></li>
-              <li><a href="#common-mistakes">Common mistakes</a></li>
-              <li><a href="#terms-to-know">Terms to know</a></li>
-              <li><a href="#interview-questions">Interview questions</a></li>
-              <li><a href="#quick-answers">Quick answers</a></li>
-              <li><a href="#next-topic">Next topic</a></li>
-            </ul>
-          </nav>
-        </div>
-      </div>
+        <p><b>How do you debug an intermittent failure where Selenium fails to locate an element that appears on the screen?</b><br>
+        This failure is caused by an asynchronous race condition where Selenium queries the DOM before client-side JavaScript finishes rendering the element. The fix is to replace static waits with explicit waits using <code>WebDriverWait</code> and <code>ExpectedConditions.visibilityOfElementLocated()</code>.</p>
 
-    </div>
-  </div>
+        <p><b>What should you check if Selenium Manager fails to download a driver on a corporate network?</b><br>
+        Corporate networks often route outbound traffic through proxy servers or inspect SSL certificates. Configure the <code>SE_PROXY</code> environment variable or set JVM proxy properties (<code>https.proxyHost</code>, <code>https.proxyPort</code>) so Selenium Manager can reach external driver repositories through the network gateway.</p>
 
-  <footer class="bg-dark py-5 row d-print-none">
-    <div class="container-fluid mx-sm-5">
-      <div class="row align-items-center">
-        <div class="col-6 col-sm-4 text-xs-center">
-          <ul class="list-inline mb-0">
-            <li class="list-inline-item mx-2"><a href="https://github.com/SeleniumHQ/selenium" target="_blank" rel="noopener"><i class="fab fa-github fa-lg"></i></a></li>
-            <li class="list-inline-item mx-2"><a href="https://inviter.co/seleniumhq" target="_blank" rel="noopener"><i class="fab fa-slack fa-lg"></i></a></li>
-            <li class="list-inline-item mx-2"><a href="https://x.com/SeleniumHQ" target="_blank" rel="noopener"><i class="fab fa-x-twitter fa-lg"></i></a></li>
-            <li class="list-inline-item mx-2"><a href="https://www.youtube.com/@SeleniumHQProject/" target="_blank" rel="noopener"><i class="fab fa-youtube fa-lg"></i></a></li>
-          </ul>
-        </div>
-        <div class="col-12 col-sm-4 text-center py-2">
-          <small class="text-white">&copy; 2026 Software Freedom Conservancy All Rights Reserved</small>
-          <div class="mt-1"><a href="https://www.selenium.dev/about/" class="text-white-50">About Selenium</a></div>
-        </div>
-        <div class="col-6 col-sm-4 text-end text-xs-center">
-          <span class="badge bg-success">Selenium 4 + Java</span>
-        </div>
-      </div>
-    </div>
-  </footer>
+        <h3>Design choices</h3>
+        <p><b>Why does Selenium not include built-in assertion methods or HTML reporting?</b><br>
+        Selenium adheres strictly to the Unix philosophy of doing one thing well: browser automation. Assertions, test sequencing, data-driven execution, and reporting are handled by specialized test frameworks like TestNG or JUnit, allowing teams to choose their preferred reporting and runner ecosystem.</p>
+
+        <p><b>What is the architectural advantage of the Page Object Model design pattern in Selenium?</b><br>
+        The Page Object Model separates page locators and technical interaction mechanisms from test verification logic. Each web page is represented as a Java class, meaning that when an element's HTML structure changes, only the page class needs updating, preventing code duplication across test classes.</p>
+
+        <p><b>When should a team choose Selenium WebDriver over Cypress or Playwright?</b><br>
+        Selenium WebDriver is chosen when cross-browser support requires real mobile browsers, Safari, or legacy browser engines across diverse operating systems. It is also chosen when the organization requires enterprise programming language diversity, multi-tab window support, and distributed infrastructure via Selenium Grid.</p>
+
+        <p><b>Why should teams avoid using static pauses like <code>Thread.sleep()</code> in Selenium test automation?</b><br>
+        <code>Thread.sleep()</code> halts the Java execution thread unconditionally, forcing the test to wait even if the page has already loaded, which inflates total test suite execution time. If the page loads slower than the sleep duration, the test fails anyway. Dynamic explicit waits poll the DOM and continue execution immediately upon condition satisfaction.</p>
+
+        <p><b>How does isolating WebDriver instances with <code>ThreadLocal</code> enable parallel execution in TestNG?</b><br>
+        <code>ThreadLocal&lt;WebDriver&gt;</code> assigns an independent <code>WebDriver</code> reference to each concurrent execution thread. This prevents parallel test threads from attempting to send commands to the same browser window or overwriting each other's driver state, ensuring clean thread isolation during multi-threaded test runs.</p>
+      </section>
+
+      <section id="quick-answers">
+        <h2>Quick answers</h2>
+        <ol>
+          <li><b>What is Selenium?</b> An open-source suite of tools and libraries for automating web browsers.</li>
+          <li><b>What is WebDriver?</b> The core component that controls browsers natively via the W3C standard.</li>
+          <li><b>What does Selenium Manager do?</b> Automatically detects, downloads, and configures matching browser driver binaries.</li>
+          <li><b>What is Selenium Grid?</b> Server infrastructure for running automated tests in parallel across multiple machines.</li>
+          <li><b>Does Selenium include assertions?</b> No, it integrates with test runners like TestNG and JUnit 5 for assertions.</li>
+          <li><b>What command ends a session?</b> <code>driver.quit()</code> closes all browser windows and stops the driver process.</li>
+        </ol>
+      </section>
+
+      <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+        <p><b>Next topic:</b> <a href="selenium-webdriver-install.html">2.1 Install Selenium Library</a></p>
+        <a class="qa-chip" href="../index.html">&larr; Back to Home</a>
+      </section>
+    </article>
+  </main>
+
+  <!-- Right Sidebar TOC ("On this page") -->
+  <aside class="se-toc" aria-label="On this page">
+    <div class="se-toc-title">On this page</div>
+    <ul>
+      <li><a href="#webdriver">WebDriver</a></li>
+      <li><a href="#ide">IDE</a></li>
+      <li><a href="#grid">Grid</a></li>
+      <li><a href="#where-it-fits">Where it fits</a></li>
+      <li><a href="#key-points">Key points</a></li>
+      <li><a href="#comparison-table">Comparison table</a></li>
+      <li><a href="#how-it-works">How it works</a></li>
+      <li><a href="#common-mistakes">Common mistakes</a></li>
+      <li><a href="#terms-to-know">Terms to know</a></li>
+      <li><a href="#interview-questions">Interview questions</a></li>
+      <li><a href="#quick-answers">Quick answers</a></li>
+      <li><a href="#next-topic">Next topic</a></li>
+    </ul>
+  </aside>
+
 </div>
 
-<script src="../selenium-main.js"></script>
-<script src="../prism.js"></script>
+<footer></footer>
+<script src="../app.js"></script>
 </body>
 </html>
