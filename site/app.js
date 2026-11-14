@@ -84,13 +84,26 @@
     // Determine current topic & track
     const currentTopic = TOPICS.find(t => t.file === currentFile);
     const tagEl = article.querySelector(".tag");
+    const rawTag = tagEl ? tagEl.textContent.replace(/[\[\]]/g, "").trim() : "";
     const currentTrack = (currentTopic && currentTopic.track) ||
-      (tagEl && tagEl.textContent.trim()) ||
+      rawTag ||
       (currentFile.startsWith("selenium-") ? "Selenium" :
        currentFile.startsWith("java-") ? "Java" :
-       currentFile.startsWith("manual-") ? "Manual" : "Selenium");
+       currentFile.startsWith("manual-") ? "Manual" :
+       currentFile.startsWith("interview-") ? "Interview" : "Selenium");
 
     document.body.setAttribute("data-track", currentTrack);
+
+    // Record last read doc for Homepage "Resume" button
+    try {
+      const h1El = article.querySelector("h1");
+      const docTitle = (currentTopic && currentTopic.title) || (h1El && h1El.textContent.trim()) || currentFile;
+      localStorage.setItem("sdet_last_read", JSON.stringify({
+        file: currentFile,
+        title: docTitle,
+        track: currentTrack
+      }));
+    } catch (e) {}
 
     // Track metadata for navbar
     const trackMeta = {
@@ -118,11 +131,11 @@
       document.body.insertBefore(navbar, document.body.firstChild);
     }
 
-    const navTracks = ["Manual", "Java", "Selenium", "TypeScript", "Playwright"];
+    const navTracks = ["Manual", "Java", "Selenium", "TypeScript", "Playwright", "Interview"];
     navbar.innerHTML = `
       <div class="se-navbar-left">
         <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776; DOCS</button>
-        <a href="../index.html" class="se-brand" title="Back to SDET Explainer Home (Alt+H)">SDET EXPLAINER</a>
+        <a href="../index.html" class="se-brand" title="Back to SDET Explainer. Home (Alt+H)">SDET Explainer<span class="brand-dot">.</span></a>
         <a href="../index.html#${encodeURIComponent(currentTrack)}" class="se-brand-sub" title="View ${esc(currentTrack)} Track on Home">[${esc(meta.badge)}]</a>
         <ul class="se-navbar-links">
           ${navTracks.map(tr => `
@@ -380,7 +393,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.2.1";
+  const SITE_VERSION = "v3.3.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -397,7 +410,7 @@
     const homeHref = inTopicsDir ? "../index.html" : "index.html";
     const footer = document.querySelector("footer");
     if (footer) {
-      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright`;
+      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer.</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright`;
     }
 
     document.addEventListener("keydown", e => {
@@ -461,6 +474,50 @@
       document.body.setAttribute("data-track", track);
     } else {
       document.body.removeAttribute("data-track");
+    }
+
+    // 1. Left Hero CTA Box: Resume Last Read Doc Link
+    const resumeBtn = document.getElementById("hero-resume-btn");
+    if (resumeBtn) {
+      try {
+        const rawLast = localStorage.getItem("sdet_last_read");
+        if (rawLast) {
+          const last = JSON.parse(rawLast);
+          if (last && last.file) {
+            const shortTitle = (last.title || "").length > 28
+              ? last.title.slice(0, 26).trim() + "…"
+              : (last.title || "Last Doc");
+            resumeBtn.href = "topics/" + last.file;
+            resumeBtn.innerHTML = `RESUME: ${esc(shortTitle)} &rarr;`;
+            resumeBtn.title = `Resume last read (${last.track || "Doc"}): ${last.title}`;
+          }
+        }
+      } catch (e) {}
+    }
+
+    // 2. Right Hero CTA Box: Suggest Random Track
+    const randomBtn = document.getElementById("hero-random-btn");
+    const candidateTracks = tracksList.filter(t => t.id !== "All");
+    let suggestedTrackId = "Manual";
+    function pickRandomTrack(excludeId) {
+      const pool = candidateTracks.filter(t => t.id !== excludeId);
+      const chosen = pool[Math.floor(Math.random() * pool.length)] || candidateTracks[0];
+      suggestedTrackId = chosen.id;
+      if (randomBtn) {
+        randomBtn.href = `#${chosen.id}`;
+        randomBtn.innerHTML = `RANDOM TRACK: ${esc(chosen.id.toUpperCase())} &rarr;`;
+        randomBtn.title = `Switch to suggested random track: ${chosen.label}`;
+      }
+    }
+    pickRandomTrack(track);
+    if (randomBtn) {
+      randomBtn.onclick = e => {
+        e.preventDefault();
+        const target = suggestedTrackId;
+        history.replaceState(null, "", `#${target}`);
+        selectTrackFn(target);
+        pickRandomTrack(target);
+      };
     }
 
     controls.querySelectorAll(".chip").forEach(c => c.remove());
