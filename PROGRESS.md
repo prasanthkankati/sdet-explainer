@@ -1,11 +1,19 @@
-# Progress Tracker (Current Version: `v3.0.0`)
+# Progress Tracker (Current Version: `v3.1.0`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
 
-## Published Selenium Track Topics (Official Selenium.dev Clone Architecture)
-- **1. Overview:**
-  - **1.1 About Selenium & Components:** Done (`selenium-overview.html`) (`v3.0.0`)
-- **Next Up:** 2.1 Install Selenium Library (`selenium-webdriver-install.html`)
+## Selenium Track: 100% Complete (25/25 Pages Published — Official Selenium.dev + Java Architecture)
+- **1. Overview:** `1.1` (`selenium-overview.html`)
+- **2. WebDriver: Getting Started:** `2.1` (`selenium-webdriver-install.html`), `2.2` (`selenium-webdriver-first-script.html`), `2.3` (`selenium-webdriver-test-runner.html`)
+- **3. WebDriver: Drivers & Sessions:** `3.1` (`selenium-webdriver-drivers-sessions.html`), `3.2` (`selenium-webdriver-drivers-options.html`), `3.3` (`selenium-webdriver-remote-driver.html`)
+- **4. WebDriver: Elements:** `4.1` (`selenium-webdriver-elements-locators.html`), `4.2` (`selenium-webdriver-elements-relative.html`), `4.3` (`selenium-webdriver-elements-info.html`), `4.4` (`selenium-webdriver-elements-interactions.html`)
+- **5. WebDriver: Interactions:** `5.1` (`selenium-webdriver-navigation-windows.html`), `5.2` (`selenium-webdriver-frames-alerts-cookies.html`), `5.3` (`selenium-webdriver-screenshots-pdf.html`)
+- **6. WebDriver: Waits:** `6.1` (`selenium-webdriver-waits-implicit.html`), `6.2` (`selenium-webdriver-waits-explicit.html`), `6.3` (`selenium-webdriver-waits-fluent.html`)
+- **7. WebDriver: Actions API:** `7.1` (`selenium-webdriver-actions-mouse.html`), `7.2` (`selenium-webdriver-actions-keyboard-wheel.html`)
+- **8. WebDriver: BiDi APIs (Selenium 4):** `8.1` (`selenium-webdriver-bidi-overview.html`), `8.2` (`selenium-webdriver-bidi-features.html`)
+- **9. Selenium Manager:** `9.1` (`selenium-manager-guide.html`)
+- **10. Selenium Grid:** `10.1` (`selenium-grid-modes.html`)
+- **11. Test Practices:** `11.1` (`selenium-test-practices-pom.html`), `11.2` (`selenium-test-practices-guidelines.html`)
 
 ## Manual Testing Track: 100% Complete (15/15 Concept Pages + 15 Question Banks = 525 Questions!)
 - **M1 (1.1&ndash;1.4):** Done + 140 Q&amp;As (`v1.1.0`–`v1.3.0`)

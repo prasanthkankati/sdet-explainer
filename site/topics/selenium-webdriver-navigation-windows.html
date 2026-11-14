@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5.1 Navigation & Windows Management | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>5.1 Navigation & Windows Management</h1>
+  <div class="se-lead">Controlling browser history (back, forward, refresh), switching tabs/windows, opening newWindow(WindowType), and managing viewport dimensions.</div>
+
+  <p>Selenium controls browser navigation through driver.navigate() (to, back, forward, refresh) and manages multiple tabs or windows using unique opaque string identifiers called window handles. Selenium 4 introduced driver.switchTo().newWindow(WindowType.TAB) and newWindow(WindowType.WINDOW) to create and switch into new tabs or windows in a single command.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-elements-interactions.html">4.4 Element Interactions</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Window and navigation APIs are used whenever a test verifies browser history buttons, multi-tab OAuth flows, or external target='_blank' links.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>driver.navigate().to(url) and driver.get(url) perform the exact same W3C navigation operation; navigate() also exposes back(), forward(), and refresh().</li>
+      <li>driver.getWindowHandle() returns the unique String handle of the currently focused tab/window, while driver.getWindowHandles() returns a Set<String> of all open tabs/windows.</li>
+      <li>Clicking a link that opens a new tab does not automatically switch WebDriver's focus; you must call driver.switchTo().window(handle) to interact with the new tab.</li>
+      <li>In Selenium 4, driver.switchTo().newWindow(WindowType.TAB) opens a new tab and automatically switches focus to it.</li>
+      <li>After closing a secondary tab with driver.close(), you must explicitly call driver.switchTo().window(originalHandle) before issuing further commands, or NoSuchWindowException is thrown.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Return Type</th><th>Focus Behavior</th><th>Purpose</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>driver.getWindowHandle()</b></td><td>String</td><td>Reads current focused window ID</td><td>Saves original parent tab handle before opening child tabs.</td></tr>
+        <tr><td><b>driver.getWindowHandles()</b></td><td>Set<String></td><td>Reads all open window IDs</td><td>Iterates handles to find newly opened child tabs.</td></tr>
+        <tr><td><b>driver.switchTo().window(id)</b></td><td>WebDriver</td><td>Switches context to specified handle</td><td>Changes active target window for subsequent findElement calls.</td></tr>
+        <tr><td><b>driver.switchTo().newWindow(WindowType.TAB)</b></td><td>WebDriver</td><td>Creates & auto-switches to new tab</td><td>Selenium 4 API to open a blank tab/window in one step.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Store the parent tab's handle before opening a new tab: String originalTab = driver.getWindowHandle().</li>
+      <li>Either click a link that opens a new tab (and iterate driver.getWindowHandles() to switch to the handle not equal to originalTab) or call driver.switchTo().newWindow(WindowType.TAB).</li>
+      <li>Perform interactions and assertions inside the newly focused tab, then call driver.close() to close only that child tab.</li>
+      <li>Call driver.switchTo().window(originalTab) to return WebDriver's focus back to the parent tab.</li>
+    </ol>
+    <p>Opening a new tab with WindowType.TAB, closing it, and switching back:</p>
+<pre><code>package dev.selenium.interactions; // Declares package
+
+import org.openqa.selenium.Dimension; // Imports Dimension for window size
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WindowType; // Imports Selenium 4 WindowType enum
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+
+public class NavigationWindowsExample { // Declares class
+    public static void main(String[] args) { // Main method
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.manage().window().setSize(new Dimension(1280, 800)); // Sets window dimensions
+            driver.get("https://www.selenium.dev/"); // Opens parent tab
+            String parentHandle = driver.getWindowHandle(); // Saves parent window handle
+
+            driver.switchTo().newWindow(WindowType.TAB); // Opens a new tab and switches focus to it
+            driver.navigate().to("https://www.selenium.dev/documentation/"); // Navigates in new tab
+            System.out.println("Child Tab: " + driver.getTitle()); // Prints child tab title
+
+            driver.close(); // Closes only the child tab
+            driver.switchTo().window(parentHandle); // Switches focus back to parent tab
+            driver.navigate().refresh(); // Refreshes parent tab
+        } finally { // Teardown block
+            driver.quit(); // Closes all remaining windows and terminates driver
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Clicking a target='_blank' link and immediately calling findElement() for an element on the new tab without calling driver.switchTo().window(newHandle); fix by switching window handles first.</li>
+      <li>Calling driver.close() on a child tab and forgetting to call driver.switchTo().window(parentHandle), which throws NoSuchWindowException on the next command; fix by always switching back to a valid handle.</li>
+      <li>Relying on index order in driver.getWindowHandles() assuming it is sorted across all browsers; fix by filtering out known parent handles (!handle.equals(parentHandle)).</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Window Handle</b></td><td>An opaque, unique alphanumeric string identifier assigned by the browser driver to each open tab or window.</td></tr>
+        <tr><td><b>WindowType</b></td><td>A Selenium 4 enum (WindowType.TAB, WindowType.WINDOW) used with switchTo().newWindow().</td></tr>
+        <tr><td><b>NoSuchWindowException</b></td><td>Exception thrown when switching to a non-existent handle or acting on a window that has already been closed.</td></tr>
+        <tr><td><b>Dimension & Point</b></td><td>Selenium classes used with driver.manage().window() to get or set window width/height and screen x/y position.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>Is there any functional difference between driver.get(url) and driver.navigate().to(url)?</b><br>
+    No. In Selenium's Java bindings, driver.navigate().to(url) simply calls driver.get(url) internally. The navigate() interface exists to group history actions like back(), forward(), and refresh().</p>
+
+    <p><b>What is the difference between getWindowHandle() and getWindowHandles()?</b><br>
+    getWindowHandle() returns a single String representing the currently focused browser tab or window. getWindowHandles() returns a Set<String> containing the handles of all tabs and windows open in the current session.</p>
+
+    <p><b>How do you open a new tab and switch to it in Selenium 4?</b><br>
+    Call driver.switchTo().newWindow(WindowType.TAB). It opens a new blank browser tab and automatically switches WebDriver's active context into that new tab.</p>
+
+    <h3>How it works</h3>
+    <p><b>Does WebDriver automatically switch focus when a test clicks a link that opens a new browser tab?</b><br>
+    No. Even though the new tab appears in the foreground visually on screen, WebDriver's internal command context remains bound to the original tab until you explicitly call driver.switchTo().window(newTabHandle).</p>
+
+    <p><b>How do you wait for a second window or tab to finish opening after clicking a link?</b><br>
+    Use an explicit wait: new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.numberOfWindowsToBe(2)), and then iterate through driver.getWindowHandles() to switch to the new handle.</p>
+
+    <p><b>What happens if you call driver.close() on a child tab and then immediately call driver.getTitle()?</b><br>
+    Selenium throws NoSuchWindowException: target window already closed, because WebDriver's focus is still pointing to the closed child tab. You must call driver.switchTo().window(parentHandle) first.</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you test two different user roles (such as Admin and Customer) simultaneously in Selenium?</b><br>
+    Note that two tabs opened inside the same ChromeDriver instance share cookies and session storage. To isolate cookies for two concurrent users, either instantiate two separate WebDriver instances or use WebDriver BiDi BrowsingContext user contexts.</p>
+
+    <p><b>How do you verify a responsive mobile layout on desktop Chrome without changing device emulation?</b><br>
+    Use driver.manage().window().setSize(new Dimension(375, 812)) to resize the browser viewport to mobile dimensions and verify mobile menu visibility.</p>
+
+    <p><b>What happens to PageElement references when driver.navigate().refresh() is called?</b><br>
+    Refreshing the page destroys and recreates the entire DOM tree. Any WebElement variable located before refresh() becomes invalid and throws StaleElementReferenceException if used afterward.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why does driver.switchTo().window() sometimes fail to find the new tab right after element.click()?</b><br>
+    Opening a new OS window or tab is asynchronous. If getWindowHandles() is called a few milliseconds before the browser registers the new tab, the Set still has size 1. Always wait with ExpectedConditions.numberOfWindowsToBe(2) first.</p>
+
+    <p><b>What causes NoSuchWindowException during a test run?</b><br>
+    Either the test called driver.close() on the active tab without switching back to another open tab, or an application script called window.close() on a popup window while Selenium was still trying to interact with it.</p>
+
+    <p><b>Why does driver.manage().window().maximize() fail in headless Linux CI pipelines?</b><br>
+    Headless environments often lack a desktop window manager to define screen dimensions. Pass --window-size=1920,1080 in ChromeOptions instead of calling maximize().</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why does getWindowHandles() return a java.util.Set<String> instead of a List<String>?</b><br>
+    Every window handle in a session is guaranteed to be unique, and the W3C specification does not mandate a strict chronological ordering across all browser engines, making Set the appropriate collection type.</p>
+
+    <p><b>When should you use WindowType.TAB versus WindowType.WINDOW?</b><br>
+    Use WindowType.TAB for standard multi-tab workflows since it uses less OS window-management overhead. Use WindowType.WINDOW when testing multi-window positioning or side-by-side drag/drop.</p>
+
+    <p><b>Why should a multi-window helper method always record the initial handle before performing the click?</b><br>
+    Storing String parent = driver.getWindowHandle() before the action provides a deterministic reference so the test can reliably close child popups and restore focus to the parent page.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>Are driver.get() and driver.navigate().to() identical?</b> Yes, navigate().to() delegates directly to driver.get().</li>
+      <li><b>What does getWindowHandles() return?</b> A Set<String> of all open window/tab handles in the session.</li>
+      <li><b>How do you open a new tab in Selenium 4?</b> Call driver.switchTo().newWindow(WindowType.TAB).</li>
+      <li><b>What must you do after calling driver.close() on a popup tab?</b> Call driver.switchTo().window(parentHandle) to restore focus.</li>
+      <li><b>Which ExpectedCondition waits for a new tab to open?</b> ExpectedConditions.numberOfWindowsToBe(2).</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-frames-alerts-cookies.html">5.2 Frames, Alerts & Cookies &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

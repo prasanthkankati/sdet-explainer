@@ -496,7 +496,7 @@ const TOPICS = [
     summary: "What Selenium is, browser automation scope, and core suite components: WebDriver, Grid, IDE, and Selenium Manager.",
     keywords: "Selenium, WebDriver, Selenium Grid, Selenium IDE, Selenium Manager, browser automation, overview",
     status: "done",
-    date: "2026-11-14"
+    date: "2026-11-15"
   },
 
   // Section 2: WebDriver - Getting Started
@@ -508,7 +508,8 @@ const TOPICS = [
     file: "selenium-webdriver-install.html",
     summary: "Adding selenium-java dependency in Maven pom.xml and Gradle build.gradle, transitive dependencies, and automated driver resolution.",
     keywords: "install, Maven, Gradle, pom.xml, selenium-java, dependency, setup",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -518,7 +519,8 @@ const TOPICS = [
     file: "selenium-webdriver-first-script.html",
     summary: "The 8 fundamental script steps: start session, take action on browser, request info, establish wait, find element, take action on element, request element info, and end session.",
     keywords: "first script, 8 steps, ChromeDriver, get, getTitle, findElement, sendKeys, quit",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -528,7 +530,8 @@ const TOPICS = [
     file: "selenium-webdriver-test-runner.html",
     summary: "Structuring automation scripts inside test runner lifecycles: @BeforeMethod, @Test, and @AfterMethod hooks with driver.quit() guarantees.",
     keywords: "test runner, TestNG, JUnit 5, @BeforeMethod, @AfterMethod, @Test, assertions",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 3: WebDriver - Drivers & Sessions
@@ -540,7 +543,8 @@ const TOPICS = [
     file: "selenium-webdriver-drivers-sessions.html",
     summary: "Starting and terminating driver sessions, W3C capability negotiation, alwaysMatch vs firstMatch, and browser timeouts.",
     keywords: "driver sessions, capabilities, W3C, alwaysMatch, timeouts, session lifecycle",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -550,7 +554,8 @@ const TOPICS = [
     file: "selenium-webdriver-drivers-options.html",
     summary: "ChromeOptions, FirefoxOptions, EdgeOptions, command-line arguments (--headless=new, --window-size), user preferences, and PageLoadStrategy (normal, eager, none).",
     keywords: "ChromeOptions, FirefoxOptions, PageLoadStrategy, normal, eager, none, headless, prefs",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -560,7 +565,8 @@ const TOPICS = [
     file: "selenium-webdriver-remote-driver.html",
     summary: "RemoteWebDriver instantiation with grid URL, DriverService custom port/log controls, and network timeouts.",
     keywords: "RemoteWebDriver, DriverService, ChromeDriverService, grid URL, port binding",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 4: WebDriver - Elements
@@ -572,7 +578,8 @@ const TOPICS = [
     file: "selenium-webdriver-elements-locators.html",
     summary: "Finding elements by id, name, className, tagName, linkText, partialLinkText, cssSelector, and xpath.",
     keywords: "locators, By.id, By.name, By.className, By.tagName, By.linkText, By.cssSelector, By.xpath",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -582,7 +589,8 @@ const TOPICS = [
     file: "selenium-webdriver-elements-relative.html",
     summary: "Spatial locator strategy using with(By) with above, below, toLeftOf, toRightOf, and near based on getBoundingClientRect().",
     keywords: "RelativeLocators, with, above, below, toLeftOf, toRightOf, near",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -592,7 +600,8 @@ const TOPICS = [
     file: "selenium-webdriver-elements-info.html",
     summary: "Querying element state: isDisplayed(), isEnabled(), isSelected(), getText(), getAttribute(), getDomAttribute(), getDomProperty(), and getCssValue().",
     keywords: "isDisplayed, isEnabled, isSelected, getText, getAttribute, getDomAttribute, getDomProperty, getCssValue",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -602,7 +611,8 @@ const TOPICS = [
     file: "selenium-webdriver-elements-interactions.html",
     summary: "Manipulating DOM elements: click(), sendKeys(), clear(), submit(), and handling file upload inputs.",
     keywords: "click, sendKeys, clear, submit, file upload, WebElement interactions",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 5: WebDriver - Browser Interactions
@@ -614,7 +624,8 @@ const TOPICS = [
     file: "selenium-webdriver-navigation-windows.html",
     summary: "driver.navigate() to, back, forward, refresh; window handles, switchTo().window(), newWindow(WindowType.TAB/WINDOW), and window sizing.",
     keywords: "navigate, back, forward, refresh, window handles, newWindow, WindowType, switchTo window",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -624,7 +635,8 @@ const TOPICS = [
     file: "selenium-webdriver-frames-alerts-cookies.html",
     summary: "switchTo().frame(), defaultContent(), parentFrame(); switchTo().alert() accept/dismiss/sendKeys/getText; and driver.manage().cookies API.",
     keywords: "frame, iframe, defaultContent, parentFrame, alert, accept, dismiss, cookies, addCookie, getCookie",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -634,7 +646,8 @@ const TOPICS = [
     file: "selenium-webdriver-screenshots-pdf.html",
     summary: "TakesScreenshot interface, getScreenshotAs(OutputType.FILE/BYTES), element screenshots, and driver.print(PrintOptions) to PDF.",
     keywords: "TakesScreenshot, OutputType, FILE, element screenshot, print to PDF, PrintOptions",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 6: WebDriver - Waits
@@ -646,7 +659,8 @@ const TOPICS = [
     file: "selenium-webdriver-waits-implicit.html",
     summary: "The synchronization problem, why Thread.sleep is an anti-pattern, implicitlyWait(Duration), and why mixing wait types causes timeouts.",
     keywords: "waits, implicitlyWait, Duration, synchronization, Thread.sleep, polling",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -656,7 +670,8 @@ const TOPICS = [
     file: "selenium-webdriver-waits-explicit.html",
     summary: "WebDriverWait class, until() method, and ExpectedConditions: visibilityOf, elementToBeClickable, presenceOfElementLocated, and titleContains.",
     keywords: "WebDriverWait, ExpectedConditions, elementToBeClickable, visibilityOf, presenceOfElementLocated",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -666,7 +681,8 @@ const TOPICS = [
     file: "selenium-webdriver-waits-fluent.html",
     summary: "FluentWait class builder: withTimeout(), pollingEvery(), ignoring(NoSuchElementException.class), and custom lambda conditions.",
     keywords: "FluentWait, withTimeout, pollingEvery, ignoring, lambda, custom condition",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 7: WebDriver - Actions API
@@ -678,7 +694,8 @@ const TOPICS = [
     file: "selenium-webdriver-actions-mouse.html",
     summary: "Actions class pointer inputs: moveToElement (hover), contextClick (right click), doubleClick, dragAndDrop, and clickAndHold.",
     keywords: "Actions, moveToElement, contextClick, doubleClick, dragAndDrop, clickAndHold, perform",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -688,7 +705,8 @@ const TOPICS = [
     file: "selenium-webdriver-actions-keyboard-wheel.html",
     summary: "KeyDown, keyUp, sendKeys with modifier keys (Keys.SHIFT, Keys.CONTROL), and scrollToElement or scrollByAmount wheel actions.",
     keywords: "Actions, keyboard, keyDown, keyUp, Keys.SHIFT, Keys.CONTROL, wheel, scrollToElement, scrollByAmount",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 8: WebDriver - BiDi
@@ -700,7 +718,8 @@ const TOPICS = [
     file: "selenium-webdriver-bidi-overview.html",
     summary: "What WebDriver BiDi is, W3C WebSocket standard vs CDP, webSocketUrl capability, and real-time event streaming.",
     keywords: "BiDi, Bidirectional, WebSocket, W3C, webSocketUrl, event streaming, CDP",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Selenium",
@@ -710,7 +729,8 @@ const TOPICS = [
     file: "selenium-webdriver-bidi-features.html",
     summary: "Listening to console logs and JavaScript errors, inspecting HTTP requests, and basic network authentication interception.",
     keywords: "BiDi, console logs, JavaScript errors, network interception, basic auth, Network listener",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 9: Selenium Manager
@@ -722,7 +742,8 @@ const TOPICS = [
     file: "selenium-manager-guide.html",
     summary: "The built-in Rust binary tool, automated driver resolution, browser matching, local cache directory (~/.cache/selenium), and proxy configurations.",
     keywords: "Selenium Manager, Rust binary, automated driver management, cache, proxy, Chrome for Testing",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 10: Selenium Grid
@@ -734,7 +755,8 @@ const TOPICS = [
     file: "selenium-grid-modes.html",
     summary: "Standalone mode, Hub and Node mode, Distributed mode, and connecting tests using RemoteWebDriver.",
     keywords: "Selenium Grid, Standalone, Hub, Node, Distributed, Router, Distributor, RemoteWebDriver",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // Section 11: Test Practices
@@ -746,7 +768,19 @@ const TOPICS = [
     file: "selenium-test-practices-pom.html",
     summary: "Structuring maintainable test suites with Page Object Model (POM), PageFactory @FindBy annotations, and business-focused Domain-Specific Languages (DSL).",
     keywords: "Page Object Model, POM, PageFactory, @FindBy, Domain-Specific Language, DSL, test practices",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
+  },
+  {
+    track: "Selenium",
+    section: "11. Test Practices",
+    order: 2,
+    title: "11.2 Guidelines, Worst Practices & Exceptions",
+    file: "selenium-test-practices-guidelines.html",
+    summary: "Atomic tests, API state seeding, official Selenium anti-patterns (CAPTCHAs, link spidering, load tests), and the WebDriverException hierarchy.",
+    keywords: "guidelines, worst practices, WebDriverException, StaleElementReferenceException, NoSuchElementException, TimeoutException, ElementClickInterceptedException",
+    status: "done",
+    date: "2026-11-15"
   },
 
   // ==================== TRACK 4: TYPESCRIPT / JS (TS1 - TS3) ====================

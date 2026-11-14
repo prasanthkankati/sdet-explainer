@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>8.2 Log & Network Interception with BiDi | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>8.2 Log & Network Interception with BiDi</h1>
+  <div class="se-lead">Streaming console.log and uncaught JavaScript exceptions with LogInspector, intercepting HTTP traffic with Network, and handling Basic Auth.</div>
+
+  <p>With WebDriver BiDi enabled, Selenium 4 provides high-level Java APIs to observe and control internal browser activity in real time. LogInspector captures console logs (console.log, console.error) and uncaught JavaScript page exceptions, while the BiDi Network module intercepts HTTP requests/responses and injects Basic Authentication credentials automatically.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-bidi-overview.html">8.1 WebDriver BiDi Architecture & Setup</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>BiDi listeners are registered in @BeforeMethod or inside specialized test methods to fail tests automatically on uncaught JS errors or to authenticate against protected endpoints.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>LogInspector (org.openqa.selenium.bidi.module.LogInspector) subscribes to browser console logs via onConsoleEntry() and uncaught JS errors via onJavaScriptException().</li>
+      <li>LogInspector implements AutoCloseable and should be closed in teardown (or via try-with-resources) to unsubscribe WebSocket listeners.</li>
+      <li>Network (org.openqa.selenium.bidi.module.Network) intercepts traffic via onBeforeRequestSent(), onResponseCompleted(), and addIntercept().</li>
+      <li>HTTP Basic Authentication popups are handled cleanly via network.onAuthRequired() or ((HasAuthentication) driver).register(UsernameAndPassword.of(user, pass)).</li>
+      <li>Capturing uncaught JavaScript exceptions during UI regression runs catches silent frontend React/Angular crashes that do not throw a WebDriver exception.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>BiDi Module / API</th><th>Method</th><th>Event Captured / Action</th><th>Primary QA Use Case</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>LogInspector</b></td><td>onConsoleEntry(Consumer)</td><td>console.log, warn, error, info</td><td>Verifying frontend telemetry or catching console errors.</td></tr>
+        <tr><td><b>LogInspector</b></td><td>onJavaScriptException(Consumer)</td><td>Uncaught JS Error / Promise rejection</td><td>Failing UI tests automatically when frontend JS crashes.</td></tr>
+        <tr><td><b>Network</b></td><td>onBeforeRequestSent(Consumer)</td><td>Outbound HTTP request headers & URL</td><td>Verifying API query parameters and auth headers.</td></tr>
+        <tr><td><b>Network</b></td><td>onResponseCompleted(Consumer)</td><td>Inbound HTTP status code (200, 500)</td><td>Detecting broken 404/500 backend API calls during UI flows.</td></tr>
+        <tr><td><b>HasAuthentication</b></td><td>register(UsernameAndPassword)</td><td>HTTP 401 Basic Auth challenge</td><td>Logging into Basic-Auth-protected staging environments.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Enable BiDi on the browser options via options.enableBiDi() and launch the driver.</li>
+      <li>Instantiate LogInspector(driver) inside a try-with-resources block (or close it in @AfterMethod).</li>
+      <li>Register callbacks with logInspector.onConsoleEntry(...) and logInspector.onJavaScriptException(...) to collect logs into a thread-safe CopyOnWriteArrayList.</li>
+      <li>Trigger the UI actions in the browser and assert on the captured console messages or zero JS exceptions.</li>
+    </ol>
+    <p>Capturing console logs and uncaught JavaScript errors with BiDi LogInspector:</p>
+<pre><code>package dev.selenium.bidi; // Declares package
+
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.bidi.log.ConsoleLogEntry; // Imports ConsoleLogEntry model
+import org.openqa.selenium.bidi.log.JavascriptLogEntry; // Imports JavascriptLogEntry model
+import org.openqa.selenium.bidi.module.LogInspector; // Imports W3C BiDi LogInspector
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions; // Imports ChromeOptions
+import java.util.List; // Imports List interface
+import java.util.concurrent.CopyOnWriteArrayList; // Imports thread-safe list for async callbacks
+
+public class BiDiFeaturesExample { // Declares class
+    public static void main(String[] args) { // Main method
+        ChromeOptions options = new ChromeOptions(); // Creates ChromeOptions
+        options.enableBiDi(); // Enables W3C WebDriver BiDi WebSocket
+
+        WebDriver driver = new ChromeDriver(options); // Starts BiDi-enabled Chrome session
+        List<ConsoleLogEntry> consoleLogs = new CopyOnWriteArrayList<>(); // Thread-safe list for console logs
+        List<JavascriptLogEntry> jsExceptions = new CopyOnWriteArrayList<>(); // Thread-safe list for JS errors
+
+        try (LogInspector logInspector = new LogInspector(driver)) { // Opens auto-closeable LogInspector
+            logInspector.onConsoleEntry(consoleLogs::add); // Subscribes to all console.* entries
+            logInspector.onJavaScriptException(jsExceptions::add); // Subscribes to uncaught JS exceptions
+
+            driver.get("https://www.selenium.dev/selenium/web/bidi/logEntryAdded.html"); // Loads BiDi test page
+            driver.findElement(By.id("consoleLog")).click(); // Clicks button that logs to console
+            driver.findElement(By.id("jsException")).click(); // Clicks button that throws JS Error
+
+            System.out.println("Console logs captured: " + consoleLogs.size()); // Prints captured log count
+            System.out.println("JS exceptions captured: " + jsExceptions.size()); // Prints captured exception count
+        } finally { // Teardown block
+            driver.quit(); // Closes browser and WebSocket
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Using a standard non-thread-safe ArrayList inside async BiDi callbacks (onConsoleEntry / onResponseCompleted), which can cause ConcurrentModificationException because WebSocket events arrive on a background thread; fix by using CopyOnWriteArrayList or CompletableFuture.</li>
+      <li>Asserting on the consoleLogs list zero milliseconds after click() before the async WebSocket frame arrives; use WebDriverWait or CompletableFuture.get(5, TimeUnit.SECONDS) to await the event.</li>
+      <li>Using URL credentials (https://user:pass@site.com) on modern browsers that block embedded credentials in sub-resource requests; fix by using HasAuthentication or BiDi Network auth handlers.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>LogInspector</b></td><td>The Selenium 4 BiDi module for listening to browser console logs and uncaught JavaScript exceptions.</td></tr>
+        <tr><td><b>ConsoleLogEntry</b></td><td>Data object representing a browser console message (text, level, timestamp, args, stackTrace).</td></tr>
+        <tr><td><b>JavascriptLogEntry</b></td><td>Data object representing an uncaught runtime JavaScript Error or unhandled Promise rejection.</td></tr>
+        <tr><td><b>HasAuthentication</b></td><td>Selenium 4 interface implemented by drivers to supply credentials for HTTP Basic/Digest authentication challenges.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>How do you capture browser console.log and console.error messages in Selenium 4?</b><br>
+    Enable BiDi with options.enableBiDi(), instantiate new LogInspector(driver), and register a callback via logInspector.onConsoleEntry(entry -> System.out.println(entry.getText())).</p>
+
+    <p><b>How do you detect uncaught JavaScript exceptions thrown by the web application during a Selenium test?</b><br>
+    Use LogInspector.onJavaScriptException(entry -> ...). Whenever the page throws an uncaught TypeError or ReferenceError in the browser console, the callback receives a JavascriptLogEntry with the message and stack trace.</p>
+
+    <p><b>How do you handle an HTTP Basic Authentication dialog in Selenium 4?</b><br>
+    Cast driver to HasAuthentication and register credentials before navigating: ((HasAuthentication) driver).register(UsernameAndPassword.of("admin", "secret")); driver.get("https://...");.</p>
+
+    <h3>How it works</h3>
+    <p><b>Why should lists that collect BiDi events use CopyOnWriteArrayList instead of ArrayList?</b><br>
+    BiDi WebSocket callbacks execute asynchronously on a background listener thread while your @Test method runs on the main test thread. CopyOnWriteArrayList prevents ConcurrentModificationException when iterating or asserting on the list.</p>
+
+    <p><b>How do you wait deterministically for a single BiDi console log or network event in a test?</b><br>
+    Create a CompletableFuture<ConsoleLogEntry> future = new CompletableFuture<>(); pass future::complete to logInspector.onConsoleEntry(future::complete), trigger the click, and call ConsoleLogEntry entry = future.get(5, TimeUnit.SECONDS).</p>
+
+    <p><b>How do you restrict HasAuthentication credentials so they are only sent to a specific domain?</b><br>
+    Use the overloaded register(Predicate<URI>, Supplier<Credentials>) method, such as ((HasAuthentication) driver).register(uri -> uri.getHost().contains("staging.example.com"), UsernameAndPassword.of("user", "pass")).</p>
+
+    <h3>Real situations</h3>
+    <p><b>How can a QA team automatically fail any UI test if the application logs a HTTP 500 response in the background?</b><br>
+    Register a BiDi Network.onResponseCompleted listener in @BeforeMethod that records any response where response.getStatus() >= 500, and assert in @AfterMethod that the error list is empty.</p>
+
+    <p><b>Why is LogInspector preferred over the legacy driver.manage().logs().get(LogType.BROWSER) API?</b><br>
+    The legacy LogType.BROWSER API was never part of the W3C standard, did not work in Firefox, and required polling. BiDi LogInspector is an official W3C standard that streams logs in real time across Chrome, Firefox, and Edge.</p>
+
+    <p><b>How do you filter ConsoleLogEntry events to capture only console.error messages?</b><br>
+    Either pass a FilterBy.logLevel(LogLevel.ERROR) to onConsoleEntry, or check if (entry.getLevel() == LogLevel.ERROR) inside your consumer lambda.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why was my consoleLogs list still empty immediately after clicking the button that calls console.log()?</b><br>
+    WebSocket frames arrive asynchronously a few milliseconds after the click command returns. Wrap your assertion in new WebDriverWait(driver, Duration.ofSeconds(5)).until(d -> !consoleLogs.isEmpty()).</p>
+
+    <p><b>Why did LogInspector throw BiDiException when running on Firefox or Chrome?</b><br>
+    You forgot to call options.enableBiDi() on FirefoxOptions or ChromeOptions before instantiating the driver.</p>
+
+    <p><b>What happens if LogInspector or Network is not closed at the end of a test?</b><br>
+    If the browser session remains open across multiple operations, unclosed listeners continue firing callbacks and accumulating objects in memory. Always close them via try-with-resources or in @AfterMethod.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why did LogInspector and Network implement AutoCloseable in Java?</b><br>
+    Implementing AutoCloseable allows engineers to scope event interception cleanly to a specific try (LogInspector inspector = new LogInspector(driver)) { ... } block, automatically unsubscribing the listener on exit.</p>
+
+    <p><b>When should you use BiDi Network interception vs a dedicated API test in RestAssured?</b><br>
+    Use RestAssured to test backend API contracts directly. Use BiDi Network interception in Selenium when you need to verify how the frontend UI reacts to a slow network, a 503 error, or specific API payloads.</p>
+
+    <p><b>Why is registering HasAuthentication better than embedding https://user:pass@host in the URL?</b><br>
+    Modern browsers strip embedded URL credentials when fetching sub-resources (XHR/fetch requests) for security, causing AJAX calls to fail with 401. HasAuthentication supplies credentials on every challenge automatically.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>Which class captures console logs and JS errors in Selenium 4 BiDi?</b> org.openqa.selenium.bidi.module.LogInspector.</li>
+      <li><b>Which method subscribes to uncaught JS errors?</b> logInspector.onJavaScriptException(consumer).</li>
+      <li><b>Which interface handles HTTP Basic Auth popups?</b> HasAuthentication via ((HasAuthentication) driver).register(UsernameAndPassword.of(u, p)).</li>
+      <li><b>Which thread-safe List should hold async BiDi events?</b> CopyOnWriteArrayList (or synchronize with CompletableFuture).</li>
+      <li><b>Which BiDi module monitors HTTP status codes?</b> org.openqa.selenium.bidi.module.Network.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-manager-guide.html">9.1 Automated Driver & Browser Management &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

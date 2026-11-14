@@ -1,55 +1,61 @@
-// Dynamically load topics.js and glossary.js on pages if not already loaded
+// Universal SDET Explainer Engine: Theme, 3-Column DocTree, Right TOC, Volume-Dot Scroller, Search & Glossary
 (function () {
   const inTopicsDir = location.pathname.replace(/\\/g, "/").includes("/topics/");
   const assetPrefix = inTopicsDir ? "../" : "";
+  const currentFile = location.pathname.replace(/\\/g, "/").split("/").pop() || "index.html";
 
-  // Theme toggle (dark/light), saved in localStorage, defaults to system setting, Shortcut: Alt+L
+  // Theme toggle (dark/light), saved in localStorage, defaults to dark, Shortcut: Alt+L
   const root = document.documentElement;
   const saved = localStorage.getItem("theme");
   const sys = matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
-  const btn = document.createElement("button");
-  btn.className = "theme-toggle fixed-theme-toggle";
-  btn.type = "button";
-  btn.title = "Toggle Light/Dark Theme (Alt+L)";
-  btn.setAttribute("aria-label", "Toggle Light/Dark Theme");
-  btn.innerHTML = `
-    <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="12" cy="12" r="5"></circle>
-      <line x1="12" y1="1" x2="12" y2="3"></line>
-      <line x1="12" y1="21" x2="12" y2="23"></line>
-      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-      <line x1="1" y1="12" x2="3" y2="12"></line>
-      <line x1="21" y1="12" x2="23" y2="12"></line>
-      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-    </svg>
-    <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <circle cx="17" cy="6" r="3" class="night-moon" fill="#FFFFFF" stroke="#FFFFFF"></circle>
-      <path d="M2 19L8.5 9.5L15 19"></path>
-      <path d="M12.5 19L17 12.5L22 19"></path>
-      <line x1="2" y1="19" x2="22" y2="19"></line>
-    </svg>
-  `;
+
+  function createThemeToggleSvg() {
+    return `
+      <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="17" cy="6" r="3" class="night-moon" fill="currentColor" stroke="currentColor"></circle>
+        <path d="M2 19L8.5 9.5L15 19"></path>
+        <path d="M12.5 19L17 12.5L22 19"></path>
+        <line x1="2" y1="19" x2="22" y2="19"></line>
+      </svg>
+    `;
+  }
+
   const setTheme = t => {
     root.setAttribute("data-theme", t);
-    const heroThemeBtn = document.getElementById("hero-theme-btn");
-    if (heroThemeBtn) heroThemeBtn.title = (t === "light" ? "Switch to Dark Mode (Alt+L)" : "Switch to Light Mode (Alt+L)");
+    document.querySelectorAll(".theme-toggle").forEach(b => {
+      b.title = t === "light" ? "Switch to Dark Mode (Alt+L)" : "Switch to Light Mode (Alt+L)";
+    });
     localStorage.setItem("theme", t);
   };
   const toggleTheme = () => setTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
-  btn.onclick = toggleTheme;
-  document.body.appendChild(btn);
+
   const heroThemeBtn = document.getElementById("hero-theme-btn");
   if (heroThemeBtn) heroThemeBtn.onclick = toggleTheme;
-  setTheme(saved || sys);
+  setTheme(saved || sys || "dark");
+
+  let openCmdFn = null;
+  let selectTrackFn = null;
 
   function initAll() {
     cleanMarkdownInArticle();
+    initUniversalDocLayout();
+    initSyntaxAndCopy();
     initHeaderAndShortcuts();
     initIndex();
     initTypeahead();
     initGlossary();
+    initVolumeScroller();
   }
 
   // Convert any residual **bold** or `code` in article HTML into proper <b> and <code> tags
@@ -65,6 +71,249 @@
           .replace(/`([^`]+)`/g, "<code>$1</code>");
       }
     });
+  }
+
+  // Build Universal 3-Column DocTree + Right TOC + Aligned Top Navbar on all chapter pages
+  function initUniversalDocLayout() {
+    if (!inTopicsDir || typeof TOPICS === "undefined") return;
+    const article = document.querySelector("article");
+    if (!article) return;
+
+    document.body.classList.add("in-chapter", "selenium-doc-page");
+
+    // Determine current topic & track
+    const currentTopic = TOPICS.find(t => t.file === currentFile);
+    const tagEl = article.querySelector(".tag");
+    const currentTrack = (currentTopic && currentTopic.track) ||
+      (tagEl && tagEl.textContent.trim()) ||
+      (currentFile.startsWith("selenium-") ? "Selenium" :
+       currentFile.startsWith("java-") ? "Java" :
+       currentFile.startsWith("manual-") ? "Manual" : "Selenium");
+
+    document.body.setAttribute("data-track", currentTrack);
+
+    // Track metadata for navbar
+    const trackMeta = {
+      Manual: { badge: "MANUAL QA", pill: "ISTQB + AGILE" },
+      Java: { badge: "JAVA CORE", pill: "LANG: JAVA 21" },
+      Selenium: { badge: "SELENIUM DOCS", pill: "SELENIUM 4 · JAVA" },
+      TypeScript: { badge: "TS / JS", pill: "LANG: TYPESCRIPT" },
+      Playwright: { badge: "PLAYWRIGHT", pill: "PLAYWRIGHT · TS" },
+      Interview: { badge: "INTERVIEW", pill: "SDET Q&A" }
+    };
+    const meta = trackMeta[currentTrack] || { badge: currentTrack.toUpperCase(), pill: "SDET DOCS" };
+
+    // Find first published file per track for quick track switching in navbar
+    function firstFileForTrack(tr) {
+      const found = TOPICS.find(t => t.track === tr && t.file);
+      return found ? found.file : `../index.html#${tr}`;
+    }
+
+    // 1. Build or normalize Top Navbar (.se-navbar)
+    let navbar = document.querySelector(".se-navbar");
+    if (!navbar) {
+      navbar = document.createElement("nav");
+      navbar.className = "se-navbar";
+      navbar.setAttribute("aria-label", "Documentation Navigation");
+      document.body.insertBefore(navbar, document.body.firstChild);
+    }
+
+    const navTracks = ["Manual", "Java", "Selenium", "TypeScript", "Playwright"];
+    navbar.innerHTML = `
+      <div class="se-navbar-left">
+        <a href="../index.html" class="se-brand" title="Back to SDET Explainer Home (Alt+H)">SDET EXPLAINER</a>
+        <span class="se-brand-sub">[${esc(meta.badge)}]</span>
+        <ul class="se-navbar-links">
+          ${navTracks.map(tr => `
+            <li><a href="${firstFileForTrack(tr)}" class="${tr === currentTrack ? "active" : ""}">${tr === "TypeScript" ? "TS / JS" : tr}</a></li>
+          `).join("")}
+          <li><a href="../index.html">All Tracks</a></li>
+        </ul>
+      </div>
+      <div class="se-navbar-right">
+        <button class="nav-btn" type="button" id="nav-search-btn" title="Search Syllabus (/)">SEARCH [/]</button>
+        <span class="se-lang-pill">${esc(meta.pill)}</span>
+        <button class="theme-toggle nav-theme-toggle" type="button" id="nav-theme-btn" aria-label="Toggle Light/Dark Theme">
+          ${createThemeToggleSvg()}
+        </button>
+      </div>
+    `;
+
+    const navThemeBtn = document.getElementById("nav-theme-btn");
+    if (navThemeBtn) {
+      navThemeBtn.onclick = toggleTheme;
+      setTheme(root.getAttribute("data-theme") || "dark");
+    }
+    const navSearchBtn = document.getElementById("nav-search-btn");
+    if (navSearchBtn) {
+      navSearchBtn.onclick = () => { if (openCmdFn) openCmdFn(""); };
+    }
+
+    // 2. Ensure .se-layout wrapper exists around sidebar, main article, and right TOC
+    let layout = document.querySelector(".se-layout");
+    if (!layout) {
+      layout = document.createElement("div");
+      layout.className = "se-layout";
+      const oldWrap = article.closest(".wrap");
+      const mainEl = document.createElement("main");
+      mainEl.className = "se-main";
+      mainEl.setAttribute("role", "main");
+      mainEl.appendChild(article);
+
+      const sidebarEl = document.createElement("aside");
+      sidebarEl.className = "se-sidebar";
+      sidebarEl.setAttribute("aria-label", "Documentation Tree");
+
+      const tocEl = document.createElement("aside");
+      tocEl.className = "se-toc";
+      tocEl.setAttribute("aria-label", "On this page");
+
+      layout.appendChild(sidebarEl);
+      layout.appendChild(mainEl);
+      layout.appendChild(tocEl);
+
+      if (oldWrap) {
+        oldWrap.replaceWith(layout);
+      } else {
+        navbar.insertAdjacentElement("afterend", layout);
+      }
+    }
+
+    // 3. Populate Left Sidebar Documentation Tree (.se-sidebar) from TOPICS for currentTrack
+    const sidebar = layout.querySelector(".se-sidebar");
+    if (sidebar) {
+      const trackTopics = TOPICS.filter(t => t.track === currentTrack);
+      const secGroups = new Map();
+      trackTopics.forEach(t => {
+        const sec = t.section || currentTrack;
+        if (!secGroups.has(sec)) secGroups.set(sec, []);
+        secGroups.get(sec).push(t);
+      });
+
+      const doneCount = trackTopics.filter(t => t.file).length;
+      let treeHtml = `<div class="se-sidebar-hdr"><span>${esc(currentTrack)} DocTree</span><span>${doneCount}/${trackTopics.length}</span></div><ul class="se-tree">`;
+      secGroups.forEach((items, secName) => {
+        items.sort((a, b) => (a.order || 99) - (b.order || 99));
+        treeHtml += `<li><span class="se-sec-label">${esc(secName)}</span><ul>`;
+        items.forEach(item => {
+          const isActive = item.file === currentFile;
+          if (item.file) {
+            treeHtml += `<li><a href="${item.file}" class="${isActive ? "active" : ""}">${esc(item.title)}</a></li>`;
+          } else {
+            treeHtml += `<li><a href="#" class="planned">${esc(item.title)}</a></li>`;
+          }
+        });
+        treeHtml += `</ul></li>`;
+      });
+      treeHtml += `</ul>`;
+      sidebar.innerHTML = treeHtml;
+
+      // Auto-scroll active item into center of sidebar
+      const activeLink = sidebar.querySelector("a.active");
+      if (activeLink) {
+        requestAnimationFrame(() => {
+          const topOffset = activeLink.offsetTop - sidebar.clientHeight / 2 + activeLink.clientHeight / 2;
+          sidebar.scrollTop = Math.max(0, topOffset);
+        });
+      }
+    }
+
+    // 4. Populate Right Sidebar TOC (.se-toc "On this page") from article h2 headings + Scroll-Spy
+    const toc = layout.querySelector(".se-toc");
+    if (toc) {
+      const headings = Array.from(article.querySelectorAll("h2"));
+      const usedIds = new Set();
+      const tocItems = headings.map((h, i) => {
+        const parentSec = h.closest("section");
+        let id = (parentSec && parentSec.id) || h.id;
+        if (!id) {
+          id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `sec-${i + 1}`;
+          if (usedIds.has(id)) id += `-${i + 1}`;
+          h.id = id;
+        }
+        usedIds.add(id);
+        return { id, text: h.textContent.trim(), el: h };
+      });
+
+      toc.innerHTML = `<div class="se-toc-title">On this page</div><ul>` +
+        tocItems.map(item => `<li><a href="#${item.id}" data-target="${item.id}">${esc(item.text)}</a></li>`).join("") +
+        `</ul>`;
+
+      const tocLinks = Array.from(toc.querySelectorAll("a[data-target]"));
+      function updateScrollSpy() {
+        const scrollY = window.scrollY + 110;
+        let currentId = tocItems[0] ? tocItems[0].id : "";
+        for (const item of tocItems) {
+          const top = item.el.getBoundingClientRect().top + window.scrollY;
+          if (top <= scrollY) {
+            currentId = item.id;
+          }
+        }
+        tocLinks.forEach(a => {
+          a.classList.toggle("active", a.dataset.target === currentId);
+        });
+      }
+      window.addEventListener("scroll", updateScrollSpy, { passive: true });
+      updateScrollSpy();
+    }
+  }
+
+  // Right-Side Volume-Dot Scroll Progress Indicator Across All Pages
+  function initVolumeScroller() {
+    if (document.querySelector(".scroll-volume-rail")) return;
+    const rail = document.createElement("div");
+    rail.className = "scroll-volume-rail d-print-none";
+    rail.setAttribute("aria-label", "Page Scroll Progress");
+    rail.innerHTML = `
+      <div class="scroll-volume-line">
+        <div class="scroll-volume-fill"></div>
+        <div class="scroll-volume-dot"></div>
+      </div>
+      <div class="scroll-volume-pct">0%</div>
+    `;
+    document.body.appendChild(rail);
+
+    const fill = rail.querySelector(".scroll-volume-fill");
+    const dot = rail.querySelector(".scroll-volume-dot");
+    const pctLabel = rail.querySelector(".scroll-volume-pct");
+
+    function updateScroller() {
+      const docEl = document.documentElement;
+      const maxScroll = Math.max(1, docEl.scrollHeight - window.innerHeight);
+      const ratio = Math.min(1, Math.max(0, window.scrollY / maxScroll));
+      const pct = Math.round(ratio * 100);
+      fill.style.height = `${pct}%`;
+      dot.style.top = `${pct}%`;
+      pctLabel.style.top = `${pct}%`;
+      pctLabel.textContent = `${pct}%`;
+    }
+
+    function scrubToEvent(e) {
+      const rect = rail.getBoundingClientRect();
+      const ratio = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height));
+      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+      window.scrollTo({ top: ratio * maxScroll, behavior: "auto" });
+    }
+
+    let dragging = false;
+    rail.addEventListener("mousedown", e => {
+      dragging = true;
+      rail.classList.add("dragging");
+      scrubToEvent(e);
+    });
+    window.addEventListener("mousemove", e => {
+      if (!dragging) return;
+      scrubToEvent(e);
+    });
+    window.addEventListener("mouseup", () => {
+      if (!dragging) return;
+      dragging = false;
+      rail.classList.remove("dragging");
+    });
+
+    window.addEventListener("scroll", updateScroller, { passive: true });
+    window.addEventListener("resize", updateScroller, { passive: true });
+    updateScroller();
   }
 
   function loadGlossaryThenInit() {
@@ -88,8 +337,7 @@
     loadGlossaryThenInit();
   }
 
-  // Global Header Brand Link + Alt+<Letter> Track, Home & Light/Dark Theme Shortcuts
-  const SITE_VERSION = "v2.5.5";
+  const SITE_VERSION = "v3.1.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -102,104 +350,13 @@
     i: "Interview"
   };
 
-  let selectTrackFn = null;
-
   function initHeaderAndShortcuts() {
     const homeHref = inTopicsDir ? "../index.html" : "index.html";
-
-    if (inTopicsDir) {
-      document.body.classList.add("in-chapter");
-
-      // Vertical architectural typography spine in left gutter (fills empty space, centered vertically)
-      const spine = document.createElement("a");
-      spine.className = "vertical-brand-spine";
-      spine.href = homeHref;
-      spine.title = "Back to Home (Alt+H)";
-      spine.setAttribute("aria-label", "SDET Explainer Home");
-
-      const word1 = document.createElement("span");
-      word1.className = "v-word";
-      "SDET".split("").forEach(char => {
-        const s = document.createElement("span");
-        s.textContent = char;
-        word1.appendChild(s);
-      });
-
-      const dot = document.createElement("span");
-      dot.className = "v-dot";
-
-      const word2 = document.createElement("span");
-      word2.className = "v-word";
-      "EXPLAINER".split("").forEach(char => {
-        const s = document.createElement("span");
-        s.textContent = char;
-        word2.appendChild(s);
-      });
-
-      spine.appendChild(word1);
-      spine.appendChild(dot);
-      spine.appendChild(word2);
-      document.body.appendChild(spine);
-
-      spine.addEventListener("click", () => {
-        const r = spine.getBoundingClientRect();
-        sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
-      });
-    } else if (document.getElementById("home-link") || document.querySelector("header.top")) {
-      const h1 = document.querySelector("header.top h1");
-      if (h1 && !h1.querySelector("a")) {
-        h1.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)">${h1.textContent}</a>`;
-      }
-      const homeLink = document.getElementById("home-link") || document.querySelector("header.top h1 a");
-      if (homeLink) {
-        // Animate SDET Explainer back to Homepage position if returning from a chapter
-        const prevRectRaw = sessionStorage.getItem("sdet-brand-rect");
-        sessionStorage.removeItem("sdet-brand-rect");
-        if (prevRectRaw) {
-          try {
-            const prev = JSON.parse(prevRectRaw);
-            const cur = homeLink.getBoundingClientRect();
-            const dx = prev.left - cur.left;
-            const dy = prev.top - cur.top;
-            homeLink.style.display = "inline-block";
-            homeLink.style.transform = `translate(${dx}px, ${dy}px)`;
-            requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                homeLink.style.transition = "transform 0.38s cubic-bezier(0.22, 1, 0.36, 1)";
-                homeLink.style.transform = "translate(0, 0)";
-              });
-            });
-          } catch (_) {}
-        }
-
-        homeLink.addEventListener("click", e => {
-          if (selectTrackFn) {
-            e.preventDefault();
-            history.replaceState(null, "", "index.html");
-            const search = document.getElementById("search");
-            if (search) search.value = "";
-            selectTrackFn("All");
-          }
-        });
-      }
-
-      // Capture Homepage SDET Explainer rect before navigating into any chapter
-      document.addEventListener("click", e => {
-        const a = e.target.closest("a[href*='topics/']");
-        if (a && homeLink) {
-          const r = homeLink.getBoundingClientRect();
-          sessionStorage.setItem("sdet-brand-rect", JSON.stringify({ left: r.left, top: r.top }));
-        }
-      });
-    }
-
-    // Make footer 'SDET Explainer' clickable to navigate Home + show version & shortcuts
     const footer = document.querySelector("footer");
-    if (footer && inTopicsDir) {
-      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>Alt+A</b> All &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright &middot; <b>Alt+I</b> Interview`;
+    if (footer) {
+      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright`;
     }
 
-    // Global Alt+<Key> listener across all pages
     document.addEventListener("keydown", e => {
       if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
       const key = (e.key || "").toLowerCase();
@@ -234,7 +391,7 @@
     });
   }
 
-  // Index page: dynamic track chips, section grouping, search & filter
+  // Homepage Index: dynamic track chips, section grouping, search & filter
   function initIndex() {
     const grid = document.getElementById("grid");
     if (!grid) return;
@@ -243,7 +400,6 @@
     const stats = document.getElementById("stats");
     let track = "All";
 
-    // Build track filter chips dynamically from TRACKS
     const tracksList = typeof TRACKS !== "undefined" ? TRACKS : [
       { id: "All", label: "All" },
       { id: "Manual", label: "Manual Testing" },
@@ -254,13 +410,11 @@
       { id: "Interview", label: "Interview Q&A" }
     ];
 
-    // Check URL hash for initial track (e.g. index.html#Manual from Alt+M on a topic page)
     const hashTrack = (location.hash || "").replace(/^#/, "");
     if (hashTrack && tracksList.some(t => t.id.toLowerCase() === hashTrack.toLowerCase())) {
       track = tracksList.find(t => t.id.toLowerCase() === hashTrack.toLowerCase()).id;
     }
 
-    // Remove any static chips if present and render dynamic ones
     controls.querySelectorAll(".chip").forEach(c => c.remove());
     tracksList.forEach(tr => {
       const b = document.createElement("button");
@@ -277,6 +431,11 @@
 
     selectTrackFn = function (newTrack) {
       track = newTrack;
+      if (newTrack !== "All") {
+        document.body.setAttribute("data-track", newTrack);
+      } else {
+        document.body.removeAttribute("data-track");
+      }
       controls.querySelectorAll(".chip").forEach(x => {
         x.classList.toggle("active", x.dataset.track === track);
       });
@@ -301,7 +460,6 @@
         return;
       }
 
-      // Group by section
       const groups = new Map();
       list.forEach(t => {
         const sec = t.section || t.track;
@@ -336,10 +494,9 @@
     render();
   }
 
-  // Global Command Search Overlay (Type anywhere to open, blurs background, clears on collapse)
+  // Global Command Search Overlay
   function initTypeahead() {
     if (typeof TOPICS === "undefined") return;
-    const inTopicsDir = location.pathname.replace(/\\/g, "/").includes("/topics/");
     const prefix = inTopicsDir ? "" : "topics/";
 
     const backdrop = document.createElement("div");
@@ -416,6 +573,7 @@
       input.focus();
       renderDropdown();
     }
+    openCmdFn = openCmd;
 
     function closeCmd() {
       backdrop.classList.remove("open");
@@ -466,9 +624,6 @@
       if (e.key === "/") {
         e.preventDefault();
         openCmd("");
-      } else if (e.key.length === 1 && /[a-zA-Z0-9]/.test(e.key)) {
-        e.preventDefault();
-        openCmd(e.key);
       }
     });
 
@@ -477,13 +632,12 @@
     });
   }
 
-  // Inline Glossary Popover (Definition + Properties + Real Example on Hover/Click)
+  // Inline Glossary Popover
   function initGlossary() {
     if (typeof GLOSSARY === "undefined") return;
     const article = document.querySelector("article");
     if (!article) return;
 
-    // Build alias -> key lookup sorted longest-first
     const pairs = [];
     Object.keys(GLOSSARY).forEach(k => {
       (GLOSSARY[k].aliases || []).forEach(a => pairs.push({ alias: a, key: k }));
@@ -496,7 +650,6 @@
       const aliasMap = new Map();
       pairs.forEach(p => aliasMap.set(p.alias.toLowerCase(), p.key));
 
-      // Auto-annotate first occurrence of each term per section in text nodes
       article.querySelectorAll("section").forEach(sec => {
         const seenInSec = new Set();
         const walker = document.createTreeWalker(sec, NodeFilter.SHOW_TEXT, {
@@ -544,7 +697,6 @@
       });
     }
 
-    // Create shared floating popover element
     const pop = document.createElement("div");
     pop.className = "term-pop";
     document.body.appendChild(pop);
@@ -611,47 +763,68 @@
       if (e.key === "Escape") hideTerm();
     });
   }
+
+  // Context-Aware Multi-Color Syntax Highlighting (Java, XML/Maven, Gradle, TS/Playwright)
+  function initSyntaxAndCopy() {
+    document.querySelectorAll("pre code").forEach(c => {
+      if (c.dataset.highlighted === "1") return;
+      c.dataset.highlighted = "1";
+      const raw = c.textContent;
+      if (c.classList.contains("bash")) {
+        c.innerHTML = esc(raw)
+          .replace(/(#.*)/g, '<span class="t-cmt">$1</span>')
+          .replace(/^(javac|java|mvn|gradle|git|cd|npm|npx|docker)\b/gm, '<span class="t-fn">$1</span>');
+      } else {
+        c.innerHTML = highlight(raw);
+      }
+    });
+
+    document.querySelectorAll("pre").forEach(pre => {
+      if (pre.querySelector(".copy")) return;
+      const b = document.createElement("button");
+      b.className = "copy";
+      b.textContent = "copy";
+      b.onclick = () => {
+        const codeEl = pre.querySelector("code");
+        navigator.clipboard.writeText(codeEl ? codeEl.textContent : pre.textContent).then(() => {
+          b.textContent = "copied";
+          setTimeout(() => (b.textContent = "copy"), 1200);
+        });
+      };
+      pre.appendChild(b);
+    });
+  }
 })();
 
-// Terminal-style syntax highlighting for code blocks (Java + TS/Playwright)
-const KW = new Set("class public private protected static void final new return if else for while do switch case break continue try catch finally throw throws extends implements interface abstract import package this super null true false instanceof enum default const let var async await function export from type readonly".split(" "));
-const TYPES = new Set("int long double float boolean char byte short String Integer List Map Set ArrayList HashMap WebDriver WebElement By Object ChromeDriver ChromeOptions LoginPage Promise Page Locator Browser BrowserContext Expect".split(" "));
-function esc(s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+const KW = new Set("class public private protected static void final new return if else for while do switch case break continue try catch finally throw throws extends implements interface abstract import package this super null true false instanceof enum default const let var async await function export from type readonly synchronized volatile".split(" "));
+const TYPES = new Set("int long double float boolean char byte short String Integer Double Boolean List Map Set ArrayList HashMap WebDriver WebElement By Object ChromeDriver FirefoxDriver EdgeDriver SafariDriver RemoteWebDriver ChromeOptions FirefoxOptions EdgeOptions SafariOptions ChromeDriverService DriverService PageLoadStrategy WebDriverWait FluentWait Wait ExpectedConditions Duration Actions Select TakesScreenshot OutputType PrintOptions WindowType Cookie Alert Keys RelativeLocator PageFactory Assert Assertions Test System Thread ThreadLocal Exception RuntimeException NoSuchElementException TimeoutException StaleElementReferenceException ElementClickInterceptedException SessionNotCreatedException WebDriverException File URL URI Path Files Paths DevTools LogInspector Network BrowsingContext Promise Page Locator Browser BrowserContext Expect".split(" "));
+
+function esc(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 function highlight(src) {
-  const re = /(\/\/.*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|\b([A-Za-z_]\w*)\b(\s*\()?|([=+\-*\/<>!&|%\[\]]+)|([{}();,.])/g;
+  const re = /(\/\/.*|\/\*[\s\S]*?\*\/|<!--[\s\S]*?-->)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(@[A-Za-z_]\w*)|\b(\d+(?:\.\d+)?[Lfd]?)\b|\b([A-Za-z_]\w*)\b(\s*\()?|([=+\-*\/<>!&|%\[\]]+)|([{}();,.])/g;
   let out = "", last = 0, m, prev = "";
   while ((m = re.exec(src))) {
-    out += esc(src.slice(last, m.index)); last = re.lastIndex;
+    out += esc(src.slice(last, m.index));
+    last = re.lastIndex;
     if (m[1]) out += `<span class="t-cmt">${esc(m[1])}</span>`;
     else if (m[2]) out += `<span class="t-str">${esc(m[2])}</span>`;
-    else if (m[3]) {
-      const w = m[3], call = m[4] || "";
+    else if (m[3]) out += `<span class="t-ann">${esc(m[3])}</span>`;
+    else if (m[4]) out += `<span class="t-num">${esc(m[4])}</span>`;
+    else if (m[5]) {
+      const w = m[5], call = m[6] || "";
       let cls = "";
       if (KW.has(w)) cls = "t-kw";
-      else if (TYPES.has(w)) cls = "t-type";
+      else if (TYPES.has(w) || /^[A-Z][A-Za-z0-9_]*$/.test(w)) cls = "t-type";
       else if (/^(class|interface|enum|type)$/.test(prev)) cls = "t-cls";
       else if (call) cls = "t-fn";
       out += (cls ? `<span class="${cls}">${w}</span>` : w) + esc(call);
       prev = w;
     }
-    else if (m[5]) out += `<span class="t-op">${esc(m[5])}</span>`;
-    else if (m[6]) out += `<span class="t-punc">${m[6]}</span>`;
+    else if (m[7]) out += `<span class="t-op">${esc(m[7])}</span>`;
+    else if (m[8]) out += `<span class="t-punc">${m[8]}</span>`;
   }
   return out + esc(src.slice(last));
 }
-document.querySelectorAll("pre code").forEach(c => {
-  if (c.classList.contains("bash")) {
-    c.innerHTML = esc(c.textContent).replace(/(#.*)/g, '<span class="t-cmt">$1</span>')
-      .replace(/^(javac|java|mvn|git|cd|npm|npx)\b/gm, '<span class="t-fn">$1</span>');
-  } else c.innerHTML = highlight(c.textContent);
-});
-
-// Copy buttons on code blocks
-document.querySelectorAll("pre").forEach(pre => {
-  const b = document.createElement("button");
-  b.className = "copy"; b.textContent = "copy";
-  b.onclick = () => navigator.clipboard.writeText(pre.querySelector("code").textContent).then(() => {
-    b.textContent = "copied"; setTimeout(() => b.textContent = "copy", 1200);
-  });
-  pre.appendChild(b);
-});

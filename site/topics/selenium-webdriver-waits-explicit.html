@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>6.2 Explicit Waits & ExpectedConditions | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>6.2 Explicit Waits & ExpectedConditions</h1>
+  <div class="se-lead">Targeted client-side synchronization using WebDriverWait, until(), and ExpectedConditions for visibility, clickability, and state transitions.</div>
+
+  <p>An Explicit Wait is a targeted, code-defined synchronization mechanism that polls the browser from the Java client until a specific condition evaluates to a non-null/true value or the timeout expires. In Selenium 4, WebDriverWait(driver, Duration.ofSeconds(10)) pairs with the ExpectedConditions utility class or custom Java lambda expressions.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-waits-implicit.html">6.1 Waiting Strategies Overview & Implicit Waits</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>WebDriverWait is encapsulated inside BasePage helper methods (waitForVisible, waitForClickable, waitForUrl) and invoked before every Page Object interaction.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>WebDriverWait extends FluentWait<WebDriver> with a default polling interval of 500 milliseconds and automatically ignores NoSuchElementException.</li>
+      <li>wait.until(ExpectedConditions.visibilityOfElementLocated(By)) waits until the element exists in the DOM AND is visibly rendered with width and height > 0.</li>
+      <li>wait.until(ExpectedConditions.elementToBeClickable(By)) waits until the element is both visible AND enabled.</li>
+      <li>wait.until(ExpectedConditions.invisibilityOfElementLocated(By)) waits for loading spinners or modal backdrops to disappear or be removed from the DOM.</li>
+      <li>If the condition is not satisfied within the configured Duration, wait.until() throws org.openqa.selenium.TimeoutException.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>ExpectedConditions Method</th><th>Checks DOM Presence?</th><th>Checks Visible?</th><th>Checks Enabled?</th><th>Return Type</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>presenceOfElementLocated(By)</b></td><td>Yes</td><td>No (can be hidden)</td><td>No</td><td>WebElement</td></tr>
+        <tr><td><b>visibilityOfElementLocated(By)</b></td><td>Yes</td><td>Yes (width/height > 0)</td><td>No</td><td>WebElement</td></tr>
+        <tr><td><b>elementToBeClickable(By)</b></td><td>Yes</td><td>Yes</td><td>Yes (!disabled)</td><td>WebElement</td></tr>
+        <tr><td><b>invisibilityOfElementLocated(By)</b></td><td>Passes if absent or hidden</td><td>Waits for hidden</td><td>N/A</td><td>Boolean</td></tr>
+        <tr><td><b>textToBePresentInElementLocated(By, text)</b></td><td>Yes</td><td>Yes</td><td>No</td><td>Boolean</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Instantiate WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10)).</li>
+      <li>Call wait.until(...) passing an ExpectedCondition or a lambda function (d -> ...).</li>
+      <li>Every 500ms (default), WebDriverWait evaluates the condition against the browser while ignoring NoSuchElementException.</li>
+      <li>As soon as the condition returns a non-null object or Boolean.TRUE, wait.until() returns that value immediately; if 10 seconds elapse, it throws TimeoutException.</li>
+    </ol>
+    <p>Synchronizing dynamic elements with WebDriverWait and ExpectedConditions:</p>
+<pre><code>package dev.selenium.waits; // Declares package
+
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WebElement; // Imports WebElement interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.support.ui.ExpectedConditions; // Imports ExpectedConditions utility
+import org.openqa.selenium.support.ui.WebDriverWait; // Imports WebDriverWait class
+import java.time.Duration; // Imports Duration class
+
+public class ExplicitWaitExample { // Declares class
+    public static void main(String[] args) { // Main method
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/selenium/web/dynamic.html"); // Opens dynamic test page
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10)); // Creates 10s explicit wait
+
+            driver.findElement(By.id("reveal")).click(); // Clicks button that reveals a hidden input
+            WebElement revealed = wait.until( // Polls every 500ms until input becomes visible
+                ExpectedConditions.visibilityOfElementLocated(By.id("revealed")) // Checks DOM presence + visibility
+            ); // Returns visible WebElement
+            revealed.sendKeys("Synchronized!"); // Types into input once visible
+            System.out.println("Typed: " + revealed.getDomProperty("value")); // Prints typed value
+        } finally { // Teardown block
+            driver.quit(); // Closes browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Using presenceOfElementLocated(By) before calling click() or sendKeys(), which fails with ElementNotInteractableException if the element is still hidden in the DOM; fix by using visibilityOfElementLocated(By) or elementToBeClickable(By).</li>
+      <li>Passing driver.findElement(By.id("foo")) inside ExpectedConditions.visibilityOf(driver.findElement(...)) when the element is not in the DOM yet, causing findElement() to throw NoSuchElementException before WebDriverWait even starts; fix by passing the By locator to visibilityOfElementLocated(By).</li>
+      <li>Using a 60-second WebDriverWait everywhere, which hides real application performance regressions and makes failed tests hang for a full minute.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>WebDriverWait</b></td><td>The primary Explicit Wait class in Selenium that polls a condition every 500ms up to a specified Duration.</td></tr>
+        <tr><td><b>ExpectedConditions</b></td><td>A utility class containing pre-built wait conditions for elements, alerts, frames, titles, and URLs.</td></tr>
+        <tr><td><b>TimeoutException</b></td><td>Exception thrown by wait.until() when the condition is not met before the timeout expires.</td></tr>
+        <tr><td><b>stalenessOf(WebElement)</b></td><td>An ExpectedCondition that waits until an old WebElement reference is detached from the DOM (useful after page/table reload).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What is an Explicit Wait and how is it created in Selenium 4?</b><br>
+    An Explicit Wait pauses execution until a specific condition is met for a targeted element or browser state. It is created via new WebDriverWait(driver, Duration.ofSeconds(10)) and executed with wait.until(condition).</p>
+
+    <p><b>What is the default polling interval of WebDriverWait?</b><br>
+    WebDriverWait polls the condition every 500 milliseconds (0.5 seconds) by default.</p>
+
+    <p><b>What is the difference between presenceOfElementLocated() and visibilityOfElementLocated()?</b><br>
+    presenceOfElementLocated() succeeds as soon as the element exists in the HTML DOM, even if it is hidden (display:none). visibilityOfElementLocated() waits until the element exists in the DOM AND is visibly rendered with height and width greater than zero.</p>
+
+    <h3>How it works</h3>
+    <p><b>Why does WebDriverWait not fail on the first 500ms poll when findElement() throws NoSuchElementException?</b><br>
+    WebDriverWait's constructor automatically calls ignoring(NotFoundException.class), which is the superclass of NoSuchElementException. Whenever a poll throws NoSuchElementException, WebDriverWait catches it, sleeps 500ms, and polls again until the timeout expires.</p>
+
+    <p><b>What happens if wait.until() times out after 10 seconds because the element never appeared?</b><br>
+    wait.until() throws an org.openqa.selenium.TimeoutException, and its getCause() contains the last NoSuchElementException thrown during the final poll.</p>
+
+    <p><b>How do you write a custom Explicit Wait in Selenium 4 using a Java lambda expression instead of ExpectedConditions?</b><br>
+    wait.until() accepts any Function<WebDriver, T>. For example, wait.until(d -> d.findElement(By.id("status")).getText().equals("READY")) polls until the lambda returns true.</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you wait for a loading spinner to appear and then disappear before clicking a button?</b><br>
+    Wait for invisibility: wait.until(ExpectedConditions.invisibilityOfElementLocated(By.cssSelector(".loading-spinner"))), and then call wait.until(ExpectedConditions.elementToBeClickable(buttonLocator)).click().</p>
+
+    <p><b>How do you wait for a table or section to finish refreshing after selecting a filter dropdown?</b><br>
+    Grab a reference to an old element in the table before selecting the filter, select the filter, and then call wait.until(ExpectedConditions.stalenessOf(oldTableElement)) to confirm the old DOM was replaced.</p>
+
+    <p><b>How do you combine two conditions (for example, waiting for either a Dashboard header OR an Error banner)?</b><br>
+    Use ExpectedConditions.or(ExpectedConditions.visibilityOfElementLocated(dashboardLoc), ExpectedConditions.visibilityOfElementLocated(errorLoc)).</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why did wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("msg")))) throw NoSuchElementException immediately at 0 seconds?</b><br>
+    In Java, method arguments are evaluated before the outer method runs. Calling driver.findElement() inside the argument executes immediately before wait.until() starts polling. Pass the By locator to ExpectedConditions.visibilityOfElementLocated(By.id("msg")) instead.</p>
+
+    <p><b>Why did elementToBeClickable() succeed, but element.click() still threw ElementClickInterceptedException?</b><br>
+    elementToBeClickable() checks that the button itself is visible and enabled, but it does not check if a transparent backdrop overlay is sitting on top of its z-index. Wait for invisibilityOfElementLocated(overlayLocator) first.</p>
+
+    <p><b>Why does wait.until() throw StaleElementReferenceException when an element is re-rendered mid-poll?</b><br>
+    If the DOM node is replaced between locating it and checking its visibility, StaleElementReferenceException is thrown. ChainExpectedConditions.refreshed(ExpectedConditions.visibilityOfElementLocated(By)) or add StaleElementReferenceException to .ignoring().</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why is wrapping ExpectedConditions inside ExpectedConditions.refreshed(...) useful in React/Angular apps?</b><br>
+    React and Angular frequently re-mount components during state hydration, causing StaleElementReferenceException. ExpectedConditions.refreshed() automatically catches StaleElementReferenceException and re-evaluates the inner condition.</p>
+
+    <p><b>Why should explicit wait helper methods live in a BasePage class rather than inside @Test classes?</b><br>
+    Synchronization is an implementation detail of interacting with the UI. Centralizing waitForClickable(By) and waitForVisible(By) in BasePage keeps @Test classes clean and readable.</p>
+
+    <p><b>When should you use a custom lambda in wait.until() instead of ExpectedConditions?</b><br>
+    Use a lambda when waiting for custom application conditions not covered by ExpectedConditions, such as waiting for a list of elements to reach a specific count or waiting for a JavaScript variable to settle.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What is the default polling interval of WebDriverWait?</b> 500 milliseconds.</li>
+      <li><b>Which exception does WebDriverWait ignore by default?</b> NotFoundException (including NoSuchElementException).</li>
+      <li><b>Which exception is thrown when WebDriverWait expires?</b> org.openqa.selenium.TimeoutException.</li>
+      <li><b>What is the difference between presenceOf and visibilityOf?</b> presenceOf only checks DOM existence; visibilityOf also requires the element to be visibly rendered.</li>
+      <li><b>Which ExpectedCondition waits for an old element to be detached from the DOM?</b> ExpectedConditions.stalenessOf(element).</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-waits-fluent.html">6.3 FluentWait Configuration &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

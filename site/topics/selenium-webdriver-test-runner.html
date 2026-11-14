@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2.3 Using a Test Runner (TestNG & JUnit 5) | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>2.3 Using a Test Runner (TestNG & JUnit 5)</h1>
+  <div class="se-lead">Integrating Selenium WebDriver with TestNG and JUnit 5 for lifecycle hooks, assertions, and parallel execution.</div>
+
+  <p>Selenium WebDriver automates browsers but does not include a test runner, assertion library, or reporting engine. In Java automation frameworks, engineers pair Selenium with TestNG or JUnit 5 to manage setup and teardown lifecycles, validate expected outcomes with assertions, and execute test suites in parallel.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-first-script.html">2.2 Write Your First Selenium Script</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>The test runner orchestrates the entire execution lifecycle around Selenium commands in local IDE runs and CI/CD pipelines.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>TestNG (@BeforeMethod, @Test, @AfterMethod) and JUnit 5 (@BeforeEach, @Test, @AfterEach) manage browser startup and teardown automatically.</li>
+      <li>Initializing a fresh WebDriver instance before each test method and quitting it afterward ensures strict test isolation.</li>
+      <li>Hard assertions (Assert.assertEquals) abort the test method immediately on failure, whereas SoftAssert collects multiple failures before reporting.</li>
+      <li>Never store a shared static WebDriver field across parallel tests; use instance fields per test or ThreadLocal<WebDriver>.</li>
+      <li>Maven Surefire Plugin executes TestNG (testng.xml) and JUnit 5 test classes from the command line via mvn test.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Feature</th><th>TestNG</th><th>JUnit 5 (Jupiter)</th><th>Role in Selenium Suite</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Method Setup Hook</b></td><td>@BeforeMethod</td><td>@BeforeEach</td><td>Instantiates WebDriver and configures browser window before each test.</td></tr>
+        <tr><td><b>Method Teardown Hook</b></td><td>@AfterMethod</td><td>@AfterEach</td><td>Invokes driver.quit() after each test regardless of pass/fail.</td></tr>
+        <tr><td><b>Data-Driven Testing</b></td><td>@DataProvider</td><td>@ParameterizedTest + @MethodSource</td><td>Runs the same Selenium test across multiple credential or product datasets.</td></tr>
+        <tr><td><b>Suite XML Configuration</b></td><td>testng.xml</td><td>junit-platform.properties</td><td>Defines parallel thread counts, test groups, and listeners.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>The test runner invokes the @BeforeMethod (or @BeforeEach) setup method before a @Test method starts.</li>
+      <li>The setup method initializes a new ChromeDriver instance so the test begins with a clean browser profile and empty cookies.</li>
+      <li>The test runner executes the @Test method, which performs Selenium actions and calls Assert.assertEquals() to verify UI state.</li>
+      <li>Whether the @Test passes or throws an AssertionError, the test runner guarantees execution of @AfterMethod to call driver.quit().</li>
+    </ol>
+    <p>TestNG lifecycle with Selenium 4 WebDriver:</p>
+<pre><code>package dev.selenium.runner; // Declares package
+
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver class
+import org.testng.Assert; // Imports TestNG Assert utility
+import org.testng.annotations.AfterMethod; // Imports teardown annotation
+import org.testng.annotations.BeforeMethod; // Imports setup annotation
+import org.testng.annotations.Test; // Imports test annotation
+
+public class WebFormTest { // Declares TestNG test class
+    private WebDriver driver; // Declares instance-level WebDriver field
+
+    @BeforeMethod // Runs before every @Test method
+    public void setUp() { // Setup method
+        driver = new ChromeDriver(); // Starts a clean Chrome session
+        driver.get("https://www.selenium.dev/selenium/web/web-form.html"); // Opens target application URL
+    } // Ends setup
+
+    @Test // Marks method as an executable test case
+    public void shouldSubmitWebFormSuccessfully() { // Test method
+        driver.findElement(By.name("my-text")).sendKeys("Selenium 4"); // Enters text into input
+        driver.findElement(By.cssSelector("button")).click(); // Clicks submit button
+        String actualMessage = driver.findElement(By.id("message")).getText(); // Reads confirmation banner
+        Assert.assertEquals(actualMessage, "Received!"); // Verifies actual text matches expected text
+    } // Ends test method
+
+    @AfterMethod(alwaysRun = true) // Runs after every @Test even if assertions fail
+    public void tearDown() { // Teardown method
+        if (driver != null) { // Null check guard
+            driver.quit(); // Closes browser and terminates driver process
+        } // Ends guard
+    } // Ends teardown
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Creating the browser in @BeforeSuite or @BeforeClass and sharing one browser state across 20 tests; fix by initializing a fresh session in @BeforeMethod so a failure in test 1 never corrupts test 2.</li>
+      <li>Omitting alwaysRun = true on @AfterMethod in TestNG group runs, causing teardown to be skipped; fix by annotating @AfterMethod(alwaysRun = true).</li>
+      <li>Using SoftAssert without calling softAssert.assertAll() at the end of the @Test method; fix by always invoking assertAll() as the final line of the test.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Test Runner</b></td><td>A framework (such as TestNG or JUnit 5) that discovers, schedules, executes, and reports on annotated test methods.</td></tr>
+        <tr><td><b>Test Isolation</b></td><td>The principle that each test method runs independently with its own clean browser session and state.</td></tr>
+        <tr><td><b>Hard Assertion</b></td><td>An assertion that immediately throws an AssertionError and halts the current test method when a check fails.</td></tr>
+        <tr><td><b>SoftAssert</b></td><td>A TestNG class that records assertion failures without halting execution until assertAll() is called.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>Why do we need TestNG or JUnit 5 when working with Selenium?</b><br>
+    Selenium only provides browser automation APIs. TestNG and JUnit 5 provide test discovery, @BeforeMethod/@AfterMethod lifecycle hooks, assertion methods, data-driven execution, parallel thread management, and HTML/XML test reports.</p>
+
+    <p><b>What is the difference between @BeforeClass and @BeforeMethod in TestNG?</b><br>
+    @BeforeClass runs once before the first test method in the current class, whereas @BeforeMethod runs before every single @Test method in the class. Creating WebDriver in @BeforeMethod guarantees every test starts with a clean browser.</p>
+
+    <p><b>What is the difference between Assert.assertEquals() and SoftAssert in TestNG?</b><br>
+    Assert.assertEquals() is a hard assertion that throws AssertionError immediately on mismatch and stops the test method. SoftAssert records failures and continues executing subsequent checks until softAssert.assertAll() is called at the end of the test.</p>
+
+    <h3>How it works</h3>
+    <p><b>Does @AfterMethod still execute if an assertion fails or NoSuchElementException is thrown inside @Test?</b><br>
+    Yes. TestNG and JUnit 5 guarantee that @AfterMethod / @AfterEach teardown hooks execute even when the @Test method terminates abnormally with an exception or AssertionError, ensuring driver.quit() always runs.</p>
+
+    <p><b>What is the parameter order difference between TestNG Assert.assertEquals and JUnit 5 Assertions.assertEquals?</b><br>
+    In TestNG, the signature is Assert.assertEquals(actual, expected, message). In JUnit 5, the signature is Assertions.assertEquals(expected, actual, message). Swapping them produces confusing failure logs.</p>
+
+    <p><b>How does Maven execute TestNG or JUnit 5 Selenium tests from the command line?</b><br>
+    Maven uses the maven-surefire-plugin during the mvn test phase to scan src/test/java for @Test classes or execute a configured testng.xml suite file.</p>
+
+    <h3>Real situations</h3>
+    <p><b>Why is declaring public static WebDriver driver dangerous when running tests in parallel?</b><br>
+    A static field is shared by all threads in the JVM. When two parallel threads overwrite the same static driver variable, commands from both tests interleave in one browser window and cause race conditions. Use ThreadLocal<WebDriver> instead.</p>
+
+    <p><b>Why should you add alwaysRun = true to @BeforeMethod and @AfterMethod in TestNG?</b><br>
+    When filtering tests by TestNG groups (such as groups = {"smoke"}), TestNG skips lifecycle hooks that do not belong to that group unless alwaysRun = true is specified. Without it, driverremains null and throws NullPointerException.</p>
+
+    <p><b>How do you capture a screenshot automatically only when a Selenium @Test method fails?</b><br>
+    In @AfterMethod, accept an ITestResult result parameter, check if (!result.isSuccess()), cast driver to TakesScreenshot, capture the screenshot bytes, and then call driver.quit().</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why did a test pass in TestNG even though a SoftAssert check failed?</b><br>
+    The engineer forgot to call softAssert.assertAll() at the end of the @Test method. Without assertAll(), SoftAssert collects the failures in memory but never throws the aggregated AssertionError.</p>
+
+    <p><b>What causes NullPointerException on driver.get() inside a @Test method?</b><br>
+    Either the @BeforeMethod setup was skipped (for example, missing alwaysRun = true during group execution), or the test class re-declared WebDriver driver = new ChromeDriver() as a local variable inside setUp() instead of assigning it to the class field.</p>
+
+    <p><b>Why does mvn test report 'No tests were executed' even though @Test methods exist?</b><br>
+    Ensure the test class filename ends with Test.java (such as LoginTest.java), or explicitly point maven-surefire-plugin to your testng.xml suite file.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why is starting a new browser per @Test method preferred over sharing one browser across an entire test class?</b><br>
+    Browser sessions accumulate cookies, localStorage tokens, and open modals. Starting a fresh browser in @BeforeMethod guarantees each test is atomic, repeatable, and immune to cascading failures from earlier tests.</p>
+
+    <p><b>Where should assertions live: inside Page Object classes or inside @Test classes?</b><br>
+    Assertions should live inside @Test classes, while Page Object classes return page state (such as getErrorMessageText()). Keeping assertions in test classes preserves separation of concerns.</p>
+
+    <p><b>When should you use TestNG @DataProvider instead of writing multiple @Test methods?</b><br>
+    Use @DataProvider when the exact same UI workflow (such as login validation) must be verified with multiple input combinations (invalid password, locked user, empty fields).</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>Which TestNG annotation runs before each test method?</b> @BeforeMethod runs before every @Test method.</li>
+      <li><b>Which JUnit 5 annotation runs after each test method?</b> @AfterEach runs after every @Test method.</li>
+      <li><b>Why use alwaysRun = true on @AfterMethod?</b> Guarantees driver.quit() runs even when filtering by TestNG groups.</li>
+      <li><b>What must be called at the end of a SoftAssert test?</b> softAssert.assertAll() must be called to throw collected failures.</li>
+      <li><b>How do you isolate WebDriver across parallel threads?</b> Store the WebDriver instance inside a ThreadLocal<WebDriver> container.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-drivers-sessions.html">3.1 Driver Sessions & Capabilities &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

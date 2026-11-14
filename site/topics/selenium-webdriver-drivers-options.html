@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3.2 Browser Options & Page Load Strategy | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>3.2 Browser Options & Page Load Strategy</h1>
+  <div class="se-lead">Customizing browser startup arguments, headless execution, user preferences, and PageLoadStrategy (NORMAL, EAGER, NONE).</div>
+
+  <p>Browser Options classes (ChromeOptions, FirefoxOptions, EdgeOptions, SafariOptions) configure both W3C capabilities and vendor-specific browser settings. They control how the browser launches, including headless mode, window dimensions, file download directories, and the PageLoadStrategy that governs when driver.get() returns control to the script.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-drivers-sessions.html">3.1 Driver Sessions & Capabilities</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Browser Options are configured in your framework's driver initialization layer before launching local or CI/CD headless browser sessions.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>PageLoadStrategy.NORMAL (default) waits for the full page and all stylesheets, images, and subframes (document.readyState === 'complete').</li>
+      <li>PageLoadStrategy.EAGER waits only until the initial HTML document is parsed and DOMContentLoaded fires (document.readyState === 'interactive'), skipping slow images/stylesheets.</li>
+      <li>PageLoadStrategy.NONE returns immediately after the initial HTML response starts downloading, requiring explicit waits for all elements.</li>
+      <li>In Chrome 109+, modern headless mode is enabled via options.addArguments("--headless=new").</li>
+      <li>Vendor-specific preferences such as default download directories are configured via options.setExperimentalOption("prefs", prefsMap) in Chromium browsers.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>PageLoadStrategy</th><th>DOM readyState Trigger</th><th>Waits for Images & CSS?</th><th>Primary Use Case</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>PageLoadStrategy.NORMAL</b></td><td>complete (load event)</td><td>Yes, waits for all sub-resources</td><td>Default strategy for standard functional UI testing.</td></tr>
+        <tr><td><b>PageLoadStrategy.EAGER</b></td><td>interactive (DOMContentLoaded)</td><td>No, returns once HTML DOM is parsed</td><td>Speeding up tests on pages with slow third-party ads or heavy images.</td></tr>
+        <tr><td><b>PageLoadStrategy.NONE</b></td><td>Initial navigation commit</td><td>No, returns immediately</td><td>Single-page apps or custom synchronization with explicit waits.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Instantiate ChromeOptions (or FirefoxOptions/EdgeOptions) before creating the driver.</li>
+      <li>Call options.setPageLoadStrategy(PageLoadStrategy.EAGER) or NORMAL to define when navigation commands complete.</li>
+      <li>Call options.addArguments(...) to pass command-line flags such as --headless=new and --window-size=1920,1080.</li>
+      <li>Pass the configured options object into new ChromeDriver(options) so the browser starts with those flags and preferences.</li>
+    </ol>
+    <p>Configuring ChromeOptions with headless mode, window size, and PageLoadStrategy:</p>
+<pre><code>package dev.selenium.drivers; // Declares package
+
+import org.openqa.selenium.PageLoadStrategy; // Imports PageLoadStrategy enum
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions; // Imports ChromeOptions
+import java.util.HashMap; // Imports HashMap for browser prefs
+import java.util.Map; // Imports Map interface
+
+public class BrowserOptionsExample { // Declares class
+    public static void main(String[] args) { // Main entry point
+        ChromeOptions options = new ChromeOptions(); // Creates ChromeOptions instance
+        options.setPageLoadStrategy(PageLoadStrategy.EAGER); // Returns once DOMContentLoaded fires
+        options.addArguments("--headless=new"); // Enables modern Chromium headless mode
+        options.addArguments("--window-size=1920,1080"); // Sets fixed desktop viewport resolution
+
+        Map<String, Object> prefs = new HashMap<>(); // Creates preferences map
+        prefs.put("download.prompt_for_download", false); // Disables save-as dialog prompt
+        options.setExperimentalOption("prefs", prefs); // Attaches custom user prefs to ChromeOptions
+
+        WebDriver driver = new ChromeDriver(options); // Launches Chrome with configured options
+        try { // Guarded execution
+            driver.get("https://www.selenium.dev/"); // Navigates using EAGER page load strategy
+            System.out.println("Loaded: " + driver.getTitle()); // Outputs page title
+        } finally { // Cleanup block
+            driver.quit(); // Terminates browser and driver
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Running headless tests without specifying --window-size=1920,1080, which defaults to a small viewport (800x600) and hides desktop menus behind mobile hamburger icons; fix by explicitly setting window size.</li>
+      <li>Using PageLoadStrategy.NONE without explicit waits, causing immediate NoSuchElementException; fix by pairing NONE or EAGER with WebDriverWait.</li>
+      <li>Using driver.manage().window().maximize() inside headless Linux Docker containers where no window manager exists; fix by passing --window-size=1920,1080 in ChromeOptions.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>PageLoadStrategy</b></td><td>An enum (NORMAL, EAGER, NONE) that defines the document readiness state WebDriver waits for during navigation.</td></tr>
+        <tr><td><b>DOMContentLoaded</b></td><td>The browser event fired when the initial HTML document has been completely parsed without waiting for images or stylesheets.</td></tr>
+        <tr><td><b>Headless Mode</b></td><td>Executing a real browser engine without rendering a visible graphical user interface window on screen.</td></tr>
+        <tr><td><b>Experimental Option</b></td><td>A vendor-specific Chromium configuration (such as prefs or excludeSwitches) passed inside goog:chromeOptions.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What are the three PageLoadStrategy modes in Selenium 4?</b><br>
+    The three modes are PageLoadStrategy.NORMAL (waits for the full load event including images and stylesheets), PageLoadStrategy.EAGER (waits only for DOMContentLoaded when HTML is parsed), and PageLoadStrategy.NONE (returns immediately after navigation starts).</p>
+
+    <p><b>How do you run Chrome in headless mode in Selenium 4?</b><br>
+    Create a ChromeOptions instance, call options.addArguments("--headless=new"), and pass options into new ChromeDriver(options). For Firefox, use firefoxOptions.addArguments("-headless").</p>
+
+    <p><b>Why is --headless=new preferred over the legacy --headless flag in Chrome?</b><br>
+    In Chrome 109+, --headless=new runs the exact same unified browser rendering binary as headed Chrome, supporting extensions and Downloads accurately, whereas legacy --headless ran a separate stripped-down implementation.</p>
+
+    <h3>How it works</h3>
+    <p><b>How does PageLoadStrategy.EAGER affect driver.get() execution time?</b><br>
+    Under EAGER, driver.get() finishes as soon as document.readyState reaches interactive (DOMContentLoaded). It does not wait for heavy images, fonts, or slow external analytics scripts, significantly reducing navigation wait times.</p>
+
+    <p><b>How are ChromeOptions serialized when sent to ChromeDriver?</b><br>
+    Selenium packages standard W3C settings at the top level of the capabilities JSON and nests Chromium-specific arguments, extensions, and prefs inside the vendor-prefixed goog:chromeOptions object.</p>
+
+    <p><b>How do you configure Chrome to automatically download files to a custom directory without showing a Save dialog?</b><br>
+    Create a Map<String, Object> with "download.default_directory" set to your absolute folder path and "download.prompt_for_download" set to false, then pass it via options.setExperimentalOption("prefs", prefs).</p>
+
+    <h3>Real situations</h3>
+    <p><b>Why do tests that pass locally in headed Chrome often fail with ElementNotInteractableException in CI headless mode?</b><br>
+    Headless browsers in CI default to a small 800x600 viewport, causing responsive web pages to collapse desktop navigation bars into mobile hamburger menus. Adding --window-size=1920,1080 in ChromeOptions fixes the viewport.</p>
+
+    <p><b>Which flags are required when running Chrome inside a Linux Docker container?</b><br>
+    Pass --headless=new, --no-sandbox, and --disable-dev-shm-usage. In Docker, the default /dev/shm shared memory partition is only 64MB, which causes Chrome tabs to crash unless --disable-dev-shm-usage redirects shared memory to /tmp.</p>
+
+    <p><b>How do you test a web application using a specific Chrome user profile or browser extension?</b><br>
+    Use options.addArguments("user-data-dir=/path/to/profile") to load an existing profile, or options.addExtensions(new File("extension.crx")) to install a packaged Chrome extension at startup.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why does Chrome crash with 'session not created: DevToolsActivePort file doesn't exist' in Linux CI?</b><br>
+    Chrome crashed immediately on launch because it ran as the root user in a container without sandboxing support or ran out of /dev/shm memory. Add --no-sandbox and --disable-dev-shm-usage to ChromeOptions.</p>
+
+    <p><b>Why did switching to PageLoadStrategy.NONE cause immediate NoSuchElementException on the first findElement()?</b><br>
+    PageLoadStrategy.NONE returns control to Java before the HTML body has even finished downloading. Every element lookup after driver.get() must be wrapped in an explicit WebDriverWait.</p>
+
+    <p><b>How do you suppress the 'Chrome is being controlled by automated test software' infobar?</b><br>
+    Call options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation")) on your ChromeOptions instance.</p>
+
+    <h3>Design choices</h3>
+    <p><b>When should an architect choose PageLoadStrategy.EAGER over PageLoadStrategy.NORMAL?</b><br>
+    Choose EAGER when testing e-commerce or media sites where slow third-party ad networks or high-resolution product images delay the window.onload event for 20+ seconds even though the interactive DOM is ready in 1 second.</p>
+
+    <p><b>Why should headless mode be controlled via a Maven CLI property (-Dheadless=true) rather than hardcoded?</b><br>
+    Developers need headed browsers locally to visually debug test steps, while CI/CD pipelines need headless browsers for speed and headless Linux agents. Reading System.getProperty("headless") supports both seamlessly.</p>
+
+    <p><b>Why is setting a fixed window size (--window-size=1920,1080) better than driver.manage().window().maximize()?</b><br>
+    maximize() depends on the host monitor's physical resolution, which varies across developer laptops and CI virtual displays. A fixed 1920x1080 viewport guarantees identical responsive breakpoints everywhere.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What is the default PageLoadStrategy?</b> PageLoadStrategy.NORMAL (waits for document.readyState === 'complete').</li>
+      <li><b>Which PageLoadStrategy waits only for DOMContentLoaded?</b> PageLoadStrategy.EAGER (document.readyState === 'interactive').</li>
+      <li><b>What argument enables modern headless mode in Chrome?</b> options.addArguments("--headless=new").</li>
+      <li><b>Why add --disable-dev-shm-usage in Docker?</b> Prevents Chrome tab crashes caused by Docker's small 64MB /dev/shm memory limit.</li>
+      <li><b>How do you set a 1080p viewport in headless Chrome?</b> options.addArguments("--window-size=1920,1080").</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-remote-driver.html">3.3 RemoteWebDriver & Service Classes &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

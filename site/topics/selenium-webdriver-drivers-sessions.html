@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3.1 Driver Sessions & Capabilities | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>3.1 Driver Sessions & Capabilities</h1>
+  <div class="se-lead">Creating and terminating W3C WebDriver sessions, capability negotiation, and session-level timeouts.</div>
+
+  <p>A WebDriver session is a stateful connection between your Java test script and a target browser instance identified by a unique SessionId. When a session starts, the client and driver perform W3C capability negotiation to agree on browser name, platform, timeouts, and security settings.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-test-runner.html">2.3 Using a Test Runner (TestNG & JUnit 5)</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Session creation and capability handshake happen inside your DriverFactory every time a new test browser is launched locally or on Selenium Grid.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Every WebDriver session is assigned a unique UUID SessionId accessible via ((RemoteWebDriver) driver).getSessionId().</li>
+      <li>W3C standard capabilities include browserName, browserVersion, platformName, acceptInsecureCerts, pageLoadStrategy, and timeouts.</li>
+      <li>Session timeouts consist of three configurable durations: script timeout (default 30s), pageLoad timeout (default 300s), and implicitWait timeout (default 0s).</li>
+      <li>In Selenium 4, legacy DesiredCapabilities is replaced by strongly typed browser option classes (ChromeOptions, FirefoxOptions, EdgeOptions, SafariOptions).</li>
+      <li>Setting acceptInsecureCerts(true) instructs the browser to bypass self-signed or expired SSL/TLS certificate warnings in staging environments.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Timeout Type</th><th>Default Value</th><th>Configuration Method</th><th>Exception When Exceeded</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>pageLoadTimeout</b></td><td>300 seconds (5 min)</td><td>driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30))</td><td>TimeoutException</td></tr>
+        <tr><td><b>implicitlyWait</b></td><td>0 seconds (disabled)</td><td>driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10))</td><td>NoSuchElementException</td></tr>
+        <tr><td><b>scriptTimeout</b></td><td>30 seconds</td><td>driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(15))</td><td>ScriptTimeoutException</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>The test creates a typed options object such as ChromeOptions and sets W3C capabilities (like setAcceptInsecureCerts(true)).</li>
+      <li>Passing the options object into new ChromeDriver(options) sends an HTTP POST /session request with alwaysMatch/firstMatch JSON payload.</li>
+      <li>The driver launches the browser with the requested configuration and returns a unique SessionId and negotiated capabilities.</li>
+      <li>During execution, session timeouts can be read or updated via driver.manage().timeouts().</li>
+      <li>Calling driver.quit() sends HTTP DELETE /session/{sessionId} to close the browser and invalidate the SessionId.</li>
+    </ol>
+    <p>Configuring W3C session capabilities and timeouts in Java:</p>
+<pre><code>package dev.selenium.drivers; // Declares package
+
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions; // Imports typed ChromeOptions
+import org.openqa.selenium.remote.RemoteWebDriver; // Imports RemoteWebDriver for SessionId access
+import org.openqa.selenium.remote.SessionId; // Imports SessionId class
+import java.time.Duration; // Imports Duration for timeouts
+
+public class SessionCapabilitiesExample { // Declares class
+    public static void main(String[] args) { // Main method
+        ChromeOptions options = new ChromeOptions(); // Creates typed W3C options object
+        options.setAcceptInsecureCerts(true); // Accepts self-signed SSL certificates on staging
+        options.setPageLoadTimeout(Duration.ofSeconds(60)); // Sets W3C pageLoad timeout to 60s
+
+        WebDriver driver = new ChromeDriver(options); // Starts session with negotiated capabilities
+        try { // Guarded block
+            SessionId sessionId = ((RemoteWebDriver) driver).getSessionId(); // Retrieves unique W3C SessionId
+            System.out.println("Active Session ID: " + sessionId); // Prints UUID session identifier
+            driver.get("https://www.selenium.dev/"); // Navigates to Selenium homepage
+        } finally { // Teardown block
+            driver.quit(); // Deletes session and invalidates SessionId
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Using deprecated DesiredCapabilities directly to configure local browsers; fix by using ChromeOptions, FirefoxOptions, EdgeOptions, or SafariOptions.</li>
+      <li>Setting pageLoadTimeout too low (such as 2 seconds), causing TimeoutException on normal navigation; fix by keeping pageLoadTimeout at 30 to 60 seconds.</li>
+      <li>Trying to mutate ChromeOptions after passing it into new ChromeDriver(options); fix by setting all options before instantiating the driver because capabilities are immutable once a session starts.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>SessionId</b></td><td>A unique identifier assigned by the WebDriver server to track an active browser session.</td></tr>
+        <tr><td><b>Capabilities</b></td><td>Key-value configuration properties negotiated between the client and driver when creating a session.</td></tr>
+        <tr><td><b>acceptInsecureCerts</b></td><td>A boolean W3C capability that tells the browser to trust self-signed or expired TLS certificates.</td></tr>
+        <tr><td><b>pageLoadTimeout</b></td><td>The maximum time WebDriver waits for a document navigation to complete before throwing TimeoutException.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What is a WebDriver session and how is it identified?</b><br>
+    A WebDriver session is an active, stateful connection between the test client and a controlled browser instance. It is uniquely identified by a SessionId UUID generated by the driver when the session starts.</p>
+
+    <p><b>What are the three session-level timeouts in W3C WebDriver and their default values?</b><br>
+    The three timeouts are pageLoadTimeout (default 300 seconds), scriptTimeout for asynchronous JavaScript execution (default 30 seconds), and implicitlyWait for element location (default 0 seconds).</p>
+
+    <p><b>Why was DesiredCapabilities replaced by browser Option classes in Selenium 4?</b><br>
+    DesiredCapabilities relied on untyped string keys prone to typos. Browser Option classes like ChromeOptions and FirefoxOptions provide compile-time type safety and enforce W3C capability compliance.</p>
+
+    <h3>How it works</h3>
+    <p><b>How does W3C capability negotiation use alwaysMatch and firstMatch?</b><br>
+    When starting a session, the client sends an alwaysMatch object containing capabilities that must be supported, and an optional list of firstMatch objects. The driver merges alwaysMatch with each firstMatch entry in order until it finds a valid combination, or throws SessionNotCreatedException.</p>
+
+    <p><b>Can you change browser capabilities such as acceptInsecureCerts after new ChromeDriver(options) has already been called?</b><br>
+    No. Capabilities are negotiated only once during the POST /session handshake when the browser launches. Modifying the options object afterward has no effect on the running session.</p>
+
+    <p><b>What happens to the SessionId after driver.quit() is called?</b><br>
+    Calling driver.quit() destroys the session on the driver server and sets the client's internal SessionId reference to null. Any further command throws NoSuchSessionException.</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you automate an internal QA staging site that uses a self-signed HTTPS certificate?</b><br>
+    Call options.setAcceptInsecureCerts(true) on your ChromeOptions, FirefoxOptions, or EdgeOptions object before creating the driver so the browser bypasses the 'Your connection is not private' interstitial page.</p>
+
+    <p><b>How do you retrieve the active SessionId for logging or cloud grid video correlation?</b><br>
+    Cast the WebDriver instance to RemoteWebDriver and call ((RemoteWebDriver) driver).getSessionId().toString(). Cloud grids like BrowserStack and Sauce Labs use this exact ID to index video recordings and logs.</p>
+
+    <p><b>When would you customize scriptTimeout in a Selenium project?</b><br>
+    Increase scriptTimeout when calling JavascriptExecutor.executeAsyncScript() to wait for long-running client-side promises or third-party analytics callbacks.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why does Selenium throw SessionNotCreatedException: Unrecognized capability?</b><br>
+    W3C WebDriver rejects non-standard capability keys that lack a vendor prefix (such as goog:chromeOptions or moz:firefoxOptions). Use the official Option class methods or prefix custom vendor capabilities properly.</p>
+
+    <p><b>What causes org.openqa.selenium.TimeoutException during driver.get(url)?</b><br>
+    The web page took longer to fire the window load event than the configured pageLoadTimeout (for example, due to a hanging third-party ad or tracking script). Increase pageLoadTimeout or switch to PageLoadStrategy.EAGER.</p>
+
+    <p><b>Why does Safari ignore setAcceptInsecureCerts(true) in some environments?</b><br>
+    SafariDriver has stricter OS-level keychain restrictions on untrusted certificates compared to Chrome and Firefox. For Safari, install the staging root CA certificate into the macOS System Keychain.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why is the default implicitlyWait timeout set to 0 seconds in W3C WebDriver?</b><br>
+    An implicit wait of 0 seconds ensures findElement() fails fast when an element is missing and allows engineers to use targeted explicit waits (WebDriverWait) without unintended timeout multiplication.</p>
+
+    <p><b>Why is RemoteWebDriver the superclass of ChromeDriver, FirefoxDriver, and EdgeDriver?</b><br>
+    Whether a browser runs locally via a driver binary or remotely on a Selenium Grid node, both communicate over the exact same HTTP W3C WebDriver protocol implemented in RemoteWebDriver.</p>
+
+    <p><b>Why should capability configuration be centralized in a DriverFactory class?</b><br>
+    Centralizing options in a single DriverFactory allows the entire suite to toggle headless mode, SSL acceptance, or timeouts via system properties (-Dheadless=true) without editing individual test classes.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>How do you get the current session ID?</b> Call ((RemoteWebDriver) driver).getSessionId().</li>
+      <li><b>What is the default pageLoadTimeout in Selenium?</b> 300 seconds (5 minutes).</li>
+      <li><b>What is the default implicitlyWait timeout?</b> 0 seconds.</li>
+      <li><b>How do you bypass SSL certificate errors?</b> Call options.setAcceptInsecureCerts(true) before launching the driver.</li>
+      <li><b>Are capabilities mutable after session startup?</b> No, capabilities are negotiated once at session creation.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-drivers-options.html">3.2 Browser Options & Page Load Strategy &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7.2 Keyboard & Wheel Actions | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>7.2 Keyboard & Wheel Actions</h1>
+  <div class="se-lead">Simulating modifier key chords (keyDown, keyUp, Keys.SHIFT/CONTROL) and native viewport/container scrolling (scrollToElement, scrollByAmount).</div>
+
+  <p>Beyond mouse pointer gestures, the Selenium Actions class controls virtual keyboard and scroll wheel input devices. Keyboard actions allow holding down modifier keys (keyDown(Keys.SHIFT), keyUp(Keys.SHIFT)) for uppercase typing or multi-select shortcuts, while Selenium 4.2+ Wheel actions provide native scrollToElement() and scrollByAmount() without requiring JavaScript execution.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-actions-mouse.html">7.1 Mouse Actions</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Keyboard and Wheel actions are used in Page Objects for keyboard shortcuts (Ctrl+A, Ctrl+C), multi-row Shift/Ctrl selection, and scrolling infinite-scroll feeds or nested scrollable containers.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>actions.keyDown(Keys.SHIFT).sendKeys("selenium").keyUp(Keys.SHIFT).perform() holds Shift while typing, producing "SELENIUM".</li>
+      <li>Every keyDown(modifier) MUST be paired with a matching keyUp(modifier), or the modifier key remains stuck down for the rest of the session.</li>
+      <li>Platform-aware Copy/Paste shortcuts compare Platform.getCurrent().is(Platform.MAC) to choose Keys.COMMAND on macOS vs Keys.CONTROL on Windows/Linux.</li>
+      <li>actions.scrollToElement(WebElement).perform() scrolls the viewport until the target element is in view.</li>
+      <li>actions.scrollByAmount(int deltaX, int deltaY).perform() scrolls horizontally by deltaX pixels and vertically by deltaY pixels (positive deltaY scrolls down, negative scrolls up).</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Actions Method</th><th>Input Device</th><th>Parameters</th><th>Behavior</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>keyDown(Keys) / keyUp(Keys)</b></td><td>Keyboard</td><td>Modifier key (SHIFT, CONTROL, ALT, COMMAND)</td><td>Presses and holds (or releases) a modifier key.</td></tr>
+        <tr><td><b>sendKeys(CharSequence...)</b></td><td>Keyboard</td><td>Text string or Keys enum</td><td>Types into currently focused element (or passed WebElement).</td></tr>
+        <tr><td><b>scrollToElement(WebElement)</b></td><td>Scroll Wheel</td><td>Target WebElement</td><td>Scrolls page until target element enters the viewport.</td></tr>
+        <tr><td><b>scrollByAmount(dx, dy)</b></td><td>Scroll Wheel</td><td>int deltaX, int deltaY</td><td>Scrolls viewport by exact pixel offsets (+dy down, -dy up).</td></tr>
+        <tr><td><b>scrollFromOrigin(origin, dx, dy)</b></td><td>Scroll Wheel</td><td>WheelInput.ScrollOrigin, dx, dy</td><td>Scrolls inside a specific nested scrollable container or offset.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Instantiate Actions actions = new Actions(driver).</li>
+      <li>For modifier shortcuts, focus the target element, call keyDown(Keys.SHIFT), call sendKeys("abc"), call keyUp(Keys.SHIFT), and finish with .perform().</li>
+      <li>For scrolling, call actions.scrollToElement(footerElement).perform() or actions.scrollByAmount(0, 500).perform().</li>
+      <li>For scrolling inside an inner scrollable table or div, create WheelInput.ScrollOrigin.fromElement(scrollableDiv) and call actions.scrollFromOrigin(origin, 0, 300).perform().</li>
+    </ol>
+    <p>Executing Shift-key typing and native Wheel scrolling in Selenium 4:</p>
+<pre><code>package dev.selenium.actions; // Declares package
+
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.Keys; // Imports Keys enum
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WebElement; // Imports WebElement interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.interactions.Actions; // Imports Actions class
+import org.openqa.selenium.interactions.WheelInput; // Imports WheelInput for ScrollOrigin
+
+public class KeyboardWheelActionsExample { // Declares class
+    public static void main(String[] args) { // Main method
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/selenium/web/single_text_input.html"); // Loads input test page
+            WebElement input = driver.findElement(By.id("textInput")); // Locates text input
+            Actions actions = new Actions(driver); // Creates Actions builder
+
+            actions.click(input) // Focuses the input field
+                .keyDown(Keys.SHIFT) // Holds down Shift modifier key
+                .sendKeys("sdet") // Types 'sdet' (rendered as 'SDET')
+                .keyUp(Keys.SHIFT) // Releases Shift modifier key
+                .perform(); // Executes keyboard sequence
+
+            driver.get("https://www.selenium.dev/"); // Navigates to long scrollable page
+            WebElement footer = driver.findElement(By.tagName("footer")); // Locates footer element
+            actions.scrollToElement(footer).perform(); // Scrolls viewport down to footer natively
+            actions.scrollByAmount(0, -300).perform(); // Scrolls back up by 300 pixels
+
+            WheelInput.ScrollOrigin origin = WheelInput.ScrollOrigin.fromViewport(10, 10); // Defines scroll origin
+            actions.scrollFromOrigin(origin, 0, 200).perform(); // Scrolls 200px down from origin
+        } finally { // Teardown block
+            driver.quit(); // Closes browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Calling actions.keyDown(Keys.CONTROL).sendKeys("a").perform() without calling .keyUp(Keys.CONTROL), leaving the Control key held down so subsequent normal clicks open new tabs!</li>
+      <li>Passing a non-modifier key (like Keys.ENTER or "a") to keyDown(), which throws InvalidArgumentException; keyDown() and keyUp() only accept modifier keys (SHIFT, CONTROL, ALT, COMMAND/META).</li>
+      <li>Hardcoding Keys.CONTROL for Copy/Paste shortcuts on macOS where Chrome expects Keys.COMMAND; fix by checking Platform.getCurrent().is(Platform.MAC).</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Modifier Key</b></td><td>A key held down to modify subsequent keystrokes: Keys.SHIFT, Keys.CONTROL, Keys.ALT, or Keys.COMMAND (META).</td></tr>
+        <tr><td><b>scrollToElement()</b></td><td>A Selenium 4.2+ Actions wheel method that scrolls the viewport until the target WebElement is visible.</td></tr>
+        <tr><td><b>scrollByAmount()</b></td><td>A Selenium 4.2+ Actions wheel method that scrolls horizontally (deltaX) and vertically (deltaY) by pixel amounts.</td></tr>
+        <tr><td><b>ScrollOrigin</b></td><td>A WheelInput class specifying the starting coordinate (viewport or specific scrollable WebElement) for a wheel scroll action.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>Which keys are valid arguments for Actions.keyDown() and Actions.keyUp()?</b><br>
+    Only modifier keys are valid in keyDown() and keyUp(): Keys.SHIFT, Keys.CONTROL, Keys.ALT, and Keys.COMMAND (or Keys.META). Passing regular character keys or Keys.ENTER throws InvalidArgumentException.</p>
+
+    <p><b>What is the difference between WebElement.sendKeys() and Actions.sendKeys()?</b><br>
+    WebElement.sendKeys() focuses the specific target element automatically before typing. Actions.sendKeys(CharSequence) types into whatever element currently has focus in the browser (unless you pass the target WebElement via Actions.sendKeys(element, text)).</p>
+
+    <p><b>How do you scroll down 500 pixels in Selenium 4 without using JavascriptExecutor?</b><br>
+    Use the native Wheel Actions API introduced in Selenium 4.2: new Actions(driver).scrollByAmount(0, 500).perform().</p>
+
+    <h3>How it works</h3>
+    <p><b>What happens if you call keyDown(Keys.SHIFT) in a test and forget to call keyUp(Keys.SHIFT)?</b><br>
+    The virtual keyboard state inside the browser session keeps the Shift key depressed for all subsequent commands in that session, causing later sendKeys() calls to type in uppercase and clicks to behave as Shift+Clicks.</p>
+
+    <p><b>How do you scroll inside a specific scrollable <div> or data grid instead of scrolling the main window?</b><br>
+    Create a ScrollOrigin anchored to that container: WheelInput.ScrollOrigin origin = WheelInput.ScrollOrigin.fromElement(scrollableDiv); and call new Actions(driver).scrollFromOrigin(origin, 0, 400).perform().</p>
+
+    <p><b>How do you write a cross-platform Select-All (Ctrl+A / Cmd+A) keyboard shortcut in Selenium Java?</b><br>
+    Determine the modifier key dynamically: Keys cmdCtrl = Platform.getCurrent().is(Platform.MAC) ? Keys.COMMAND : Keys.CONTROL; and execute actions.keyDown(cmdCtrl).sendKeys("a").keyUp(cmdCtrl).perform().</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you automate an infinite-scroll product feed on an e-commerce page?</b><br>
+    Run a loop that calls new Actions(driver).scrollByAmount(0, 800).perform(), waits briefly for new product cards to render in the DOM, and breaks once driver.findElements(productCardBy).size() reaches the target count.</p>
+
+    <p><b>How do you select multiple non-adjacent items in a custom UI list that supports Ctrl+Click?</b><br>
+    Use new Actions(driver).keyDown(Keys.CONTROL).click(item1).click(item3).click(item5).keyUp(Keys.CONTROL).perform().</p>
+
+    <p><b>Why is Actions.scrollToElement(element) preferred over JavascriptExecutor window.scrollTo()?</b><br>
+    Actions.scrollToElement() dispatches genuine W3C wheel scroll events through the browser compositor, properly triggering intersection observers and lazy-scroll listeners that sometimes ignore synthetic JS scroll jumps.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why did Actions.keyDown(Keys.ENTER) throw InvalidArgumentException: Key Down action only supports modifier keys?</b><br>
+    Keys.ENTER is not a modifier key. To press Enter inside an Actions chain, pass it to sendKeys: actions.sendKeys(Keys.ENTER).perform().</p>
+
+    <p><b>Why did scrollByAmount(0, 500) not move an inner modal dialog's scrollbar?</b><br>
+    scrollByAmount(dx, dy) originates at the viewport level (0,0). To scroll an inner modal or overflow container, use scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(modalBody), 0, 500).</p>
+
+    <p><b>How do you clear a stuck modifier key if an exception interrupted an Actions chain between keyDown and keyUp?</b><br>
+    Call ((Interactive) driver).resetInputState() in a finally block or recovery helper to release all virtual keys and mouse buttons.</p>
+
+    <h3>Design choices</h3>
+    <p><b>When should you use WebElement.sendKeys(Keys.chord(Keys.CONTROL, "a")) versus Actions.keyDown(Keys.CONTROL)?</b><br>
+    Use Keys.chord() when sending a quick shortcut directly to a single <input> element. Use Actions.keyDown() when combining keyboard modifiers with mouse clicks (such as Shift+Click or Ctrl+Click across multiple elements).</p>
+
+    <p><b>Why did W3C WebDriver add a dedicated WheelInput device in Selenium 4.2?</b><br>
+    Previously, engineers had to fall back to raw JavascriptExecutor scripts for scrolling. Adding WheelInput standardized hardware-accurate touchpad and mouse-wheel scrolling across Chromium, Firefox, and Safari.</p>
+
+    <p><b>What do positive and negative values represent in scrollByAmount(deltaX, deltaY)?</b><br>
+    Positive deltaX scrolls right and negative deltaX scrolls left; positive deltaY scrolls down and negative deltaY scrolls up.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>Which keys work with keyDown() and keyUp()?</b> Modifier keys only: SHIFT, CONTROL, ALT, COMMAND/META.</li>
+      <li><b>How do you scroll down 400px natively in Selenium 4?</b> new Actions(driver).scrollByAmount(0, 400).perform().</li>
+      <li><b>How do you scroll until an element is in view?</b> new Actions(driver).scrollToElement(element).perform().</li>
+      <li><b>How do you scroll inside a specific overflow <div>?</b> Use actions.scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(div), 0, 300).perform().</li>
+      <li><b>How do you release all stuck modifier keys?</b> Call ((Interactive) driver).resetInputState().</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-bidi-overview.html">8.1 WebDriver BiDi Architecture & Setup &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

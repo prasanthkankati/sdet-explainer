@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5.2 Frames, Alerts & Cookies | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>5.2 Frames, Alerts & Cookies</h1>
+  <div class="se-lead">Switching across iframes (frame, parentFrame, defaultContent), handling JS dialogs (Alert, Confirm, Prompt), and managing browser cookies.</div>
+
+  <p>Web applications frequently embed isolated HTML documents inside <iframe> tags, trigger native JavaScript dialogs (alert, confirm, prompt), and store session state in HTTP cookies. Selenium provides driver.switchTo().frame() for iframe traversal, driver.switchTo().alert() for modal dialogs, and driver.manage(). cookies APIs for state manipulation.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-navigation-windows.html">5.1 Navigation & Windows Management</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>These APIs are used when automating payment gateways embedded in iframes (like Stripe), dismissing native browser confirmation dialogs, or injecting session cookies to bypass UI login.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Selenium cannot find elements inside an <iframe> unless you first switch context via driver.switchTo().frame(WebElement | nameOrId | index).</li>
+      <li>driver.switchTo().parentFrame() moves up one level to the immediate parent frame, whereas driver.switchTo().defaultContent() exits all nested frames back to the top-level document.</li>
+      <li>The Alert interface handles JavaScript alert(), confirm(), and prompt() via accept(), dismiss(), getText(), and sendKeys(String).</li>
+      <li>If a JavaScript alert is open and you call any normal WebDriver command (like findElement) without handling the alert, Selenium throws UnhandledAlertException.</li>
+      <li>You can only add a Cookie via driver.manage().addCookie(cookie) after navigating to the target domain first; adding a cookie on about:blank throws InvalidCookieDomainException.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Context API</th><th>Switch In Command</th><th>Exit / Action Command</th><th>Common Exception</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>IFrame (by WebElement)</b></td><td>driver.switchTo().frame(iframeEl)</td><td>driver.switchTo().defaultContent()</td><td>NoSuchFrameException</td></tr>
+        <tr><td><b>Nested IFrame</b></td><td>driver.switchTo().frame(childFrame)</td><td>driver.switchTo().parentFrame()</td><td>NoSuchElementException (if not switched)</td></tr>
+        <tr><td><b>JS Alert / Confirm / Prompt</b></td><td>Alert a = driver.switchTo().alert()</td><td>a.accept() / a.dismiss() / a.sendKeys()</td><td>NoAlertPresentException / UnhandledAlertException</td></tr>
+        <tr><td><b>Browser Cookies</b></td><td>driver.manage().getCookies()</td><td>driver.manage().addCookie(c) / deleteAllCookies()</td><td>InvalidCookieDomainException</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>For iframes: Locate the <iframe> WebElement, call driver.switchTo().frame(iframeElement), interact with inner elements, and call driver.switchTo().defaultContent() when done.</li>
+      <li>For alerts: Wait for ExpectedConditions.alertIsPresent(), call Alert alert = driver.switchTo().alert(), read alert.getText(), and call alert.accept() or alert.dismiss().</li>
+      <li>For cookies: Navigate to the application domain first, construct a new Cookie("key", "value"), and call driver.manage().addCookie(cookie).</li>
+    </ol>
+    <p>Handling iframes, JavaScript alerts, and cookies in Selenium 4:</p>
+<pre><code>package dev.selenium.interactions; // Declares package
+
+import org.openqa.selenium.Alert; // Imports Alert interface
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.Cookie; // Imports Cookie class
+import org.openqa.selenium.JavascriptExecutor; // Imports JavascriptExecutor
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+
+public class FramesAlertsCookiesExample { // Declares class
+    public static void main(String[] args) { // Main method
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/"); // Navigates to domain before setting cookie
+            driver.manage().addCookie(new Cookie("theme", "dark")); // Adds cookie for selenium.dev
+            Cookie themeCookie = driver.manage().getCookieNamed("theme"); // Reads cookie by name
+            System.out.println("Cookie value: " + themeCookie.getValue()); // Prints 'dark'
+
+            ((JavascriptExecutor) driver).executeScript("alert('Confirm action');"); // Triggers JS alert
+            Alert alert = driver.switchTo().alert(); // Switches focus to active alert dialog
+            System.out.println("Alert text: " + alert.getText()); // Reads alert message
+            alert.accept(); // Clicks OK on the alert
+
+            driver.switchTo().defaultContent(); // Ensures context is at top-level document
+        } finally { // Teardown block
+            driver.quit(); // Closes browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Trying to click an element inside an <iframe> without calling driver.switchTo().frame() first, which always throws NoSuchElementException.</li>
+      <li>Staying trapped inside an iframe after interacting with it and failing to locate top-level navigation elements; fix by calling driver.switchTo().defaultContent().</li>
+      <li>Calling driver.manage().addCookie() before calling driver.get() on the target domain, which throws InvalidCookieDomainException because the browser is still on data:, or about:blank.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>defaultContent()</b></td><td>Switches WebDriver context out of all iframes back to the main top-level HTML document.</td></tr>
+        <tr><td><b>parentFrame()</b></td><td>Moves WebDriver context up one level from a nested child iframe to its immediate parent iframe.</td></tr>
+        <tr><td><b>NoAlertPresentException</b></td><td>Exception thrown when driver.switchTo().alert() is called while no native JS dialog is open.</td></tr>
+        <tr><td><b>InvalidCookieDomainException</b></td><td>Exception thrown when adding a cookie whose domain does not match the browser's current document domain.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What are the three overloaded ways to switch into an iframe in Selenium?</b><br>
+    driver.switchTo().frame() is overloaded to accept: (1) a WebElement representing the <iframe> tag, (2) a String matching the iframe's name or id attribute, or (3) a zero-based int index of the iframe on the page.</p>
+
+    <p><b>What is the difference between switchTo().parentFrame() and switchTo().defaultContent()?</b><br>
+    If you are inside a nested iframe (Frame A -> Frame B), parentFrame() moves one level up from Frame B to Frame A. defaultContent() exits all frames completely and returns directly to the main top-level page.</p>
+
+    <p><b>What are the four methods available on the Selenium Alert interface?</b><br>
+    The four methods are accept() (clicks OK), dismiss() (clicks Cancel), getText() (reads the dialog message), and sendKeys(String) (types text into a JavaScript prompt() input box).</p>
+
+    <h3>How it works</h3>
+    <p><b>Why can't driver.findElement() see elements inside an <iframe> automatically?</b><br>
+    An <iframe> hosts a separate HTML document with its own independent DOM tree and browsing context. The W3C WebDriver specification scopes all element lookups strictly to the currently active browsing context.</p>
+
+    <p><b>How do you wait for an asynchronous JavaScript alert to appear before interacting with it?</b><br>
+    Use Alert alert = new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.alertIsPresent()). It polls until the alert opens and returns the switched Alert object directly.</p>
+
+    <p><b>Why must you navigate to the application domain before calling driver.manage().addCookie()?</b><br>
+    Browser security policies (Same-Origin Policy) forbid setting cookies for a domain unless the active document belongs to that domain. You can navigate to a lightweight static asset or 404 path on the domain, add the cookie, and then refresh.</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you speed up 100 UI tests by bypassing the login screen using cookies?</b><br>
+    Authenticate once via a fast REST API call to obtain the session/JWT cookie, open a lightweight URL on the application domain, inject the cookie via driver.manage().addCookie(), and navigate directly to the authenticated dashboard.</p>
+
+    <p><b>Can driver.switchTo().alert() handle custom HTML/Bootstrap modal popups?</b><br>
+    No. driver.switchTo().alert() only handles native browser JavaScript dialogs created by window.alert(), window.confirm(), and window.prompt(). Custom HTML modals are regular DOM elements and are automated with standard findElement() and click().</p>
+
+    <p><b>How do you handle a browser Basic Authentication popup (username/password at the HTTP level)?</b><br>
+    Either register a BasicAuthentication predicate via WebDriver BiDi / HasAuthentication, or pass credentials in the URL as https://username:password@domain.com/.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>What causes UnhandledAlertException during a test run?</b><br>
+    An unexpected native JavaScript alert() or confirm() dialog popped up on screen, blocking the browser thread, and the test tried to execute another command like findElement() without accepting or dismissing the alert first.</p>
+
+    <p><b>Why does switchTo().frame(int index) make tests brittle in production?</b><br>
+    Third-party analytics scripts and ad networks dynamically inject hidden tracking <iframe> tags into the page, shifting frame indices (0, 1, 2) unpredictably. Always switch using a located WebElement or explicit name/id.</p>
+
+    <p><b>Why did driver.findElement(By.id("header")) fail right after completing work inside an iframe?</b><br>
+    The driver context was still focused inside the iframe. Call driver.switchTo().defaultContent() before searching for elements in the main page.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why isExpectedConditions.frameToBeAvailableAndSwitchToIt() preferred over calling switchTo().frame() directly?</b><br>
+    Iframes (such as payment widgets) load asynchronously. frameToBeAvailableAndSwitchToIt() waits for the iframe to exist and switches context into it atomically in a single step.</p>
+
+    <p><b>When should you call driver.manage().deleteAllCookies()?</b><br>
+    Call deleteAllCookies() if you reuse a browser instance between scenarios and need to clear authentication and cart state without restarting the browser process.</p>
+
+    <p><b>How do you configure what Selenium does automatically when an unexpected alert appears?</b><br>
+    Set the W3C unhandledPromptBehavior capability on ChromeOptions via options.setUnhandledPromptBehavior(UnexpectedAlertBehaviour.DISMISS_AND_NOTIFY) or ACCEPT.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>How do you exit all iframes back to the main page?</b> Call driver.switchTo().defaultContent().</li>
+      <li><b>How do you move up one level from a nested iframe?</b> Call driver.switchTo().parentFrame().</li>
+      <li><b>Which exception occurs if switchTo().alert() is called when no alert is open?</b> NoAlertPresentException.</li>
+      <li><b>Which ExpectedCondition waits for an iframe and switches into it?</b> ExpectedConditions.frameToBeAvailableAndSwitchToIt(locator).</li>
+      <li><b>Why does addCookie() throw InvalidCookieDomainException?</b> The browser is not currently on the domain matching the cookie; call driver.get() on the domain first.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-screenshots-pdf.html">5.3 Screenshots & Print to PDF &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2.2 Write Your First Selenium Script | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>2.2 Write Your First Selenium Script</h1>
+  <div class="se-lead">The eight fundamental components of every Selenium WebDriver script from session startup to teardown.</div>
+
+  <p>Every Selenium test script follows a predictable eight-step lifecycle to interact with a web application. The script starts a browser session, navigates to a URL, queries browser metadata, establishes a synchronization strategy, locates DOM elements, performs user actions, reads element state, and terminates the session.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-install.html">2.1 Install Selenium Library</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>These eight steps form the core execution body of every automated UI test method across smoke, sanity, and regression suites.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Step 1 (Start Session): WebDriver driver = new ChromeDriver() launches a browser instance and binds a W3C session.</li>
+      <li>Step 2 (Navigate): driver.get("https://...") loads the target web page and waits for the document readyState to reach complete.</li>
+      <li>Step 3 (Browser Info): driver.getTitle() and driver.getCurrentUrl() retrieve document-level metadata.</li>
+      <li>Step 4 (Wait Strategy): Synchronization ensures elements exist in the DOM before interacting with them.</li>
+      <li>Step 5 & 6 (Find & Act): driver.findElement(By...) locates a WebElement so methods like sendKeys() and click() can act on it.</li>
+      <li>Step 7 & 8 (Read State & End Session): getText() extracts rendered text for assertions, and driver.quit() closes all windows and kills the driver process.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Scope</th><th>Behavior</th><th>Driver Process Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>driver.get(url)</b></td><td>Browser Navigation</td><td>Loads a full URL and waits for page load completion.</td><td>Keeps session active.</td></tr>
+        <tr><td><b>driver.close()</b></td><td>Current Window/Tab</td><td>Closes only the currently focused browser window or tab.</td><td>Driver process stays alive if other tabs remain.</td></tr>
+        <tr><td><b>driver.quit()</b></td><td>Entire Session</td><td>Closes all windows/tabs and terminates the driver binary.</td><td>Cleanly exits chromedriver/geckodriver process.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Instantiate ChromeDriver() to start the local driver server and open a fresh Chrome browser window.</li>
+      <li>Call driver.get() with the target URL to navigate to the web page under test.</li>
+      <li>Configure a wait timeout using driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500)) or WebDriverWait.</li>
+      <li>Locate the target input field and submit button using driver.findElement(By.name(...)) or By.cssSelector(...).</li>
+      <li>Invoke sendKeys() on the input element and click() on the button element, then read the resulting message with getText().</li>
+      <li>Invoke driver.quit() inside a finally block to close the browser and release operating system resources.</li>
+    </ol>
+    <p>Complete 8-step Selenium 4 Java script:</p>
+<pre><code>package dev.selenium.getting_started; // Declares package namespace
+
+import org.openqa.selenium.By; // Imports By locator mechanism
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WebElement; // Imports WebElement interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver implementation
+import java.time.Duration; // Imports Java time Duration class
+
+public class FirstScriptExample { // Declares test class
+    public static void main(String[] args) { // Main execution entry point
+        WebDriver driver = new ChromeDriver(); // 1. Starts the session and launches Chrome
+        try { // Guards execution to guarantee cleanup
+            driver.get("https://www.selenium.dev/selenium/web/web-form.html"); // 2. Navigates to target web form
+            String title = driver.getTitle(); // 3. Requests browser document title
+            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(500)); // 4. Establishes wait strategy
+            WebElement textBox = driver.findElement(By.name("my-text")); // 5. Finds text input element
+            WebElement submitButton = driver.findElement(By.cssSelector("button")); // 5. Finds submit button element
+            textBox.sendKeys("Selenium"); // 6. Enters keystrokes into text box
+            submitButton.click(); // 6. Clicks the submit button
+            WebElement message = driver.findElement(By.id("message")); // 5. Finds confirmation message element
+            System.out.println("Result: " + message.getText()); // 7. Requests element text content
+        } finally { // Executes regardless of pass or exception
+            driver.quit(); // 8. Ends session and terminates driver process
+        } // Ends finally block
+    } // Ends main method
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Interacting with elements immediately after click() without waiting for the DOM to update; fix by establishing an explicit or implicit wait before locating dynamic elements.</li>
+      <li>Calling driver.close() instead of driver.quit() at the end of a test; fix by always calling driver.quit() so background driver processes do not leak memory.</li>
+      <li>Passing a domain without the protocol scheme (such as driver.get("www.selenium.dev")) which throws InvalidArgumentException; fix by always including https:// or http://.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>WebDriver</b></td><td>The primary interface representing an automated browser session.</td></tr>
+        <tr><td><b>WebElement</b></td><td>An interface representing an individual HTML DOM node on the page.</td></tr>
+        <tr><td><b>By</b></td><td>The factory class providing static locator methods such as By.id(), By.name(), and By.cssSelector().</td></tr>
+        <tr><td><b>InvalidArgumentException</b></td><td>Exception thrown when a command parameter (such as a malformed URL without https://) violates the W3C specification.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What are the eight core steps of a standard Selenium WebDriver script?</b><br>
+    The eight steps are: (1) Start the session, (2) Take action on the browser (navigate), (3) Request browser information, (4) Establish a waiting strategy, (5) Find an element, (6) Take action on the element, (7) Request element information, and (8) End the session with driver.quit().</p>
+
+    <p><b>Why do we declare WebDriver driver = new ChromeDriver() instead of ChromeDriver driver = new ChromeDriver()?</b><br>
+    Coding to the WebDriver interface applies polymorphism. It allows the rest of the test script to switch seamlessly between ChromeDriver, FirefoxDriver, EdgeDriver, or RemoteWebDriver without changing any method calls.</p>
+
+    <p><b>What happens if you pass a URL without https:// to driver.get()?</b><br>
+    Selenium throws an org.openqa.selenium.InvalidArgumentException because the W3C WebDriver navigate command strictly requires a fully qualified URI scheme such as http:// or https://.</p>
+
+    <h3>How it works</h3>
+    <p><b>Does driver.get() wait for the web page to finish loading before moving to the next line?</b><br>
+    Under the default PageLoadStrategy.NORMAL, driver.get() blocks execution until the browser fires the window load event (document.readyState equals complete), meaning HTML, stylesheets, and synchronous scripts have loaded.</p>
+
+    <p><b>When is a WebElement actually looked up in the DOM?</b><br>
+    The DOM lookup happens the exact moment driver.findElement(By...) is executed. If the element is not present in the DOM after any configured implicit wait expires, Selenium immediately throws NoSuchElementException.</p>
+
+    <p><b>What happens internally when driver.quit() is executed?</b><br>
+    Selenium sends an HTTP DELETE request to the /session/{sessionId} endpoint of the driver server. The driver closes all associated browser windows, deletes temporary user profile directories, and shuts down its own OS process.</p>
+
+    <h3>Real situations</h3>
+    <p><b>When should you use driver.close() instead of driver.quit() in a real test?</b><br>
+    Use driver.close() when a test clicks a link that opens a secondary popup tab, verifies the popup content, and needs to close only that popup tab before switching back to the parent window. Always use driver.quit() in the final test teardown.</p>
+
+    <p><b>How do you verify that clicking a submit button navigated the user to the expected confirmation page?</b><br>
+    After calling submitButton.click(), use WebDriverWait with ExpectedConditions.urlContains("/submitted") and then assert on driver.getCurrentUrl() and the confirmation element's getText().</p>
+
+    <p><b>Why should driver.quit() be placed inside a finally block or @AfterMethod hook?</b><br>
+    If an assertion fails or a NoSuchElementException is thrown mid-test, normal execution aborts immediately. Placing driver.quit() inside finally or @AfterMethod guarantees the browser closes even when the test fails.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why does calling any driver method after driver.quit() throw NoSuchSessionException?</b><br>
+    Once driver.quit() executes, the session ID is destroyed and the driver server process is terminated. Any subsequent call on that same WebDriver reference has no active session to communicate with and throws NoSuchSessionException.</p>
+
+    <p><b>Why did driver.findElement() throw NoSuchElementException even though the element is visible on the screen?</b><br>
+    The script likely executed findElement() a few milliseconds before an asynchronous AJAX call finished inserting the element into the DOM, or the element resides inside an <iframe>. Add an explicit wait or switch into the frame first.</p>
+
+    <p><b>What happens if driver.close() is called when only one browser tab is open?</b><br>
+    The single browser window closes, but the background chromedriver binary process remains running in memory until driver.quit() is called.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why does Selenium separate browser-level actions (driver.get) from element-level actions (element.click)?</b><br>
+    Separating browser context methods on WebDriver from DOM node operations on WebElement mirrors the browser architecture itself, keeping the API clean and modular.</p>
+
+    <p><b>Why did Selenium 4 replace long + TimeUnit parameters with java.time.Duration?</b><br>
+    Java's standard Duration class (such as Duration.ofSeconds(10) or Duration.ofMillis(500)) is type-safe, self-documenting, and prevents unit conversion bugs between milliseconds and seconds.</p>
+
+    <p><b>Why should production test scripts avoid writing tests inside public static void main()?</b><br>
+    A main() method lacks test lifecycle hooks, parallel execution, failure reporting, and assertion tracking. Production frameworks use TestNG or JUnit 5 @Test methods instead.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>Which method opens a URL in Selenium?</b> driver.get("https://...") opens a URL and waits for page load.</li>
+      <li><b>Which method returns the browser tab title?</b> driver.getTitle() returns the current document title as a String.</li>
+      <li><b>Which method finds a single element?</b> driver.findElement(By) returns the first matching WebElement.</li>
+      <li><b>Which method types text into an input?</b> element.sendKeys("text") dispatches keystrokes to the element.</li>
+      <li><b>What is the difference between close() and quit()?</b> close() closes the current tab; quit() closes all tabs and stops the driver process.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-test-runner.html">2.3 Using a Test Runner (TestNG & JUnit 5) &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

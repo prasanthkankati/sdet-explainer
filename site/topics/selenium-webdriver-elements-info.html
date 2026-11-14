@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4.3 Element Information & State | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>4.3 Element Information & State</h1>
+  <div class="se-lead">Inspecting DOM element state and properties: isDisplayed(), isEnabled(), isSelected(), getText(), getDomAttribute(), getDomProperty(), getCssValue(), and getRect().</div>
+
+  <p>Once a WebElement is located, test scripts frequently inspect its state, text, attributes, and computed styles to drive assertions. Selenium 4 provides boolean state checks (isDisplayed, isEnabled, isSelected) and distinguishes between initial HTML markup attributes (getDomAttribute) and live JavaScript DOM properties (getDomProperty).</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-elements-relative.html">4.2 Relative Locators</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Element information methods are called inside Page Object getter methods to return UI values back to @Test methods for TestNG/JUnit assertions.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>isDisplayed() returns true if the element is rendered visibly in the viewport (not display:none, visibility:hidden, or zero-sized).</li>
+      <li>isEnabled() returns true unless the form control has the disabled attribute or belongs to a disabled <fieldset>.</li>
+      <li>isSelected() returns true if a checkbox, radio button, or <option> element is currently checked/selected.</li>
+      <li>getDomAttribute(name) reads the static initial attribute from the HTML source markup, whereas getDomProperty(name) reads the live runtime JavaScript property from the DOM object.</li>
+      <li>To read the current text typed inside an <input> box, call input.getDomProperty("value") (or getAttribute("value")), because getText() only returns inner text between opening and closing tags.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Data Source</th><th>Example Input (<input value='init'> after typing 'new')</th><th>Returned Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>getText()</b></td><td>Rendered visible inner text</td><td><input> has no inner text node</td><td>"" (empty string)</td></tr>
+        <tr><td><b>getDomAttribute("value")</b></td><td>Initial HTML source attribute</td><td>Reads static HTML markup value='init'</td><td>"init"</td></tr>
+        <tr><td><b>getDomProperty("value")</b></td><td>Live JS DOM object property</td><td>Reads runtime element.value property</td><td>"new"</td></tr>
+        <tr><td><b>getAttribute("value")</b></td><td>Legacy hybrid lookup</td><td>Checks property first, falls back to attribute</td><td>"new"</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Locate the target WebElement using driver.findElement(By...).</li>
+      <li>Invoke state methods (isDisplayed(), isEnabled(), isSelected()) to obtain boolean flags for conditional checks or assertions.</li>
+      <li>Invoke getText() to extract visible, whitespace-normalized text from headings, paragraphs, labels, or buttons.</li>
+      <li>Invoke getDomAttribute() for static HTML attributes (like href or class), getDomProperty("value") for live input values, and getCssValue() for computed styles.</li>
+    </ol>
+    <p>Querying element state, DOM properties, attributes, and CSS styles:</p>
+<pre><code>package dev.selenium.elements; // Declares package
+
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.Rectangle; // Imports Rectangle for geometry
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WebElement; // Imports WebElement interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+
+public class ElementInfoExample { // Declares class
+    public static void main(String[] args) { // Main method
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/selenium/web/web-form.html"); // Loads web form
+            WebElement textInput = driver.findElement(By.id("my-text-id")); // Locates text input
+            textInput.sendKeys("SDET"); // Types 'SDET' into input
+            System.out.println("Live value: " + textInput.getDomProperty("value")); // Prints 'SDET'
+            System.out.println("HTML attr: " + textInput.getDomAttribute("type")); // Prints 'text'
+
+            WebElement disabledInput = driver.findElement(By.name("my-disabled")); // Locates disabled input
+            System.out.println("Is enabled? " + disabledInput.isEnabled()); // Prints false
+
+            WebElement checkbox = driver.findElement(By.id("my-check-1")); // Locates checked checkbox
+            System.out.println("Is selected? " + checkbox.isSelected()); // Prints true
+
+            Rectangle rect = textInput.getRect(); // Reads x, y, width, height
+            System.out.println("Width: " + rect.getWidth() + ", Color: " + textInput.getCssValue("color")); // Prints geometry and CSS color
+        } finally { // Teardown block
+            driver.quit(); // Closes browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Calling element.getText() on an <input> field to read what the user typed, which always returns an empty string ""; fix by calling element.getDomProperty("value").</li>
+      <li>Using isDisplayed() to check if an element exists in the DOM when it might not be present at all, which throws NoSuchElementException; fix by checking !driver.findElements(By...).isEmpty() first.</li>
+      <li>Asserting hex colors like "#ff0000" against getCssValue("color") in Chrome, which returns computed "rgba(255, 0, 0, 1)"; fix by using Selenium's Color.fromString(el.getCssValue("color")).asHex().</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>getDomAttribute()</b></td><td>W3C method that returns only the initial attribute value declared in the HTML source markup.</td></tr>
+        <tr><td><b>getDomProperty()</b></td><td>W3C method that returns the live runtime property of the underlying JavaScript DOM object.</td></tr>
+        <tr><td><b>getCssValue()</b></td><td>Method that returns the browser's computed CSS style value (such as color, font-size, or display).</td></tr>
+        <tr><td><b>getRect()</b></td><td>Method that returns a Rectangle object containing an element's x, y coordinates and width, height dimensions.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What are the three boolean state-checking methods on WebElement?</b><br>
+    The three boolean methods are isDisplayed() (checks if the element is visibly rendered), isEnabled() (checks if a form element is interactive and not disabled), and isSelected() (checks if a checkbox, radio button, or option is checked).</p>
+
+    <p><b>How do you read the text currently typed inside an <input> text box?</b><br>
+    Call inputElement.getDomProperty("value") (or getAttribute("value")). Calling getText() on an <input> returns an empty string because <input> is a void tag with no inner text.</p>
+
+    <p><b>What is the difference between getDomAttribute() and getDomProperty() in Selenium 4?</b><br>
+    getDomAttribute() reads the static attribute written in the HTML markup (like value="initial"), whereas getDomProperty() reads the live JavaScript property in memory (which updates as the user types or checks a box).</p>
+
+    <h3>How it works</h3>
+    <p><b>Why was getAttribute() split into getDomAttribute() and getDomProperty() in Selenium 4?</b><br>
+    In Selenium 3, getAttribute() executed a large JavaScript blob that guessed whether the caller wanted an HTML attribute or a JS property. The W3C standard separated them into two fast, explicit endpoints.</p>
+
+    <p><b>Does isDisplayed() return false if an element is not in the HTML DOM at all?</b><br>
+    No. You can only call isDisplayed() on a WebElement returned by findElement(). If the element is not in the DOM, findElement() throws NoSuchElementException before isDisplayed() is ever reached.</p>
+
+    <p><b>How did getRect() replace getLocation() and getSize() in Selenium 4?</b><br>
+    In Selenium 3, getLocation() and getSize() made two separate wire calls. In W3C Selenium 4, element.getRect() retrieves x, y, width, and height in a single HTTP command.</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you verify the background color of a button across Chrome and Firefox without rgba vs rgb string mismatches?</b><br>
+    Pass the string returned by button.getCssValue("background-color") into org.openqa.selenium.support.Color.fromString(cssColor).asHex() and assert against the normalized hex code such as "#43b02a".</p>
+
+    <p><b>How do you check if a custom <button class='btn disabled'> that does not use the HTML disabled attribute is disabled?</b><br>
+    Because isEnabled() only checks the native HTML disabled attribute, check button.getDomAttribute("class").contains("disabled") or button.getDomAttribute("aria-disabled").</p>
+
+    <p><b>What does getDomProperty("checked") return on a checkbox element?</b><br>
+    It returns the string "true" or "false" representing the live JavaScript checked boolean property, matching what element.isSelected() returns as a Java boolean.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why does element.getText() return an empty string even though text is present inside the HTML tag?</b><br>
+    getText() only returns visible rendered text. If the element or its parent has CSS display: none or visibility: hidden, getText() returns "". To read hidden text, call element.getDomProperty("textContent").</p>
+
+    <p><b>Why did getDomAttribute("value") return null or the old default value after calling sendKeys("hello")?</b><br>
+    Typing into an input modifies the live JavaScript .value property in memory, not the static HTML attribute in the DOM markup. Use getDomProperty("value") to read the updated text.</p>
+
+    <p><b>Why does isDisplayed() return true for an element covered by a modal overlay?</b><br>
+    isDisplayed() checks whether the element has non-zero dimensions and is not hidden via CSS display/visibility; it does not check z-index occlusion. Clicking an occluded element will throw ElementClickInterceptedException.</p>
+
+    <h3>Design choices</h3>
+    <p><b>When should you use getDomAttribute() vs getDomProperty() in Page Objects?</b><br>
+    Use getDomAttribute() for static markup attributes like data-testid, aria-label, or class. Use getDomProperty() for dynamic runtime state like value, checked, or selectedIndex.</p>
+
+    <p><b>Why does getText() normalize whitespace and strip leading/trailing spaces?</b><br>
+    HTML source files often contain indentation newlines and spaces for formatting. Normalizing whitespace ensures getText() matches what a human user actually reads on the screen.</p>
+
+    <p><b>Why is Color.fromString() recommended whenever asserting on getCssValue() colors?</b><br>
+    Browsers format computed colors differently (Chrome returns rgba(r, g, b, 1) while Firefox may return rgb(r, g, b)). Converting to .asHex() guarantees cross-browser assertion stability.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>How do you get the text typed inside an <input>?</b> Call input.getDomProperty("value").</li>
+      <li><b>What is the difference between getDomAttribute and getDomProperty?</b> getDomAttribute reads static HTML markup; getDomProperty reads live JS object state.</li>
+      <li><b>How do you read hidden text inside a display:none element?</b> Call element.getDomProperty("textContent").</li>
+      <li><b>How do you normalize CSS colors to hex in Selenium?</b> Use Color.fromString(el.getCssValue("color")).asHex().</li>
+      <li><b>Which method returns element x, y, width, and height together?</b> element.getRect() returns a Rectangle object.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-elements-interactions.html">4.4 Element Interactions &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

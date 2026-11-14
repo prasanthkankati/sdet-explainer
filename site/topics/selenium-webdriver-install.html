@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2.1 Install Selenium Library | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>2.1 Install Selenium Library</h1>
+  <div class="se-lead">Setting up the Selenium Java client library in Maven (pom.xml) or Gradle (build.gradle) projects.</div>
+
+  <p>Installing the Selenium library means adding the official org.seleniumhq.selenium:selenium-java dependency to your Java build tool. Once declared in Maven or Gradle, the build tool automatically downloads the WebDriver APIs, browser-specific driver classes, and the built-in Selenium Manager binary.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-overview.html">1.1 About Selenium & Components</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Dependency configuration is the very first setup step in any Java test automation repository before writing page objects or test classes.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>The official Maven coordinates for Selenium 4 in Java are groupId org.seleniumhq.selenium and artifactId selenium-java.</li>
+      <li>Selenium 4 requires a minimum of Java 11 at both compile time and runtime.</li>
+      <li>Adding selenium-java pulls transitive dependencies for Chrome, Firefox, Edge, Safari, RemoteWebDriver, and Selenium Manager automatically.</li>
+      <li>You should never mix different versions of individual selenium-* sub-artifacts (such as selenium-chrome-driver and selenium-api) in the same pom.xml.</li>
+      <li>In Selenium 4.6+, third-party driver managers like WebDriverManager are no longer required because Selenium Manager is bundled inside selenium-java.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Build Tool</th><th>Configuration File</th><th>Dependency Syntax</th><th>Resolution Command</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Maven</b></td><td>pom.xml</td><td><dependency><groupId>org.seleniumhq.selenium</groupId><artifactId>selenium-java</artifactId><version>4.26.0</version></dependency></td><td>mvn clean test-compile</td></tr>
+        <tr><td><b>Gradle (Groovy)</b></td><td>build.gradle</td><td>implementation 'org.seleniumhq.selenium:selenium-java:4.26.0'</td><td>gradle build</td></tr>
+        <tr><td><b>Gradle (Kotlin)</b></td><td>build.gradle.kts</td><td>implementation("org.seleniumhq.selenium:selenium-java:4.26.0")</td><td>gradle build</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>The engineer creates a standard Maven or Gradle Java project with JDK 11 or newer configured.</li>
+      <li>The engineer declares org.seleniumhq.selenium:selenium-java inside the dependencies block of pom.xml or build.gradle.</li>
+      <li>Maven or Gradle queries Maven Central, resolves the dependency tree, and downloads the JAR artifacts to the local ~/.m2 or ~/.gradle cache.</li>
+      <li>The IDE indexes the downloaded JARs, making org.openqa.selenium.* packages available for import in Java test classes.</li>
+    </ol>
+    <p>Maven pom.xml configuration for Selenium 4 and TestNG:</p>
+<pre><code><project xmlns="http://maven.apache.org/POM/4.0.0"> <!-- Root Maven POM element -->
+    <modelVersion>4.0.0</modelVersion> <!-- POM model version required by Maven -->
+    <groupId>dev.selenium.qa</groupId> <!-- Organization package identifier -->
+    <artifactId>selenium-automation-suite</artifactId> <!-- Project module name -->
+    <version>1.0.0</version> <!-- Project build version -->
+    <properties> <!-- Central properties block for versions -->
+        <maven.compiler.source>21</maven.compiler.source> <!-- Sets Java source compatibility to JDK 21 -->
+        <maven.compiler.target>21</maven.compiler.target> <!-- Sets bytecode target to JDK 21 -->
+        <selenium.version>4.26.0</selenium.version> <!-- Centralizes the Selenium 4 version -->
+    </properties> <!-- Ends properties block -->
+    <dependencies> <!-- Starts dependency declarations -->
+        <dependency> <!-- Declares the umbrella Selenium Java library -->
+            <groupId>org.seleniumhq.selenium</groupId> <!-- Official Selenium group ID -->
+            <artifactId>selenium-java</artifactId> <!-- Umbrella artifact including all drivers -->
+            <version>${selenium.version}</version> <!-- Resolves version from properties -->
+        </dependency> <!-- Ends Selenium dependency -->
+    </dependencies> <!-- Ends dependencies block -->
+</project> <!-- Ends Maven POM --></code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Declaring both selenium-java and older individual artifacts like selenium-chrome-driver with mismatched versions; fix by declaring only selenium-java.</li>
+      <li>Running Selenium 4 on JDK 8; fix by upgrading JAVA_HOME and maven.compiler.release to JDK 11, 17, or 21.</li>
+      <li>Placing selenium-java under <dependencyManagement> without adding it to <dependencies>; fix by placing it directly in the <dependencies> section so JARs are added to the classpath.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Maven Central</b></td><td>The primary public repository from which Maven and Gradle download Java JAR libraries.</td></tr>
+        <tr><td><b>selenium-java</b></td><td>The official umbrella Maven artifact that bundles all Selenium 4 Java client bindings and Selenium Manager.</td></tr>
+        <tr><td><b>Transitive Dependency</b></td><td>A secondary library automatically downloaded because a primary dependency requires it.</td></tr>
+        <tr><td><b>pom.xml</b></td><td>Project Object Model XML file that defines a Maven project's dependencies, plugins, and build lifecycle.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What are the exact Maven coordinates to install Selenium in a Java project?</b><br>
+    You add the dependency with groupId org.seleniumhq.selenium and artifactId selenium-java inside your pom.xml file. This single umbrella dependency pulls all supported browser driver bindings and Selenium Manager automatically.</p>
+
+    <p><b>What is the minimum Java version required to compile and run Selenium 4?</b><br>
+    Selenium 4 requires a minimum of Java 11. Attempting to compile or run Selenium 4 classes on Java 8 results in an UnsupportedClassVersionError because the library bytecode is compiled for class file version 55.0.</p>
+
+    <p><b>Do you need to download chromedriver.exe manually after installing selenium-java?</b><br>
+    No. Starting in Selenium 4.6, Selenium Manager is bundled directly inside selenium-java and automatically detects your installed browser version and downloads the matching driver binary on the fly.</p>
+
+    <h3>How it works</h3>
+    <p><b>What transitive dependencies are included when you add selenium-java to pom.xml?</b><br>
+    Adding selenium-java automatically resolves selenium-api, selenium-support, selenium-remote-driver, selenium-chrome-driver, selenium-firefox-driver, selenium-edge-driver, selenium-safari-driver, and the native Selenium Manager binaries.</p>
+
+    <p><b>Where does Maven store the downloaded Selenium JAR files on your machine?</b><br>
+    Maven caches all downloaded JAR artifacts inside the local repository located at ~/.m2/repository/org/seleniumhq/selenium/. Subsequent builds reuse these cached JARs without re-downloading them from Maven Central.</p>
+
+    <p><b>How do you centralize the Selenium version across a multi-module Maven framework?</b><br>
+    Define a custom property such as <selenium.version>4.26.0</selenium.version> inside the parent pom.xml <properties> block and reference it via ${selenium.version}. This ensures every submodule upgrades in lockstep by changing a single line.</p>
+
+    <h3>Real situations</h3>
+    <p><b>Should you set the Maven scope of selenium-java to compile or test?</b><br>
+    If your Page Object classes and driver factory live in src/main/java, keep the default compile scope so main classes can import WebDriver. If all framework and test classes live strictly inside src/test/java, you can use <scope>test</scope>.</p>
+
+    <p><b>How do you upgrade Selenium in a CI/CD project without breaking existing tests?</b><br>
+    Update the <selenium.version> property in pom.xml, run mvn dependency:tree to verify no transitive version conflicts exist, and execute the smoke test suite on CI before merging.</p>
+
+    <p><b>Why do enterprise teams use a corporate artifact repository like Nexus or Artifactory for selenium-java?</b><br>
+    Enterprise CI runners often block direct outbound internet access to Maven Central for security. An internal Nexus or Artifactory server proxies and caches verified selenium-java JARs inside the corporate firewall.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>How do you fix java.lang.NoClassDefFoundError: org/openqa/selenium/WebDriver?</b><br>
+    This error occurs when selenium-java is missing from the runtime classpath or was declared with <scope>test</scope> while being referenced by code in src/main/java. Fix it by removing <scope>test</scope> or running mvn test-compile.</p>
+
+    <p><b>How do you diagnose a NoSuchMethodError inside internal Selenium classes after an upgrade?</b><br>
+    NoSuchMethodError indicates a dependency version collision where an older transitive selenium-api or Guava JAR overrides the newer version on the classpath. Run mvn dependency:tree -Dverbose to locate the conflicting dependency and exclude the older transitive artifact.</p>
+
+    <p><b>What causes UnsupportedClassVersionError (class file version 55.0) when running a Selenium test?</b><br>
+    Class file version 55.0 corresponds to Java 11, meaning your IDE or Maven runner is executing with a JDK 8 runtime. Update your project SDK and JAVA_HOME environment variable to JDK 11, 17, or 21.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why is declaring the single selenium-java artifact preferred over declaring individual browser driver artifacts?</b><br>
+    Declaring selenium-java guarantees that selenium-api, selenium-remote-driver, selenium-support, and all browser driver classes share the exact same release version. Mixing individual artifacts frequently causes binary incompatibility exceptions.</p>
+
+    <p><b>Why did Selenium 4 replace the Apache HttpClient / OkHttp transport layer with the built-in Java 11+ HttpClient?</b><br>
+    By adopting the standard java.net.http.HttpClient introduced in Java 11, Selenium reduced external third-party library conflicts, added native HTTP/2 and WebSocket support for BiDi, and shrank the dependency footprint.</p>
+
+    <p><b>Why should you remove io.github.bonigarcia:webdrivermanager when migrating to modern Selenium 4?</b><br>
+    Selenium Manager is natively integrated into Selenium 4 and performs driver and browser discovery automatically as a fallback whenever a driver session starts. Removing external driver managers eliminates redundant network checks and extra third-party dependencies.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What is the Maven artifactId for Selenium?</b> selenium-java under groupId org.seleniumhq.selenium.</li>
+      <li><b>What is the minimum JDK version for Selenium 4?</b> Java 11 (JDK 17 or 21 recommended for production).</li>
+      <li><b>Does selenium-java include Select and Actions classes?</b> Yes, selenium-support is pulled automatically as a transitive dependency.</li>
+      <li><b>How do you inspect version conflicts in Maven?</b> Run mvn dependency:tree from the project root.</li>
+      <li><b>Is WebDriverManager needed in Selenium 4.6+?</b> No, built-in Selenium Manager resolves drivers automatically.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-first-script.html">2.2 Write Your First Selenium Script &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

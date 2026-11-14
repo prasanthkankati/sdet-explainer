@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>9.1 Automated Driver & Browser Management | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>9.1 Automated Driver & Browser Management</h1>
+  <div class="se-lead">How the built-in Rust binary Selenium Manager resolves driver executables, downloads Chrome for Testing (CfT), caches binaries, and handles corporate proxies.</div>
+
+  <p>Selenium Manager is the official command-line binary tool bundled directly inside selenium-java (since Selenium 4.6) that automates browser and driver management out of the box. Written in Rust for cross-platform speed, it automatically detects the browser version installed on the host machine, downloads the matching driver binary into ~/.cache/selenium, and can even download standalone browser binaries (such as Chrome for Testing) when requested.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-bidi-features.html">8.2 Log & Network Interception with BiDi</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Selenium Manager runs transparently behind the scenes every time new ChromeDriver(), FirefoxDriver(), or EdgeDriver() is called without a manual driver path.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Selenium Manager is bundled inside selenium-java for Windows, Linux, and macOS—zero extra Maven dependencies or manual downloads are required.</li>
+      <li>It acts as an automatic fallback: if webdriver.chrome.driver is not set and chromedriver is not on the system PATH, Selenium Manager resolves and downloads the driver automatically.</li>
+      <li>Downloaded drivers and browsers are cached locally in ~/.cache/selenium (or %USERPROFILE%\.cache\selenium on Windows) alongside a selenium-manager.json metadata file.</li>
+      <li>If you specify a browser version via options.setBrowserVersion("130") (or "beta", "dev", "canary"), Selenium Manager automatically downloads both the matching Chrome for Testing (CfT) browser binary and its ChromeDriver!</li>
+      <li>In corporate networks behind a proxy or offline firewall, Selenium Manager is configured via environment variables (SE_PROXY, SE_CACHE_PATH, SE_OFFLINE) or JVM system properties.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Configuration / Env Var</th><th>Purpose</th><th>Example Value</th><th>Equivalent Capability / Property</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>SE_CACHE_PATH</b></td><td>Customizes local binary cache folder</td><td>C:\selenium-cache</td><td>-Dselenium.manager.cache.path</td></tr>
+        <tr><td><b>SE_PROXY</b></td><td>Routes downloads through corporate HTTP proxy</td><td>http://proxy.corp:8080</td><td>options.setProxy(proxy)</td></tr>
+        <tr><td><b>SE_OFFLINE</b></td><td>Disables network calls; uses cached binaries only</td><td>true</td><td>Air-gapped CI runner mode</td></tr>
+        <tr><td><b>options.setBrowserVersion(v)</b></td><td>Downloads requested browser + driver automatically</td><td>"stable", "beta", "129"</td><td>browserVersion W3C capability</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Browser Discovery: When new ChromeDriver() is called, Selenium Manager executes OS-specific shell/registry commands to detect the installed Chrome version (e.g., 130.0.6723.91).</li>
+      <li>Cache Check: It checks ~/.cache/selenium to see if a compatible chromedriver (major version 130) is already cached locally.</li>
+      <li>Driver Download: If not cached, it queries the official Chrome for Testing (CfT) JSON endpoints (or Mozilla/Edge repositories), downloads the matching driver zip, extracts it to ~/.cache/selenium, and sets its executable permission.</li>
+      <li>Session Binding: It returns the absolute binary path to ChromeDriverService, which launches the driver session seamlessly.</li>
+    </ol>
+    <p>Using Selenium Manager for automatic driver resolution and version-pinned browser testing:</p>
+<pre><code>package dev.selenium.manager; // Declares package
+
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions; // Imports ChromeOptions
+
+public class SeleniumManagerExample { // Declares class
+    public static void main(String[] args) { // Main method
+        // Case 1: Zero-config automatic driver resolution for installed Chrome
+        WebDriver defaultDriver = new ChromeDriver(); // Selenium Manager resolves matching chromedriver
+        try { // Guarded block
+            defaultDriver.get("https://www.selenium.dev/"); // Navigates to Selenium site
+            System.out.println("Default Title: " + defaultDriver.getTitle()); // Prints page title
+        } finally { // Teardown block
+            defaultDriver.quit(); // Closes default session
+        } // Ends finally
+
+        // Case 2: Requesting a specific browser version (downloads Chrome for Testing + driver)
+        ChromeOptions options = new ChromeOptions(); // Creates ChromeOptions
+        options.setBrowserVersion("stable"); // Requests stable channel Chrome for Testing
+        WebDriver versionedDriver = new ChromeDriver(options); // Selenium Manager resolves browser & driver
+        try { // Guarded block
+            versionedDriver.get("https://www.selenium.dev/documentation/selenium_manager/"); // Opens docs
+            System.out.println("Versioned Title: " + versionedDriver.getTitle()); // Prints title
+        } finally { // Teardown block
+            versionedDriver.quit(); // Closes versioned session
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Leaving an old hardcoded System.setProperty("webdriver.chrome.driver", "C:/old/chromedriver.exe") in the codebase, which overrides and bypasses Selenium Manager and causes SessionNotCreatedException when Chrome auto-updates; fix by deleting System.setProperty.</li>
+      <li>Still adding io.github.bonigarcia:webdrivermanager to pom.xml in Selenium 4.6+ projects; fix by removing it and letting built-in Selenium Manager handle drivers.</li>
+      <li>Having an outdated chromedriver binary sitting in C:\Windows\System32 or /usr/local/bin on the system PATH, which Selenium checks before invoking Selenium Manager; fix by removing stale driver binaries from system PATH folders.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Selenium Manager</b></td><td>The official Rust-based CLI binary bundled in Selenium 4.6+ that automatically manages drivers and browsers.</td></tr>
+        <tr><td><b>Chrome for Testing (CfT)</b></td><td>Google's dedicated, non-auto-updating Chromium builds published specifically for automated browser testing.</td></tr>
+        <tr><td><b>~/.cache/selenium</b></td><td>The default local directory where Selenium Manager caches downloaded driver and browser executables.</td></tr>
+        <tr><td><b>SE_OFFLINE</b></td><td>Environment variable that instructs Selenium Manager to avoid network requests and rely strictly on local cached binaries.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What is Selenium Manager and when was it introduced?</b><br>
+    Selenium Manager is the built-in CLI tool (written in Rust and bundled inside selenium-java starting in Selenium 4.6) that automatically discovers, downloads, and caches matching browser drivers and browser binaries without any manual configuration.</p>
+
+    <p><b>Where does Selenium Manager store downloaded driver binaries on your machine?</b><br>
+    By default, it stores all downloaded drivers, browsers, and metadata inside the ~/.cache/selenium directory (or %USERPROFILE%\.cache\selenium on Windows).</p>
+
+    <p><b>Do you still need System.setProperty("webdriver.chrome.driver", ...) or WebDriverManager in Selenium 4?</b><br>
+    No. Both manual System.setProperty paths and third-party WebDriverManager dependencies are obsolete in modern Selenium 4 because Selenium Manager handles driver resolution natively.</p>
+
+    <h3>How it works</h3>
+    <p><b>In what order does Selenium look for a browser driver before invoking Selenium Manager?</b><br>
+    First, Selenium checks if a JVM system property (such as webdriver.chrome.driver) or DriverService executable path was explicitly set. Second, it checks if the driver binary exists on the OS PATH. If neither is found, it invokes Selenium Manager.</p>
+
+    <p><b>What happens if you set options.setBrowserVersion("128") on a machine that only has Chrome 130 installed?</b><br>
+    Selenium Manager detects that Chrome 128 is not installed locally, automatically downloads both the standalone Chrome for Testing (CfT) v128 browser binary and ChromeDriver v128 into ~/.cache/selenium, and launches the test on Chrome 128.</p>
+
+    <p><b>How long does Selenium Manager keep cached driver metadata before checking for patch updates?</b><br>
+    Selenium Manager stores a Time-To-Live (TTL) timestamp (default 3600 seconds / 1 hour) in ~/.cache/selenium/selenium-manager.json so repeated test runs do not make redundant network requests on every single test.</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you configure Selenium Manager in a corporate CI environment that requires an outbound HTTP proxy?</b><br>
+    Either set the environment variable SE_PROXY=http://proxy.company.com:8080 on the CI agent, or configure a Proxy object on ChromeOptions via options.setProxy(proxy).</p>
+
+    <p><b>How do you run Selenium Manager in an air-gapped CI environment with zero internet access?</b><br>
+    Pre-install the browser and matching driver on the CI image's system PATH (or pre-populate the SE_CACHE_PATH directory) and set the environment variable SE_OFFLINE=true.</p>
+
+    <p><b>How can you test your web app against next month's upcoming Chrome release before it ships to users?</b><br>
+    Call options.setBrowserVersion("beta") or options.setBrowserVersion("dev") on ChromeOptions. Selenium Manager automatically downloads the beta Chrome for Testing binary and matching driver.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why did my test still fail with 'This version of ChromeDriver only supports Chrome version 114' even on Selenium 4.26?</b><br>
+    Because Selenium checks system properties and the OS PATH before calling Selenium Manager! You either have an old System.setProperty("webdriver.chrome.driver", ...) in your code or an old chromedriver.exe sitting in a folder on your system PATH. Delete both.</p>
+
+    <p><b>How do you enable debug logging for Selenium Manager to diagnose a download or proxy failure?</b><br>
+    Set the environment variable SE_DEBUG=true or enable fine logging for the org.openqa.selenium.manager.SeleniumManager logger to print the exact CLI commands and network responses.</p>
+
+    <p><b>What happens if the CI container's home directory is read-only and ~/.cache/selenium cannot be created?</b><br>
+    Set the environment variable SE_CACHE_PATH=/tmp/selenium-cache to point Selenium Manager to a writable directory.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why did the Selenium team build Selenium Manager in Rust instead of Java, Python, and C# separately?</b><br>
+    Selenium supports five official language bindings (Java, Python, C#, Ruby, JS). Writing one fast, self-contained native Rust binary allows all five languages to share the exact same driver resolution engine.</p>
+
+    <p><b>Why is Chrome for Testing (CfT) better for automation than standard consumer Google Chrome?</b><br>
+    Consumer Chrome auto-updates silently in the background, which historically broke test pipelines mid-run, and consumer Chrome cannot be downloaded by specific historical version numbers. CfT provides version-pinned, non-auto-updating binaries.</p>
+
+    <p><b>Why does Selenium Manager act as a fallback rather than overriding explicit driver paths?</b><br>
+    Acting as a fallback preserves backward compatibility for enterprise environments or custom embedded browsers that intentionally supply a custom-built driver binary.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What language is the Selenium Manager binary written in?</b> Rust (bundled natively inside selenium-java).</li>
+      <li><b>Where is the default Selenium Manager cache folder?</b> ~/.cache/selenium (or %USERPROFILE%\.cache\selenium on Windows).</li>
+      <li><b>Which env var configures a proxy for Selenium Manager?</b> SE_PROXY.</li>
+      <li><b>Which env var changes the cache folder path?</b> SE_CACHE_PATH.</li>
+      <li><b>How do you auto-download Chrome Beta for testing?</b> Call chromeOptions.setBrowserVersion("beta").</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-grid-modes.html">10.1 Grid Execution Modes & Architecture &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

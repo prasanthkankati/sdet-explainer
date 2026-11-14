@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4.2 Relative Locators | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>4.2 Relative Locators</h1>
+  <div class="se-lead">Finding elements spatially using RelativeLocator.with(By) and above(), below(), toLeftOf(), toRightOf(), and near().</div>
+
+  <p>Introduced in Selenium 4, Relative Locators (formerly Friendly Locators) allow you to find elements based on their visual, spatial position relative to other known elements on the page. They use the browser's JavaScript getBoundingClientRect() API to calculate coordinates for above, below, toLeftOf, toRightOf, and near.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-elements-locators.html">4.1 Locators (All 8 Traditional Strategies)</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Relative locators are used in Page Objects when target inputs or buttons lack unique attributes of their own but sit next to a stable label or heading.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Entry point is RelativeLocator.with(By.tagName("...")) from org.openqa.selenium.support.locators.RelativeLocator.</li>
+      <li>The five spatial methods are above(), below(), toLeftOf(), toRightOf(), and near().</li>
+      <li>near() locates elements within a default Euclidean pixel distance of 50px (or a custom pixel radius passed as an argument).</li>
+      <li>Multiple spatial constraints can be chained together, such as with(By.tagName("button")).below(emailInput).toRightOf(cancelBtn).</li>
+      <li>Relative locators execute client-side bounding box math via getBoundingClientRect(), so responsive layout shifts can change spatial relationships.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Spatial Method</th><th>Reference Argument</th><th>Coordinate Condition</th><th>Typical Scenario</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>above(elementOrBy)</b></td><td>WebElement or By</td><td>Target bottom edge is above reference top edge</td><td>Finding a section label positioned directly above an input field.</td></tr>
+        <tr><td><b>below(elementOrBy)</b></td><td>WebElement or By</td><td>Target top edge is below reference bottom edge</td><td>Finding a text input positioned directly beneath its <label>.</td></tr>
+        <tr><td><b>toLeftOf(elementOrBy)</b></td><td>WebElement or By</td><td>Target right edge is left of reference left edge</td><td>Finding a checkbox located to the left of a description.</td></tr>
+        <tr><td><b>toRightOf(elementOrBy)</b></td><td>WebElement or By</td><td>Target left edge is right of reference right edge</td><td>Finding an 'Edit' button to the right of a username cell.</td></tr>
+        <tr><td><b>near(elementOrBy)</b></td><td>WebElement or By (optional px)</td><td>Within 50px (default) of reference bounding box</td><td>Finding an icon or input adjacent to a label.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Import static org.openqa.selenium.support.locators.RelativeLocator.with.</li>
+      <li>Locate or specify the anchor reference element (for example, By.id("password") or an existing WebElement).</li>
+      <li>Build the RelativeBy query using with(By.tagName("input")).above(By.id("password")).</li>
+      <li>Pass the resulting RelativeBy locator into driver.findElement(), which executes a bundled JavaScript function in the browser using getBoundingClientRect() to sort candidates by proximity.</li>
+    </ol>
+    <p>Using RelativeLocator.with() to find elements by spatial relationship:</p>
+<pre><code>package dev.selenium.elements; // Declares package
+
+import org.openqa.selenium.By; // Imports By class
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WebElement; // Imports WebElement interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import static org.openqa.selenium.support.locators.RelativeLocator.with; // Static import for with()
+
+public class RelativeLocatorsExample { // Declares class
+    public static void main(String[] args) { // Main entry point
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/selenium/web/web-form.html"); // Loads web form
+            WebElement passwordField = driver.findElement(By.name("my-password")); // Locates known reference element
+            WebElement textAbovePassword = driver.findElement( // Finds input spatially above password
+                with(By.tagName("input")).above(passwordField) // Chains with(By) and above(WebElement)
+            ); // Completes lookup
+            textAbovePassword.sendKeys("Found via RelativeLocator"); // Types into located input
+            System.out.println("Input name: " + textAbovePassword.getAttribute("name")); // Prints matched input name
+        } finally { // Teardown block
+            driver.quit(); // Closes browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Using relative locators without a fixed browser viewport size, causing elements that are toRightOf() on desktop to wrap below() on narrow mobile viewports; fix by setting --window-size=1920,1080.</li>
+      <li>Using RelativeLocator when a simple, direct By.id or By.cssSelector is available; fix by reserving RelativeLocator for elements that genuinely lack unique attributes.</li>
+      <li>Passing a broad tag like By.tagName("div") to with(), which matches outer wrapper containers; fix by passing the specific leaf tag such as By.tagName("input") or By.tagName("button").</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>RelativeLocator</b></td><td>A Selenium 4 support class that locates elements based on visual proximity to other DOM elements.</td></tr>
+        <tr><td><b>RelativeBy</b></td><td>The specialized By subclass returned by RelativeLocator.with(By) that supports spatial chaining.</td></tr>
+        <tr><td><b>getBoundingClientRect()</b></td><td>The native DOM JavaScript method that returns an element's x, y, width, height, top, right, bottom, and left viewport coordinates.</td></tr>
+        <tr><td><b>near()</b></td><td>A RelativeBy method that matches elements within 50 pixels (by default) of the reference element.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What are Relative Locators in Selenium 4 and what are the five spatial methods?</b><br>
+    Relative Locators find elements based on their visual layout position relative to an anchor element rather than solely by DOM hierarchy. The five spatial methods are above(), below(), toLeftOf(), toRightOf(), and near().</p>
+
+    <p><b>What is the default pixel distance used by the near() relative locator?</b><br>
+    By default, near() searches for candidate elements within 50 pixels of the reference element's bounding box. You can also pass a custom distance in pixels, such as near(element, 100).</p>
+
+    <p><b>Which package provides RelativeLocator in Selenium Java?</b><br>
+    RelativeLocator is located in org.openqa.selenium.support.locators.RelativeLocator, and its entry method with(By) is typically imported statically.</p>
+
+    <h3>How it works</h3>
+    <p><b>How does Selenium calculate whether one element is above() or toRightOf() another element?</b><br>
+    Selenium injects a pre-compiled JavaScript atom into the browser that calls element.getBoundingClientRect() on all candidate elements and the anchor element, comparing their top, bottom, left, and right pixel coordinates and sorting matches by center-to-center distance.</p>
+
+    <p><b>Can you pass a By locator instead of a WebElement into above() or below()?</b><br>
+    Yes. All five spatial methods are overloaded to accept either a resolved WebElement reference or a By locator directly, such as with(By.tagName("input")).below(By.id("email-label")).</p>
+
+    <p><b>How does chaining multiple spatial methods work in RelativeLocator?</b><br>
+    When you chain methods like with(By.tagName("button")).below(formHeader).toRightOf(cancelButton), Selenium intersects the candidate sets so only buttons that satisfy both coordinate conditions are returned.</p>
+
+    <h3>Real situations</h3>
+    <p><b>When is RelativeLocator better than an XPath sibling axis in a real project?</b><br>
+    Sometimes two elements appear side-by-side visually via CSS Grid or Flexbox, even though they live in completely separate branches of the HTML DOM tree. RelativeLocator finds them visually by screen coordinates where XPath sibling axes fail.</p>
+
+    <p><b>Why can responsive web design break tests that rely on toLeftOf() or toRightOf()?</b><br>
+    On a narrow window (such as 800x600 in unconfigured headless mode), CSS Flexbox or Grid wraps horizontal columns into a vertical stack, moving an element from toRightOf() to below(). Always lock the viewport to 1920x1080.</p>
+
+    <p><b>How do you click the 'Delete' button corresponding to a specific user row in a grid layout without table tags?</b><br>
+    Locate the user's label element first, then call driver.findElement(with(By.tagName("button")).toRightOf(userLabel)).click().</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why did RelativeLocator return the wrong element when multiple inputs existed below a label?</b><br>
+    above() and below() sort all matching candidates by Euclidean proximity to the reference element and return the closest one. If another input is slightly closer diagonally, chain a second constraint like .near() or use a more specific By inside with().</p>
+
+    <p><b>Why does RelativeLocator fail to match an element that is further down the page outside the current scroll view?</b><br>
+    getBoundingClientRect() computes coordinates relative to the layout, but if a virtualized table only renders rows when scrolled into view, the target node is not in the DOM yet. Scroll the anchor into view first.</p>
+
+    <p><b>What happens if the anchor element passed to below(By.id("missing")) does not exist?</b><br>
+    Selenium throws NoSuchElementException because it cannot resolve the reference anchor element's bounding rectangle.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Should RelativeLocators replace standard CSS and ID locators across a framework?</b><br>
+    No. Standard ID and CSS selectors are faster and immune to visual CSS layout shifts. RelativeLocators should be used selectively when target elements lack semantic attributes.</p>
+
+    <p><b>Why did Selenium 4.2+ expand RelativeLocator.with() to accept any By locator instead of only By.tagName()?</b><br>
+    Allowing any By locator (such as with(By.cssSelector("button.action-btn")).toRightOf(anchor)) lets engineers filter candidates by CSS class or attribute before applying coordinate math.</p>
+
+    <p><b>What is the performance overhead of RelativeLocator compared to By.id()?</b><br>
+    Both execute in a single round-trip HTTP call because Selenium sends the entire JavaScript coordinate filter in one payload, though evaluating getBoundingClientRect() on many candidates takes slightly more browser CPU than a direct ID lookup.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What is the entry method for Relative Locators?</b> RelativeLocator.with(By) (statically imported).</li>
+      <li><b>What are the 5 Relative Locator methods?</b> above(), below(), toLeftOf(), toRightOf(), and near().</li>
+      <li><b>What is the default pixel radius of near()?</b> 50 pixels.</li>
+      <li><b>Which browser API powers Relative Locators?</b> The DOM element.getBoundingClientRect() JavaScript method.</li>
+      <li><b>Can you chain multiple Relative Locator directions?</b> Yes, e.g., with(By.tagName("button")).below(el1).toRightOf(el2).</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-elements-info.html">4.3 Element Information & State &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

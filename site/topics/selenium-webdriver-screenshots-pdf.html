@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5.3 Screenshots & Print to PDF | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>5.3 Screenshots & Print to PDF</h1>
+  <div class="se-lead">Capturing viewport screenshots (TakesScreenshot), element-level screenshots, and printing headless/headed pages to PDF (PrintsPage).</div>
+
+  <p>Visual evidence is critical for debugging failed CI/CD test runs and archiving invoice or receipt views. Selenium 4 provides TakesScreenshot to capture the current viewport, WebElement.getScreenshotAs() to capture an isolated DOM element, and PrintsPage.print(PrintOptions) to export any web page directly as a Base64-encoded PDF.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-frames-alerts-cookies.html">5.2 Frames, Alerts & Cookies</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Screenshots are captured inside TestNG @AfterMethod failure hooks or Extent/Allure report listeners, while Print to PDF is used in document export verification tests.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE | BYTES | BASE64) captures the currently visible browser viewport.</li>
+      <li>element.getScreenshotAs(OutputType.FILE) captures a cropped image of only that specific WebElement's bounding box.</li>
+      <li>OutputType.BYTES or OutputType.BASE64 is preferred for attaching screenshots in-memory to Allure or ExtentReports without writing temporary disk files.</li>
+      <li>((PrintsPage) driver).print(new PrintOptions()) renders the current page to a W3C Pdf object, which can be written to disk via OutputType.BYTES.convertFromBase64Png(pdf.getContent()).</li>
+      <li>FirefoxDriver additionally exposes getFullPageScreenshotAs() to capture the entire scrollable document height from top to bottom.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Capability</th><th>Interface / Target</th><th>Java Call</th><th>Scope Captured</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Viewport Screenshot</b></td><td>TakesScreenshot (driver)</td><td>((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES)</td><td>Visible browser viewport only.</td></tr>
+        <tr><td><b>Element Screenshot</b></td><td>WebElement (element)</td><td>element.getScreenshotAs(OutputType.FILE)</td><td>Cropped bounding box of the single element.</td></tr>
+        <tr><td><b>Full-Page Screenshot</b></td><td>HasFullPageScreenshot (Firefox)</td><td>((FirefoxDriver) driver).getFullPageScreenshotAs(OutputType.FILE)</td><td>Entire scrollable document height.</td></tr>
+        <tr><td><b>Print to PDF</b></td><td>PrintsPage (driver)</td><td>((PrintsPage) driver).print(new PrintOptions())</td><td>Paginated PDF document of the web page.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>For a viewport screenshot, cast the WebDriver reference to TakesScreenshot and call getScreenshotAs(OutputType.BYTES).</li>
+      <li>For an element screenshot, call getScreenshotAs(OutputType.FILE) directly on the located WebElement.</li>
+      <li>For PDF generation, cast driver to PrintsPage, configure PrintOptions (such as orientation or page ranges), and call driver.print(printOptions).</li>
+      <li>Write the returned byte array or File to your target report directory using java.nio.file.Files.write() or Files.copy().</li>
+    </ol>
+    <p>Capturing viewport screenshot, element screenshot, and printing page to PDF:</p>
+<pre><code>package dev.selenium.interactions; // Declares package
+
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.OutputType; // Imports OutputType target formats
+import org.openqa.selenium.Pdf; // Imports W3C Pdf container
+import org.openqa.selenium.PrintsPage; // Imports PrintsPage interface
+import org.openqa.selenium.TakesScreenshot; // Imports TakesScreenshot interface
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WebElement; // Imports WebElement interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.print.PrintOptions; // Imports PrintOptions configuration
+import java.nio.file.Files; // Imports NIO Files utility
+import java.nio.file.Paths; // Imports NIO Paths utility
+
+public class ScreenshotsPdfExample { // Declares class
+    public static void main(String[] args) throws Exception { // Main method
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/"); // Navigates to Selenium site
+            byte[] viewportPng = ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES); // Captures viewport bytes
+            Files.write(Paths.get("target/viewport.png"), viewportPng); // Saves viewport PNG to disk
+
+            WebElement logo = driver.findElement(By.cssSelector(".navbar-brand")); // Locates navbar logo
+            byte[] logoPng = logo.getScreenshotAs(OutputType.BYTES); // Captures element-only screenshot
+            Files.write(Paths.get("target/logo.png"), logoPng); // Saves element PNG
+
+            Pdf pdf = ((PrintsPage) driver).print(new PrintOptions()); // Prints current page to W3C PDF
+            Files.write(Paths.get("target/page.pdf"), OutputType.BYTES.convertFromBase64Png(pdf.getContent())); // Decodes Base64 PDF to disk
+        } finally { // Teardown block
+            driver.quit(); // Closes browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Calling getScreenshotAs(OutputType.FILE) and assuming the file is permanently saved; OutputType.FILE writes to the OS temp folder and deletes it on JVM exit unless copied with Files.copy().</li>
+      <li>Calling TakesScreenshot inside @AfterMethod after driver.quit() has already executed, which throws NoSuchSessionException; always capture the screenshot before calling driver.quit().</li>
+      <li>Trying to capture a screenshot while an unhandled JavaScript alert is open on screen, which throws UnhandledAlertException.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>TakesScreenshot</b></td><td>The Selenium interface implemented by all browser drivers and WebElement to capture PNG screenshots.</td></tr>
+        <tr><td><b>OutputType</b></td><td>An interface providing three screenshot output targets: OutputType.FILE, OutputType.BYTES, and OutputType.BASE64.</td></tr>
+        <tr><td><b>PrintsPage</b></td><td>The Selenium 4 interface that exports the current web page as a paginated PDF using the W3C Print command.</td></tr>
+        <tr><td><b>PrintOptions</b></td><td>Configuration class for PrintsPage specifying orientation (LANDSCAPE/PORTRAIT), scale, background graphics, and page ranges.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>Why do you have to cast WebDriver to TakesScreenshot when taking a screenshot?</b><br>
+    The WebDriver interface itself does not declare getScreenshotAs(). Concrete driver classes like ChromeDriver, FirefoxDriver, and RemoteWebDriver implement both WebDriver and TakesScreenshot, so casting ((TakesScreenshot) driver) exposes the method.</p>
+
+    <p><b>What are the three OutputType formats supported by getScreenshotAs()?</b><br>
+    The three formats are OutputType.FILE (saves a temporary PNG file on disk), OutputType.BYTES (returns a raw byte[] array in memory), and OutputType.BASE64 (returns a Base64-encoded String).</p>
+
+    <p><b>How do you take a screenshot of a single WebElement in Selenium 4?</b><br>
+    WebElement extends TakesScreenshot directly in Selenium 4, so you simply call element.getScreenshotAs(OutputType.FILE) or OutputType.BYTES without casting.</p>
+
+    <h3>How it works</h3>
+    <p><b>Does ((TakesScreenshot) driver).getScreenshotAs() capture the entire scrollable page or only the visible viewport?</b><br>
+    Under the W3C WebDriver specification, getScreenshotAs() on the driver captures only the currently visible browser viewport. To capture a full scrollable page in Firefox, cast to FirefoxDriver and call getFullPageScreenshotAs().</p>
+
+    <p><b>What happens to the File returned by getScreenshotAs(OutputType.FILE) when the Java process finishes?</b><br>
+    Selenium creates that File inside the operating system's temporary directory and marks it with deleteOnExit(). You must copy it to a persistent path (such as target/screenshots/) using Files.copy().</p>
+
+    <p><b>How does PrintsPage.print() work in Selenium 4?</b><br>
+    Calling ((PrintsPage) driver).print(new PrintOptions()) sends the W3C Print Page command to the browser, which renders the page using its native print-to-PDF engine and returns a Pdf object containing Base64-encoded PDF content.</p>
+
+    <h3>Real situations</h3>
+    <p><b>Which OutputType is best when attaching failure screenshots to Allure or ExtentReports in parallel CI runs?</b><br>
+    OutputType.BYTES or OutputType.BASE64 is best because the image data stays entirely in memory per thread and is embedded directly into the report without disk I/O collisions or leftover temp files.</p>
+
+    <p><b>How do you include background colors and images when printing a page to PDF with PrintOptions?</b><br>
+    Create PrintOptions options = new PrintOptions(); options.setBackground(true); and pass it to ((PrintsPage) driver).print(options). By default, browsers omit background graphics when printing.</p>
+
+    <p><b>Why do element screenshots help in visual regression testing?</b><br>
+    Capturing an isolated component (such as a navigation bar or chart widget via element.getScreenshotAs()) avoids false-positive pixel diffs caused by dynamic timestamps or ads elsewhere on the page.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why did TakesScreenshot throw UnhandledAlertException when a test failed?</b><br>
+    The test failed while a native JavaScript alert() dialog was open. W3C WebDriver cannot capture the DOM viewport while a modal alert blocks the page; dismiss the alert in a catch block before taking the screenshot.</p>
+
+    <p><b>Why did printsPage.print() fail on older Chrome versions when running in headed mode?</b><br>
+    Prior to Chrome 109's unified --headless=new architecture, Chromium only allowed PDF printing in headless mode. In modern Chrome 109+ and Selenium 4, print() works in both headed and headless modes.</p>
+
+    <p><b>Why is an element screenshot blank or cut off?</b><br>
+    If the element is inside a scrollable overflow container and partially scrolled out of view, ensure the element is scrolled into view before calling element.getScreenshotAs().</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why is java.nio.file.Files.copy() or Files.write() preferred over Apache Commons FileUtils.copyFile()?</b><br>
+    Standard JDK java.nio.file.Files is built into Java 11+ and writes byte[] or copies File objects in one line without requiring an extra Apache Commons IO dependency.</p>
+
+    <p><b>Where should automatic failure screenshot capture be implemented in a TestNG framework?</b><br>
+    Implement it either inside an ITestListener.onTestFailure(ITestResult) listener or inside the base test class's @AfterMethod(alwaysRun = true) hook before calling driver.quit().</p>
+
+    <p><b>Why should screenshot filenames include a timestamp or thread ID in parallel runs?</b><br>
+    If two parallel tests fail at the same millisecond or a data-driven test fails on two iterations, including testName + "_" + System.currentTimeMillis() prevents one screenshot file from overwriting another.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>How do you take a viewport screenshot?</b> Call ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES).</li>
+      <li><b>How do you take a screenshot of one element?</b> Call element.getScreenshotAs(OutputType.BYTES) directly on the WebElement.</li>
+      <li><b>Which OutputType is best for ExtentReports or Allure?</b> OutputType.BYTES or OutputType.BASE64 (in-memory, no temp file cleanup needed).</li>
+      <li><b>Which interface exports a web page to PDF?</b> PrintsPage via ((PrintsPage) driver).print(new PrintOptions()).</li>
+      <li><b>How do you take a full scrollable page screenshot in Firefox?</b> Call ((FirefoxDriver) driver).getFullPageScreenshotAs(OutputType.FILE).</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-waits-implicit.html">6.1 Waiting Strategies Overview & Implicit Waits &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

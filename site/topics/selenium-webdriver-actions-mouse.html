@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>7.1 Mouse Actions | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>7.1 Mouse Actions</h1>
+  <div class="se-lead">Simulating complex pointer gestures with the Actions API: moveToElement (hover), contextClick (right-click), doubleClick, dragAndDrop, and clickAndHold.</div>
+
+  <p>The Selenium Actions class implements the W3C WebDriver Actions API to simulate low-level hardware input devices (mouse pointer, keyboard, touch/pen, and scroll wheel). Mouse actions allow tests to hover over dropdown menus (moveToElement), right-click context menus (contextClick), double-click elements (doubleClick), and drag-and-drop items across the viewport.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-waits-fluent.html">6.3 FluentWait Configuration</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>The Actions class is used in Page Objects whenever an interaction requires hovering, right-clicking, double-clicking, or dragging elements.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Every Actions chain MUST end with .perform() (which internally calls .build().perform()) to transmit the action sequence to the browser.</li>
+      <li>moveToElement(WebElement) moves the virtual mouse pointer to the in-view center of the element, triggering CSS :hover and mouseover events.</li>
+      <li>contextClick(WebElement) performs a right-click on the target element; doubleClick(WebElement) performs a rapid double left-click.</li>
+      <li>dragAndDrop(source, target) presses and holds on source, moves to target, and releases the mouse button (equivalent to clickAndHold(source).moveToElement(target).release()).</li>
+      <li>If a pointer movement target lies outside the current browser viewport bounds, the driver throws MoveTargetOutOfBoundsException.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Actions Method</th><th>Equivalent User Gesture</th><th>DOM Events Dispatched</th><th>Common Use Case</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>moveToElement(el)</b></td><td>Mouse hover over element</td><td>mousemove, mouseenter, mouseover</td><td>Revealing hover-only mega menus or tooltips.</td></tr>
+        <tr><td><b>contextClick(el)</b></td><td>Right-click on element</td><td>mousedown(button=2), mouseup, contextmenu</td><td>Opening custom right-click context menus in web grids.</td></tr>
+        <tr><td><b>doubleClick(el)</b></td><td>Double left-click</td><td>mousedown, mouseup, click (x2), dblclick</td><td>Editing inline spreadsheet cells or selecting words.</td></tr>
+        <tr><td><b>dragAndDrop(src, tgt)</b></td><td>Click-hold, drag, release</td><td>mousedown, mousemove, mouseup</td><td>Moving Kanban cards or slider handles.</td></tr>
+        <tr><td><b>dragAndDropBy(src, x, y)</b></td><td>Drag by pixel offset</td><td>mousedown, mousemove(dx, dy), mouseup</td><td>Adjusting price range sliders or resizing columns.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Instantiate Actions actions = new Actions(driver).</li>
+      <li>Chain one or more pointer gestures such as actions.moveToElement(menu).pause(Duration.ofMillis(200)).click(submenu).</li>
+      <li>Call .perform() at the end of the chain to compile the composite Action and send the W3C /actions payload to the driver.</li>
+      <li>The browser executes the low-level pointer ticks sequentially in real time.</li>
+    </ol>
+    <p>Performing hover, right-click, double-click, and drag-and-drop with Actions:</p>
+<pre><code>package dev.selenium.actions; // Declares package
+
+import org.openqa.selenium.By; // Imports By locator class
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.WebElement; // Imports WebElement interface
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.interactions.Actions; // Imports Actions API class
+
+public class MouseActionsExample { // Declares class
+    public static void main(String[] args) { // Main method
+        WebDriver driver = new ChromeDriver(); // Starts Chrome session
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/selenium/web/mouse_interaction.html"); // Loads mouse test page
+            Actions actions = new Actions(driver); // Creates Actions builder bound to driver
+
+            WebElement hoverable = driver.findElement(By.id("hover")); // Locates hover target
+            actions.moveToElement(hoverable).perform(); // Moves mouse to center of element and executes
+
+            WebElement clickable = driver.findElement(By.id("clickable")); // Locates input target
+            actions.contextClick(clickable).perform(); // Performs right-click on element
+            actions.doubleClick(clickable).perform(); // Performs double-click on element
+
+            WebElement draggable = driver.findElement(By.id("draggable")); // Locates drag source
+            WebElement droppable = driver.findElement(By.id("droppable")); // Locates drop target
+            actions.dragAndDrop(draggable, droppable).perform(); // Drags source onto target and releases
+        } finally { // Teardown block
+            driver.quit(); // Closes browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Chaining actions.moveToElement(menu).click(subMenu) and forgetting to call .perform() at the end, which does nothing at all and throws no error; fix by always ending with .perform().</li>
+      <li>Moving the OS physical mouse cursor across the monitor while a headed test runs, which can interfere with native hover states; run in headless mode or keep the physical cursor outside the browser window.</li>
+      <li>Calling moveToElement() on an element that is scrolled far below the viewport without scrolling it into view first, which throws MoveTargetOutOfBoundsException.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Actions</b></td><td>The Selenium builder class for constructing complex sequences of mouse, keyboard, pen, and wheel inputs.</td></tr>
+        <tr><td><b>perform()</b></td><td>The terminal method on Actions that builds and executes all queued input ticks in the browser.</td></tr>
+        <tr><td><b>MoveTargetOutOfBoundsException</b></td><td>Exception thrown when an Actions pointer move targets coordinates outside the visible browser viewport.</td></tr>
+        <tr><td><b>PointerInput</b></td><td>The underlying W3C input source class representing a MOUSE, PEN, or TOUCH device.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What is the difference between calling build() and perform() on the Actions class?</b><br>
+    build() compiles the chained actions into a composite Action object without executing it. perform() internally calls build().perform() and immediately executes the actions. In everyday tests, calling .perform() alone is sufficient.</p>
+
+    <p><b>How do you hover over a navigation menu to reveal a dropdown in Selenium?</b><br>
+    Instantiate Actions actions = new Actions(driver); locate the menu WebElement, and call actions.moveToElement(menuElement).perform().</p>
+
+    <p><b>How do you perform a right-click and a double-click in Selenium?</b><br>
+    Use new Actions(driver).contextClick(element).perform() for a right-click, and new Actions(driver).doubleClick(element).perform() for a double-click.</p>
+
+    <h3>How it works</h3>
+    <p><b>How does element.click() differ from new Actions(driver).click(element).perform()?</b><br>
+    WebElement.click() uses the W3C Element Click endpoint, which automatically scrolls the element into view and checks interactability. Actions.click(element) uses the W3C Actions endpoint, moving the virtual mouse pointer to the element's current viewport coordinates and clicking without auto-scrolling.</p>
+
+    <p><b>What sequence of primitive actions does dragAndDrop(source, target) execute internally?</b><br>
+    It executes clickAndHold(source), moves the pointer to the center of target via moveToElement(target), and releases the mouse button via release().</p>
+
+    <p><b>How do you insert a brief delay inside an Actions chain (for example, holding a drag for 500ms)?</b><br>
+    Chain .pause(Duration.ofMillis(500)) between clickAndHold(source) and moveToElement(target) before calling .perform().</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you move a horizontal price range slider by 80 pixels to the right?</b><br>
+    Locate the slider handle WebElement and call new Actions(driver).dragAndDropBy(sliderHandle, 80, 0).perform().</p>
+
+    <p><b>Why does dragAndDrop(source, target) sometimes fail on HTML5 draggable elements, and how do you fix it?</b><br>
+    Some HTML5 drag-and-drop libraries require a small initial pointer movement or pause after mousedown to register the drag start. Chain clickAndHold(src).pause(Duration.ofMillis(200)).moveByOffset(5, 5).moveToElement(tgt).release().perform().</p>
+
+    <p><b>How do you click at a specific pixel offset from the center of a <canvas> element?</b><br>
+    Call new Actions(driver).moveToElement(canvas, offsetX, offsetY).click().perform(). Note that in W3C Selenium 4, offsets in moveToElement(el, x, y) are calculated from the center of the element, not the top-left corner.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>What causes MoveTargetOutOfBoundsException when using Actions.moveToElement()?</b><br>
+    Unlike WebElement.click(), Actions.moveToElement() does not automatically scroll off-screen elements into the viewport. Call new Actions(driver).scrollToElement(element).moveToElement(element).perform() first.</p>
+
+    <p><b>Why did my Actions hover line execute with zero errors, yet the dropdown menu never opened?</b><br>
+    First, verify you called .perform() at the end of the chain. Second, if the submenu renders asynchronously on hover, wait for ExpectedConditions.visibilityOfElementLocated(subMenuBy) before clicking the submenu.</p>
+
+    <p><b>Why did moveToElement(element, 10, 10) click a different spot after upgrading from Selenium 3 to Selenium 4?</b><br>
+    In legacy Selenium 3 (JSON Wire Protocol), offsets were measured from the top-left corner (0,0) of the element. In W3C Selenium 4, offsets are measured from the in-view center point of the element.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Should you use Actions.click(element) for every button click in your framework?</b><br>
+    No. Standard WebElement.click() is preferred for normal buttons and links because it automatically scrolls the element into view and performs full W3C hit-testing.</p>
+
+    <p><b>Why is creating a new Actions(driver) instance per interaction recommended over storing a single Actions field?</b><br>
+    An Actions instance maintains an internal queue of input ticks. Creating a fresh new Actions(driver) per method guarantees no leftover pointer state from an earlier failed action.</p>
+
+    <p><b>How do you explicitly reset all depressed mouse buttons and modifier keys if an action fails mid-chain?</b><br>
+    Cast driver to Interactive and call ((Interactive) driver).resetInputState().</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What method must terminate every Actions chain?</b> .perform() must be called to execute the queued actions.</li>
+      <li><b>Which Actions method hovers over an element?</b> actions.moveToElement(element).perform().</li>
+      <li><b>Which Actions method right-clicks an element?</b> actions.contextClick(element).perform().</li>
+      <li><b>Where are (x, y) offsets measured from in Selenium 4 moveToElement(el, x, y)?</b> From the center point of the element.</li>
+      <li><b>What exception occurs if moveToElement targets an off-screen element?</b> MoveTargetOutOfBoundsException (scroll to the element first).</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-actions-keyboard-wheel.html">7.2 Keyboard & Wheel Actions &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

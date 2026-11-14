@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>8.1 WebDriver BiDi Architecture & Setup | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>8.1 WebDriver BiDi Architecture & Setup</h1>
+  <div class="se-lead">Next-generation W3C Bidirectional (BiDi) WebSocket communication vs classic HTTP request-response and vendor-locked CDP.</div>
+
+  <p>Classic W3C WebDriver uses a synchronous HTTP request-response model where the browser cannot push asynchronous events back to the Java test script. WebDriver BiDi is the official cross-browser W3C bidirectional specification that establishes a persistent WebSocket channel (enabled via options.enableBiDi() or webSocketUrl: true), combining the best of classic WebDriver and Chrome DevTools Protocol (CDP) across Chrome, Firefox, and Edge.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-webdriver-actions-keyboard-wheel.html">7.2 Keyboard & Wheel Actions</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>WebDriver BiDi is enabled in your browser Options when tests need real-time event listeners (console errors, network interception, DOM mutations, or isolated user contexts).</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Classic WebDriver uses unidirectional HTTP (Client -> Driver -> Browser), requiring polling to detect browser changes.</li>
+      <li>WebDriver BiDi uses a full-duplex WebSocket connection, allowing the browser to push real-time events (logs, network traffic, crashes) to Java immediately.</li>
+      <li>To enable WebDriver BiDi in Selenium 4, call options.enableBiDi() (or options.setCapability("webSocketUrl", true)) before creating the driver.</li>
+      <li>Unlike Chrome DevTools Protocol (CDP), which is proprietary to Chromium and changes with every Chrome version, WebDriver BiDi is a stable, vendor-neutral W3C standard supported by Firefox, Chrome, and Edge.</li>
+      <li>BrowsingContext in WebDriver BiDi can create isolated incognito-like user contexts within a single browser instance to test multiple concurrent logged-in users.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Protocol</th><th>Transport Layer</th><th>Communication Flow</th><th>Browser Support</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Classic W3C WebDriver</b></td><td>HTTP / JSON</td><td>Unidirectional (Request / Response polling)</td><td>All browsers (Chrome, Firefox, Edge, Safari)</td></tr>
+        <tr><td><b>Chrome DevTools Protocol (CDP)</b></td><td>WebSocket</td><td>Bidirectional (Vendor-specific to Chromium)</td><td>Chromium only (Chrome & Edge; breaks across versions)</td></tr>
+        <tr><td><b>W3C WebDriver BiDi</b></td><td>WebSocket</td><td>Bidirectional (Standardized W3C event streaming)</td><td>Cross-browser W3C standard (Chrome, Firefox, Edge, Safari)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>Create a ChromeOptions or FirefoxOptions instance and call options.enableBiDi() (which sets the W3C capability webSocketUrl to true).</li>
+      <li>Instantiate the driver; during the session handshake, the browser driver starts a WebSocket server and returns its ws:// URL in the capabilities response.</li>
+      <li>Selenium's Java client automatically connects its internal Java 11+ WebSocket client to that ws:// endpoint.</li>
+      <li>The test registers event consumers (such as LogInspector or Network) that receive live event callbacks whenever the browser emits matching events.</li>
+    </ol>
+    <p>Enabling W3C WebDriver BiDi and using BrowsingContext in Java:</p>
+<pre><code>package dev.selenium.bidi; // Declares package
+
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.bidi.browsingcontext.BrowsingContext; // Imports BiDi BrowsingContext
+import org.openqa.selenium.bidi.browsingcontext.ReadinessState; // Imports BiDi ReadinessState
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver
+import org.openqa.selenium.chrome.ChromeOptions; // Imports ChromeOptions
+
+public class BiDiOverviewExample { // Declares class
+    public static void main(String[] args) { // Main method
+        ChromeOptions options = new ChromeOptions(); // Creates ChromeOptions
+        options.enableBiDi(); // Sets W3C webSocketUrl: true capability for BiDi
+
+        WebDriver driver = new ChromeDriver(options); // Starts session with WebSocket channel active
+        try { // Guarded block
+            BrowsingContext context = new BrowsingContext(driver, driver.getWindowHandle()); // Binds BiDi context to tab
+            context.navigate("https://www.selenium.dev/", ReadinessState.COMPLETE); // Navigates via BiDi protocol
+            System.out.println("BiDi Context ID: " + context.getId()); // Prints active browsing context ID
+        } finally { // Teardown block
+            driver.quit(); // Closes WebSocket and terminates browser
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Attempting to instantiate LogInspector, Network, or BrowsingContext without calling options.enableBiDi() first, which throws BiDiException: BiDi is not enabled.</li>
+      <li>Writing new framework utilities against raw version-specific DevTools (v128, v129) CDP packages when a standardized W3C WebDriver BiDi API already exists.</li>
+      <li>Forgetting to close or clean up event listeners when reusing a long-lived session across multiple tests.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>WebDriver BiDi</b></td><td>The W3C Bidirectional WebDriver specification providing event-driven WebSocket browser automation.</td></tr>
+        <tr><td><b>webSocketUrl</b></td><td>The W3C boolean capability (set via options.enableBiDi()) that activates a WebSocket endpoint on the session.</td></tr>
+        <tr><td><b>CDP (Chrome DevTools Protocol)</b></td><td>Chromium's internal debugging protocol, which is vendor-specific and being superseded for testing by W3C BiDi.</td></tr>
+        <tr><td><b>BrowsingContext</b></td><td>The W3C BiDi representation of a browser tab, window, or iframe context.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What is WebDriver BiDi and what problem does it solve?</b><br>
+    WebDriver BiDi is the W3C Bidirectional WebDriver standard. Classic WebDriver only supports HTTP request-response commands initiated by the test script; BiDi adds a persistent two-way WebSocket connection so the browser can stream real-time events (console logs, JS exceptions, network traffic) back to the test.</p>
+
+    <p><b>How do you enable WebDriver BiDi in a Selenium 4 Java test?</b><br>
+    Call options.enableBiDi() (or options.setCapability("webSocketUrl", true)) on your ChromeOptions, FirefoxOptions, or EdgeOptions object before creating the driver.</p>
+
+    <p><b>Why is WebDriver BiDi preferred over the Chrome DevTools Protocol (CDP)?</b><br>
+    CDP is a proprietary Chromium debugging protocol that does not work in Firefox or Safari and frequently breaks when Chrome updates. WebDriver BiDi is an official, cross-browser W3C standard designed specifically for stable test automation.</p>
+
+    <h3>How it works</h3>
+    <p><b>What happens during session creation when webSocketUrl: true is passed in capabilities?</b><br>
+    The browser driver launches the browser with a WebSocket listener and returns a ws://localhost:port/session/... URL in the session handshake response. Selenium's Java client connects to that WebSocket for full-duplex messaging.</p>
+
+    <p><b>Can a single test mix classic WebDriver commands (like driver.findElement) and WebDriver BiDi APIs?</b><br>
+    Yes. Selenium 4 is designed so classic HTTP commands and BiDi WebSocket event streams coexist seamlessly within the exact same WebDriver session.</p>
+
+    <p><b>What are ReadinessState options in BiDi BrowsingContext.navigate()?</b><br>
+    BrowsingContext.navigate(url, ReadinessState) supports ReadinessState.NONE, ReadinessState.INTERACTIVE (DOMContentLoaded), and ReadinessState.COMPLETE (load event) on a per-navigation basis.</p>
+
+    <h3>Real situations</h3>
+    <p><b>Why did upgrading Chrome often break Selenium tests that imported org.openqa.selenium.devtools.v12X packages?</b><br>
+    Raw CDP domains are tied to specific Chromium versions (such as v127, v128). Using Selenium's portable W3C BiDi APIs (LogInspector, Network, BrowsingContext) decouples your code from specific Chrome release numbers.</p>
+
+    <p><b>Does WebDriver BiDi work when running tests remotely through Selenium Grid 4?</b><br>
+    Yes. Selenium Grid 4's Router and Node components natively proxy WebSocket connections, forwarding BiDi event streams between your Java test runner and the remote browser container.</p>
+
+    <p><b>How does BiDi allow testing two logged-in users in the same browser process?</b><br>
+    BiDi's Browser module supports creating isolated User Contexts (similar to independent incognito profiles with separate cookies and storage) inside one running browser process, avoiding the memory overhead of launching a second browser.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>What causes org.openqa.selenium.bidi.BiDiException: Cannot create instance of BiDi, webSocketUrl capability is not enabled?</b><br>
+    You instantiated a BiDi class (like LogInspector or BrowsingContext) on a driver session that was started without calling options.enableBiDi(). Add options.enableBiDi() before new ChromeDriver(options).</p>
+
+    <p><b>Why did a BiDi WebSocket connection fail through a corporate reverse proxy on Selenium Grid?</b><br>
+    Some older HTTP reverse proxies or load balancers drop WebSocket Upgrade headers (Connection: Upgrade, Upgrade: websocket). Configure the proxy/ingress controller to allow WebSocket pass-through.</p>
+
+    <p><b>How do you check programmatically if a WebDriver instance supports BiDi?</b><br>
+    Check if the driver implements HasBiDi and call ((HasBiDi) driver).getBiDi() after enabling the capability.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why did the W3C Browser Testing and Tools Working Group create BiDi instead of standardizing CDP?</b><br>
+    CDP exposes internal Blink/V8 engine structures that do not exist in Mozilla's Gecko (Firefox) or Apple's WebKit (Safari). W3C BiDi defines a clean, engine-agnostic contract that all browser vendors implement.</p>
+
+    <p><b>When should you still use classic WebDriver commands vs BiDi commands?</b><br>
+    Continue using standard driver.findElement(), click(), and sendKeys() for everyday DOM interactions, and attach BiDi modules (LogInspector, Network) for event streaming, network mocking, and console monitoring.</p>
+
+    <p><b>Why is event-driven testing faster than polling for console or network state?</b><br>
+    Instead of repeatedly querying the browser in a loop, the browser pushes the exact event over the WebSocket the millisecond it occurs, eliminating polling delay.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>Which capability enables WebDriver BiDi?</b> options.enableBiDi() (which sets webSocketUrl: true).</li>
+      <li><b>What transport protocol does WebDriver BiDi use?</b> Full-duplex WebSocket (ws://).</li>
+      <li><b>Is WebDriver BiDi cross-browser or Chrome-only?</b> It is an official cross-browser W3C standard (Chrome, Firefox, Edge).</li>
+      <li><b>What exception is thrown if BiDi is used without enableBiDi()?</b> org.openqa.selenium.bidi.BiDiException.</li>
+      <li><b>Does Selenium Grid 4 support BiDi WebSocket proxying?</b> Yes, Grid 4 natively proxies BiDi WebSocket connections.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-webdriver-bidi-features.html">8.2 Log & Network Interception with BiDi &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

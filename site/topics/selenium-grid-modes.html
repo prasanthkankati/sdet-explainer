@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>10.1 Grid Execution Modes & Architecture | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Selenium">
+<div class="wrap">
+<article>
+  <span class="tag Selenium">Selenium</span>
+  <h1>10.1 Grid Execution Modes & Architecture</h1>
+  <div class="se-lead">Scaling parallel cross-browser execution across Standalone, Hub & Node, and Fully Distributed Selenium Grid 4 architectures.</div>
+
+  <p>Selenium Grid 4 allows you to execute WebDriver tests in parallel across multiple machines, operating systems, and browser versions from a single central entry point. Re-architected from scratch in Selenium 4 around six decoupled components (Router, Distributor, Session Map, New Session Queue, Event Bus, and Node), Grid can run in Standalone mode, classic Hub & Node mode, or a cloud-native Fully Distributed mode.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="selenium-manager-guide.html">9.1 Automated Driver & Browser Management</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Selenium Grid is the execution infrastructure layer in CI/CD pipelines (typically deployed via Docker Compose or Kubernetes) that receives RemoteWebDriver requests.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Grid 4 consists of six internal components: Router,Session Queue, Distributor, Session Map, Event Bus, and Nodes.</li>
+      <li>Mode 1 (Standalone): Runs all six components and browser drivers inside a single JVM process via java -jar selenium-server.jar standalone.</li>
+      <li>Mode 2 (Hub & Node): Combines Router, Distributor, Session Map, Queue, and Event Bus into one Hub machine, while multiple Node machines register over TCP/Event Bus.</li>
+      <li>Mode 3 (Distributed): Runs each of the six components as an independent microservice (ideal for large Kubernetes clusters).</li>
+      <li>Grid 4 exposes a built-in React UI dashboard at http://localhost:4444/ui and a GraphQL endpoint at http://localhost:4444/graphql for live observability.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Grid 4 Component</th><th>Architectural Responsibility</th><th>Key Interaction</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Router</b></td><td>Single entry point (port 4444) receiving all client requests.</td><td>Forwards new session requests to Queue; routes active session commands via Session Map.</td></tr>
+        <tr><td><b>New Session Queue</b></td><td>Holds incoming POST /session requests in FIFO/priority order.</td><td>Polled by Distributor until a matching Node slot opens.</td></tr>
+        <tr><td><b>Distributor</b></td><td>Tracks all registered Nodes and their available browser slots.</td><td>Assigns queued session requests to a matching Node and records in Session Map.</td></tr>
+        <tr><td><b>Session Map</b></td><td>Key-value store mapping SessionId -> Node URI.</td><td>Allows Router to forward commands directly to the hosting Node.</td></tr>
+        <tr><td><b>Event Bus</b></td><td>ZeroMQ message broker for internal component communication.</td><td>Avoids slow HTTP polling between Hub and Nodes.</td></tr>
+        <tr><td><b>Node</b></td><td>Host machine or Docker container where browsers actually run.</td><td>Registers capabilities with Distributor and executes browser sessions.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>The Java test calls new RemoteWebDriver(new URL("http://grid:4444"), chromeOptions), sending a POST /session request to the Grid Router.</li>
+      <li>Because the request has no SessionId yet, the Router places it into the New Session Queue.</li>
+      <li>The Distributor pulls the request from the Queue, finds a registered Node with an available Chrome slot, starts the session on that Node, and writes the SessionId -> Node URI mapping into the Session Map.</li>
+      <li>For all subsequent commands (get, findElement, click), the Router looks up the SessionId in the Session Map and forwards the request directly to that Node.</li>
+    </ol>
+    <p>CLI commands to launch Selenium Grid 4 and Java RemoteWebDriver connection:</p>
+<pre><code>package dev.selenium.grid; // Declares package
+
+// CLI 1 (Standalone): java -jar selenium-server-4.26.0.jar standalone
+// CLI 2 (Hub & Node): java -jar selenium-server-4.26.0.jar hub
+//                     java -jar selenium-server-4.26.0.jar node --hub http://hub-ip:4444
+
+import org.openqa.selenium.Platform; // Imports Platform enum
+import org.openqa.selenium.WebDriver; // Imports WebDriver interface
+import org.openqa.selenium.chrome.ChromeOptions; // Imports ChromeOptions
+import org.openqa.selenium.remote.RemoteWebDriver; // Imports RemoteWebDriver
+import java.net.URI; // Imports URI class
+
+public class GridExecutionExample { // Declares class
+    public static void main(String[] args) throws Exception { // Main method
+        ChromeOptions options = new ChromeOptions(); // Creates ChromeOptions for Grid negotiation
+        options.setPlatformName(Platform.LINUX.name()); // Requests a Linux container Node
+        options.setBrowserVersion("stable"); // Requests stable Chrome version
+
+        WebDriver driver = new RemoteWebDriver( // Connects to Selenium Grid Router
+            URI.create("http://localhost:4444").toURL(), options // Passes Router URL and capabilities
+        ); // Session assigned by Distributor and recorded in Session Map
+        try { // Guarded block
+            driver.get("https://www.selenium.dev/documentation/grid/"); // Executes on remote Node
+            System.out.println("Grid Page Title: " + driver.getTitle()); // Prints page title
+        } finally { // Teardown block
+            driver.quit(); // Frees slot on Node and removes SessionId from Session Map
+        } // Ends finally
+    } // Ends main
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Running parallel TestNG tests against Selenium Grid while sharing a single non-thread-safe WebDriver variable across threads; fix by isolating each thread's RemoteWebDriver in ThreadLocal<WebDriver>.</li>
+      <li>Omitting driver.quit() when a test fails, which leaves the Grid Node slot occupied until the 300-second session timeout expires, starving queued tests.</li>
+      <li>Setting TestNG thread-count=50 when the Selenium Grid only has 5 total browser slots, causing tests at the back of the New Session Queue to time out if execution takes longer than --session-request-timeout.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Router</b></td><td>The front-door component of Selenium Grid 4 listening on port 4444 that directs traffic to Queue or Session Map.</td></tr>
+        <tr><td><b>Distributor</b></td><td>The Grid 4 component that registers Nodes and matches queued session requests against available Node capabilities.</td></tr>
+        <tr><td><b>Session Map</b></td><td>The Grid 4 lookup store that maps every active SessionId to the specific Node URL hosting that browser.</td></tr>
+        <tr><td><b>Dynamic Grid</b></td><td>A Grid 4 Docker mode where the Node spins up a brand-new, disposable Docker container for every single test session and destroys it on quit().</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+    
+    <h3>Basics</h3>
+    <p><b>What are the three deployment modes of Selenium Grid 4?</b><br>
+    The three modes are: (1) Standalone (all components and browsers run in a single process on one machine), (2) Hub and Node (one central Hub coordinates multiple remote Node machines), and (3) Distributed (Router, Queue, Distributor, Session Map, Event Bus, and Nodes run as separate microservices).</p>
+
+    <p><b>What are the six internal components of Selenium Grid 4?</b><br>
+    The six components are Router, New Session Queue, Distributor, Session Map, Event Bus, and Node.</p>
+
+    <p><b>What URL do you open in a browser to view the Selenium Grid 4 live console dashboard?</b><br>
+    Open http://localhost:4444/ui (or http://grid-host:4444/ui), which displays registered nodes, available browser stereoypes, active sessions, and live VNC previews.</p>
+
+    <h3>How it works</h3>
+    <p><b>How does the Grid 4 Router handle a new session request differently from an existing session command?</b><br>
+    When a request arrives without a SessionId (POST /session), the Router sends it to the New Session Queue so the Distributor can allocate a Node. When a request arrives with an existing SessionId (like POST /session/{id}/element), the Router queries the Session Map and forwards the command straight to the hosting Node, bypassing the Distributor.</p>
+
+    <p><b>How do Hub and Nodes communicate in Grid 4 compared to Grid 3?</b><br>
+    Grid 3 relied on chatty HTTP polling between Hub and Nodes. Grid 4 uses an Event Bus (powered by ZeroMQ on ports 4442 and 4443) for asynchronous, event-driven Node registration and health heartbeats.</p>
+
+    <p><b>What is Dynamic Grid mode in Docker?</b><br>
+    In Dynamic Grid mode, instead of keeping idle browser containers running 24/7, the Grid spawns a brand-new, clean browser Docker container on the fly when a session request arrives, records video if configured, and destroys the container the instant driver.quit() is called.</p>
+
+    <h3>Real situations</h3>
+    <p><b>How do you watch a live browser screen while a test is running inside a Selenium Grid Docker container?</b><br>
+    Official Selenium Docker images (selenium/node-chrome) include a built-in VNC and noVNC server. Open http://localhost:4444/ui, click the Sessions tab, and click the camera icon (default password: secret) to watch the live browser inside your web browser.</p>
+
+    <p><b>How do you query Selenium Grid 4 metrics (like queued session count or active slots) programmatically for CI auto-scaling?</b><br>
+    Send a POST query to the Grid 4 GraphQL endpoint at http://localhost:4444/graphql or check the /status readiness endpoint.</p>
+
+    <p><b>When should a team use Standalone mode vs Hub & Node mode?</b><br>
+    Use Standalone mode on a single developer workstation or a single beefy CI agent using docker run -d -p 4444:4444 --shm-size="2g" selenium/standalone-chrome. Use Hub & Node or Kubernetes KEDA scaling when running 10+ concurrent browsers across multiple machines.</p>
+
+    <h3>Troubleshooting</h3>
+    <p><b>Why did a remote Node fail to register with the Grid Hub even though port 4444 is open?</b><br>
+    In Grid 4 Hub & Node mode, Nodes communicate with the Hub's Event Bus over TCP ports 4442 (publish) and 4443 (subscribe) in addition to HTTP port 4444. Ensure firewall and Docker security groups open ports 4442, 4443, and 4444.</p>
+
+    <p><b>Why do Chrome sessions crash inside Docker Grid containers when --shm-size="2g" is omitted?</b><br>
+    Docker defaults /dev/shm to 64MB, which is too small for modern Chrome rendering. Either start the Docker container with --shm-size="2g" or pass --disable-dev-shm-usage in ChromeOptions.</p>
+
+    <p><b>What causes SessionNotCreatedException: Could not start a new session. New session request timed out?</b><br>
+    All Grid Nodes were busy running other tests (or no Node matched your requested browser/platform capabilities), so the request sat in the New Session Queue until --session-request-timeout (default 300s) expired.</p>
+
+    <h3>Design choices</h3>
+    <p><b>Why did Selenium Grid 4 split the monolithic Hub into Router, Queue, Distributor, and Session Map?</b><br>
+    In Grid 3, a single Hub lock handled both new session matching and active command routing, creating a bottleneck under heavy parallel load. Splitting them allows the Router and Session Map to route active commands with zero contention while the Distributor assigns new sessions.</p>
+
+    <p><b>Why is OpenTelemetry integrated into Selenium Grid 4?</b><br>
+    Grid 4 instruments every component with OpenTelemetry spans, allowing DevOps teams to export distributed traces to Jaeger or Zipkin and pinpoint whether latency occurred in the Queue, Distributor, or Node.</p>
+
+    <p><b>How many concurrent sessions does a Grid Node allow by default?</b><br>
+    By default, a Node limits max-sessions to the number of available CPU processors on the host (with 1 session per Chrome/Firefox driver slot unless overridden via --max-sessions).</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What are the 3 Grid 4 execution modes?</b> Standalone, Hub & Node, and Distributed.</li>
+      <li><b>Which Grid 4 component maps SessionId to Node URI?</b> The Session Map.</li>
+      <li><b>Which ports does the Grid 4 Event Bus use?</b> Ports 4442 and 4443 (plus 4444 for the HTTP Router).</li>
+      <li><b>What is the URL for the Grid 4 web dashboard?</b> http://localhost:4444/ui.</li>
+      <li><b>Why pass --shm-size="2g" to Selenium Docker containers?</b> Prevents Chrome crashes caused by Docker's default 64MB /dev/shm limit.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="selenium-test-practices-pom.html">11.1 Page Object Models & Domain-Specific Language &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Selenium">&larr; Back to Selenium Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>
