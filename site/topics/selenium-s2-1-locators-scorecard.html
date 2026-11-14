@@ -13,14 +13,64 @@
   <h1>S2.1 Locators, DOM, Attributes, and Uniqueness</h1>
 
   <section>
-    <h2>1. Idea</h2>
-    <p>A <b>locator</b> is an instruction that tells Selenium which HTML element to find on a web page using <code>By</code> strategies. <b>LOC</b> is the 3-step engineering methodology used to build reliable locators: <b>List candidates</b>, <b>Optimize the selector</b>, and <b>Check uniqueness</b>. Every locator queries the <b>DOM</b> (Document Object Model) using an element's tag, attributes, text, or relative position.</p>
+    <h2>Layer 1: Plain-English Mental Model (Understand in 60s)</h2>
+
+    <h3>1.1 Functional Contrast</h3>
+    <table>
+      <thead>
+        <tr><th>Old way</th><th>New way (LOC Methodology)</th><th>What changed</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Right-clicking an element, copying a long absolute XPath, and pasting it blindly into <code>driver.findElement()</code>.</td><td>Applying the 3-step <b>LOC Methodology</b>: <b>L</b>ist candidates, <b>O</b>ptimize the selector, and <b>C</b>heck uniqueness in DevTools before writing test code.</td><td>Tests stop breaking on UI layout changes; selectors are deterministic, fast, and unique.</td></tr>
+      </tbody>
+    </table>
+    <p><b>IS:</b> A disciplined pre-coding verification process that proves an element selector is unique (count = 1) and stable on the live DOM.</p>
+    <p><b>IS NOT:</b> A guessing game, browser auto-generated XPath copying, or trial-and-error in test code.</p>
+
+    <h3>1.2 Action Flow: Look &rarr; Think &rarr; Do &rarr; Check</h3>
+    <pre><code>┌────────────────────────────────────────────────────────────────────────┐
+│ 1. LOOK   &rarr; Inspect element in Chrome DevTools Elements tab (Ctrl+Shift+C)│
+│              and examine the opening tag, attributes, and text.         │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ 2. THINK  &rarr; Filter stable vs dynamic attributes; apply Priority Order: │
+│              data-testid &gt; id &gt; name &gt; cssSelector &gt; relative xpath.    │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ 3. DO     &rarr; Construct the selector and run in Console ($$ or $x) to   │
+│              verify it returns exactly 1 match: $$('#username').length  │
+└───────────────────────────────────┬────────────────────────────────────┘
+                                    ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│ 4. CHECK  &rarr; Verify visibility and reload page to prove attributes do   │
+│              not regenerate, shift, or drift between sessions.          │
+└────────────────────────────────────────────────────────────────────────┘</code></pre>
+
+    <h3>1.3 Digital Toolbelt</h3>
+    <table>
+      <thead>
+        <tr><th>Technical Name</th><th>Plain Meaning</th><th>Concrete Action in a Test</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>By.id</code></td><td>Match element by unique ID attribute</td><td><code>driver.findElement(By.id("username"))</code> on the QKart login field.</td></tr>
+        <tr><td><code>By.name</code></td><td>Match form input by name attribute</td><td><code>driver.findElement(By.name("password"))</code> for standard form controls.</td></tr>
+        <tr><td><code>By.cssSelector</code></td><td>Browser-native CSS selector query</td><td><code>driver.findElement(By.cssSelector("button.button"))</code> for styled buttons.</td></tr>
+        <tr><td><code>By.xpath</code></td><td>Hierarchical DOM tree and text traversal</td><td><code>driver.findElement(By.xpath("//button[normalize-space()='LOGIN TO QKART']"))</code></td></tr>
+        <tr><td><code>$$('css')</code></td><td>Console array of all CSS matches</td><td><code>$$('[id=username]').length === 1</code> verifies uniqueness before coding.</td></tr>
+        <tr><td><code>$x('xpath')</code></td><td>Console array of all XPath matches</td><td><code>$x('//input[@id="username"]').length === 1</code> verifies unique XPath count.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>1.4 Grounding Principle (Zero Guessing)</h3>
+    <p>An automated test must never guess whether a selector works. By evaluating <code>$$('css').length</code> or <code>$x('xpath').length</code> directly inside Chrome DevTools Console before writing Java code, the engineer grounds the locator against the live browser DOM, proving it matches exactly one visible element.</p>
   </section>
 
   <section>
-    <h2>2. Concepts</h2>
+    <h2>Layer 2: Architecture, Syntax Reference &amp; Depth</h2>
 
-    <h3>2.1 Core terms</h3>
+    <h3>2.1 Core terms &amp; LOC Methodology</h3>
     <table>
       <thead>
         <tr><th>Term</th><th>Plain meaning</th><th>Example from the login page</th></tr>

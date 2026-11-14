@@ -485,189 +485,267 @@ const TOPICS = [
     status: "planned"
   },
 
-  // ==================== TRACK 3: SELENIUM (S1 - S6) ====================
+  // ==================== TRACK 3: SELENIUM (OFFICIAL SELENIUM.DEV CLONE) ====================
+  // Section 1: Overview
   {
     track: "Selenium",
-    section: "S1. Architecture, Setup & Browser Control",
+    section: "1. Overview",
     order: 1,
-    title: "1.1 Selenium 4 W3C Architecture & WebDriver Hierarchy",
-    file: "selenium-s1-1-architecture-setup.html",
-    summary: "W3C WebDriver protocol over HTTP client, SearchContext -> WebDriver -> RemoteWebDriver -> ChromeDriver hierarchy, built-in Selenium Manager & complete setup.",
-    keywords: "Selenium 4, WebDriver, architecture, W3C protocol, JSON Wire Protocol, SearchContext, RemoteWebDriver, ChromeDriver, Selenium Manager, ThreadLocal, DriverFactory",
-    status: "done",
-    date: "2026-11-13"
-  },
-  {
-    track: "Selenium",
-    section: "S1. Architecture, Setup & Browser Control",
-    order: 2,
-    title: "1.2 Environment Setup: Selenium Manager vs WebDriverManager vs System.setProperty",
-    file: "selenium-s1-2-setup-managers.html",
-    summary: "Built-in Selenium Manager (4.6+) Rust mechanics, ~/.cache/selenium vs ~/.m2, Chrome for Testing, proxy & air-gapped CI/CD.",
-    keywords: "Selenium Manager, WebDriverManager, System.setProperty, chromedriver, environment setup, SE_PROXY, Chrome for Testing",
-    status: "done",
-    date: "2026-11-13"
-  },
-  {
-    track: "Selenium",
-    section: "S1. Architecture, Setup & Browser Control",
-    order: 3,
-    title: "1.3 Browser Configuration (ChromeOptions) & close() vs quit()",
-    file: "selenium-s1-3-chromeoptions-lifecycle.html",
-    summary: "ChromeOptions class hierarchy, CLI flags, experimental prefs, PageLoadStrategy (NORMAL vs EAGER vs NONE), and close() vs quit() lifecycle.",
-    keywords: "ChromeOptions, headless new, SSL, PageLoadStrategy, driver.close, driver.quit, NoSuchSessionException, NoSuchWindowException, Docker flags",
-    status: "done",
-    date: "2026-11-13"
-  },
-  {
-    track: "Selenium",
-    section: "S2. Locators, XPath & CSS Mastery",
-    order: 1,
-    title: "2.1 All 8 Core Locators, DOM, Attributes & Uniqueness",
-    file: "selenium-s2-1-locators-scorecard.html",
-    summary: "LOC definition, reading DOM, stable vs dynamic attributes, 12 steps before writing, priority order, uniqueness checks, every locator syntax, and DevTools console commands.",
-    keywords: "locators, By.id, By.name, By.cssSelector, By.xpath, locator priority, DOM, attributes, dynamic elements, uniqueness, console, DevTools, $x, $$",
+    title: "1.1 About Selenium & Components",
+    file: "selenium-overview.html",
+    summary: "What Selenium is, browser automation scope, and core suite components: WebDriver, Grid, IDE, and Selenium Manager.",
+    keywords: "Selenium, WebDriver, Selenium Grid, Selenium IDE, Selenium Manager, browser automation, overview",
     status: "done",
     date: "2026-11-14"
   },
+
+  // Section 2: WebDriver - Getting Started
   {
     track: "Selenium",
-    section: "S2. Locators, XPath & CSS Mastery",
+    section: "2. WebDriver: Getting Started",
+    order: 1,
+    title: "2.1 Install Selenium Library",
+    file: "selenium-webdriver-install.html",
+    summary: "Adding selenium-java dependency in Maven pom.xml and Gradle build.gradle, transitive dependencies, and automated driver resolution.",
+    keywords: "install, Maven, Gradle, pom.xml, selenium-java, dependency, setup",
+    status: "planned"
+  },
+  {
+    track: "Selenium",
+    section: "2. WebDriver: Getting Started",
     order: 2,
-    title: "2.2 XPath Complete Guide: Predicates, Functions & Indexing ()[1]",
-    file: "",
-    summary: "Relative // vs /, text(), contains(), starts-with(), normalize-space(), count(), and //div[4]//div[1] vs (//div[4]//div)[1].",
-    keywords: "XPath, contains, starts-with, normalize-space, text(), predicates, indexing",
+    title: "2.2 Write Your First Selenium Script",
+    file: "selenium-webdriver-first-script.html",
+    summary: "The 8 fundamental script steps: start session, take action on browser, request info, establish wait, find element, take action on element, request element info, and end session.",
+    keywords: "first script, 8 steps, ChromeDriver, get, getTitle, findElement, sendKeys, quit",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S2. Locators, XPath & CSS Mastery",
+    section: "2. WebDriver: Getting Started",
     order: 3,
-    title: "2.3 XPath Axes: Siblings, Ancestors & Dynamic DOM Traversal",
-    file: "",
-    summary: "Navigating complex DOM trees with following-sibling::, preceding-sibling::, parent::, ancestor::, child::, and descendant::.",
-    keywords: "XPath axes, following-sibling, preceding-sibling, ancestor, parent, child, descendant",
+    title: "2.3 Using a Test Runner (TestNG & JUnit 5)",
+    file: "selenium-webdriver-test-runner.html",
+    summary: "Structuring automation scripts inside test runner lifecycles: @BeforeMethod, @Test, and @AfterMethod hooks with driver.quit() guarantees.",
+    keywords: "test runner, TestNG, JUnit 5, @BeforeMethod, @AfterMethod, @Test, assertions",
+    status: "planned"
+  },
+
+  // Section 3: WebDriver - Drivers & Sessions
+  {
+    track: "Selenium",
+    section: "3. WebDriver: Drivers",
+    order: 1,
+    title: "3.1 Driver Sessions & Capabilities",
+    file: "selenium-webdriver-drivers-sessions.html",
+    summary: "Starting and terminating driver sessions, W3C capability negotiation, alwaysMatch vs firstMatch, and browser timeouts.",
+    keywords: "driver sessions, capabilities, W3C, alwaysMatch, timeouts, session lifecycle",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S2. Locators, XPath & CSS Mastery",
+    section: "3. WebDriver: Drivers",
+    order: 2,
+    title: "3.2 Browser Options & Page Load Strategy",
+    file: "selenium-webdriver-drivers-options.html",
+    summary: "ChromeOptions, FirefoxOptions, EdgeOptions, command-line arguments (--headless=new, --window-size), user preferences, and PageLoadStrategy (normal, eager, none).",
+    keywords: "ChromeOptions, FirefoxOptions, PageLoadStrategy, normal, eager, none, headless, prefs",
+    status: "planned"
+  },
+  {
+    track: "Selenium",
+    section: "3. WebDriver: Drivers",
+    order: 3,
+    title: "3.3 RemoteWebDriver & Service Classes",
+    file: "selenium-webdriver-remote-driver.html",
+    summary: "RemoteWebDriver instantiation with grid URL, DriverService custom port/log controls, and network timeouts.",
+    keywords: "RemoteWebDriver, DriverService, ChromeDriverService, grid URL, port binding",
+    status: "planned"
+  },
+
+  // Section 4: WebDriver - Elements
+  {
+    track: "Selenium",
+    section: "4. WebDriver: Elements",
+    order: 1,
+    title: "4.1 Locators (All 8 Traditional Strategies)",
+    file: "selenium-webdriver-elements-locators.html",
+    summary: "Finding elements by id, name, className, tagName, linkText, partialLinkText, cssSelector, and xpath.",
+    keywords: "locators, By.id, By.name, By.className, By.tagName, By.linkText, By.cssSelector, By.xpath",
+    status: "planned"
+  },
+  {
+    track: "Selenium",
+    section: "4. WebDriver: Elements",
+    order: 2,
+    title: "4.2 Relative Locators",
+    file: "selenium-webdriver-elements-relative.html",
+    summary: "Spatial locator strategy using with(By) with above, below, toLeftOf, toRightOf, and near based on getBoundingClientRect().",
+    keywords: "RelativeLocators, with, above, below, toLeftOf, toRightOf, near",
+    status: "planned"
+  },
+  {
+    track: "Selenium",
+    section: "4. WebDriver: Elements",
+    order: 3,
+    title: "4.3 Element Information & State",
+    file: "selenium-webdriver-elements-info.html",
+    summary: "Querying element state: isDisplayed(), isEnabled(), isSelected(), getText(), getAttribute(), getDomAttribute(), getDomProperty(), and getCssValue().",
+    keywords: "isDisplayed, isEnabled, isSelected, getText, getAttribute, getDomAttribute, getDomProperty, getCssValue",
+    status: "planned"
+  },
+  {
+    track: "Selenium",
+    section: "4. WebDriver: Elements",
     order: 4,
-    title: "2.4 CSS Selector Mastery & Chained Locators",
-    file: "",
-    summary: "Attribute prefix/suffix/substring (^=, $=, *=), combinators (>, +, ~), element.findElement() chaining, and ByChained.",
-    keywords: "CSS selector, combinators, chained locators, ByChained, RelativeLocators",
+    title: "4.4 Element Interactions",
+    file: "selenium-webdriver-elements-interactions.html",
+    summary: "Manipulating DOM elements: click(), sendKeys(), clear(), submit(), and handling file upload inputs.",
+    keywords: "click, sendKeys, clear, submit, file upload, WebElement interactions",
     status: "planned"
   },
+
+  // Section 5: WebDriver - Browser Interactions
   {
     track: "Selenium",
-    section: "S3. Synchronization, Waits & Dynamic Elements",
+    section: "5. WebDriver: Browser Interactions",
     order: 1,
-    title: "3.1 Script Sync Issues & Polling Frequency Mechanics",
-    file: "",
-    summary: "Why scripts run faster than AJAX/DOM rendering, how polling intervals work (500ms default), and why Thread.sleep() is an anti-pattern.",
-    keywords: "synchronization, polling frequency, polling interval, Thread.sleep, flaky tests",
+    title: "5.1 Navigation & Windows Management",
+    file: "selenium-webdriver-navigation-windows.html",
+    summary: "driver.navigate() to, back, forward, refresh; window handles, switchTo().window(), newWindow(WindowType.TAB/WINDOW), and window sizing.",
+    keywords: "navigate, back, forward, refresh, window handles, newWindow, WindowType, switchTo window",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S3. Synchronization, Waits & Dynamic Elements",
+    section: "5. WebDriver: Browser Interactions",
     order: 2,
-    title: "3.2 Implicit vs Explicit (WebDriverWait) vs FluentWait",
-    file: "",
-    summary: "Complete comparison table, controlling polling frequency & ignored exceptions in FluentWait, and why never to mix Implicit & Explicit waits.",
-    keywords: "implicitlyWait, WebDriverWait, ExpectedConditions, FluentWait, pollingEvery, ignoring, TimeoutException",
+    title: "5.2 Frames, Alerts & Cookies",
+    file: "selenium-webdriver-frames-alerts-cookies.html",
+    summary: "switchTo().frame(), defaultContent(), parentFrame(); switchTo().alert() accept/dismiss/sendKeys/getText; and driver.manage().cookies API.",
+    keywords: "frame, iframe, defaultContent, parentFrame, alert, accept, dismiss, cookies, addCookie, getCookie",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S3. Synchronization, Waits & Dynamic Elements",
+    section: "5. WebDriver: Browser Interactions",
     order: 3,
-    title: "3.3 Custom ExpectedConditions & Handling Dynamic / Stale Elements",
-    file: "",
-    summary: "Implementing ExpectedCondition<T>, handling AJAX spinners, and retry wrappers for StaleElementReferenceException.",
-    keywords: "ExpectedCondition, custom wait, StaleElementReferenceException, AJAX, dynamic elements",
+    title: "5.3 Screenshots & Print to PDF",
+    file: "selenium-webdriver-screenshots-pdf.html",
+    summary: "TakesScreenshot interface, getScreenshotAs(OutputType.FILE/BYTES), element screenshots, and driver.print(PrintOptions) to PDF.",
+    keywords: "TakesScreenshot, OutputType, FILE, element screenshot, print to PDF, PrintOptions",
     status: "planned"
   },
+
+  // Section 6: WebDriver - Waits
   {
     track: "Selenium",
-    section: "S4. Web Actions, Multiple Elements, Tables & Contexts",
+    section: "6. WebDriver: Waits",
     order: 1,
-    title: "4.1 Web Actions: Select Dropdowns, Actions Class & JavascriptExecutor",
-    file: "",
-    summary: "Select class, hover/drag-and-drop/key-chords with Actions, scrolling & clicking hidden/intercepted elements with JavascriptExecutor.",
-    keywords: "Select, dropdown, Actions, moveToElement, dragAndDrop, JavascriptExecutor, scrollIntoView",
+    title: "6.1 Waiting Strategies Overview & Implicit Waits",
+    file: "selenium-webdriver-waits-implicit.html",
+    summary: "The synchronization problem, why Thread.sleep is an anti-pattern, implicitlyWait(Duration), and why mixing wait types causes timeouts.",
+    keywords: "waits, implicitlyWait, Duration, synchronization, Thread.sleep, polling",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S4. Web Actions, Multiple Elements, Tables & Contexts",
+    section: "6. WebDriver: Waits",
     order: 2,
-    title: "4.2 Multiple Elements (findElements) & Stream Validation Patterns",
-    file: "",
-    summary: "findElement vs findElements, empty list checks, Java 8 Stream filtering/mapping, batch actions, and stale-safe list iteration.",
-    keywords: "findElements, List<WebElement>, Streams, batch operations, broken links",
+    title: "6.2 Explicit Waits & ExpectedConditions",
+    file: "selenium-webdriver-waits-explicit.html",
+    summary: "WebDriverWait class, until() method, and ExpectedConditions: visibilityOf, elementToBeClickable, presenceOfElementLocated, and titleContains.",
+    keywords: "WebDriverWait, ExpectedConditions, elementToBeClickable, visibilityOf, presenceOfElementLocated",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S4. Web Actions, Multiple Elements, Tables & Contexts",
+    section: "6. WebDriver: Waits",
     order: 3,
-    title: "4.3 HTML Web Tables: Extraction, Sorting Verification & Pagination",
-    file: "",
-    summary: "Dynamic row/column XPath lookup, verifying ascending/descending column sort with Collections.sort, and multi-page table loops.",
-    keywords: "web table, pagination, sorting verification, tbody, tr, td",
+    title: "6.3 FluentWait Configuration",
+    file: "selenium-webdriver-waits-fluent.html",
+    summary: "FluentWait class builder: withTimeout(), pollingEvery(), ignoring(NoSuchElementException.class), and custom lambda conditions.",
+    keywords: "FluentWait, withTimeout, pollingEvery, ignoring, lambda, custom condition",
     status: "planned"
   },
+
+  // Section 7: WebDriver - Actions API
   {
     track: "Selenium",
-    section: "S4. Web Actions, Multiple Elements, Tables & Contexts",
-    order: 4,
-    title: "4.4 Context Switching: Windows/Tabs, Nested Iframes, Alerts & Shadow DOM",
-    file: "",
-    summary: "getWindowHandles(), switchTo().window(), frame() / parentFrame() / defaultContent(), Alert accept/dismiss, and getShadowRoot().",
-    keywords: "getWindowHandles, switchTo, window, iframe, parentFrame, defaultContent, Alert, Shadow DOM, getShadowRoot",
-    status: "planned"
-  },
-  {
-    track: "Selenium",
-    section: "S5. Selenium Exceptions, Failure Analysis & IDE Debugging",
+    section: "7. WebDriver: Actions API",
     order: 1,
-    title: "5.1 All 24 Selenium Exceptions: Root Cause & Exact Fix Matrix",
-    file: "",
-    summary: "NoSuchElement, Timeout, StaleElementReference, ElementClickIntercepted, ElementNotInteractable, InvalidSelector, SessionNotCreated & more.",
-    keywords: "WebDriverException, NoSuchElementException, ElementClickInterceptedException, ElementNotInteractableException, StaleElementReferenceException",
+    title: "7.1 Mouse Actions",
+    file: "selenium-webdriver-actions-mouse.html",
+    summary: "Actions class pointer inputs: moveToElement (hover), contextClick (right click), doubleClick, dragAndDrop, and clickAndHold.",
+    keywords: "Actions, moveToElement, contextClick, doubleClick, dragAndDrop, clickAndHold, perform",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S5. Selenium Exceptions, Failure Analysis & IDE Debugging",
+    section: "7. WebDriver: Actions API",
     order: 2,
-    title: "5.2 Execution Failures, Diagnostic Info & IDE Debugging (Breakpoints & Stepping)",
-    file: "",
-    summary: "Capturing screenshots/logs/source on failure, Line vs Conditional vs Exception Breakpoints, and Step Over vs Step Into vs Step Out.",
-    keywords: "debugging, breakpoints, conditional breakpoint, step over, step into, step out, evaluate expression, TakesScreenshot, stack trace",
+    title: "7.2 Keyboard & Wheel Actions",
+    file: "selenium-webdriver-actions-keyboard-wheel.html",
+    summary: "KeyDown, keyUp, sendKeys with modifier keys (Keys.SHIFT, Keys.CONTROL), and scrollToElement or scrollByAmount wheel actions.",
+    keywords: "Actions, keyboard, keyDown, keyUp, Keys.SHIFT, Keys.CONTROL, wheel, scrollToElement, scrollByAmount",
     status: "planned"
   },
+
+  // Section 8: WebDriver - BiDi
   {
     track: "Selenium",
-    section: "S6. Enterprise Automation Framework & Clean Code",
+    section: "8. WebDriver: Bidirectional (BiDi)",
     order: 1,
-    title: "6.1 Hybrid Framework Architecture, POM & Page Factory (@FindBy)",
-    file: "",
-    summary: "Designing BaseTest, DriverFactory, Page Objects, PageFactory lazy proxies, AjaxElementLocatorFactory, and avoiding Code Bloat (DRY/KISS).",
-    keywords: "framework design, Page Object Model, POM, PageFactory, @FindBy, AjaxElementLocatorFactory, code bloat",
+    title: "8.1 WebDriver BiDi Architecture & Setup",
+    file: "selenium-webdriver-bidi-overview.html",
+    summary: "What WebDriver BiDi is, W3C WebSocket standard vs CDP, webSocketUrl capability, and real-time event streaming.",
+    keywords: "BiDi, Bidirectional, WebSocket, W3C, webSocketUrl, event streaming, CDP",
     status: "planned"
   },
   {
     track: "Selenium",
-    section: "S6. Enterprise Automation Framework & Clean Code",
+    section: "8. WebDriver: Bidirectional (BiDi)",
     order: 2,
-    title: "6.2 TestNG Parallel Execution, ThreadLocal<WebDriver> & ExtentReports",
-    file: "",
-    summary: "testng.xml parallel=methods, ThreadLocal isolation, ITestListener, ExtentReports, IRetryAnalyzer, and Maven CI/CD execution.",
-    keywords: "TestNG, parallel execution, ThreadLocal, ITestListener, ExtentReports, IRetryAnalyzer, DataProvider",
+    title: "8.2 Log & Network Interception with BiDi",
+    file: "selenium-webdriver-bidi-features.html",
+    summary: "Listening to console logs and JavaScript errors, inspecting HTTP requests, and basic network authentication interception.",
+    keywords: "BiDi, console logs, JavaScript errors, network interception, basic auth, Network listener",
+    status: "planned"
+  },
+
+  // Section 9: Selenium Manager
+  {
+    track: "Selenium",
+    section: "9. Selenium Manager",
+    order: 1,
+    title: "9.1 Automated Driver & Browser Management",
+    file: "selenium-manager-guide.html",
+    summary: "The built-in Rust binary tool, automated driver resolution, browser matching, local cache directory (~/.cache/selenium), and proxy configurations.",
+    keywords: "Selenium Manager, Rust binary, automated driver management, cache, proxy, Chrome for Testing",
+    status: "planned"
+  },
+
+  // Section 10: Selenium Grid
+  {
+    track: "Selenium",
+    section: "10. Selenium Grid",
+    order: 1,
+    title: "10.1 Grid Execution Modes & Architecture",
+    file: "selenium-grid-modes.html",
+    summary: "Standalone mode, Hub and Node mode, Distributed mode, and connecting tests using RemoteWebDriver.",
+    keywords: "Selenium Grid, Standalone, Hub, Node, Distributed, Router, Distributor, RemoteWebDriver",
+    status: "planned"
+  },
+
+  // Section 11: Test Practices
+  {
+    track: "Selenium",
+    section: "11. Test Practices",
+    order: 1,
+    title: "11.1 Page Object Models & Domain-Specific Language",
+    file: "selenium-test-practices-pom.html",
+    summary: "Structuring maintainable test suites with Page Object Model (POM), PageFactory @FindBy annotations, and business-focused Domain-Specific Languages (DSL).",
+    keywords: "Page Object Model, POM, PageFactory, @FindBy, Domain-Specific Language, DSL, test practices",
     status: "planned"
   },
 

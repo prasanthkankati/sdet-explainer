@@ -1,12 +1,11 @@
-# Progress Tracker (Current Version: `v2.6.0`)
+# Progress Tracker (Current Version: `v3.0.0`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
 
-## Published Selenium Track Topics (S1 + S2.1 Live!)
-- **S1.1:** Done + 35 Q&As (`v2.3.0`)
-- **S1.2:** Done + 35 Q&As (`v2.4.0`)
-- **S1.3:** Done + 35 Q&As (`v2.5.0`)
-- **S2.1:** Done (Locators, DOM, Attributes, Uniqueness + 35 Q&As) (`v2.6.0`)
+## Published Selenium Track Topics (Official Selenium.dev Clone Architecture)
+- **1. Overview:**
+  - **1.1 About Selenium & Components:** Done (`selenium-overview.html`) (`v3.0.0`)
+- **Next Up:** 2.1 Install Selenium Library (`selenium-webdriver-install.html`)
 
 ## Manual Testing Track: 100% Complete (15/15 Concept Pages + 15 Question Banks = 525 Questions!)
 - **M1 (1.1&ndash;1.4):** Done + 140 Q&amp;As (`v1.1.0`–`v1.3.0`)
