@@ -523,11 +523,12 @@ const TOPICS = [
     track: "Selenium",
     section: "S2. Locators, XPath & CSS Mastery",
     order: 1,
-    title: "2.1 All 8 Core Locators & Locator Priority Scorecard",
-    file: "",
-    summary: "id, name, cssSelector, xpath, linkText, partialLinkText, className, tagName ranked by speed, stability, and readability.",
-    keywords: "locators, By.id, By.name, By.cssSelector, By.xpath, locator priority",
-    status: "planned"
+    title: "2.1 All 8 Core Locators, DOM, Attributes & Uniqueness",
+    file: "selenium-s2-1-locators-scorecard.html",
+    summary: "LOC definition, reading DOM, stable vs dynamic attributes, 12 steps before writing, priority order, uniqueness checks, every locator syntax, and DevTools console commands.",
+    keywords: "locators, By.id, By.name, By.cssSelector, By.xpath, locator priority, DOM, attributes, dynamic elements, uniqueness, console, DevTools, $x, $$",
+    status: "done",
+    date: "2026-11-14"
   },
   {
     track: "Selenium",
