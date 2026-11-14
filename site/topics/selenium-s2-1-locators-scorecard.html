@@ -14,7 +14,7 @@
 
   <section>
     <h2>1. Idea</h2>
-    <p>A <b>locator</b> (LOC) is the rule that tells Selenium which element on a page to find. Every locator searches the <b>DOM</b>, the browser's tree version of the page, using the element's <b>attributes</b>, text, or position.</p>
+    <p>A <b>locator</b> is an instruction that tells Selenium which HTML element to find on a web page using <code>By</code> strategies. <b>LOC</b> is the 3-step engineering methodology used to build reliable locators: <b>List candidates</b>, <b>Optimize the selector</b>, and <b>Check uniqueness</b>. Every locator queries the <b>DOM</b> (Document Object Model) using an element's tag, attributes, text, or relative position.</p>
   </section>
 
   <section>
@@ -26,12 +26,13 @@
         <tr><th>Term</th><th>Plain meaning</th><th>Example from the login page</th></tr>
       </thead>
       <tbody>
-        <tr><td>Locator (LOC)</td><td>A search rule built with <code>By</code></td><td><code>By.id("username")</code></td></tr>
+        <tr><td>Locator</td><td>A search instruction built with <code>By</code></td><td><code>By.id("username")</code></td></tr>
+        <tr><td>LOC Methodology</td><td>3 steps: List candidates, Optimize selector, Check uniqueness</td><td>Listing <code>id</code> and <code>name</code>, optimizing to <code>#username</code>, checking count = 1</td></tr>
         <tr><td>DOM</td><td>Tree of all tags on the loaded page</td><td><code>&lt;input&gt;</code> sits under <code>&lt;div&gt;</code> under <code>&lt;body&gt;</code></td></tr>
         <tr><td>Element</td><td>One node in the DOM</td><td>The Username input</td></tr>
         <tr><td>Attribute</td><td>A name and value inside a tag</td><td><code>id="username"</code></td></tr>
         <tr><td>Tag</td><td>The element type</td><td><code>input</code>, <code>button</code>, <code>a</code>, <code>p</code></td></tr>
-        <tr><td>Text</td><td>Visible words inside a tag</td><td><code>Add to cart</code></td></tr>
+        <tr><td>Text</td><td>Visible words inside a tag</td><td><code>LOGIN TO QKART</code></td></tr>
       </tbody>
     </table>
 
@@ -324,8 +325,8 @@ $0.getAttribute('class')                               // class of the element s
     <h2>4. Interview Bank</h2>
 
     <h3>Tier 1: Definition</h3>
-    <p><b>1. (common) What is a locator (LOC)?</b><br>
-    A locator is a rule that tells Selenium which element to find on a page. It is built with a <code>By</code> method, for example <code>By.id("username")</code>.</p>
+    <p><b>1. (common) What is a locator, and what does the LOC methodology stand for?</b><br>
+    A locator is an instruction that tells Selenium which element to find on a web page using the <code>By</code> class. LOC stands for the 3-step methodology: <b>List candidates</b>, <b>Optimize the selector</b>, and <b>Check uniqueness</b>.</p>
 
     <p><b>2. (common) What is the DOM?</b><br>
     The DOM is the browser's tree version of the HTML page, where each tag is a node. Selenium searches this tree, not the raw HTML file.</p>
