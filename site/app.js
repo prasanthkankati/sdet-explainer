@@ -316,8 +316,15 @@
     const fill = rail.querySelector(".scroll-volume-fill");
     const dot = rail.querySelector(".scroll-volume-dot");
     const pctLabel = rail.querySelector(".scroll-volume-pct");
+    const isHome = document.body.classList.contains("home-page");
+    const controlsEl = document.getElementById("controls") || document.querySelector(".hero-banner");
 
     function updateScroller() {
+      if (isHome && controlsEl) {
+        const cTop = controlsEl.getBoundingClientRect().top;
+        const railTop = Math.max(58, Math.min(window.innerHeight - 80, Math.round(cTop)));
+        rail.style.top = `${railTop}px`;
+      }
       const docEl = document.documentElement;
       const maxScroll = Math.max(1, docEl.scrollHeight - window.innerHeight);
       const ratio = Math.min(1, Math.max(0, window.scrollY / maxScroll));
@@ -393,7 +400,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.3.0";
+  const SITE_VERSION = "v3.4.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -412,6 +419,25 @@
     if (footer) {
       footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer.</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright`;
     }
+
+    // Smooth page landing & navigation transition
+    window.addEventListener("pageshow", () => {
+      document.body.classList.remove("page-leaving");
+    });
+    document.addEventListener("click", e => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = e.target.closest("a[href]");
+      if (!link) return;
+      const href = link.getAttribute("href") || "";
+      if (!href || href.startsWith("#") || href.startsWith("javascript:") || link.target === "_blank") return;
+      if (href.includes(".html")) {
+        e.preventDefault();
+        document.body.classList.add("page-leaving");
+        setTimeout(() => {
+          location.href = link.href;
+        }, 120);
+      }
+    });
 
     document.addEventListener("keydown", e => {
       if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
@@ -538,16 +564,23 @@
     });
 
     selectTrackFn = function (newTrack) {
-      track = newTrack;
-      if (newTrack !== "All") {
-        document.body.setAttribute("data-track", newTrack);
+      const applySwitch = () => {
+        track = newTrack;
+        if (newTrack !== "All") {
+          document.body.setAttribute("data-track", newTrack);
+        } else {
+          document.body.removeAttribute("data-track");
+        }
+        controls.querySelectorAll(".chip").forEach(x => {
+          x.classList.toggle("active", x.dataset.track === track);
+        });
+        render();
+      };
+      if (document.startViewTransition) {
+        document.startViewTransition(applySwitch);
       } else {
-        document.body.removeAttribute("data-track");
+        applySwitch();
       }
-      controls.querySelectorAll(".chip").forEach(x => {
-        x.classList.toggle("active", x.dataset.track === track);
-      });
-      render();
     };
 
     window.addEventListener("hashchange", () => {
