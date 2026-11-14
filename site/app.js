@@ -121,8 +121,9 @@
     const navTracks = ["Manual", "Java", "Selenium", "TypeScript", "Playwright"];
     navbar.innerHTML = `
       <div class="se-navbar-left">
+        <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776; DOCS</button>
         <a href="../index.html" class="se-brand" title="Back to SDET Explainer Home (Alt+H)">SDET EXPLAINER</a>
-        <span class="se-brand-sub">[${esc(meta.badge)}]</span>
+        <a href="../index.html#${encodeURIComponent(currentTrack)}" class="se-brand-sub" title="View ${esc(currentTrack)} Track on Home">[${esc(meta.badge)}]</a>
         <ul class="se-navbar-links">
           ${navTracks.map(tr => `
             <li><a href="${firstFileForTrack(tr)}" class="${tr === currentTrack ? "active" : ""}">${tr === "TypeScript" ? "TS / JS" : tr}</a></li>
@@ -148,6 +149,19 @@
     if (navSearchBtn) {
       navSearchBtn.onclick = () => { if (openCmdFn) openCmdFn(""); };
     }
+
+    // Mobile DocTree Drawer Toggle & Backdrop
+    let backdropEl = document.querySelector(".se-sidebar-backdrop");
+    if (!backdropEl) {
+      backdropEl = document.createElement("div");
+      backdropEl.className = "se-sidebar-backdrop";
+      document.body.appendChild(backdropEl);
+    }
+    const closeMobTree = () => document.body.classList.remove("mob-tree-open");
+    const toggleMobTree = () => document.body.classList.toggle("mob-tree-open");
+    backdropEl.onclick = closeMobTree;
+    const mobTreeBtn = document.getElementById("se-mob-tree-btn");
+    if (mobTreeBtn) mobTreeBtn.onclick = toggleMobTree;
 
     // 2. Ensure .se-layout wrapper exists around sidebar, main article, and right TOC
     let layout = document.querySelector(".se-layout");
@@ -191,7 +205,7 @@
       });
 
       const doneCount = trackTopics.filter(t => t.file).length;
-      let treeHtml = `<div class="se-sidebar-hdr"><span>${esc(currentTrack)} DocTree</span><span>${doneCount}/${trackTopics.length}</span></div><ul class="se-tree">`;
+      let treeHtml = `<div class="se-sidebar-hdr"><span>${esc(currentTrack)} DocTree (${doneCount}/${trackTopics.length})</span><button type="button" class="se-sidebar-close" id="se-sidebar-close-btn">CLOSE &times;</button></div><ul class="se-tree">`;
       secGroups.forEach((items, secName) => {
         items.sort((a, b) => (a.order || 99) - (b.order || 99));
         treeHtml += `<li><span class="se-sec-label">${esc(secName)}</span><ul>`;
@@ -208,6 +222,9 @@
       treeHtml += `</ul>`;
       sidebar.innerHTML = treeHtml;
 
+      const closeBtn = document.getElementById("se-sidebar-close-btn");
+      if (closeBtn) closeBtn.onclick = closeMobTree;
+
       // Auto-scroll active item into center of sidebar
       const activeLink = sidebar.querySelector("a.active");
       if (activeLink) {
@@ -218,8 +235,9 @@
       }
     }
 
-    // 4. Populate Right Sidebar TOC (.se-toc "On this page") from article h2 headings + Scroll-Spy
+    // 4. Populate Right Sidebar TOC (.se-toc "On this page") + Mobile Collapsible TOC (.se-mob-toc)
     const toc = layout.querySelector(".se-toc");
+    const mainContainer = layout.querySelector(".se-main");
     if (toc) {
       const headings = Array.from(article.querySelectorAll("h2"));
       const usedIds = new Set();
@@ -235,9 +253,18 @@
         return { id, text: h.textContent.trim(), el: h };
       });
 
-      toc.innerHTML = `<div class="se-toc-title">On this page</div><ul>` +
-        tocItems.map(item => `<li><a href="#${item.id}" data-target="${item.id}">${esc(item.text)}</a></li>`).join("") +
-        `</ul>`;
+      const tocLinksHtml = tocItems.map(item => `<li><a href="#${item.id}" data-target="${item.id}">${esc(item.text)}</a></li>`).join("");
+      toc.innerHTML = `<div class="se-toc-title">On this page</div><ul>${tocLinksHtml}</ul>`;
+
+      if (mainContainer && tocItems.length > 0 && !mainContainer.querySelector(".se-mob-toc")) {
+        const mobToc = document.createElement("details");
+        mobToc.className = "se-mob-toc";
+        mobToc.innerHTML = `<summary>On this page (${tocItems.length})</summary><ul>${tocLinksHtml}</ul>`;
+        mobToc.querySelectorAll("a").forEach(a => {
+          a.addEventListener("click", () => { mobToc.removeAttribute("open"); });
+        });
+        mainContainer.insertBefore(mobToc, article);
+      }
 
       const tocLinks = Array.from(toc.querySelectorAll("a[data-target]"));
       function updateScrollSpy() {
@@ -258,7 +285,7 @@
     }
   }
 
-  // Right-Side Volume-Dot Scroll Progress Indicator Across All Pages
+  // Right-Side Volume-Dot Scroll Progress Indicator Across All Pages (Mouse + Touch)
   function initVolumeScroller() {
     if (document.querySelector(".scroll-volume-rail")) return;
     const rail = document.createElement("div");
@@ -288,9 +315,9 @@
       pctLabel.textContent = `${pct}%`;
     }
 
-    function scrubToEvent(e) {
+    function scrubToClientY(clientY) {
       const rect = rail.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (e.clientY - rect.top) / rect.height));
+      const ratio = Math.min(1, Math.max(0, (clientY - rect.top) / rect.height));
       const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
       window.scrollTo({ top: ratio * maxScroll, behavior: "auto" });
     }
@@ -299,17 +326,33 @@
     rail.addEventListener("mousedown", e => {
       dragging = true;
       rail.classList.add("dragging");
-      scrubToEvent(e);
+      scrubToClientY(e.clientY);
     });
     window.addEventListener("mousemove", e => {
       if (!dragging) return;
-      scrubToEvent(e);
+      scrubToClientY(e.clientY);
     });
     window.addEventListener("mouseup", () => {
       if (!dragging) return;
       dragging = false;
       rail.classList.remove("dragging");
     });
+
+    rail.addEventListener("touchstart", e => {
+      if (!e.touches[0]) return;
+      dragging = true;
+      rail.classList.add("dragging");
+      scrubToClientY(e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener("touchmove", e => {
+      if (!dragging || !e.touches[0]) return;
+      scrubToClientY(e.touches[0].clientY);
+    }, { passive: true });
+    window.addEventListener("touchend", () => {
+      if (!dragging) return;
+      dragging = false;
+      rail.classList.remove("dragging");
+    }, { passive: true });
 
     window.addEventListener("scroll", updateScroller, { passive: true });
     window.addEventListener("resize", updateScroller, { passive: true });
@@ -337,7 +380,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.1.0";
+  const SITE_VERSION = "v3.2.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -414,6 +457,11 @@
     if (hashTrack && tracksList.some(t => t.id.toLowerCase() === hashTrack.toLowerCase())) {
       track = tracksList.find(t => t.id.toLowerCase() === hashTrack.toLowerCase()).id;
     }
+    if (track !== "All") {
+      document.body.setAttribute("data-track", track);
+    } else {
+      document.body.removeAttribute("data-track");
+    }
 
     controls.querySelectorAll(".chip").forEach(c => c.remove());
     tracksList.forEach(tr => {
@@ -425,7 +473,10 @@
       const countDone = tr.id === "All" ? TOPICS.filter(t => t.file).length : TOPICS.filter(t => t.track === tr.id && t.file).length;
       const countTotal = tr.id === "All" ? TOPICS.length : TOPICS.filter(t => t.track === tr.id).length;
       b.textContent = countTotal > 0 ? `${tr.label} (${countDone}/${countTotal})` : tr.label;
-      b.onclick = () => selectTrackFn(tr.id);
+      b.onclick = () => {
+        history.replaceState(null, "", tr.id === "All" ? "index.html" : `#${tr.id}`);
+        selectTrackFn(tr.id);
+      };
       controls.appendChild(b);
     });
 
@@ -441,6 +492,16 @@
       });
       render();
     };
+
+    window.addEventListener("hashchange", () => {
+      const ht = (location.hash || "").replace(/^#/, "");
+      if (!ht) {
+        selectTrackFn("All");
+      } else {
+        const match = tracksList.find(t => t.id.toLowerCase() === ht.toLowerCase());
+        if (match) selectTrackFn(match.id);
+      }
+    });
 
     function render() {
       const q = (search ? search.value : "").trim().toLowerCase();
