@@ -380,7 +380,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.2.0";
+  const SITE_VERSION = "v3.2.1";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
