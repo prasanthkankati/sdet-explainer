@@ -263,22 +263,7 @@ raw.add("text");
 List&lt;Integer&gt; nums = raw;  // unchecked warning at compile time, no immediate error
 Integer val = nums.get(0); // throws ClassCastException at runtime!</code></pre></section>
 
-  <section><h2>7. Common Interview Questions on Variables &amp; Casting</h2>
-    <ul>
-      <li><b>Q: What is the output of <code>(int) 3.99</code> and <code>(int) -3.99</code>?</b><br><code>3</code> and <code>-3</code>. Floating-point to integer narrowing truncates toward zero.</li>
-      <li><b>Q: Why does <code>byte c = a + b;</code> fail to compile when <code>a</code> and <code>b</code> are <code>byte</code>?</b><br>Binary arithmetic promotes <code>byte</code> operands to <code>int</code>, so an explicit cast <code>(byte) (a + b)</code> is required.</li>
-      <li><b>Q: Does <code>b += 5</code> compile when <code>b</code> is a <code>byte</code>?</b><br>Yes. Compound assignment includes an implicit narrowing cast equivalent to <code>b = (byte) (b + 5)</code>.</li>
-      <li><b>Q: What is the output of <code>(byte) 128</code>?</b><br><code>-128</code>. Value 128 overflows the signed 8-bit max (<code>127</code>) and wraps around.</li>
-      <li><b>Q: What is the output of <code>(char) 97</code> and <code>int x = 'A' + 2;</code>?</b><br><code>'a'</code> and <code>67</code>. Character arithmetic promotes <code>'A'</code> (<code>65</code>) to <code>int</code>.</li>
-      <li><b>Q: Why does <code>float f = 1.0;</code> fail to compile?</b><br><code>1.0</code> is a <code>double</code> literal; narrowing to <code>float</code> requires <code>1.0f</code> or <code>(float) 1.0</code>.</li>
-      <li><b>Q: Can <code>boolean</code> be cast to <code>int</code>?</b><br>No. <code>boolean</code> cannot be cast to or from any other type.</li>
-      <li><b>Q: What exception occurs for an invalid downcast, and how do you avoid it?</b><br><code>ClassCastException</code> at runtime. Guard with <code>instanceof</code> before downcasting.</li>
-      <li><b>Q: Is upcasting checked at runtime?</b><br>No. Converting a subclass reference to its supertype is verified at compile time and is always safe.</li>
-      <li><b>Q: Does <code>(String) null</code> throw an exception?</b><br>No. <code>null</code> can be cast to any reference type and evaluates to <code>null</code>.</li>
-    </ul>
-    <p><a class="qa-chip" href="interview-j2-2-qa.html"><span class="tag Interview">Interview</span>J2.2 Question Bank (21 Questions) &rarr;</a></p></section>
-
-  <section><h2>8. Summary &amp; Mini Glossary</h2>
+  <section><h2>7. Summary &amp; Mini Glossary</h2>
     <ul>
       <li><b>Variables:</b> Local variables live on the Stack with no default value; Instance and Static fields receive default values.</li>
       <li><b>Widening vs Narrowing:</b> Widening conversions are implicit and safe; narrowing requires an explicit <code>(type)</code> cast and may truncate or wrap data.</li>
@@ -292,7 +277,23 @@ Integer val = nums.get(0); // throws ClassCastException at runtime!</code></pre>
       <tr><td>Numeric Promotion</td><td>Compiler rule upgrading <code>byte</code>, <code>short</code>, and <code>char</code> operands to <code>int</code> before arithmetic</td></tr>
       <tr><td>Upcasting / Downcasting</td><td>Viewing an object as a supertype (implicit) vs casting back to a subtype (checked at runtime)</td></tr>
       <tr><td><code>ClassCastException</code></td><td>Runtime error thrown when an object's real Heap class does not match a downcast target</td></tr>
-    </table>
+    </table></section>
+
+  <section><h2>8. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-j2-2-qa.html"><span class="tag Interview">Interview</span>J2.2 Question Bank (35 Questions) &rarr;</a></p>
+    <ul>
+      <li><b>Q: What is the output of <code>(int) 3.99</code> and <code>(int) -3.99</code>?</b><br><code>3</code> and <code>-3</code>. Floating-point to integer narrowing truncates toward zero.</li>
+      <li><b>Q: Why does <code>byte c = a + b;</code> fail to compile when <code>a</code> and <code>b</code> are <code>byte</code>?</b><br>Binary arithmetic promotes <code>byte</code> operands to <code>int</code>, so an explicit cast <code>(byte) (a + b)</code> is required.</li>
+      <li><b>Q: Does <code>b += 5</code> compile when <code>b</code> is a <code>byte</code>?</b><br>Yes. Compound assignment includes an implicit narrowing cast equivalent to <code>b = (byte) (b + 5)</code>.</li>
+      <li><b>Q: What is the output of <code>(byte) 128</code>?</b><br><code>-128</code>. Value 128 overflows the signed 8-bit max (<code>127</code>) and wraps around.</li>
+      <li><b>Q: What is the output of <code>(char) 97</code> and <code>int x = 'A' + 2;</code>?</b><br><code>'a'</code> and <code>67</code>. Character arithmetic promotes <code>'A'</code> (<code>65</code>) to <code>int</code>.</li>
+      <li><b>Q: Why does <code>float f = 1.0;</code> fail to compile?</b><br><code>1.0</code> is a <code>double</code> literal; narrowing to <code>float</code> requires <code>1.0f</code> or <code>(float) 1.0</code>.</li>
+      <li><b>Q: Can <code>boolean</code> be cast to <code>int</code>?</b><br>No. <code>boolean</code> cannot be cast to or from any other type.</li>
+      <li><b>Q: What exception occurs for an invalid downcast, and how do you avoid it?</b><br><code>ClassCastException</code> at runtime. Guard with <code>instanceof</code> before downcasting.</li>
+      <li><b>Q: Is upcasting checked at runtime?</b><br>No. Converting a subclass reference to its supertype is verified at compile time and is always safe.</li>
+      <li><b>Q: Does <code>(String) null</code> throw an exception?</b><br>No. <code>null</code> can be cast to any reference type and evaluates to <code>null</code>.</li>
+    </ul>
+    <p><a class="qa-chip" href="interview-j2-2-qa.html"><span class="tag Interview">Interview</span>Open Full J2.2 Question Bank (35 Questions) &rarr;</a></p>
     <p>&larr; Previous: <a href="java-program-structure-main.html">2.1 Program Structure &amp; main() Method Decoded</a> &middot; Next: <a href="java-wrapper-autoboxing-cache.html">2.3 Wrapper Classes, Autoboxing &amp; Integer Cache &rarr;</a></p></section>
 </article>
 </div>

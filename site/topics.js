@@ -1142,9 +1142,9 @@ const TOPICS = [
     track: "Interview",
     section: "I-J2. Java: Core Java Fundamentals Q&A",
     order: 2,
-    title: "J2.2 Q&A: Variables, Primitive vs Reference Types & Type Casting (21 Questions)",
+    title: "J2.2 Q&A: Variables, Primitive vs Reference Types & Type Casting (35 Questions)",
     file: "interview-j2-2-qa.html",
-    summary: "21 interview questions across 5 tiers: Basics, How it works, Real situations, Troubleshooting & Design choices.",
+    summary: "35 interview questions across 5 tiers: Basics, How it works, Real situations, Troubleshooting & Design choices.",
     keywords: "java J2.2 interview questions, variables, primitive vs reference types & type casting",
     status: "done",
     date: "2026-11-15"
