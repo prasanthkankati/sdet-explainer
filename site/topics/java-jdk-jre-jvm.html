@@ -3,117 +3,211 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Java: JDK vs JRE vs JVM</title>
+<title>1.1 JDK vs JRE vs JVM &amp; Bytecode Portability | SDET Explainer</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body>
+<body class="in-chapter" data-track="Java">
 <div class="wrap">
-<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
-  <h1>Java Intro: JDK vs JRE vs JVM</h1>
+  <h1>1.1 JDK vs JRE vs JVM &amp; Bytecode Portability</h1>
+  <div class="se-lead">How javac compiles Java source files into platform-neutral bytecode and how the JDK, JRE, and JVM work together to execute tests.</div>
 
-  <section><h2>1. Definition</h2>
-    <p class="def">Java source code is compiled by the JDK into bytecode, and the JVM (inside the JRE) loads, checks and runs that bytecode on any computer.</p></section>
+  <p>Java separates compilation from execution so the same compiled test suite runs across Windows, macOS, and Linux without rewriting code. The Java Development Kit (JDK) compiles source files into bytecode, while the Java Virtual Machine (JVM) inside the Java Runtime Environment (JRE) verifies and executes that bytecode on the host operating system.</p>
 
-  <section><h2>2. Memory hook</h2>
-    <p><b>JDK = Make it, JRE = Run it, JVM = Do it.</b></p>
-    <ul>
-      <li><b>JVM</b> is only the engine that does the work. It cannot run alone, because it needs the library files.</li>
-      <li><b>JRE</b> is JVM plus the library files, so it can run programs but cannot build them.</li>
-      <li><b>JDK</b> is JRE plus the build tools, so you can write, build and run.</li>
-    </ul></section>
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Every Selenium and TestNG automation run starts with the JDK compiling your test classes into bytecode and the JVM executing them when Maven or your IDE launches the suite.</p>
+  </section>
 
-  <section><h2>3. The three layers (they nest like Russian dolls)</h2>
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>The <code>javac</code> compiler inside the JDK translates human-readable <code>.java</code> source files into platform-independent <code>.class</code> bytecode files.</li>
+      <li>Every compiled <code>.class</code> file begins with the 4-byte magic number <code>0xCAFEBABE</code> followed by a major class file version (<code>52.0</code> for Java 8, <code>55.0</code> for Java 11, <code>61.0</code> for Java 17, <code>65.0</code> for Java 21).</li>
+      <li>The JVM is the execution engine that reads bytecode, manages runtime memory, and translates instructions into native CPU machine code for the current operating system.</li>
+      <li>The JRE bundles the JVM together with the core Java class libraries (<code>java.base</code> containing <code>String</code>, <code>System</code>, and <code>ArrayList</code>) and runtime configuration files.</li>
+      <li>The JDK is a superset of the JRE that adds developer tools including <code>javac</code> (compiler), <code>jar</code> (archiver), <code>javadoc</code>, <code>jdb</code>, and <code>jlink</code>.</li>
+      <li>Starting with Java 11, Oracle and OpenJDK stopped distributing a standalone JRE download; the JDK contains the full runtime and <code>jlink</code> builds custom minimal runtimes.</li>
+      <li>Compiling with a newer JDK and running on an older JVM throws <code>java.lang.UnsupportedClassVersionError</code> because older JVMs reject higher class file major versions.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Component</th><th>Primary Role</th><th>Contents</th><th>Can Compile Code?</th><th>Can Run Bytecode?</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>JDK</b></td><td>Build, compile, package, and run Java applications</td><td>JRE + <code>javac</code>, <code>jar</code>, <code>javadoc</code>, <code>jdb</code>, <code>jshell</code></td><td>Yes</td><td>Yes</td></tr>
+        <tr><td><b>JRE</b></td><td>Provide runtime environment to execute compiled bytecode</td><td>JVM + core standard libraries + config files</td><td>No</td><td>Yes</td></tr>
+        <tr><td><b>JVM</b></td><td>Load, verify, and execute bytecode in memory</td><td>Class Loader + Runtime Memory Areas + Execution Engine</td><td>No</td><td>Only when supplied core libraries</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>An engineer writes Java source code inside a <code>.java</code> file using classes from the JDK and Selenium libraries.</li>
+      <li>The <code>javac</code> compiler checks syntax and type rules, then generates a binary <code>.class</code> file containing JVM bytecode instructions.</li>
+      <li>When <code>java ClassName</code> starts, the operating system spawns a JVM process tailored to that exact CPU and OS (Windows, macOS, or Linux).</li>
+      <li>The JVM loads the <code>.class</code> bytecode along with required standard library classes from the runtime modules.</li>
+      <li>The bytecode verifier checks stack bounds and type safety before the Execution Engine interprets or JIT-compiles the instructions into native CPU machine code.</li>
+    </ol>
     <div class="arch jdk">
-      <div class="lbl">JDK <small>Java Development Kit: "Make it". What you install.</small></div>
-      <div class="note">Everything to write, build and run. Contains the JRE plus the developer tools below.</div>
+      <div class="lbl">JDK (Java Development Kit) <small>Superset: build tools + runtime</small></div>
+      <div class="note">Provides everything required to compile, package, debug, and run Java test suites.</div>
       <div class="cols">
-        <div class="item"><b>javac</b><span>Compiler. Turns Hello.java into Hello.class (bytecode).</span></div>
-        <div class="item"><b>jar</b><span>Packs many .class files into one .jar (this is what Selenium ships as).</span></div>
-        <div class="item"><b>javadoc / jdb / jshell</b><span>Docs generator, debugger, quick playground.</span></div>
+        <div class="item"><b>javac</b><span>Compiles <code>.java</code> source files into <code>.class</code> bytecode.</span></div>
+        <div class="item"><b>jar</b><span>Bundles compiled <code>.class</code> files into distributable <code>.jar</code> archives.</span></div>
+        <div class="item"><b>jdb / javadoc / jlink</b><span>Debugger, API documentation generator, and custom runtime linker.</span></div>
       </div>
       <div class="arch jre">
-        <div class="lbl">JRE <small>Java Runtime Environment: "Run it"</small></div>
-        <div class="note">Everything to run a finished program. Contains the JVM plus the library files.</div>
+        <div class="lbl">JRE (Java Runtime Environment) <small>Runtime subset: JVM + standard libraries</small></div>
+        <div class="note">Supplies the standard classes and configuration required at execution time.</div>
         <div class="cols">
-          <div class="item"><b>Class libraries</b><span>Ready-made code: String, ArrayList, Math, System. Loaded by the JVM when your code uses them.</span></div>
-          <div class="item"><b>Config files</b><span>Security and settings files the JVM reads at startup.</span></div>
+          <div class="item"><b>Core Class Libraries</b><span>Standard modules including <code>java.lang.String</code>, <code>System</code>, and <code>java.util.List</code>.</span></div>
+          <div class="item"><b>Runtime Config</b><span>Security policies, locale data, and JVM configuration files.</span></div>
         </div>
         <div class="arch jvm">
-          <div class="lbl">JVM <small>Java Virtual Machine: "Do it". The engine.</small></div>
-          <div class="note">Loads bytecode, stores it in memory, executes it. Details on the next page.</div>
+          <div class="lbl">JVM (Java Virtual Machine) <small>Execution engine inside the JRE</small></div>
+          <div class="note">Loads bytecode, allocates Heap and Stack memory, and runs instructions on the host OS.</div>
           <div class="cols">
-            <div class="item"><b>Class Loader</b><span>Brings .class files into memory.</span></div>
-            <div class="item"><b>Memory areas</b><span>Heap, Stack, Metaspace: where data lives.</span></div>
-            <div class="item"><b>Execution Engine</b><span>Interpreter, JIT, Garbage Collector: runs code.</span></div>
+            <div class="item"><b>Class Loader</b><span>Reads <code>.class</code> bytes and links symbols into memory.</span></div>
+            <div class="item"><b>Runtime Memory</b><span>Heap, Stack, Metaspace, and PC Register.</span></div>
+            <div class="item"><b>Execution Engine</b><span>Interpreter, JIT Compiler, and Garbage Collector.</span></div>
           </div>
         </div>
       </div>
-    </div></section>
+    </div>
 
-  <section><h2>4. JRE vs JVM: the confusion fixed</h2>
-    <table>
-      <tr><th></th><th>JVM</th><th>JRE</th></tr>
-      <tr><td>Is it</td><td>A program (the engine)</td><td>A package that contains the JVM</td></tr>
-      <tr><td>Contains</td><td>Class loader, memory areas, execution engine</td><td>JVM + class libraries + config files</td></tr>
-      <tr><td>Runs Hello.class alone?</td><td>No. String and System live in the libraries.</td><td>Yes</td></tr>
-      <tr><td>Job</td><td>Executes bytecode</td><td>Provides everything needed to run</td></tr>
-    </table>
-    <p>Example: your code calls <code>new ArrayList&lt;&gt;()</code>. The code for ArrayList is <b>not</b> in the JVM. It sits in the library files (<code>java.base</code>) shipped in the JRE. The JVM's class loader fetches it when needed.</p></section>
+    <p>Compiled Java entry point demonstrating bytecode execution with Selenium context:</p>
+<pre><code>package dev.java.jvm; // Declares the package matching the folder path
 
-  <section><h2>5. Code example</h2>
-<pre><code>// Hello.java
-public class Hello {
-    public static void main(String[] args) {
-        System.out.println("Hello, SDET!");   // prints: Hello, SDET!
-    }
-}</code></pre>
-<pre><code class="bash">javac Hello.java    # JDK tool: compiles to Hello.class (bytecode)
-java Hello          # starts the JVM, which runs the bytecode -&gt; Hello, SDET!</code></pre></section>
+import org.openqa.selenium.WebDriver; // Imports WebDriver from the Selenium JAR on classpath
+import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver implementation
 
-  <section><h2>6. Step-by-step: what happens</h2>
+public class BytecodeDemo { // Class name must match BytecodeDemo.java for public classes
+    public static void main(String[] args) { // JVM entry point invoked after class loading
+        System.out.println("JDK Vendor: " + System.getProperty("java.vendor")); // Reads runtime property from java.base
+        WebDriver driver = new ChromeDriver(); // Instantiates driver object on the Heap
+        driver.get("https://qkart-qa-web.labs.crio.do/"); // Dispatches W3C HTTP navigate command
+        driver.quit(); // Terminates browser session before JVM exits
+    } // Ends main method frame
+} // Ends BytecodeDemo class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
     <ol>
-      <li>You write <code>Hello.java</code> (human-readable source code).</li>
-      <li><code>javac</code> (JDK) checks syntax and creates <code>Hello.class</code> (bytecode, not machine code).</li>
-      <li><code>java Hello</code> starts the JVM.</li>
-      <li>The JVM loads <code>Hello.class</code> plus <code>String</code> and <code>System</code> from the libraries (JRE).</li>
-      <li>The JVM checks the bytecode is safe, then runs it on your OS and CPU.</li>
+      <li>Confusing platform independence of bytecode with platform independence of the JVM; bytecode is identical across operating systems, whereas the JVM executable itself is OS-specific and CPU-specific.</li>
+      <li>Setting <code>JAVA_HOME</code> to a JRE directory instead of a JDK root; Maven fails compilation because <code>javac</code> is absent from a JRE-only path.</li>
+      <li>Targeting Java 8 in <code>pom.xml</code> while depending on Selenium 4; Selenium 4 is compiled for Java 11 bytecode (version <code>55.0</code>) and throws <code>UnsupportedClassVersionError</code> on a Java 8 JVM.</li>
+      <li>Assuming the JVM contains the source code of <code>String</code> or <code>ArrayList</code>; those classes reside inside JRE module libraries (<code>java.base</code>), not inside the JVM binary.</li>
     </ol>
-    <p>Bytecode is the same on every OS. The <b>JVM is different per OS</b> (Windows, Mac, Linux). That is the trick behind "write once, run anywhere".</p></section>
+  </section>
 
-  <section><h2>7. Real-life analogy: a restaurant</h2>
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
     <table>
-      <tr><th>Restaurant</th><th>Java</th></tr>
-      <tr><td>Recipe written in plain language</td><td>Hello.java</td></tr>
-      <tr><td>Translator who rewrites it as a standard kitchen-code card</td><td>javac, bytecode</td></tr>
-      <tr><td>Whole restaurant business: recipe office + open kitchen</td><td>JDK</td></tr>
-      <tr><td>Open kitchen ready to serve: chef, pantry (ingredient library), stoves. Cannot write recipes.</td><td>JRE</td></tr>
-      <tr><td>The head chef's cooking operation (useless without a pantry)</td><td>JVM</td></tr>
-    </table></section>
-
-  <section><h2>8. Why it matters</h2>
-    <p>Compile once and the same .class file runs on Windows, Mac and Linux. You install the <b>JDK</b> (it includes the JRE). Since Java 11 there is no separate JRE download.</p>
-    <p><b>SDET link:</b> Selenium tests are Java code. You need the JDK to compile them, and <code>JAVA_HOME</code> must point to it so Maven, Gradle, Eclipse and IntelliJ can find it.</p></section>
-
-  <section><h2>9. Quick test</h2>
-    <p><code>javac -version</code> works: you have the JDK. Only <code>java -version</code> works: JRE only, you can run Java but cannot compile it.</p></section>
-
-  <section><h2>10. Mini glossary</h2>
-    <table>
-      <tr><th>Term</th><th>Plain meaning</th></tr>
-      <tr><td>Source code</td><td>Text you write (.java)</td></tr>
-      <tr><td>Compile</td><td>Translate to another form (.java to .class)</td></tr>
-      <tr><td>Bytecode</td><td>Universal half-compiled code (.class), same on every OS</td></tr>
-      <tr><td>Machine code</td><td>Native 0s and 1s for one specific CPU</td></tr>
-      <tr><td>Runtime</td><td>While the program is running</td></tr>
-      <tr><td>Library</td><td>Ready-made code you reuse (ArrayList, Selenium)</td></tr>
-      <tr><td>Classpath</td><td>List of folders and jars where Java looks for classes</td></tr>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>JDK</b></td><td>Java Development Kit containing the JRE plus development tools including <code>javac</code>, <code>jar</code>, and <code>jdb</code>.</td></tr>
+        <tr><td><b>JRE</b></td><td>Java Runtime Environment combining the JVM with core standard class libraries and runtime configuration files.</td></tr>
+        <tr><td><b>JVM</b></td><td>Java Virtual Machine process that loads, verifies, and executes compiled bytecode on a specific operating system.</td></tr>
+        <tr><td><b>Bytecode</b></td><td>Intermediate binary instruction set stored in <code>.class</code> files that the JVM executes independently of the underlying CPU.</td></tr>
+        <tr><td><b><code>javac</code></b></td><td>The JDK compiler tool that translates <code>.java</code> source files into <code>.class</code> bytecode files.</td></tr>
+        <tr><td><b><code>JAVA_HOME</code></b></td><td>An environment variable pointing to the JDK root directory used by Maven, Gradle, and CI runners.</td></tr>
+        <tr><td><b><code>UnsupportedClassVersionError</code></b></td><td>A linkage error thrown when a JVM attempts to load a <code>.class</code> file compiled for a newer Java major version.</td></tr>
+      </tbody>
     </table>
-    <p>Next: <a href="java-jvm-architecture.html">JVM Architecture and Memory Areas &rarr;</a></p></section>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+
+    <h3>Basics</h3>
+
+    <p><b>What is the exact relationship between JDK, JRE, and JVM?</b><br>
+    The JVM is the core engine that executes bytecode, the JRE wraps the JVM together with standard class libraries, and the JDK wraps the JRE together with development tools including <code>javac</code> and <code>jar</code>. The JDK is strictly a superset of the JRE, which is a superset of the JVM. For example, writing and compiling a Selenium test requires the JDK, while running a pre-compiled JAR only requires the runtime inside the JRE.</p>
+
+    <p><b>Why is Java called 'Write Once, Run Anywhere' (WORA)?</b><br>
+    The <code>javac</code> compiler produces standardized <code>.class</code> bytecode that has no dependency on Windows, macOS, or Linux CPU instructions. Each operating system runs its own native JVM implementation that understands that identical bytecode format. A Selenium framework JAR compiled on a macOS laptop executes without recompilation on a Linux Jenkins agent.</p>
+
+    <p><b>Is the JVM itself platform-independent?</b><br>
+    No, the JVM is platform-dependent because it must interface directly with the host operating system's memory manager, threads, and CPU architecture. A Windows machine uses a Windows JVM binary, while a Linux container uses a Linux JVM binary. Bytecode is platform-independent precisely because each OS provides a platform-specific JVM to translate it.</p>
+
+    <p><b>What is bytecode and where is it stored?</b><br>
+    Bytecode is the compact binary instruction format generated by <code>javac</code> for the JVM stack-based execution model rather than for physical hardware registers. It is stored in <code>.class</code> files on disk or packaged inside <code>.jar</code> archives. Every valid <code>.class</code> file starts with the 4-byte hexadecimal signature <code>0xCAFEBABE</code>.</p>
+
+    <h3>How it works</h3>
+
+    <p><b>Why can the JVM not execute a Java program without the JRE libraries?</b><br>
+    The JVM binary provides class loading, memory areas, and instruction execution, but it does not bundle standard classes like <code>java.lang.String</code>, <code>java.lang.System</code>, or <code>java.util.ArrayList</code>. Those classes live in the runtime libraries supplied by the JRE (packaged in <code>lib/modules</code> since Java 9). Without those libraries, even a minimal <code>System.out.println()</code> fails to link.</p>
+
+    <p><b>What happens step by step between running <code>javac Test.java</code> and <code>java Test</code>?</b><br>
+    First, <code>javac Test.java</code> parses the source text, enforces compile-time type safety, and writes <code>Test.class</code> bytecode to disk. Next, <code>java Test</code> launches a native JVM process, loads <code>Test.class</code> into memory, verifies bytecode safety rules, and invokes <code>public static void main(String[] args)</code>. Finally, the Execution Engine interprets or JIT-compiles the instructions onto the CPU.</p>
+
+    <p><b>What does the class file major version inside a <code>.class</code> file represent?</b><br>
+    Bytes 6 and 7 of every <code>.class</code> file store the major version number indicating the minimum JVM specification required to run it. Java 8 uses version <code>52.0</code>, Java 11 uses <code>55.0</code>, Java 17 uses <code>61.0</code>, and Java 21 uses <code>65.0</code>. When a Maven build runs under Java 8 against a Selenium 4 JAR built for version <code>55.0</code>, the JVM rejects the class during loading.</p>
+
+    <h3>Real situations</h3>
+
+    <p><b>A Jenkins pipeline compiles tests on JDK 21 locally but fails on a CI runner with <code>UnsupportedClassVersionError: class file version 65.0</code>. What happened?</b><br>
+    The CI runner is executing the compiled bytecode using an older JVM, typically Java 11 or Java 17, which cannot read Java 21 class files (version <code>65.0</code>). Fix this either by upgrading the CI agent's <code>JAVA_HOME</code> to JDK 21 or by configuring <code>&lt;maven.compiler.release&gt;17&lt;/maven.compiler.release&gt;</code> in <code>pom.xml</code> so <code>javac</code> emits Java 17 bytecode.</p>
+
+    <p><b>Why did standalone JRE installers disappear after Java 8?</b><br>
+    Starting with Java 9 modules and Java 11, Oracle and OpenJDK discontinued shipping a separate JRE distribution because desktop browser applets were obsolete and server deployments preferred self-contained runtimes. Instead, teams ship the JDK or use the JDK's <code>jlink</code> tool to assemble a stripped-down custom runtime containing only the modules an application uses. For CI test runners, using a standard JDK image provides both build tools and runtime.</p>
+
+    <p><b>Why does a Selenium Maven project still fail when <code>java -version</code> works in the shell?</b><br>
+    <code>java -version</code> only proves a runtime binary exists on the system <code>PATH</code>, which could be a JRE or an outdated Java version. Maven requires <code>javac</code> and reads the <code>JAVA_HOME</code> environment variable to locate the JDK compiler and tools. If <code>JAVA_HOME</code> is unset or points to a JRE folder, Maven aborts the <code>compile</code> phase.</p>
+
+    <h3>Troubleshooting</h3>
+
+    <p><b>How do you tell if a machine only has a JRE or a full JDK?</b><br>
+    Check whether the compiler executable <code>javac</code> is present alongside the <code>java</code> executable inside the Java <code>bin</code> directory. If <code>java -version</code> responds with a version number but <code>javac</code> is missing or unrecognized, only a runtime environment is available and compilation will fail. In CI containers, switching from a <code>jre</code> base image to a <code>jdk</code> base image resolves this immediately.</p>
+
+    <p><b>What is the difference between <code>ClassNotFoundException</code> and <code>UnsupportedClassVersionError</code> at startup?</b><br>
+    <code>UnsupportedClassVersionError</code> means the JVM successfully located the <code>.class</code> file on the classpath, read its header bytes, and rejected it because its major version exceeds the running JVM's version. <code>ClassNotFoundException</code> means the ClassLoader could not locate the requested <code>.class</code> file anywhere on the classpath. Checking the version number in the error message immediately pinpoints a JDK mismatch.</p>
+
+    <p><b>Why do Maven builds fail with 'invalid target release: 21' even when JDK 21 is on the system?</b><br>
+    This happens when the system <code>PATH</code> lists JDK 21, but the <code>JAVA_HOME</code> variable still points to an older JDK directory including JDK 11 or JDK 17. Maven invokes the compiler found under <code>JAVA_HOME</code> rather than searching <code>PATH</code> first. Aligning <code>JAVA_HOME</code> with the JDK 21 directory resolves the target release error.</p>
+
+    <h3>Design choices</h3>
+
+    <p><b>Why did Java adopt a bytecode virtual machine instead of compiling directly to native binaries like C++?</b><br>
+    Native compilation ties every build artifact to a single operating system and CPU architecture, forcing teams to maintain separate builds and toolchains. Compiling to bytecode creates a single portable artifact (a <code>.jar</code>) that ships unchanged across developer laptops and heterogeneous CI nodes. In addition, the JVM can optimize hot code at runtime using actual execution profiles via the JIT compiler.</p>
+
+    <p><b>Why does Selenium 4 enforce Java 11 as its minimum supported version?</b><br>
+    Java 11 introduced the standard <code>java.net.http.HttpClient</code> with built-in HTTP/2 and WebSocket support inside the standard library. Relying on the built-in client allowed Selenium 4 to drop heavy third-party HTTP dependencies and support WebDriver BiDi cleanly. Consequently, all Selenium 4 artifacts are compiled to class file major version <code>55.0</code>.</p>
+
+    <p><b>When packaging an automation project, why do teams configure <code>maven.compiler.release</code> instead of only <code>source</code> and <code>target</code>?</b><br>
+    Setting <code>source</code> and <code>target</code> only alters syntax checking and class file version headers, without preventing accidental calls to APIs added in newer JDKs. Setting <code>&lt;maven.compiler.release&gt;17&lt;/maven.compiler.release&gt;</code> links compilation against the exact Java 17 standard library signatures as well. This guarantees bytecode compatibility when executing on Java 17 CI agents.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What does the JDK contain that the JRE lacks?</b> Development tools including the <code>javac</code> compiler, <code>jar</code> packager, <code>jdb</code> debugger, and <code>jlink</code>.</li>
+      <li><b>What does the JRE contain that the JVM lacks?</b> Core Java class libraries (<code>java.base</code> modules) and runtime configuration files.</li>
+      <li><b>Which file extension holds Java bytecode?</b> <code>.class</code> (or packaged inside a <code>.jar</code> archive).</li>
+      <li><b>What is the minimum Java version for Selenium 4?</b> Java 11 (class file major version <code>55.0</code>).</li>
+      <li><b>What error indicates a class was compiled on a newer JDK than the running JVM?</b> <code>java.lang.UnsupportedClassVersionError</code>.</li>
+      <li><b>What environment variable do Maven and Gradle read to find the JDK?</b> <code>JAVA_HOME</code>.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="java-jvm-architecture.html">1.2 JVM Architecture & Class Loader Subsystem &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
+  </section>
 </article>
 </div>
-<footer>SDET Explainer</footer>
+<footer></footer>
 <script src="../app.js"></script>
 </body>
 </html>

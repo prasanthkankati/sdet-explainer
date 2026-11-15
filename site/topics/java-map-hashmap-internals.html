@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>5.4 Map: HashMap Internal Working &amp; equals/hashCode Contract | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Java">
+<div class="wrap">
+<article>
+  <span class="tag Java">Java</span>
+  <h1>5.4 Map: HashMap Internal Working &amp; equals/hashCode Contract</h1>
+  <div class="se-lead">HashMap put/get bucket mechanics, load factor 0.75 resizing, Java 8 Red-Black Tree treeification at threshold 8, equals/hashCode contract, and ConcurrentHashMap.</div>
+
+  <p>A <code>Map&lt;K, V&gt;</code> associates unique keys to values, and <code>HashMap</code> is Java's most frequently asked interview data structure because its performance hinges on hashing, collision handling, and the <code>equals()</code>/<code>hashCode()</code> contract. Knowing how buckets resize, treeify in Java 8+, and behave under concurrency explains both O(1) lookups and thread-safety hazards.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="java-set-hashset-linkedhashset-treeset.html">5.3 Set: HashSet vs LinkedHashSet vs TreeSet</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Configuration properties maps, Excel row-to-map TestNG DataProviders, API header/query parameter maps, and JSON object parsing all rely directly on <code>HashMap</code>, <code>LinkedHashMap</code>, and <code>ConcurrentHashMap</code>.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li><code>HashMap</code> starts with a default initial capacity of <b>16 buckets</b> (power of 2) allocated lazily on the first <code>put()</code> and a default <b>load factor of <code>0.75</code></b> (resizing to 2x capacity when size exceeds threshold <code>16 * 0.75 = 12</code>).</li>
+      <li>Bucket index calculation mixes upper bits via <code>(h = key.hashCode()) ^ (h &gt;&gt;&gt; 16)</code> and computes <code>(table.length - 1) &amp; hash</code> (fast bitwise AND replacing modulo).</li>
+      <li>When two distinct keys map to the same bucket (a <b>hash collision</b>), nodes form a linked list; in Java 8+, once a single bucket reaches <code>TREEIFY_THRESHOLD = 8</code> (and table length <code>&gt;= 64</code>), that bucket converts into a balanced <b>Red-Black Tree</b>, improving worst-case lookup from O(n) to O(log n).</li>
+      <li>If a bucket drops back down to <code>UNTREEIFY_THRESHOLD = 6</code> during removals or resizing, the tree converts back into a linked list.</li>
+      <li><b>The <code>equals()</code> &amp; <code>hashCode()</code> Contract:</b> If <code>a.equals(b)</code> is <code>true</code>, then <code>a.hashCode() == b.hashCode()</code> MUST be <code>true</code>; unequal objects MAY share the same hash code (collision).</li>
+      <li><code>HashMap</code> allows 1 <code>null</code> key and multiple <code>null</code> values (not thread-safe); <code>Hashtable</code> is legacy-synchronized forbidding any <code>null</code>; <code>ConcurrentHashMap</code> uses fine-grained CAS + bucket-level locking forbidding <code>null</code> keys and values.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Implementation</th><th>Ordering</th><th>Null Key / Null Values</th><th>Thread Safety</th><th>Internal Mechanism</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b><code>HashMap</code></b></td><td>Unordered</td><td>1 null key, any null values</td><td>Not thread-safe</td><td>Array of buckets + LinkedList / Red-Black Tree (Java 8+)</td></tr>
+        <tr><td><b><code>LinkedHashMap</code></b></td><td>Insertion order (or LRU access order)</td><td>1 null key, any null values</td><td>Not thread-safe</td><td><code>HashMap</code> + doubly-linked entry chain</td></tr>
+        <tr><td><b><code>TreeMap</code></b></td><td>Sorted by key (<code>Comparable</code> / <code>Comparator</code>)</td><td>0 null keys (NPE), null values allowed</td><td>Not thread-safe</td><td>Red-Black Tree (O(log n))</td></tr>
+        <tr><td><b><code>Hashtable</code></b></td><td>Unordered (legacy Java 1.0)</td><td>Neither null keys nor null values (NPE)</td><td>Synchronized on entire map</td><td>Legacy coarse lock blocking all concurrent reads/writes</td></tr>
+        <tr><td><b><code>ConcurrentHashMap</code></b></td><td>Unordered</td><td>Neither null keys nor null values (NPE)</td><td>Thread-safe &amp; scalable</td><td>CAS on empty buckets + per-head-node <code>synchronized</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>On <code>map.put(key, value)</code>, <code>HashMap</code> checks if <code>key == null</code> (routing straight to bucket <code>0</code>); otherwise it computes perturbed <code>hash(key)</code> and bucket index <code>(n - 1) &amp; hash</code>.</li>
+      <li>If the bucket slot is empty, it inserts a new <code>Node&lt;K, V&gt;</code> directly.</li>
+      <li>If the bucket is occupied (collision), it walks the linked list or Red-Black Tree checking <code>node.hash == hash &amp;&amp; (node.key == key || key.equals(node.key))</code>: if matched, it overwrites the old value and returns it; if absent, it appends the new node.</li>
+      <li>If the linked chain length hits 8 (and total table capacity is at least 64), <code>treeifyBin()</code> converts the bucket into a Red-Black Tree.</li>
+      <li>On <code>map.get(key)</code>, <code>HashMap</code> locates the exact same bucket via <code>hash(key)</code>, compares key equality via <code>equals()</code>, and returns the matching value or <code>null</code>.</li>
+    </ol>
+    <p>Implementing equals/hashCode properly on a key class and iterating entries safely via entrySet():</p>
+<pre><code>package dev.java.collections; // Declares package
+
+import java.util.HashMap; // Imports HashMap implementation
+import java.util.Map; // Imports Map interface
+import java.util.Objects; // Imports Objects.equals and Objects.hash
+
+final class EnvKey { // Custom immutable Map key class
+    private final String env; // Immutable field participating in hashCode and equals
+    private final String browser; // Second immutable key field
+
+    EnvKey(String env, String browser) { // Constructor initializes immutable key fields
+        this.env = env; // Assigns environment name
+        this.browser = browser; // Assigns browser name
+    } // Ends constructor
+
+    @Override // Overrides Object.equals per HashMap contract
+    public boolean equals(Object o) { // Checks logical equivalence of two keys
+        if (this == o) return true; // Short-circuits same Heap address
+        if (!(o instanceof EnvKey other)) return false; // Rejects null or unrelated types
+        return Objects.equals(env, other.env) &amp;&amp; Objects.equals(browser, other.browser); // Compares fields
+    } // Ends equals
+
+    @Override // Always override hashCode whenever equals is overridden
+    public int hashCode() { // Guarantees equal EnvKey instances produce identical bucket hashes
+        return Objects.hash(env, browser); // Computes consistent hash from exact equals fields
+    } // Ends hashCode
+} // Ends EnvKey class
+
+public class HashMapInternalsDemo { // Demonstrates custom key contract and entrySet iteration
+    public static void main(String[] args) { // Main method starts
+        Map&lt;EnvKey, String&gt; urls = new HashMap&lt;&gt;(); // Capacity 16, load factor 0.75
+        urls.put(new EnvKey("qa", "chrome"), "https://qkart-qa-web.labs.crio.do/"); // Stores entry
+        String target = urls.get(new EnvKey("qa", "chrome")); // New EnvKey matches same bucket + equals -&gt; found
+        for (Map.Entry&lt;EnvKey, String&gt; entry : urls.entrySet()) { // Efficient single-lookup iteration
+            System.out.println("Resolved URL: " + entry.getValue()); // Prints: Resolved URL: https://qkart-qa-web.labs.crio.do/
+        } // Ends entrySet loop
+        System.out.println("Lookup match: " + target); // Prints QKart URL cleanly
+    } // Ends main method
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Overriding <code>equals()</code> on a key class while forgetting to override <code>hashCode()</code>; two logically equal keys hash to different buckets so <code>map.get(new Key("a"))</code> returns <code>null</code>.</li>
+      <li>Using mutable objects as <code>HashMap</code> keys and mutating fields after <code>put()</code>; the key remains trapped inside its original hash bucket and becomes unreachable.</li>
+      <li>Iterating a <code>Map</code> via <code>for (String k : map.keySet()) { val = map.get(k); }</code> instead of <code>map.entrySet()</code>; looking up <code>map.get(k)</code> repeats hashing for every key, whereas <code>entrySet()</code> reads keys and values together in one pass.</li>
+      <li>Assuming <code>map.get(k) == null</code> guarantees the key is absent; the key could be explicitly mapped to a <code>null</code> value—always check <code>map.containsKey(k)</code>.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Load Factor</b></td><td>Fill ratio (default <code>0.75</code>) governing when <code>HashMap</code> doubles its bucket array capacity to maintain O(1) lookup.</td></tr>
+        <tr><td><b>Hash Collision</b></td><td>Condition where two non-equal keys map onto the exact same bucket index inside a <code>HashMap</code>.</td></tr>
+        <tr><td><b>Treeification</b></td><td>Java 8+ optimization converting a collided bucket's linked list into a balanced Red-Black Tree at threshold <code>8</code>.</td></tr>
+        <tr><td><b><code>entrySet()</code></b></td><td><code>Map</code> view returning <code>Set&lt;Map.Entry&lt;K, V&gt;&gt;</code> pairs for efficient single-pass traversal.</td></tr>
+        <tr><td><b><code>ConcurrentHashMap</code></b></td><td>Thread-safe high-concurrency map locking only individual bucket heads without blocking concurrent reads.</td></tr>
+        <tr><td><b>Bucket</b></td><td>One slot inside <code>HashMap</code>'s internal <code>Node&lt;K, V&gt;[] table</code> array holding zero, one, or collided entries.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+
+    <h3>Basics</h3>
+
+    <p><b>Explain the <code>equals()</code> and <code>hashCode()</code> contract and why breaking it breaks <code>HashMap</code>.</b><br>
+    The contract states two rules: 1) If <code>a.equals(b)</code> is <code>true</code>, then <code>a.hashCode()</code> MUST equal <code>b.hashCode()</code>. 2) Having identical <code>hashCode()</code> values does NOT force <code>a.equals(b)</code> to be <code>true</code> (collisions are allowed). If you override <code>equals()</code> without <code>hashCode()</code>, two equal keys land in different buckets, making <code>map.get(key)</code> return <code>null</code> because it searches the wrong bucket.</p>
+
+    <p><b>Compare <code>HashMap</code>, <code>LinkedHashMap</code>, and <code>TreeMap</code>.</b><br>
+    <code>HashMap</code> delivers O(1) average lookup with unpredictable iteration order and permits 1 null key. <code>LinkedHashMap</code> preserves insertion order (or LRU access order) via an internal doubly-linked list across entries at O(1) speed. <code>TreeMap</code> stores entries sorted by key inside a Red-Black Tree in O(log n) time and throws <code>NullPointerException</code> on a null key.</p>
+
+    <p><b>Why is <code>ConcurrentHashMap</code> preferred over <code>Hashtable</code> and <code>Collections.synchronizedMap()</code>?</b><br>
+    <code>Hashtable</code> and <code>synchronizedMap()</code> lock the entire map object on every <code>get()</code> and <code>put()</code>, serializing all parallel threads into a single bottleneck. <code>ConcurrentHashMap</code> allows lock-free concurrent reads (via <code>volatile</code> reads) and restricts write locking to just the single bucket head node using CAS and fine-grained <code>synchronized</code> blocks.</p>
+
+    <h3>How it works</h3>
+
+    <p><b>Trace every step of <code>map.put("env", "qa")</code> inside <code>HashMap</code>.</b><br>
+    First, if the internal bucket table is still <code>null</code>, <code>HashMap</code> allocates 16 buckets. Next, it computes <code>"env".hashCode()</code>, perturbs upper bits with <code>h ^ (h &gt;&gt;&gt; 16)</code>, and finds the bucket index using <code>(16 - 1) &amp; hash</code>. If the bucket is empty, it creates a <code>Node</code>; if occupied, it traverses the chain/tree checking <code>equals()</code> to update an existing key or append a new node, doubling table capacity when size crosses <code>12</code>.</p>
+
+    <p><b>What changed in <code>HashMap</code> collision handling in Java 8?</b><br>
+    In Java 7 and earlier, all colliding entries inside one bucket lived in a singly linked list, causing worst-case <code>get()</code> lookup to degrade to O(n) under heavy hash collisions or denial-of-service attacks. Java 8 converts any bucket chain reaching <code>TREEIFY_THRESHOLD = 8</code> (provided total table capacity is at least <code>MIN_TREEIFY_CAPACITY = 64</code>; otherwise it resizes first) into a balanced Red-Black Tree, bounding worst-case bucket lookup to O(log n).</p>
+
+    <p><b>Why did Java choose a default load factor of <code>0.75</code> instead of <code>0.5</code> or <code>1.0</code>?</b><br>
+    A low load factor like <code>0.5</code> wastes half the bucket array in empty slots and triggers frequent expensive table resizes. A high load factor like <code>1.0</code> fills every slot densely, increasing collision chain lengths and slowing down lookups. Empirical analysis established <code>0.75</code> as the optimal balance between space overhead and minimal hash collisions.</p>
+
+    <h3>Real situations</h3>
+
+    <p><b>How do SDETs solve the classic 'count frequency of every character or word in a string' interview program using <code>HashMap</code>?</b><br>
+    Iterate through characters or split words and update counts cleanly in one line using Java 8's <code>map.merge(ch, 1, Integer::sum)</code> or <code>map.put(ch, map.getOrDefault(ch, 0) + 1)</code>. Using <code>getOrDefault</code> or <code>merge</code> avoids verbose <code>containsKey</code> null branches.</p>
+
+    <p><b>In a parallel TestNG framework caching API auth tokens across test threads by role name, which map should you use?</b><br>
+    Use <code>ConcurrentHashMap&lt;String, String&gt;</code> alongside atomic <code>tokens.computeIfAbsent(role, r -&gt; fetchToken(r))</code>. That prevents race conditions when two parallel threads simultaneously request the first token for the same role, and avoids <code>ConcurrentModificationException</code> during concurrent updates.</p>
+
+    <p><b>When mapping Excel column headers to cell values per test row, why choose <code>LinkedHashMap</code> over <code>HashMap</code>?</b><br>
+    <code>LinkedHashMap</code> preserves the exact left-to-right column order from the spreadsheet, making failure logs and serialized test reports deterministic and readable.</p>
+
+    <h3>Troubleshooting</h3>
+
+    <p><b>Why did storing test threads' data in a non-synchronized <code>HashMap</code> cause an infinite loop (100% CPU) in Java 7 or lost updates in Java 8?</b><br>
+    Concurrent <code>put()</code> calls resizing a standard <code>HashMap</code> across parallel threads can overwrite bucket pointers simultaneously, corrupting entries or (in Java 7) forming cyclic linked-list pointers during rehash. Never share an unsynchronized <code>HashMap</code> across writing threads—use <code>ConcurrentHashMap</code> instead.</p>
+
+    <p><b>Why did <code>concurrentMap.put("token", null)</code> throw <code>NullPointerException</code> when <code>HashMap</code> allowed it?</b><br>
+    In a concurrent map, if <code>map.get(key)</code> returned <code>null</code>, a caller could never tell whether the key was absent or mapped to <code>null</code> because another thread could delete the key between <code>containsKey()</code> and <code>get()</code>. To prevent ambiguous race checks, <code>ConcurrentHashMap</code> strictly forbids both <code>null</code> keys and <code>null</code> values.</p>
+
+    <p><b>Why does a <code>HashMap</code> fail to find a custom <code>ByWrapper</code> key even though both instances print identical fields?</b><br>
+    Either <code>hashCode()</code> was omitted (sending lookups to a different bucket), <code>equals()</code> was overloaded with the wrong parameter type (missing <code>@Override</code>), or a mutable field inside the key changed after insertion.</p>
+
+    <h3>Design choices</h3>
+
+    <p><b>Why does <code>HashMap</code> require bucket table capacity to always be a power of 2 (16, 32, 64)?</b><br>
+    When table length <code>n</code> is a power of 2, <code>n - 1</code> has all binary lower bits set to <code>1</code> (for example, <code>15 = 0b1111</code>). Computing <code>(n - 1) &amp; hash</code> produces the identical remainder as <code>hash % n</code> using a single CPU bitwise AND instruction instead of slower integer division.</p>
+
+    <p><b>Why does <code>HashMap</code> store keys via <code>Immutable</code> types like <code>String</code> or <code>Integer</code> by default in real projects?</b><br>
+    Immutable keys never change fields after insertion, cache their <code>hashCode()</code> safely, and eliminate bucket corruption defects caused by post-insertion mutation.</p>
+
+    <p><b>When writing a custom LRU cache for test fixtures or mock API responses, how does <code>LinkedHashMap</code> build one effortlessly?</b><br>
+    Calling <code>new LinkedHashMap&lt;&gt;(16, 0.75f, true)</code> enables access-order mode and overriding <code>removeEldestEntry(Map.Entry eldest) { return size() &gt; maxEntries; }</code> automatically evicts the least recently accessed entry on every insertion.</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>What are <code>HashMap</code>'s default initial capacity and load factor?</b> Capacity <code>16</code>, load factor <code>0.75</code> (resize threshold <code>12</code>).</li>
+      <li><b>At what bucket chain length does Java 8 <code>HashMap</code> treeify into a Red-Black Tree?</b> <code>8</code> nodes (when table capacity is at least <code>64</code>).</li>
+      <li><b>Can <code>ConcurrentHashMap</code> store <code>null</code> keys or <code>null</code> values?</b> No; either throws <code>NullPointerException</code>.</li>
+      <li><b>Which method iterates both keys and values in a single lookup?</b> <code>map.entrySet()</code>.</li>
+      <li><b>What happens if two objects have <code>a.equals(b) == true</code> but different <code>hashCode()</code> values?</b> Violates the contract; <code>HashMap</code> fails to find keys on <code>get()</code>.</li>
+      <li><b>Which <code>Map</code> preserves insertion order?</b> <code>LinkedHashMap</code>.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="java-sorting-comparable-comparator-iterators.html">5.5 Sorting (Comparable vs Comparator) & Fail-Fast Iterators &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

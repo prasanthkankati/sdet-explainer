@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>2.4 Operators, Control Flow &amp; Loops | SDET Explainer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body class="in-chapter" data-track="Java">
+<div class="wrap">
+<article>
+  <span class="tag Java">Java</span>
+  <h1>2.4 Operators, Control Flow &amp; Loops</h1>
+  <div class="se-lead">Short-circuit boolean guards (&amp;&amp; vs &amp;), ternary expressions, modern switch expressions, and loop control with break and continue.</div>
+
+  <p>Operators and control-flow statements govern branching, retry logic, and element iteration inside every automation helper. Understanding short-circuit evaluation order, switch fall-through traps, and loop termination prevents null dereferences and subtle off-by-one defects.</p>
+
+  <section id="before-you-start">
+    <h2>Before you start</h2>
+    <p>Prerequisite: <a href="java-wrapper-autoboxing-cache.html">2.3 Wrapper Classes, Autoboxing &amp; Integer Cache (-128 to 127)</a></p>
+  </section>
+
+  <section id="where-it-fits">
+    <h2>Where it fits</h2>
+    <p>Null-safe DOM checks (<code>el != null &amp;&amp; el.isDisplayed()</code>), browser factory <code>switch</code> selection, and iterating over <code>List&lt;WebElement&gt;</code> product cards in QKart rely directly on short-circuit operators and loop control.</p>
+  </section>
+
+  <section id="key-points">
+    <h2>Key points</h2>
+    <ol>
+      <li>Short-circuit operators <code>&amp;&amp;</code> and <code>||</code> skip evaluating the right-hand operand whenever the left-hand operand already determines the boolean result.</li>
+      <li>Single <code>&amp;</code> and <code>|</code> evaluate <b>both sides unconditionally</b> on booleans (and act as bitwise operators on integers), breaking null guards if misused.</li>
+      <li>The ternary operator <code>condition ? exprIfTrue : exprIfFalse</code> evaluates to a single expression value and works cleanly for inline defaults like timeouts or headless flags.</li>
+      <li>Traditional <code>switch</code> statements fall through into subsequent <code>case</code> blocks unless terminated by <code>break</code> or <code>return</code>; Java 14+ arrow <code>switch</code> expressions (<code>case "chrome" -&gt; ...</code>) eliminate fall-through completely.</li>
+      <li><code>while</code> checks the condition before the first iteration (0+ times), whereas <code>do-while</code> executes the body once before checking the condition (1+ times).</li>
+      <li><code>break</code> exits the enclosing loop immediately, <code>continue</code> skips the remainder of the current iteration and advances to the next check, and labeled <code>break outer;</code> exits nested loops.</li>
+    </ol>
+  </section>
+
+  <section id="comparison-table">
+    <h2>Comparison table</h2>
+    <table>
+      <thead>
+        <tr><th>Operator / Loop</th><th>Evaluation / Execution Rule</th><th>Common Automation Pitfall</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b><code>&amp;&amp;</code> (Short-circuit AND)</b></td><td>Skips right operand if left operand is <code>false</code></td><td>Safe for <code>if (list != null &amp;&amp; !list.isEmpty())</code></td></tr>
+        <tr><td><b><code>&amp;</code> (Non-short-circuit AND)</b></td><td>Evaluates both operands every time</td><td>Throws <code>NullPointerException</code> if used as <code>list != null &amp; !list.isEmpty()</code></td></tr>
+        <tr><td><b>Classic <code>switch :</code></b></td><td>Requires explicit <code>break</code> per branch</td><td>Forgetting <code>break</code> causes unintended fall-through into next browser case</td></tr>
+        <tr><td><b>Modern <code>switch -&gt;</code> (Java 14+)</b></td><td>Single branch executes without fall-through; can yield a value</td><td>Must cover all cases or include <code>default</code> when returning a value</td></tr>
+        <tr><td><b>Enhanced <code>for-each</code></b></td><td>Iterates forward sequentially over arrays/Iterables</td><td>Does not expose numeric index and forbids structural <code>list.remove()</code> during loop</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="how-it-works">
+    <h2>How it works</h2>
+    <ol>
+      <li>An incoming browser name string enters an arrow <code>switch</code> expression that maps <code>"chrome"</code>, <code>"firefox"</code>, or <code>"edge"</code> without needing <code>break</code>.</li>
+      <li>Inside a search loop over product cards, an <code>if (card == null || !card.isDisplayed()) continue;</code> statement short-circuits safely and skips hidden items.</li>
+      <li>Once the matching product card is located and clicked, <code>break;</code> exits the loop immediately rather than scanning remaining DOM elements.</li>
+      <li>For polling loops requiring at least one initial check before evaluating continuation, <code>do { ... } while (...)</code> runs once prior to checking the exit predicate.</li>
+    </ol>
+    <p>Using short-circuit guards, Java 14+ arrow switch, and break/continue over Selenium results:</p>
+<pre><code>package dev.java.core; // Declares package
+
+import java.util.List; // Imports List interface
+
+public class ControlFlowDemo { // Demonstrates operators and loop control
+    static String resolveBrowserFlag(String browser) { // Method returning CLI flag via switch expression
+        return switch (browser.toLowerCase()) { // Modern arrow switch prevents fall-through
+            case "chrome", "edge" -&gt; "--headless=new"; // Multiple labels share one branch without break
+            case "firefox" -&gt; "-headless"; // Firefox headless argument
+            default -&gt; throw new IllegalArgumentException("Unsupported browser: " + browser); // Explicit guard
+        }; // Semicolon closes switch expression
+    } // Ends resolveBrowserFlag
+
+    public static void main(String[] args) { // Main execution entry
+        List&lt;String&gt; titles = List.of("", "QKart Shoe", "QKart Watch"); // Sample product list
+        String found = null; // Holds matched title
+        for (String title : titles) { // Enhanced for-each iterates elements sequentially
+            if (title == null || title.isBlank()) { // Short-circuit OR skips blank check when null
+                continue; // Skips blank entry and moves to next element
+            } // Ends skip check
+            if (title.contains("Shoe")) { // Checks target keyword
+                found = title; // Stores matched product title
+                break; // Stops scanning remaining products immediately
+            } // Ends match check
+        } // Ends for-each loop
+        String status = (found != null) ? found : "MISSING"; // Ternary assigns fallback value
+        System.out.println(resolveBrowserFlag("chrome") + " | " + status); // Prints: --headless=new | QKart Shoe
+    } // Ends main method
+} // Ends class</code></pre>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>Common mistakes</h2>
+    <ol>
+      <li>Forgetting <code>break;</code> in a classic <code>case "chrome":</code> switch block; execution falls through into <code>case "firefox":</code> and overwrites or launches the wrong driver.</li>
+      <li>Using <code>&amp;</code> instead of <code>&amp;&amp;</code> in <code>if (el != null &amp; el.isEnabled())</code>; Java still calls <code>el.isEnabled()</code> when <code>el</code> is <code>null</code> and throws <code>NullPointerException</code>.</li>
+      <li>Writing an assignment <code>=</code> inside an <code>if</code> condition on booleans (<code>if (isAdmin = true)</code>); this assigns <code>true</code> and always enters the branch—always use <code>==</code> or write <code>if (isAdmin)</code> directly.</li>
+      <li>Writing a <code>for (int i = 0; i &lt;= items.size(); i++)</code> boundary condition; valid indices stop at <code>size() - 1</code>, so <code>&lt;=</code> throws <code>IndexOutOfBoundsException</code>.</li>
+    </ol>
+  </section>
+
+  <section id="terms-to-know">
+    <h2>Terms to know</h2>
+    <table>
+      <thead>
+        <tr><th>Term</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Short-Circuit Evaluation</b></td><td>Execution strategy of <code>&amp;&amp;</code> and <code>||</code> where the right-hand operand is skipped whenever the left-hand operand determines the outcome.</td></tr>
+        <tr><td><b>Ternary Operator</b></td><td>Conditional expression <code>cond ? a : b</code> returning one of two expressions based on a boolean condition.</td></tr>
+        <tr><td><b>Switch Fall-Through</b></td><td>Classic <code>switch</code> behavior where omitting <code>break</code> continues executing subsequent <code>case</code> blocks.</td></tr>
+        <tr><td><b>Switch Expression</b></td><td>Modern Java 14+ <code>switch</code> form using <code>-&gt;</code> labels that returns a value directly without fall-through.</td></tr>
+        <tr><td><b><code>break</code></b></td><td>Jump statement that terminates the innermost enclosing loop or classic <code>switch</code> block immediately.</td></tr>
+        <tr><td><b><code>continue</code></b></td><td>Jump statement that skips the rest of the current loop body and jumps to the next iteration check.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-questions">
+    <h2>Interview questions</h2>
+
+    <h3>Basics</h3>
+
+    <p><b>What is the difference between <code>&amp;&amp;</code> and <code>&amp;</code> in Java?</b><br>
+    When applied to booleans, <code>&amp;&amp;</code> (logical short-circuit AND) evaluates the left expression first and skips the right expression completely if the left side is <code>false</code>. Single <code>&amp;</code> evaluates both sides unconditionally and also functions as a bitwise AND operator on integers. For null checks like <code>driver != null &amp;&amp; driver.getTitle().contains("QKart")</code>, only <code>&amp;&amp;</code> prevents <code>NullPointerException</code>.</p>
+
+    <p><b>How do <code>while</code> and <code>do-while</code> loops differ?</b><br>
+    A <code>while</code> loop evaluates its boolean condition before entering the loop body, meaning the body executes zero times if the condition starts out <code>false</code>. A <code>do-while</code> loop runs its body first and evaluates the condition at the bottom, guaranteeing at least one execution. Pagination helpers often use <code>do-while</code> to inspect page 1 before checking if a Next button is enabled.</p>
+
+    <p><b>What is the difference between <code>break</code> and <code>continue</code> inside a loop?</b><br>
+    <code>break</code> terminates the enclosing loop entirely and resumes execution at the first statement after the loop. <code>continue</code> aborts only the current pass through the loop body and jumps immediately to the next iteration's update/condition check. Neither keyword exits the enclosing method itself—use <code>return</code> for that.</p>
+
+    <h3>How it works</h3>
+
+    <p><b>Explain operator precedence pitfalls between <code>!</code>, <code>&amp;&amp;</code>, and <code>||</code>.</b><br>
+    Unary negation <code>!</code> binds tightest, <code>&amp;&amp;</code> binds tighter than <code>||</code>, and assignment <code>=</code> binds last. Writing <code>a || b &amp;&amp; c</code> evaluates as <code>a || (b &amp;&amp; c)</code> even if the author intended <code>(a || b) &amp;&amp; c</code>. Adding explicit parentheses around compound boolean checks prevents subtle logic defects.</p>
+
+    <p><b>How do Java 14+ arrow switch expressions eliminate fall-through bugs?</b><br>
+    With arrow labels (<code>case "chrome" -&gt; new ChromeDriver();</code>), only the single expression or block to the right of the arrow executes, and control exits the switch automatically without needing <code>break</code>. Comma-separated labels (<code>case "chrome", "chromium" -&gt; ...</code>) handle shared branches cleanly. If a switch expression assigns to a variable, the compiler also enforces exhaustiveness via <code>default</code>.</p>
+
+    <p><b>How does a labeled <code>break outer;</code> behave inside nested loops?</b><br>
+    By placing a label like <code>outer:</code> directly above an outer <code>for</code> loop, a nested inner loop can execute <code>break outer;</code> to exit both loops simultaneously instead of only escaping the inner loop. This removes the need for awkward boolean exit flags when scanning a 2D HTML table for a target cell.</p>
+
+    <h3>Real situations</h3>
+
+    <p><b>In Selenium, when should you choose an index-based <code>for (int i = 0; ...)</code> loop over an enhanced <code>for-each</code> loop?</b><br>
+    Use enhanced <code>for-each</code> when reading every element sequentially without needing its position, including collecting text from <code>List&lt;WebElement&gt;</code> product titles. Choose a classic indexed <code>for</code> loop when you need the numeric row/column index to construct a dynamic XPath like <code>//tr[" + (i + 1) + "]/td[3]</code> or to avoid <code>StaleElementReferenceException</code> by re-fetching elements by index.</p>
+
+    <p><b>How does short-circuit <code>||</code> help in fallback locator or retry checks?</b><br>
+    In <code>isVisible(primaryLocator) || isVisible(fallbackLocator)</code>, if the primary locator succeeds and returns <code>true</code>, Java skips evaluating <code>isVisible(fallbackLocator)</code> completely. This prevents paying an unnecessary implicit or explicit wait timeout on the fallback locator when the primary locator already matched.</p>
+
+    <p><b>Why does <code>String flag = headless ? "--headless=new" : "";</code> keep Page Object setup concise?</b><br>
+    The ternary operator assigns a conditional configuration value in a single expression without declaring an uninitialized mutable variable beforehand. It allows marking the target variable <code>final</code> immediately at declaration.</p>
+
+    <h3>Troubleshooting</h3>
+
+    <p><b>Why did a DriverFactory <code>switch (browser)</code> pass Chrome into FirefoxDriver initialization?</b><br>
+    In a classic colon-syntax <code>switch</code> statement, omitting <code>break;</code> at the end of <code>case "chrome":</code> causes execution to fall straight into <code>case "firefox":</code>, overwriting the <code>driver</code> variable. Converting the factory to a modern arrow <code>switch</code> expression makes fall-through syntactically impossible.</p>
+
+    <p><b>Why does <code>for (int i = 0; i &lt;= rows.size(); i++)</code> crash on the final iteration?</b><br>
+    Zero-based Java collections and arrays index valid elements from <code>0</code> up to <code>size() - 1</code>. Using <code>&lt;=</code> attempts to access index <code>rows.size()</code> on the last pass and throws <code>IndexOutOfBoundsException</code>. Always use strict <code>&lt;</code> (<code>i &lt; rows.size()</code>).</p>
+
+    <p><b>Why does passing <code>null</code> into <code>switch (browser)</code> throw <code>NullPointerException</code>?</b><br>
+    Classic and standard <code>switch</code> statements call <code>browser.hashCode()</code> internally during dispatch, crashing immediately if the selector expression is <code>null</code>. Either validate <code>Objects.requireNonNullElse(browser, "chrome")</code> beforehand or use a Java 21 <code>case null -&gt;</code> branch.</p>
+
+    <h3>Design choices</h3>
+
+    <p><b>Why should complex nested <code>if-else</code> chains in DriverFactory or test helpers be replaced with <code>switch</code> expressions or early returns?</b><br>
+    Deeply nested <code>if-else</code> ladders increase cyclomatic complexity and make missing edge cases hard to spot in code reviews. Early-return guard clauses flatten nesting, while Java 14+ <code>switch</code> expressions enforce exhaustive handling at compile time.</p>
+
+    <p><b>Why should you avoid nesting multiple ternary operators inside a single expression?</b><br>
+    While single ternary expressions (<code>a ? b : c</code>) improve readability for simple defaults, chaining nested ternaries creates dense, error-prone precedence puzzles. Replace multi-branch ternary expressions with an <code>if-else</code> or <code>switch</code> expression.</p>
+
+    <p><b>Why should a loop checking dynamic page state include a maximum iteration or timeout bound?</b><br>
+    Unbounded <code>while (true)</code> or <code>while (!ready)</code> loops hang a CI pipeline indefinitely if an AJAX call fails or a spinner freezes in the DOM. Always bound polling loops with a maximum attempt count or <code>Duration</code> deadline (preferring Selenium's built-in <code>WebDriverWait</code>).</p>
+  </section>
+
+  <section id="quick-answers">
+    <h2>Quick answers</h2>
+    <ol>
+      <li><b>Which operator skips the right side when the left side is <code>false</code>?</b> <code>&amp;&amp;</code> (short-circuit logical AND).</li>
+      <li><b>Which operator skips the right side when the left side is <code>true</code>?</b> <code>||</code> (short-circuit logical OR).</li>
+      <li><b>How many times does a <code>do-while</code> loop execute at minimum?</b> At least 1 time.</li>
+      <li><b>What happens when <code>break</code> is omitted in a classic <code>switch</code> case?</b> Execution falls through into the next <code>case</code> block.</li>
+      <li><b>How do you exit both outer and inner loops at once in Java?</b> Use a labeled <code>break labelName;</code> statement.</li>
+      <li><b>Does Java 14+ arrow syntax (<code>case "x" -&gt; ...</code>) fall through?</b> No, fall-through is impossible with arrow labels.</li>
+    </ol>
+  </section>
+
+  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
+    <p><b>Next topic:</b> <a href="java-arrays-1d-2d-dataprovider.html">2.5 Arrays (1D & 2D Object[][]) &rarr;</a></p>
+    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
+  </section>
+</article>
+</div>
+<footer></footer>
+<script src="../app.js"></script>
+</body>
+</html>

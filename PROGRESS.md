@@ -1,4 +1,4 @@
-# Progress Tracker (Current Version: `v3.4.0`)
+# Progress Tracker (Current Version: `v3.5.0`)
 
 See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) release ledger and Git tags.
 
@@ -22,8 +22,15 @@ See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) rele
 - **M4 (4.1&ndash;4.3):** Done + 105 Q&amp;As (`v1.8.0`)
 - **M5 (5.1&ndash;5.2):** Done + 70 Q&amp;As (`v1.8.0`)
 
-## Next Up: Java Track (`J1`&ndash;`J6`)
-- Upgrade `J1.1` &amp; `J1.2` + add `J1.3 Stack vs Heap`, `J1.4 String Pool`, and `J1` Question Banks.
+## Java Track: 100% Complete (30/30 Pages Published — Concept Explainer Standard, 451 Interview Q&As)
+- **J1. JVM Architecture &amp; Memory Internals (`1.1`&ndash;`1.4`):** `java-jdk-jre-jvm.html`, `java-jvm-architecture.html`, `java-stack-vs-heap.html`, `java-metaspace-jit-gc.html`
+- **J2. Core Java Fundamentals (`2.1`&ndash;`2.6`):** `java-program-structure-main.html`, `java-variables-primitives-casting.html`, `java-wrapper-autoboxing-cache.html`, `java-operators-control-flow-loops.html`, `java-arrays-1d-2d-dataprovider.html`, `java-methods-parameters-varargs.html`
+- **J3. Strings &amp; Text Manipulation (`3.1`&ndash;`3.3`):** `java-string-immutability-pool.html`, `java-string-stringbuilder-stringbuffer.html`, `java-string-methods-regex.html`
+- **J4. Object-Oriented Programming (`4.1`&ndash;`4.7`):** `java-object.html`, `java-constructors-chaining-singleton.html`, `java-access-modifiers-encapsulation.html`, `java-keywords-static-final-this-super.html`, `java-inheritance-vs-composition.html`, `java-polymorphism-overloading-overriding.html`, `java-abstraction-abstract-interface.html`
+- **J5. Collections, Generics &amp; Streams (`5.1`&ndash;`5.6`):** `java-collections-hierarchy-generics.html`, `java-list-arraylist-linkedlist.html`, `java-set-hashset-linkedhashset-treeset.html`, `java-map-hashmap-internals.html`, `java-sorting-comparable-comparator-iterators.html`, `java-lambdas-streams-optional.html`
+- **J6. Exceptions, File I/O &amp; Multithreading (`6.1`&ndash;`6.4`):** `java-exception-hierarchy.html`, `java-try-catch-finally-resources.html`, `java-file-io-properties-json-poi.html`, `java-multithreading-threadlocal.html`
+
+## Next Up: TypeScript / JavaScript (`TS1`&ndash;`TS4`) &amp; Playwright (`P1`&ndash;`P5`)
 
 ## Published Topic & Question Bank Pages (17 Pages Live &middot; 245 Interview Questions)
 
@@ -58,6 +65,7 @@ See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) rele
 ---
 
 ## Feature & Build Version Log
+- **2026-11-15 (`v3.5.0`):** Published **100% of Java Track (`J1`–`J6`, 30/30 pages, 451 Interview Q&amp;As)** under the 12-section Concept Explainer standard (upgraded `1.1`, `1.2`, `4.1` and authored all 27 queued Java topics).
 - **2026-11-13 (`v1.7.2`):** Set `border-radius: 0` on the chapter border edge for sharp corners.
 - **2026-11-13 (`v1.7.1`):** Simplified chapter container to a clean thin metallic border liner (`1px solid var(--sheet-border)`) without inner page background fill/shadow.
 - **2026-11-13 (`v1.7.0`):** Flush-left single-row chapter top bar (`SDET Explainer` without `>` + `← All topics` + search bar on far left) and metallic-sheet reading UI (`article` with thin metallic liner border & sheen).

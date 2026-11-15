@@ -400,7 +400,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.4.0";
+  const SITE_VERSION = "v3.5.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",

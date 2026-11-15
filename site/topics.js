@@ -190,7 +190,7 @@ const TOPICS = [
     summary: "How javac compiles .java to .class bytecode and the JVM executes it across OS.",
     keywords: "javac, java, jar, bytecode, .class, write once run anywhere, JAVA_HOME, UnsupportedClassVersionError, ClassNotFoundException",
     status: "done",
-    date: "2026-11-12"
+    date: "2026-11-15"
   },
   {
     track: "Java",
@@ -201,117 +201,128 @@ const TOPICS = [
     summary: "Bootstrap, Platform & Application ClassLoaders, Linking (Verify, Prepare, Resolve) & Initialization.",
     keywords: "classloader, bootstrap, application, parent delegation, linking, verify, NoClassDefFoundError, ClassNotFoundException",
     status: "done",
-    date: "2026-11-12"
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J1. JVM Architecture & Memory Internals",
     order: 3,
     title: "1.3 Stack vs Heap Memory & Pass-by-Value",
-    file: "",
+    file: "java-stack-vs-heap.html",
     summary: "Stack frames, local variable slots, object allocation on Heap, and how Java passes references by value.",
     keywords: "stack, heap, frame, reference, pass by value, StackOverflowError, OutOfMemoryError",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J1. JVM Architecture & Memory Internals",
     order: 4,
     title: "1.4 Metaspace, static Memory & Execution Engine (JIT + GC)",
-    file: "",
+    file: "java-metaspace-jit-gc.html",
     summary: "Where class metadata and static variables live, Interpreter vs JIT compiler, and Garbage Collection (Young/Old Gen).",
     keywords: "metaspace, static, interpreter, jit compiler, hot code, garbage collector, young generation, old generation, reachability",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J2. Core Java Fundamentals",
     order: 1,
     title: "2.1 Program Structure & main() Method Decoded",
-    file: "",
+    file: "java-program-structure-main.html",
     summary: "package, import, class, why main is public static void main(String[] args), and System.out.println internals.",
     keywords: "public static void main, String[] args, System.out.println, entry point, package, import",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J2. Core Java Fundamentals",
     order: 2,
     title: "2.2 Variables, Primitive vs Reference Types & Type Casting",
-    file: "",
+    file: "java-variables-primitives-casting.html",
     summary: "8 primitive types, default values, local vs instance vs static variables, widening vs narrowing casts.",
     keywords: "int, long, double, boolean, char, byte, short, float, primitive, reference, type casting, default values",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J2. Core Java Fundamentals",
     order: 3,
     title: "2.3 Wrapper Classes, Autoboxing & Integer Cache (-128 to 127)",
-    file: "",
+    file: "java-wrapper-autoboxing-cache.html",
     summary: "Why collections require Integer/Boolean objects, autoboxing/unboxing, parseInt vs valueOf, and the == cache trap.",
     keywords: "Integer, Double, Boolean, wrapper class, autoboxing, unboxing, Integer cache, valueOf, parseInt",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J2. Core Java Fundamentals",
     order: 4,
     title: "2.4 Operators, Control Flow & Loops",
-    file: "",
+    file: "java-operators-control-flow-loops.html",
     summary: "Short-circuit && vs &, ternary operator, if-else, switch expressions, for / enhanced-for / while, break & continue.",
     keywords: "operators, short circuit, ternary, switch, for loop, foreach, while, break, continue",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J2. Core Java Fundamentals",
     order: 5,
     title: "2.5 Arrays (1D & 2D Object[][])",
-    file: "",
+    file: "java-arrays-1d-2d-dataprovider.html",
     summary: "Fixed-size Heap arrays, indexing, ArrayIndexOutOfBoundsException, and 2D Object[][] arrays for TestNG @DataProvider.",
     keywords: "array, Object[][], DataProvider, ArrayIndexOutOfBoundsException, Arrays.sort, Arrays.asList",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J2. Core Java Fundamentals",
     order: 6,
     title: "2.6 Methods, Parameters, Return Types & Varargs",
-    file: "",
+    file: "java-methods-parameters-varargs.html",
     summary: "Method signatures, call stack execution, return values, static vs instance methods, and varargs (String...).",
     keywords: "method, signature, parameter, argument, return, void, varargs",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J3. Strings & Text Manipulation",
     order: 1,
     title: "3.1 String Immutability & String Constant Pool",
-    file: "",
+    file: "java-string-immutability-pool.html",
     summary: "Why String is immutable and final, literal vs new String(), intern(), hash caching, and security.",
     keywords: "String, immutable, String pool, literal, new String, intern, == vs equals",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J3. Strings & Text Manipulation",
     order: 2,
     title: "3.2 String vs StringBuilder vs StringBuffer",
-    file: "",
+    file: "java-string-stringbuilder-stringbuffer.html",
     summary: "Why + in a loop creates garbage objects, mutable StringBuilder for single-thread speed, synchronized StringBuffer.",
     keywords: "StringBuilder, StringBuffer, mutable, thread safe, append, reverse",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J3. Strings & Text Manipulation",
     order: 3,
     title: "3.3 Essential String Methods & Regex for SDETs",
-    file: "",
+    file: "java-string-methods-regex.html",
     summary: "trim, strip, split, substring, replace vs replaceAll (regex), contains, format, and extracting dynamic UI text.",
     keywords: "trim, split, substring, replaceAll, regex, contains, equalsIgnoreCase, getText",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
@@ -322,167 +333,183 @@ const TOPICS = [
     summary: "Runtime instance on the Heap bundling state (fields) and behavior (methods), 5 creation ways, == vs equals, null.",
     keywords: "new, reference, heap, stack, state, behavior, identity, ==, equals, null, NullPointerException, ChromeDriver, WebElement, By, PageFactory, reflection, clone, deserialization, factory method, LoginPage",
     status: "done",
-    date: "2026-11-13"
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J4. Object-Oriented Programming (OOP)",
     order: 2,
     title: "4.2 Constructors: Default, Parameterized, Chaining & Singleton",
-    file: "",
+    file: "java-constructors-chaining-singleton.html",
     summary: "Constructor vs method, compiler default constructor rule, this() vs super() chaining, and private constructors.",
     keywords: "constructor, this(), super(), constructor overloading, private constructor, singleton, Page Object constructor",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J4. Object-Oriented Programming (OOP)",
     order: 3,
     title: "4.3 Access Modifiers & Encapsulation",
-    file: "",
+    file: "java-access-modifiers-encapsulation.html",
     summary: "private < default < protected < public scope matrix, getter/setter validation, and hiding private By locators in POM.",
     keywords: "private, default, protected, public, access modifiers, encapsulation, getter, setter, Page Object",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J4. Object-Oriented Programming (OOP)",
     order: 4,
     title: "4.4 Core Keywords: static, final, this, super & instanceof",
-    file: "",
+    file: "java-keywords-static-final-this-super.html",
     summary: "Why static WebDriver breaks parallel runs, final variable/method/class, final vs finally vs finalize, this vs super.",
     keywords: "static, final, finally, finalize, this, super, instanceof, ClassCastException",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J4. Object-Oriented Programming (OOP)",
     order: 5,
     title: "4.5 Inheritance (IS-A) vs Composition (HAS-A)",
-    file: "",
+    file: "java-inheritance-vs-composition.html",
     summary: "extends keyword, BaseTest / BasePage inheritance, the Diamond Problem, and why Page Objects use Composition for driver.",
     keywords: "inheritance, extends, super, diamond problem, multiple inheritance, composition, IS-A, HAS-A, BaseTest",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J4. Object-Oriented Programming (OOP)",
     order: 6,
     title: "4.6 Polymorphism: Overloading vs Overriding & Upcasting",
-    file: "",
+    file: "java-polymorphism-overloading-overriding.html",
     summary: "Compile-time overloading (switchTo().frame) vs runtime overriding, covariant return, and WebDriver driver = new ChromeDriver().",
     keywords: "polymorphism, overloading, overriding, compile time, runtime, dynamic binding, upcasting, downcasting, WebDriver",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J4. Object-Oriented Programming (OOP)",
     order: 7,
     title: "4.7 Abstraction: Abstract Class vs Interface",
-    file: "",
+    file: "java-abstraction-abstract-interface.html",
     summary: "Contract design, Java 8 default/static methods, Functional & Marker interfaces, and Selenium's WebDriver/TakesScreenshot interfaces.",
     keywords: "abstraction, abstract class, interface, implements, default method, functional interface, marker interface, TakesScreenshot, JavascriptExecutor",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J5. Collections, Generics & Java 8+ Streams",
     order: 1,
     title: "5.1 Collections Hierarchy & Generics (Type Safety)",
-    file: "",
+    file: "java-collections-hierarchy-generics.html",
     summary: "Iterable -> Collection -> List/Set/Queue + Map, Collection vs Collections, Generics <T>, and Type Erasure.",
     keywords: "Collection, Collections, Iterable, Generics, type erasure, List<WebElement>",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J5. Collections, Generics & Java 8+ Streams",
     order: 2,
     title: "5.2 List: ArrayList vs LinkedList",
-    file: "",
+    file: "java-list-arraylist-linkedlist.html",
     summary: "Dynamic array resizing (1.5x), O(1) index access vs doubly-linked nodes, and handling List<WebElement> from findElements().",
     keywords: "List, ArrayList, LinkedList, findElements, dynamic array, time complexity",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J5. Collections, Generics & Java 8+ Streams",
     order: 3,
     title: "5.3 Set: HashSet vs LinkedHashSet vs TreeSet",
-    file: "",
+    file: "java-set-hashset-linkedhashset-treeset.html",
     summary: "How HashSet uses HashMap internally for uniqueness, insertion-ordered LinkedHashSet, sorted TreeSet, and getWindowHandles().",
     keywords: "Set, HashSet, LinkedHashSet, TreeSet, remove duplicates, getWindowHandles",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J5. Collections, Generics & Java 8+ Streams",
     order: 4,
     title: "5.4 Map: HashMap Internal Working & equals/hashCode Contract",
-    file: "",
+    file: "java-map-hashmap-internals.html",
     summary: "Hashing, bucket index, load factor 0.75, collision chaining, Java 8 Red-Black Tree at 8 nodes, and ConcurrentHashMap.",
     keywords: "Map, HashMap, hashCode, equals, collision, load factor, red-black tree, Hashtable, ConcurrentHashMap, TreeMap",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J5. Collections, Generics & Java 8+ Streams",
     order: 5,
     title: "5.5 Sorting (Comparable vs Comparator) & Fail-Fast Iterators",
-    file: "",
+    file: "java-sorting-comparable-comparator-iterators.html",
     summary: "Natural ordering (compareTo) vs custom Comparator, ConcurrentModificationException, and verifying UI table sorting.",
     keywords: "Comparable, Comparator, compareTo, compare, Collections.sort, Fail-Fast, Fail-Safe, ConcurrentModificationException",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J5. Collections, Generics & Java 8+ Streams",
     order: 6,
     title: "5.6 Java 8+ Lambdas, Functional Interfaces, Streams & Optional",
-    file: "",
+    file: "java-lambdas-streams-optional.html",
     summary: "Predicate, Function, Consumer, Supplier, Stream filter/map/collect on List<WebElement>, Method References, and Optional.",
     keywords: "lambda, Stream, filter, map, collect, Predicate, Function, Consumer, Supplier, Optional, method reference",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J6. Exceptions, File I/O & Multithreading",
     order: 1,
     title: "6.1 Exception Hierarchy: Checked vs Unchecked & Error",
-    file: "",
+    file: "java-exception-hierarchy.html",
     summary: "Throwable -> Error vs Exception -> RuntimeException, compiler enforcement, and why WebDriverException is unchecked.",
     keywords: "Throwable, Error, Exception, RuntimeException, checked, unchecked, WebDriverException",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J6. Exceptions, File I/O & Multithreading",
     order: 2,
     title: "6.2 try-catch-finally, throw vs throws & try-with-resources",
-    file: "",
+    file: "java-try-catch-finally-resources.html",
     summary: "Multi-catch order, when finally does/doesn't run, AutoCloseable resource cleanup, and custom framework exceptions.",
     keywords: "try, catch, finally, throw, throws, try-with-resources, AutoCloseable, custom exception",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J6. Exceptions, File I/O & Multithreading",
     order: 3,
     title: "6.3 File I/O: Properties, JSON & Apache POI (Excel)",
-    file: "",
+    file: "java-file-io-properties-json-poi.html",
     summary: "Reading config.properties, FileInputStream, Apache POI XSSFWorkbook for Excel data-driven testing, and JSON POJOs.",
     keywords: "Properties, FileInputStream, Apache POI, XSSFWorkbook, Excel, JSON, Jackson, data-driven",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
   {
     track: "Java",
     section: "J6. Exceptions, File I/O & Multithreading",
     order: 4,
     title: "6.4 Multithreading & ThreadLocal<WebDriver> for Parallel Tests",
-    file: "",
+    file: "java-multithreading-threadlocal.html",
     summary: "Threads, race conditions, synchronized, volatile, and how ThreadLocal isolates WebDriver & ExtentTest across parallel threads.",
     keywords: "Thread, Runnable, synchronized, volatile, ThreadLocal, get, set, remove, parallel execution, thread safety",
-    status: "planned"
+    status: "done",
+    date: "2026-11-15"
   },
 
   // ==================== TRACK 3: SELENIUM (OFFICIAL SELENIUM.DEV CLONE) ====================
