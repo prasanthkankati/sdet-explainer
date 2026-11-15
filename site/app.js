@@ -298,85 +298,32 @@
     }
   }
 
-  // Right-Side Volume-Dot Scroll Progress Indicator Across All Pages (Mouse + Touch)
+  // Minimalist Floating Scroll-Dot Indicator Across All Pages (No lines/rails; fades when idle)
   function initVolumeScroller() {
-    if (document.querySelector(".scroll-volume-rail")) return;
-    const rail = document.createElement("div");
-    rail.className = "scroll-volume-rail d-print-none";
-    rail.setAttribute("aria-label", "Page Scroll Progress");
-    rail.innerHTML = `
-      <div class="scroll-volume-line">
-        <div class="scroll-volume-fill"></div>
-        <div class="scroll-volume-dot"></div>
-      </div>
-      <div class="scroll-volume-pct">0%</div>
-    `;
-    document.body.appendChild(rail);
+    if (document.querySelector(".scroll-dot-indicator")) return;
+    const dot = document.createElement("div");
+    dot.className = "scroll-dot-indicator d-print-none";
+    dot.setAttribute("aria-hidden", "true");
+    document.body.appendChild(dot);
 
-    const fill = rail.querySelector(".scroll-volume-fill");
-    const dot = rail.querySelector(".scroll-volume-dot");
-    const pctLabel = rail.querySelector(".scroll-volume-pct");
-    const isHome = document.body.classList.contains("home-page");
-    const controlsEl = document.getElementById("controls") || document.querySelector(".hero-banner");
+    let hideTimeout = null;
 
     function updateScroller() {
-      if (isHome && controlsEl) {
-        const cTop = controlsEl.getBoundingClientRect().top;
-        const railTop = Math.max(58, Math.min(window.innerHeight - 80, Math.round(cTop)));
-        rail.style.top = `${railTop}px`;
-      }
       const docEl = document.documentElement;
       const maxScroll = Math.max(1, docEl.scrollHeight - window.innerHeight);
       const ratio = Math.min(1, Math.max(0, window.scrollY / maxScroll));
-      const pct = Math.round(ratio * 100);
-      fill.style.height = `${pct}%`;
-      dot.style.top = `${pct}%`;
-      pctLabel.style.top = `${pct}%`;
-      pctLabel.textContent = `${pct}%`;
+      const topPx = Math.round((window.innerHeight * 0.08) + ratio * (window.innerHeight * 0.84));
+      dot.style.top = `${topPx}px`;
+
+      dot.classList.add("is-scrolling");
+      clearTimeout(hideTimeout);
+      hideTimeout = setTimeout(() => {
+        dot.classList.remove("is-scrolling");
+      }, 650);
     }
-
-    function scrubToClientY(clientY) {
-      const rect = rail.getBoundingClientRect();
-      const ratio = Math.min(1, Math.max(0, (clientY - rect.top) / rect.height));
-      const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-      window.scrollTo({ top: ratio * maxScroll, behavior: "auto" });
-    }
-
-    let dragging = false;
-    rail.addEventListener("mousedown", e => {
-      dragging = true;
-      rail.classList.add("dragging");
-      scrubToClientY(e.clientY);
-    });
-    window.addEventListener("mousemove", e => {
-      if (!dragging) return;
-      scrubToClientY(e.clientY);
-    });
-    window.addEventListener("mouseup", () => {
-      if (!dragging) return;
-      dragging = false;
-      rail.classList.remove("dragging");
-    });
-
-    rail.addEventListener("touchstart", e => {
-      if (!e.touches[0]) return;
-      dragging = true;
-      rail.classList.add("dragging");
-      scrubToClientY(e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener("touchmove", e => {
-      if (!dragging || !e.touches[0]) return;
-      scrubToClientY(e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener("touchend", () => {
-      if (!dragging) return;
-      dragging = false;
-      rail.classList.remove("dragging");
-    }, { passive: true });
 
     window.addEventListener("scroll", updateScroller, { passive: true });
     window.addEventListener("resize", updateScroller, { passive: true });
-    updateScroller();
   }
 
   function loadGlossaryThenInit() {
@@ -400,7 +347,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.5.2";
+  const SITE_VERSION = "v3.6.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -417,7 +364,7 @@
     const homeHref = inTopicsDir ? "../index.html" : "index.html";
     const footer = document.querySelector("footer");
     if (footer) {
-      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer.</a> <b>${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright`;
+      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer.</a> <b class="ver-pill">${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright`;
     }
 
     // Smooth page landing & navigation transition
@@ -540,9 +487,26 @@
       randomBtn.onclick = e => {
         e.preventDefault();
         const target = suggestedTrackId;
-        history.replaceState(null, "", `#${target}`);
-        selectTrackFn(target);
-        pickRandomTrack(target);
+        const targetTopic = TOPICS.find(t => t.track === target && t.file);
+        if (targetTopic) {
+          location.href = (inTopicsDir ? "" : "topics/") + targetTopic.file;
+        } else {
+          history.replaceState(null, "", `#${target}`);
+          if (selectTrackFn) selectTrackFn(target);
+          pickRandomTrack(target);
+        }
+      };
+    }
+
+    // Interactive Hero KPI Q&A Banks Button
+    const kpiInterviewBtn = document.getElementById("kpi-interview-btn");
+    if (kpiInterviewBtn) {
+      kpiInterviewBtn.onclick = e => {
+        e.preventDefault();
+        history.replaceState(null, "", "#Interview");
+        if (selectTrackFn) selectTrackFn("Interview");
+        const target = document.getElementById("controls") || document.getElementById("grid");
+        if (target) target.scrollIntoView({ behavior: "smooth" });
       };
     }
 
@@ -623,7 +587,7 @@
         items.sort((a, b) => (a.order || 99) - (b.order || 99));
         const secDone = items.filter(x => x.file).length;
         const secTrack = items[0] ? items[0].track : "";
-        html += `<section class="sec-card">` +
+        html += `<section class="sec-card" data-track="${secTrack}">` +
           `<div class="sec-card-hdr">` +
             `<span class="tag ${secTrack}">${secTrack}</span>` +
             `<span class="sec-card-title">${esc(sec)}</span>` +

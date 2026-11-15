@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@600;700&display=swap');
 
 @view-transition {
   navigation: auto;
@@ -23,13 +23,13 @@
 }
 
 :root {
-  --bg: #080B11;
-  --text: #E6EDF3;
+  --bg: #000000;
+  --text: #F3F4F6;
   --bold: #FFFFFF;
-  --muted: #94A3B8;
-  --accent: #E0E0E0;
-  --accent-rgb: 224, 224, 224;
-  --hero-box-bg: var(--accent);
+  --muted: #9CA3AF;
+  --accent: #FF4D00;
+  --accent-rgb: 255, 77, 0;
+  --hero-box-bg: #FF4D00;
   --hero-title-color: #000000;
   --kw: #FF7B72;
   --type: #4EC9B0;
@@ -46,15 +46,15 @@
   --ts: #C4B5FD;
   --pw: #FDA4AF;
   --int: #FDBA74;
-  --border: rgba(255, 255, 255, 0.13);
-  --border-dim: rgba(255, 255, 255, 0.07);
-  --code-bg: rgba(17, 23, 34, 0.62);
-  --card-bg: rgba(14, 19, 29, 0.58);
-  --glass-bg: rgba(16, 22, 33, 0.56);
-  --glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-  --glass-shadow: 0 10px 30px rgba(0, 0, 0, 0.36);
-  --sheet-border: rgba(255, 255, 255, 0.14);
-  --hc-amber: #E0E0E0;
+  --border: rgba(255, 255, 255, 0.18);
+  --border-dim: rgba(255, 255, 255, 0.09);
+  --code-bg: #0B0B0C;
+  --card-bg: #0E0E10;
+  --glass-bg: rgba(12, 12, 14, 0.88);
+  --glass-shine: inset 0 1px 0 rgba(255, 255, 255, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --glass-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+  --sheet-border: rgba(255, 255, 255, 0.18);
+  --hc-amber: #FF4D00;
 }
 
 :root[data-theme="light"] {
@@ -191,12 +191,12 @@ pre::-webkit-scrollbar {
 
 body {
   margin: 0;
-  font: 15.5px/1.72 "Segoe UI", system-ui, -apple-system, sans-serif;
+  font: 16.5px/1.76 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--bg);
   background-image:
-    radial-gradient(circle at 14% 4%, rgba(var(--accent-rgb), 0.11) 0%, transparent 44%),
+    radial-gradient(circle at 14% 4%, rgba(var(--accent-rgb), 0.12) 0%, transparent 44%),
     radial-gradient(circle at 86% 18%, rgba(255, 255, 255, 0.045) 0%, transparent 40%),
-    radial-gradient(circle at 50% 92%, rgba(var(--accent-rgb), 0.06) 0%, transparent 50%);
+    radial-gradient(circle at 50% 92%, rgba(var(--accent-rgb), 0.07) 0%, transparent 50%);
   background-attachment: fixed;
   color: var(--text);
   transition: opacity 0.16s ease, background-color 0.25s ease;
@@ -207,8 +207,18 @@ body.page-leaving {
 
 header.top, header.chapter-top, nav, .controls, .stats, .tag, .status-pill, .kbd-hint,
 .ac-kw, .phase-num, .phase-role, .v-hdr, .v-mid, footer, pre, code, .chip, .qa-chip,
-.se-navbar, .se-sidebar, .se-toc {
-  font-family: Consolas, "Cascadia Mono", "Courier New", monospace;
+.se-navbar, .se-sidebar, .se-toc, .ver-pill, .version-tag {
+  font-family: 'JetBrains Mono', Consolas, "Cascadia Mono", "Courier New", monospace;
+}
+
+.ver-pill,
+.version-tag,
+[data-version],
+footer b.ver-pill,
+.hero-kicker .ver-pill {
+  color: #22C55E !important;
+  font-weight: 700;
+  font-family: 'JetBrains Mono', Consolas, monospace;
 }
 
 a {
@@ -220,72 +230,34 @@ a:hover {
 }
 
 /* ============================================================
-   Right-Side Volume-Dot Scroll Progress Indicator
+   Minimalist Floating Scroll-Dot Indicator (No lines/rails; fades when idle)
    ============================================================ */
-.scroll-volume-rail {
+.scroll-volume-rail,
+.scroll-volume-line,
+.scroll-volume-fill,
+.scroll-volume-pct {
+  display: none !important;
+}
+
+.scroll-dot-indicator {
   position: fixed;
-  top: 64px;
-  bottom: 18px;
-  right: 7px;
-  width: 12px;
-  z-index: 95;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  user-select: none;
-}
-.scroll-volume-line {
-  position: relative;
-  width: 2px;
-  height: 100%;
-  background: var(--border);
-}
-.scroll-volume-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 2px;
-  height: 0%;
-  background: var(--hero-box-bg);
-  opacity: 0.65;
-  transition: height 0.04s linear;
-}
-.scroll-volume-dot {
-  position: absolute;
-  left: 50%;
-  top: 0%;
-  width: 10px;
-  height: 10px;
+  right: 9px;
+  top: 10%;
+  width: 8px;
+  height: 8px;
   border-radius: 50% !important;
   background: var(--hero-box-bg);
-  border: 2px solid var(--bg);
-  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.75);
-  transform: translate(-50%, -50%);
-  transition: top 0.04s linear, transform 0.15s ease, box-shadow 0.15s ease;
-}
-.scroll-volume-rail:hover .scroll-volume-dot,
-.scroll-volume-rail.dragging .scroll-volume-dot {
-  transform: translate(-50%, -50%) scale(1.3);
-  box-shadow: 0 0 12px var(--accent);
-}
-.scroll-volume-pct {
-  position: absolute;
-  right: 16px;
-  top: 0%;
-  transform: translateY(-50%);
-  background: var(--code-bg);
-  border: 1px solid var(--border);
-  color: var(--bold);
-  font: 10.5px/1.2 Consolas, "Cascadia Mono", monospace;
-  padding: 2px 5px;
-  opacity: 0;
+  box-shadow: 0 0 10px var(--hero-box-bg), 0 0 4px rgba(255, 255, 255, 0.7);
   pointer-events: none;
-  transition: opacity 0.15s ease;
-  white-space: nowrap;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(-50%) scale(0.5);
+  transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.scroll-volume-rail:hover .scroll-volume-pct,
-.scroll-volume-rail.dragging .scroll-volume-pct {
+
+.scroll-dot-indicator.is-scrolling {
   opacity: 1;
+  transform: translateY(-50%) scale(1);
 }
 
 /* ============================================================
@@ -387,7 +359,7 @@ body.home-page .fixed-theme-toggle {
   transition: background-color 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .hero-kicker {
-  font-family: Consolas, "Cascadia Mono", monospace;
+  font-family: 'JetBrains Mono', Consolas, "Cascadia Mono", monospace;
   font-size: 0.74rem;
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -397,12 +369,13 @@ body.home-page .fixed-theme-toggle {
 }
 .hero-left h1 {
   margin: 14px 0 10px;
-  font-size: 2.4rem;
-  line-height: 1.02;
-  letter-spacing: -0.6px;
-  font-weight: 800;
+  font-family: 'Syne', -apple-system, sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.35rem, 5.8vw, 3.45rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
   color: var(--hero-title-color, #000000);
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 .hero-left .hero-sub {
   margin: 0 0 20px;
@@ -425,7 +398,7 @@ body.home-page .fixed-theme-toggle {
   background: #000000;
   color: #FFFFFF;
   border: 1px solid #000000;
-  font-family: Consolas, "Cascadia Mono", monospace;
+  font-family: 'JetBrains Mono', Consolas, "Cascadia Mono", monospace;
   font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
@@ -465,7 +438,7 @@ body.home-page .fixed-theme-toggle {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-family: Consolas, "Cascadia Mono", monospace;
+  font-family: 'JetBrains Mono', Consolas, "Cascadia Mono", monospace;
   font-size: 0.76rem;
   color: #8E8E8E;
   margin-bottom: 8px;
@@ -499,6 +472,33 @@ body.home-page .fixed-theme-toggle {
   flex-direction: column;
   gap: 4px;
 }
+.kpi-cell.kpi-link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.18s ease, background-color 0.18s ease;
+}
+.kpi-cell.kpi-link:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+}
+.kpi-cell span {
+  font-family: 'JetBrains Mono', Consolas, "Cascadia Mono", monospace;
+  font-size: 0.72rem;
+  color: #8E8E8E;
+  letter-spacing: 0.4px;
+}
+.kpi-cell b {
+  font-family: 'JetBrains Mono', Consolas, "Cascadia Mono", monospace;
+  font-size: 1.05rem;
+  color: #FFFFFF;
+  transition: color 0.18s ease;
+}
+.kpi-cell.kpi-link:hover b {
+  color: var(--hero-box-bg);
+}
+}
 .kpi-cell span {
   font-family: Consolas, "Cascadia Mono", monospace;
   font-size: 0.72rem;
@@ -523,6 +523,7 @@ body.home-page .fixed-theme-toggle {
 }
 .sec-card {
   border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
   background: var(--glass-bg);
   backdrop-filter: blur(22px) saturate(180%);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
@@ -534,6 +535,37 @@ body.home-page .fixed-theme-toggle {
   max-width: 100%;
   overflow: hidden;
   animation: pageBlendIn 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.sec-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shine), 0 14px 38px rgba(0, 0, 0, 0.55);
+}
+
+/* Category Color Identification */
+.sec-card[data-track="Java"] {
+  border-top: 3px solid var(--java);
+  background: linear-gradient(180deg, rgba(252, 211, 77, 0.06) 0%, var(--glass-bg) 35%);
+}
+.sec-card[data-track="Selenium"] {
+  border-top: 3px solid var(--sel);
+  background: linear-gradient(180deg, rgba(134, 239, 172, 0.06) 0%, var(--glass-bg) 35%);
+}
+.sec-card[data-track="Manual"] {
+  border-top: 3px solid var(--man);
+  background: linear-gradient(180deg, rgba(125, 211, 252, 0.06) 0%, var(--glass-bg) 35%);
+}
+.sec-card[data-track="TypeScript"] {
+  border-top: 3px solid var(--ts);
+  background: linear-gradient(180deg, rgba(196, 181, 253, 0.06) 0%, var(--glass-bg) 35%);
+}
+.sec-card[data-track="Playwright"] {
+  border-top: 3px solid var(--pw);
+  background: linear-gradient(180deg, rgba(253, 164, 175, 0.06) 0%, var(--glass-bg) 35%);
+}
+.sec-card[data-track="Interview"] {
+  border-top: 3px solid var(--int);
+  background: linear-gradient(180deg, rgba(253, 186, 116, 0.06) 0%, var(--glass-bg) 35%);
 }
 .sec-card-hdr {
   display: flex;
@@ -1509,8 +1541,18 @@ html, body {
     line-height: 1.6;
   }
   .home-nav {
-    padding: 12px max(14px, env(safe-area-inset-right)) 12px max(14px, env(safe-area-inset-left));
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    padding: max(12px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) 12px max(14px, env(safe-area-inset-left));
     margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  :root[data-theme="light"] .home-nav {
+    background: rgba(238, 242, 246, 0.88);
   }
   .home-brand {
     height: 32px;
@@ -1619,10 +1661,20 @@ html, body {
     line-height: 1.4;
     font-size: 0.85rem;
   }
-  /* Chapter Navbar & Edge-to-Edge Reading View on iPhone 16 Pro Max (440px) */
+  /* Chapter Navbar & Edge-to-Edge Reading View on iPhone 16 Pro Max (440px) — PWA App Bar */
   .se-navbar {
-    padding: 0 max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
-    height: 48px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(0, 0, 0, 0.88);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) 0 max(12px, env(safe-area-inset-left));
+    height: calc(48px + env(safe-area-inset-top, 0px));
+    border-bottom: 1px solid var(--border);
+  }
+  :root[data-theme="light"] .se-navbar {
+    background: rgba(238, 242, 246, 0.88);
   }
   .se-navbar-left {
     gap: 8px;
