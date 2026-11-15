@@ -1175,9 +1175,9 @@ const TOPICS = [
     track: "Interview",
     section: "I-J2. Java: Core Java Fundamentals Q&A",
     order: 5,
-    title: "J2.5 Q&A: Arrays (1D & 2D Object[][]) (21 Questions)",
+    title: "J2.5 Q&A: Arrays (1D & 2D Object[][]), Methods & TestNG DataProviders (35 Questions)",
     file: "interview-j2-5-qa.html",
-    summary: "21 interview questions across 5 tiers: Basics, How it works, Real situations, Troubleshooting & Design choices.",
+    summary: "35 questions across 5 tiers: Memory contiguity, O(1) address math, Arrays method reference, 2D jagged matrices & TestNG DataProvider rubrics.",
     keywords: "java J2.5 interview questions, arrays (1d & 2d object[][])",
     status: "done",
     date: "2026-11-15"

@@ -22,7 +22,7 @@ See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) rele
 - **M4 (4.1&ndash;4.3):** Done + 105 Q&amp;As (`v1.8.0`)
 - **M5 (5.1&ndash;5.2):** Done + 70 Q&amp;As (`v1.8.0`)
 
-## Java Track: 100% Complete (30/30 Pages Published — Visual-Hook Explain Style + 30 Connected Question Banks = 665 Questions!)
+## Java Track: 100% Complete (30/30 Pages Published — Visual-Hook Explain Style + 30 Connected Question Banks = 679 Questions!)
 - **J1. JVM Architecture &amp; Memory Internals (`1.1`&ndash;`1.4`):** `java-jdk-jre-jvm.html`, `java-jvm-architecture.html`, `java-stack-vs-heap.html`, `java-metaspace-jit-gc.html`
 - **J2. Core Java Fundamentals (`2.1`&ndash;`2.6`):** `java-program-structure-main.html`, `java-variables-primitives-casting.html`, `java-wrapper-autoboxing-cache.html`, `java-operators-control-flow-loops.html`, `java-arrays-1d-2d-dataprovider.html`, `java-methods-parameters-varargs.html`
 - **J3. Strings &amp; Text Manipulation (`3.1`&ndash;`3.3`):** `java-string-immutability-pool.html`, `java-string-stringbuilder-stringbuffer.html`, `java-string-methods-regex.html`
@@ -65,6 +65,7 @@ See [VERSIONS.md](VERSIONS.md) for the full Source Version Management (SVM) rele
 ---
 
 ## Feature & Build Version Log
+- **2026-11-15 (`v3.5.5`):** Upgraded **Java 2.5 (`java-arrays-1d-2d-dataprovider.html`)** to the full standard with complete `java.util.Arrays` method reference, 3 standalone demonstration programs, 2D jagged matrices, and TestNG `@DataProvider` templates. Expanded companion **J2.5 Question Bank (`interview-j2-5-qa.html`)** to **35 practical questions across 5 Tiers** (679 total Java Q&As). Pushed live to GitHub.
 - **2026-11-15 (`v3.5.4`):** Upgraded **Java 2.4 (`java-operators-control-flow-loops.html`)** to the full hardware-to-selenium narrative standard (ALU branching, short-circuit bytecode evaluation, modern arrow switch, 4 multi-context Selenium templates) and expanded companion **J2.4 Question Bank (`interview-j2-4-qa.html`)** to **35 practical questions across 5 Tiers** (665 total Java Q&As). Pushed live to GitHub.
 - **2026-11-15 (`v3.5.3`):** Upgraded **Java 2.3 (`java-wrapper-autoboxing-cache.html`)** to the full 7-step `java-teacher` pedagogical standard and expanded companion **J2.3 Question Bank (`interview-j2-3-qa.html`)** to the full **35 questions across 5 Tiers** (651 total Java Q&As).
 - **2026-11-15 (`v3.5.2`):** Added numbered `Q&amp;A` sections with `.qa-chip` Question Bank buttons across all 30 **Java Track (`J1`–`J6`)** Visual-Hook chapters, published **30 connected `interview-j*-qa.html` Question Banks** (`623` Q&amp;As across 5 Tiers each), and indexed all `I-J1`–`I-J6` entries in `topics.js` (`1,500+` total site Q&amp;As).
