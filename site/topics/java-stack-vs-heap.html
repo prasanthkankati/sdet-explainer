@@ -3,203 +3,108 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>1.3 Stack vs Heap Memory &amp; Pass-by-Value | SDET Explainer</title>
+<title>Java: Stack vs Heap Memory &amp; Pass-by-Value</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>1.3 Stack vs Heap Memory &amp; Pass-by-Value</h1>
-  <div class="se-lead">How Stack frames store local variables and method calls, how the Heap allocates objects, and why Java is strictly Pass-by-Value.</div>
 
-  <p>Java separates short-lived method execution state from long-lived object data by storing method calls and local variables on the JVM Stack while allocating objects on the shared Heap. Every parameter passed to a Java method—whether a primitive value or an object reference—is copied by value onto the called method's Stack frame.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">The Stack stores short-lived method calls and local variables per thread, while the Heap stores all objects and arrays shared across the program; Java always passes copies of Stack values into methods.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-jvm-architecture.html">1.2 JVM Architecture &amp; Class Loader Subsystem</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>Stack = Private scratchpad, Heap = Shared warehouse, Call = Copy the slip.</b></p>
+    <ul>
+      <li><b>Stack</b> opens a fresh frame when a method starts and wipes it cleanly when the method returns.</li>
+      <li><b>Heap</b> holds every <code>new</code> object until nothing points to it and the Garbage Collector clears it.</li>
+      <li><b>Pass-by-value</b> means a method receives a copy of a number or a copy of a Heap address ticket, never the caller's own Stack box.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Understanding Stack frames and Heap references explains why passing a <code>WebDriver</code> into a Page Object shares the same browser session, while reassigning a parameter inside a helper method leaves the caller's variable unchanged.</p>
-  </section>
-
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li>Each thread owns a private Last-In-First-Out (LIFO) <b>JVM Stack</b> that pushes a new <b>Stack Frame</b> on every method call and pops it immediately when the method returns.</li>
-      <li>Every Stack Frame contains a Local Variable Array (method parameters and local variables), an Operand Stack (intermediate computation values), and Frame Data (return address and constant pool reference).</li>
-      <li>Local primitives store their actual value directly inside the Stack Frame, whereas local object variables store only the 32-bit or 64-bit Heap memory address (reference).</li>
-      <li>The <b>Heap</b> is a single shared memory area across all threads where every object created with <code>new</code> and every array lives until reclaimed by the Garbage Collector.</li>
-      <li>Java is strictly <b>Pass-by-Value</b>: passing a primitive copies its numeric/boolean value; passing an object passes a copy of its Heap address reference, never the caller's variable slot itself.</li>
-      <li>Unbounded recursion exhausts per-thread stack memory and throws <code>java.lang.StackOverflowError</code>, whereas retaining excessive live objects on the Heap throws <code>java.lang.OutOfMemoryError: Java heap space</code>.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
-    <table>
-      <thead>
-        <tr><th>Characteristic</th><th>JVM Stack</th><th>JVM Heap</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Thread Scope</b></td><td>Private (one Stack per thread)</td><td>Shared (one Heap per JVM process)</td></tr>
-        <tr><td><b>Stored Data</b></td><td>Method frames, local primitives, object references</td><td>Objects created via <code>new</code>, instance fields, arrays</td></tr>
-        <tr><td><b>Allocation Order</b></td><td>Strict LIFO (Last-In, First-Out)</td><td>Dynamic allocation managed by Garbage Collector</td></tr>
-        <tr><td><b>Lifetime</b></td><td>Popped automatically when the method returns</td><td>Persists until unreachable by any live reference</td></tr>
-        <tr><td><b>Failure Error</b></td><td><code>java.lang.StackOverflowError</code></td><td><code>java.lang.OutOfMemoryError: Java heap space</code></td></tr>
-        <tr><td><b>Tuning Flag</b></td><td><code>-Xss</code> (e.g., <code>-Xss512k</code>)</td><td><code>-Xms</code> (initial) and <code>-Xmx</code> (max, e.g., <code>-Xmx2g</code>)</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section id="how-it-works">
-    <h2>How it works</h2>
-    <ol>
-      <li>When <code>main()</code> starts, the JVM pushes a <code>main</code> frame onto the thread's Stack holding local variable <code>driver</code>.</li>
-      <li>Executing <code>new ChromeDriver()</code> allocates the object block on the Heap (address <code>@A1</code>) and writes <code>@A1</code> into the <code>driver</code> slot on the Stack.</li>
-      <li>Calling <code>openLogin(driver)</code> pushes a new <code>openLogin</code> frame onto the Stack and copies the value <code>@A1</code> into parameter <code>d</code>.</li>
-      <li>Invoking <code>d.get(...)</code> dereferences <code>@A1</code> on the Heap, modifying the shared browser session visible to the caller.</li>
-      <li>Reassigning <code>d = null;</code> inside <code>openLogin</code> overwrites only the copied local slot in the <code>openLogin</code> frame; once the frame pops, <code>main</code>'s <code>driver</code> still holds <code>@A1</code>.</li>
-    </ol>
+  <section><h2>3. Memory map (Stack points into Heap)</h2>
     <div class="arch">
-      <div class="lbl">Pass-by-Value Trace During <code>openLogin(driver)</code></div>
+      <div class="lbl">One Running Method <small>two separate areas in RAM</small></div>
+      <div class="note">Local names live on the Stack and hold either a direct number or a pointer into the Heap.</div>
       <div class="cols">
-        <div class="item"><b>STACK: <code>openLogin</code> Frame (Top)</b><span>Parameter <code>d</code> receives copy of <code>@A1</code>.<br><code>d = null;</code> clears only <code>d</code>, not <code>driver</code>.</span></div>
-        <div class="item"><b>STACK: <code>main</code> Frame (Below)</b><span>Local <code>int timeout = 10</code> (raw value).<br>Local <code>driver = @A1</code> (unchanged on return).</span></div>
-        <div class="item"><b>HEAP (Shared Objects)</b><span>Address <code>@A1</code>: <code>ChromeDriver</code> instance.<br>State changes via <code>d.get()</code> persist here.</span></div>
+        <div class="item"><b>Thread Stack (LIFO frames)</b><span><code>int waitSec = 10</code> (raw number inside slot)<br><code>driver = @H42</code> (address ticket only)</span></div>
+        <div class="item"><b>Shared Heap (objects)</b><span>Address <code>@H42</code>: <code>ChromeDriver</code> object + internal fields</span></div>
       </div>
-    </div>
+      <div class="flow">pass driver to openLogin(driver)</div>
+      <div class="arch">
+        <div class="lbl">Child Method Frame <small>gets a copy of the address ticket</small></div>
+        <div class="note"><code>d = @H42</code> points to the same <code>@H42</code> object, so <code>d.get(...)</code> moves the same browser. Setting <code>d = null</code> only erases <code>d</code>, not <code>driver</code>.</div>
+      </div>
+    </div></section>
 
-    <p>Demonstrating Pass-by-Value behavior on primitives and object references:</p>
-<pre><code>package dev.java.jvm; // Declares package
-
-public class StackHeapTrace { // Class loaded into Metaspace
-    static class PageConfig { // Static nested class for Heap object state
-        int timeoutSeconds = 10; // Instance field lives inside the Heap object
-    } // Ends PageConfig
-    static void mutateAndReassign(int retries, PageConfig cfg) { // Pushes new Stack frame with copies
-        retries = 99; // Modifies local primitive copy on this frame only
-        cfg.timeoutSeconds = 30; // Dereferences Heap address and mutates caller's object
-        cfg = new PageConfig(); // Reassigns local reference copy to a brand-new Heap object
-        cfg.timeoutSeconds = 50; // Modifies only the new local Heap object
-    } // Pops Stack frame; local new object becomes unreachable for GC
-    public static void main(String[] args) { // Pushes main Stack frame
-        int retries = 3; // Local primitive stored directly on main Stack frame
-        PageConfig config = new PageConfig(); // Reference on Stack points to Heap object
-        mutateAndReassign(retries, config); // Passes copies of 3 and Heap reference
-        System.out.println(retries + " | " + config.timeoutSeconds); // Prints: 3 | 30
-    } // Pops main Stack frame
-} // Ends StackHeapTrace</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Claiming Java passes primitives by value and objects by reference; Java passes ALL arguments strictly by value, meaning object parameters receive a copied value of the Heap address rather than the caller's Stack variable slot.</li>
-      <li>Writing a recursive Page Object wait retry helper without a termination counter; infinite self-invocation fills the Stack with frames and crashes with <code>StackOverflowError</code>.</li>
-      <li>Storing large screenshots or base64 logs in a static <code>List&lt;byte[]&gt;</code> without clearing it; objects remain reachable from Metaspace forever and eventually trigger <code>OutOfMemoryError: Java heap space</code>.</li>
-      <li>Assuming local variables inside a method need manual <code>null</code> cleanup before return; Stack Frames are popped automatically on method exit, dropping those references immediately.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>4. Stack vs Heap: the confusion fixed</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Stack Frame</b></td><td>A private memory block pushed onto a thread's JVM Stack for one active method invocation.</td></tr>
-        <tr><td><b>JVM Stack</b></td><td>Thread-private LIFO memory region storing method call frames, local variables, and partial computation results.</td></tr>
-        <tr><td><b>Heap</b></td><td>Shared JVM memory pool where all objects and arrays reside throughout their reachable lifetime.</td></tr>
-        <tr><td><b>Object Reference</b></td><td>The memory address value stored in a variable that points to an object located on the Heap.</td></tr>
-        <tr><td><b>Pass-by-Value</b></td><td>Parameter passing semantics where the method receives a copy of the caller's argument value rather than the caller's variable address.</td></tr>
-        <tr><td><b><code>StackOverflowError</code></b></td><td>Unchecked JVM <code>Error</code> thrown when nested method calls exceed the thread's allocated stack capacity.</td></tr>
-        <tr><td><b><code>OutOfMemoryError</code></b></td><td>Unchecked JVM <code>Error</code> thrown when the Heap cannot allocate space for a new object even after Garbage Collection.</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th></th><th>Stack</th><th>Heap</th></tr>
+      <tr><td>What it stores</td><td>Method frames, local primitives, reference pointers</td><td>All objects (<code>new</code>) and arrays</td></tr>
+      <tr><td>Who owns it</td><td>One private Stack per thread</td><td>Shared by every thread in the JVM</td></tr>
+      <tr><td>Lifetime</td><td>Dies the instant the method returns</td><td>Lives until GC sees zero pointers to it</td></tr>
+      <tr><td>When it fills up</td><td><code>StackOverflowError</code></td><td><code>OutOfMemoryError</code></td></tr>
+    </table></section>
 
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
+  <section><h2>5. Code example: primitive copy vs reference copy</h2>
+<pre><code>public class MemoryTrace {
+    static void bump(int sec, StringBuilder log) {
+        sec = 30;                 // changes only local copy 'sec'; caller stays 10
+        log.append("OK");         // follows @H99 copy into Heap and edits shared object
+        log = new StringBuilder();// rewires only local 'log' to new @H100; caller unchanged
+    }
+    public static void main(String[] args) {
+        int wait = 10;                              // Stack: literal value 10
+        StringBuilder sb = new StringBuilder("Run:");// Stack: sb=@H99 -&gt; Heap object "Run:"
+        bump(wait, sb);                             // copies 10 and @H99 into bump's frame
+        System.out.println(wait + " | " + sb);      // 10 | Run:OK
+    }
+}</code></pre>
+<pre><code class="bash">javac MemoryTrace.java
+java MemoryTrace   # Output: 10 | Run:OK</code></pre></section>
 
-    <h3>Basics</h3>
-
-    <p><b>What is the difference between Stack memory and Heap memory in Java?</b><br>
-    Stack memory is allocated per thread in LIFO order to hold active method frames, local primitive values, and object references. Heap memory is shared across all threads and holds the actual objects created with <code>new</code> along with their instance fields and arrays. Stack memory is reclaimed instantly when a method returns, while Heap memory is reclaimed asynchronously by the Garbage Collector.</p>
-
-    <p><b>Why is Java considered strictly Pass-by-Value?</b><br>
-    When a method is invoked, the JVM copies the contents of each caller variable into the new Stack frame's parameter slots. For primitives, that value is the number or boolean; for objects, that value is the Heap memory address. Because the called method only holds a copy of the address, reassigning the parameter variable (<code>cfg = new PageConfig()</code>) never changes which object the caller's variable points to.</p>
-
-    <p><b>Where do instance variables live versus local variables?</b><br>
-    Local variables declared inside a method or constructor always live inside that method's Stack Frame (holding either the primitive value or the object reference). Instance variables belong to an object, so they always live inside that object's memory block on the Heap for the entire life of the object.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>How can a helper method modify a caller's object if Java is Pass-by-Value?</b><br>
-    Although the reference parameter is a copy of the caller's Stack slot, both variables now hold the identical Heap address. Calling a setter or mutating a field through the dot operator (<code>cfg.timeoutSeconds = 30</code>) follows that shared Heap address and modifies the single Heap object that the caller also points to. Reassigning the parameter itself breaks the link only for the callee's frame.</p>
-
-    <p><b>What are the three components inside a single JVM Stack Frame?</b><br>
-    Each Stack Frame contains a Local Variable Array for parameters and local variables, an Operand Stack where bytecode instructions push and pop operands during arithmetic or method invocation, and Frame Data holding the return address and reference to the class's constant pool. When an exception occurs, the JVM reads active Stack Frames to build the printed stack trace.</p>
-
-    <p><b>What happens to objects created inside a method once that method returns?</b><br>
-    When a method returns, its Stack Frame is popped and all local reference variables inside that frame vanish. Any Heap object created inside the method that was not returned or saved to a longer-lived field becomes unreachable. During the next Garbage Collection cycle, the JVM reclaims that unreachable Heap memory.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>In a Selenium framework, <code>BaseTest</code> passes <code>driver</code> into <code>new LoginPage(driver)</code>, and <code>LoginPage</code> later calls <code>driver = null;</code> in a teardown bug. Why is <code>BaseTest.driver</code> not null?</b><br>
-    Passing <code>driver</code> into the <code>LoginPage</code> constructor copied the Heap address of the <code>ChromeDriver</code> object into the constructor parameter and then into <code>LoginPage.driver</code>. Setting <code>LoginPage</code>'s field to <code>null</code> only zeroes out <code>LoginPage</code>'s reference copy. The <code>driver</code> reference inside <code>BaseTest</code> still holds the original Heap address.</p>
-
-    <p><b>Why can two parallel threads run the exact same Page Object method simultaneously without corrupting local variables?</b><br>
-    Each TestNG thread owns an independent JVM Stack. Even when two threads invoke <code>loginPage.enterCredentials(user, pass)</code> on the same bytecode at the same millisecond, Thread 1 creates its frame with its own <code>user</code> and <code>pass</code> slots on Stack 1 while Thread 2 creates a separate frame on Stack 2. Only shared instance or static fields on the Heap risk thread interference.</p>
-
-    <p><b>Why does a <code>swap(WebElement a, WebElement b)</code> method fail to swap the two caller variables?</b><br>
-    Inside <code>swap</code>, swapping parameters <code>a</code> and <code>b</code> only exchanges the two copied Heap addresses inside <code>swap</code>'s Stack Frame. The moment <code>swap</code> returns, its Stack Frame is popped and the caller's original <code>a</code> and <code>b</code> variables retain their original Heap addresses.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>How do you diagnose and fix a <code>StackOverflowError</code> in an automation test?</b><br>
-    A <code>StackOverflowError</code> stack trace shows the same two or three method names repeating hundreds of times until the thread stack fills up. Common automation triggers include a method calling itself without a base exit condition, mutual recursion between Page Object constructors (Page A creates Page B which creates Page A), or a circular <code>toString()</code> implementation on an API POJO. Adding a termination guard or breaking the constructor cycle eliminates the error.</p>
-
-    <p><b>What causes <code>OutOfMemoryError: Java heap space</code> during a long Selenium regression run?</b><br>
-    This error happens when live references hold onto large Heap objects across hundreds of tests so the Garbage Collector cannot free enough memory. Frequent culprits in test frameworks include storing full-page screenshot byte arrays in a static report list, leaking unclosed <code>XSSFWorkbook</code> Excel objects, or retaining finished <code>WebDriver</code> objects inside a non-cleaned collection. Releasing references after each test and increasing <code>-Xmx</code> prevents Heap exhaustion.</p>
-
-    <p><b>How do you adjust Stack size or Heap size for a Maven TestNG run?</b><br>
-    Stack size per thread is configured via the JVM flag <code>-Xss</code> (for example, <code>-Xss512k</code>), and initial/maximum Heap sizes are configured via <code>-Xms</code> and <code>-Xmx</code> (for example, <code>-Xms512m -Xmx2g</code>). In Maven Surefire, pass these flags inside the <code>&lt;argLine&gt;</code> configuration element so forked test JVMs inherit the expanded memory.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why does Java keep Stack memory separate per thread instead of using a single global Stack?</b><br>
-    Isolating one Stack per thread eliminates the need for thread locking when pushing frames, reading local variables, or evaluating method expressions. Every thread executes method calls at full speed without waiting for other threads, which directly enables scalable multi-threaded execution.</p>
-
-    <p><b>Why should Selenium Page Objects avoid storing mutable test state inside Heap fields when running parallel tests?</b><br>
-    If a single Page Object instance or static utility class holds mutable instance fields on the shared Heap, concurrent threads overwrite each other's values. Keeping temporary data as local method variables on each thread's Stack guarantees isolation without locking.</p>
-
-    <p><b>Why did Java keep Pass-by-Value semantics for all parameters rather than adding C#-style <code>ref</code> or C++ pass-by-pointer-reference parameters?</b><br>
-    Strict Pass-by-Value keeps method call behavior predictable because callers know a called method can never silently swap out which object a local Stack variable points to. When multiple values must be returned from a Page Object helper, returning a clean immutable DTO or record makes data flow explicit.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li><b>Where are objects created with <code>new</code> stored?</b> On the Heap.</li>
-      <li><b>Where are local primitive variables and method parameters stored?</b> On the thread's JVM Stack inside the active Stack Frame.</li>
-      <li><b>Is Java Pass-by-Value or Pass-by-Reference?</b> Strictly Pass-by-Value (references are copied as address values).</li>
-      <li><b>Which memory error occurs on infinite recursion?</b> <code>StackOverflowError</code>.</li>
-      <li><b>Which JVM flags control minimum and maximum Heap size?</b> <code>-Xms</code> (initial) and <code>-Xmx</code> (maximum).</li>
-      <li><b>Which JVM flag controls per-thread Stack size?</b> <code>-Xss</code>.</li>
-    </ol>
-  </section>
+      <li><code>main</code> starts and gets the bottom Stack frame holding <code>wait = 10</code> and <code>sb = @H99</code>.</li>
+      <li><code>new StringBuilder("Run:")</code> allocates the object at Heap address <code>@H99</code>.</li>
+      <li>Calling <code>bump(wait, sb)</code> pushes a second Stack frame above <code>main</code> with copies <code>sec = 10</code> and <code>log = @H99</code>.</li>
+      <li>Setting <code>sec = 30</code> changes only the child frame's box; calling <code>log.append("OK")</code> walks the copied address to edit <code>@H99</code> on the Heap.</li>
+      <li>Reassigning <code>log = new StringBuilder()</code> moves only <code>log</code> to <code>@H100</code>; when <code>bump</code> returns, its frame vanishes and <code>main</code> still prints <code>10 | Run:OK</code>.</li>
+    </ol></section>
 
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-metaspace-jit-gc.html">1.4 Metaspace, static Memory & Execution Engine (JIT + GC) &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+  <section><h2>7. Real-life analogy: sticky notes and a storage warehouse</h2>
+    <table>
+      <tr><th>Warehouse</th><th>Java</th></tr>
+      <tr><td>Pocket notepad you keep on your desk per task</td><td>Stack frame per method call</td></tr>
+      <tr><td>Number written directly on your notepad</td><td>Primitive value on the Stack</td></tr>
+      <tr><td>Locker claim ticket (#42) written on your notepad</td><td>Object reference pointing to Heap</td></tr>
+      <tr><td>Shared warehouse room holding the actual box #42</td><td>Object living on the Heap</td></tr>
+      <tr><td>Handing someone a photocopy of claim ticket #42</td><td>Pass-by-value of a reference</td></tr>
+      <tr><td>Throwing away your notepad sheet when the task ends</td><td>Popping the Stack frame on return</td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Every recursive loop without a base condition blows up the Stack (<code>StackOverflowError</code>), while holding onto huge lists or unclosed objects fills the Heap (<code>OutOfMemoryError</code>).</p>
+    <p><b>SDET link:</b> Passing <code>driver</code> into a Page Object constructor (<code>new LoginPage(driver)</code>) copies the Heap ticket into the page so all pages drive the same browser. Setting a local variable <code>d = null</code> never closes the browser.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>If a helper sets its parameter <code>driver = null;</code>, does the caller's <code>driver</code> become null? <b>No</b> — only the copied Stack variable became null.</p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Stack frame</td><td>One method call's private workspace on the Stack</td></tr>
+      <tr><td>LIFO</td><td>Last-In, First-Out: newest method sits on top and finishes first</td></tr>
+      <tr><td>Pass-by-value</td><td>Java passes a copy of a variable's bits (number or address), never the variable itself</td></tr>
+      <tr><td>StackOverflowError</td><td>Stack ran out of space, usually from infinite recursion</td></tr>
+      <tr><td>OutOfMemoryError</td><td>Heap filled up and GC cannot free enough room</td></tr>
+    </table>
+    <p>&larr; Previous: <a href="java-jvm-architecture.html">1.2 JVM Architecture &amp; Memory Areas</a> &middot; Next: <a href="java-metaspace-jit-gc.html">1.4 Metaspace, static Memory &amp; Execution Engine &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

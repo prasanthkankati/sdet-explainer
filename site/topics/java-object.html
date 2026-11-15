@@ -3,210 +3,105 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>4.1 Class &amp; Object (Selenium + Interview Edition) | SDET Explainer</title>
+<title>Java: Class &amp; Object</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
-  <h1>4.1 Class &amp; Object (Selenium + Interview Edition)</h1>
-  <div class="se-lead">How classes act as templates in Metaspace, how objects store state and behavior on the Heap, 5 creation mechanisms, == vs .equals(), and null safety.</div>
+  <h1>4.1 Class &amp; Object</h1>
 
-  <p>A class defines fields and methods in Metaspace without allocating instance memory, whereas an object is a runtime instance created on the Heap that holds actual field values. In test automation, Page Objects, <code>ChromeDriver</code>, <code>By</code> locators, and <code>WebElement</code> wrappers are all Heap objects accessed via Stack reference variables.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">A class is a compile-time design rulebook taking zero object Heap space, while an object is a physical Heap memory block created at runtime bundling state fields and action methods.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-string-methods-regex.html">3.3 Essential String Methods &amp; Regex for SDETs</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>Class = Blueprint template in Metaspace (0 instance RAM); Object = Real instance on Heap created via new.</b></p>
+    <ul>
+      <li><b>One class, unlimited objects:</b> call <code>new LoginPage(driver)</code> repeatedly and each gets its own isolated field block.</li>
+      <li><b>State vs Behavior:</b> fields hold what an object knows (<code>url</code>, <code>timeout</code>); methods hold what it does (<code>open()</code>, <code>clickLogin()</code>).</li>
+      <li><b><code>==</code> vs <code>.equals()</code>:</b> <code>==</code> compares Stack memory addresses; <code>.equals()</code> checks logical equality if overridden.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Every Selenium test instantiates a driver object, wraps pages into Page Object classes, passes <code>By</code> locator objects, and invokes methods on returned <code>WebElement</code> objects.</p>
-  </section>
-
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li>A class loads once into Metaspace and consumes zero instance Heap space until instantiated via <code>new</code> or another creation mechanism.</li>
-      <li>Every object possesses three core properties: <b>State</b> (instance fields), <b>Behavior</b> (instance methods), and <b>Identity</b> (unique Heap memory address).</li>
-      <li><code>==</code> compares Stack reference addresses, whereas <code>.equals()</code> checks logical equivalence when overridden (for example, <code>String</code> text or Selenium <code>RemoteWebElement</code> DOM node ID).</li>
-      <li>Calling a field or method on an uninitialized <code>null</code> reference throws <code>java.lang.NullPointerException</code> (NPE).</li>
-      <li>Java provides exactly <b>5 ways to create an object</b>: <code>new</code> keyword, static/helper factory methods (<code>By.id("q")</code>), Reflection (<code>Constructor.newInstance()</code> used by TestNG), Cloning (<code>clone()</code>), and Deserialization (used by Jackson/RestAssured).</li>
-      <li>Calling <code>driver.quit()</code> destroys the external browser session and sets the internal session ID to <code>null</code>, while the Java <code>ChromeDriver</code> object remains on the Heap until unreachable and reclaimed by Garbage Collection.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
-    <table>
-      <thead>
-        <tr><th>Feature</th><th>Class</th><th>Object</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Definition</b></td><td>Compile-time type definition of fields and methods</td><td>Runtime instance holding actual field state</td></tr>
-        <tr><td><b>Memory Area</b></td><td>Loaded once into Metaspace</td><td>Allocated per instance on the Heap</td></tr>
-        <tr><td><b>Lifecycle</b></td><td>Lives until ClassLoader unloads</td><td>Lives until unreachable from GC Roots</td></tr>
-        <tr><td><b>Selenium Example</b></td><td><code>ChromeDriver</code>, <code>LoginPage</code></td><td><code>new ChromeDriver()</code>, <code>new LoginPage(driver)</code></td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <section id="how-it-works">
-    <h2>How it works</h2>
-    <ol>
-      <li>Executing <code>LoginPage p1 = new LoginPage();</code> allocates Heap space at address <code>@A1</code>, zeroes instance fields (<code>null</code>, <code>0</code>, <code>false</code>), runs the constructor, and writes <code>@A1</code> into Stack variable <code>p1</code>.</li>
-      <li>Invoking <code>p1.open()</code> dereferences <code>@A1</code> on the Heap and mutates <code>p1</code>'s instance state.</li>
-      <li>Executing <code>LoginPage p2 = new LoginPage();</code> allocates a second distinct object at <code>@B2</code>, making <code>p1 == p2</code> evaluate to <code>false</code>.</li>
-      <li>Executing <code>LoginPage p3 = p1;</code> copies address <code>@A1</code> into <code>p3</code> without creating a new Heap object, so edits via <code>p3</code> mutate the exact same object pointed to by <code>p1</code>.</li>
-    </ol>
+  <section><h2>3. Class in Metaspace vs Objects on the Heap</h2>
     <div class="arch">
-      <div class="lbl">Memory Snapshot After Object Assignment</div>
+      <div class="lbl">1 Class -&gt; N Separate Objects</div>
+      <div class="note">Changing <code>p2.url</code> never alters <code>p1.url</code> unless both point to the exact same Heap address.</div>
       <div class="cols">
-        <div class="item"><b>STACK (main frame)</b><span><code>p1 = @A1</code> (points to LoginPage #1)<br><code>p3 = @A1</code> (alias to LoginPage #1)<br><code>p2 = @B2</code> (points to LoginPage #2)</span></div>
-        <div class="item"><b>HEAP (@A1: LoginPage #1)</b><span><code>url = "https://qkart-qa-web.labs.crio.do/login"</code><br><code>timeout = 30</code>, <code>loaded = true</code></span></div>
-        <div class="item"><b>HEAP (@B2: LoginPage #2)</b><span><code>url = "https://www.selenium.dev/"</code><br><code>timeout = 0</code>, <code>loaded = true</code></span></div>
+        <div class="item"><b>Metaspace: class LoginPage</b><span>Code for <code>String url</code> + <code>void open()</code></span></div>
+        <div class="item"><b>Stack Refs -&gt; Heap Objects</b><span><code>p1 -&gt; @A1 { url: "selenium.dev" }</code><br><code>p2 -&gt; @B2 { url: "qkart" }</code><br><code>p3 = p1 -&gt; @A1</code> (alias!)</span></div>
       </div>
-    </div>
+    </div></section>
 
-    <p>Demonstrating Heap object allocation, reference aliasing, and == vs .equals() behavior:</p>
-<pre><code>package dev.java.oop; // Declares package
-
-class LoginPageModel { // Defines template loaded once in Metaspace
-    String url; // Instance field defaults to null
-    int timeout; // Instance field defaults to 0
-    boolean loaded; // Instance field defaults to false
-
-    void open() { // Instance behavior executed against target Heap object
-        loaded = true; // Mutates instance state on Heap
-        System.out.println("Opened " + url + " (timeout=" + timeout + ")"); // Prints object state
-    } // Ends open method
-} // Ends LoginPageModel class
-
-public class ObjectLifecycleDemo { // Declares runnable class
-    public static void main(String[] args) { // Main Stack frame starts
-        LoginPageModel p1 = new LoginPageModel(); // Allocates Heap object #1 (@A1)
-        p1.url = "https://qkart-qa-web.labs.crio.do/login"; // Writes state into @A1
-        p1.timeout = 10; // Sets timeout field on @A1
-        p1.open(); // Prints: Opened https://qkart-qa-web.labs.crio.do/login (timeout=10)
-
-        LoginPageModel p2 = new LoginPageModel(); // Allocates separate Heap object #2 (@B2)
-        p2.url = "https://www.selenium.dev/"; // Writes state into @B2
-        p2.open(); // Prints: Opened https://www.selenium.dev/ (timeout=0)
-        System.out.println("p1 == p2 : " + (p1 == p2)); // Prints: false (distinct Heap addresses)
-
-        LoginPageModel p3 = p1; // Copies address @A1 into p3 without calling new
-        p3.timeout = 30; // Mutates shared object @A1 through alias p3
-        System.out.println("p1.timeout : " + p1.timeout + " | same: " + (p1 == p3)); // Prints: 30 | true
-    } // Ends main method
-} // Ends ObjectLifecycleDemo class</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Shadowing a parent <code>BaseTest</code> <code>driver</code> field by re-declaring <code>WebDriver driver;</code> inside a child test class; <code>@BeforeMethod</code> initializes the parent field while the child field stays <code>null</code> and throws <code>NullPointerException</code>.</li>
-      <li>Calling <code>@FindBy</code> <code>WebElement</code> methods before invoking <code>PageFactory.initElements(driver, this);</code>, leaving annotated proxy fields <code>null</code>.</li>
-      <li>Expecting <code>driver.quit()</code> to set the Java <code>driver</code> variable to <code>null</code>; <code>driver</code> still points to the Heap object with a cleared session ID, throwing <code>NoSuchSessionException</code> on subsequent calls.</li>
-      <li>Using <code>==</code> instead of <code>.equals()</code> on two <code>WebElement</code> objects fetched from the same DOM node via separate <code>findElement()</code> calls.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>4. Class vs Object &amp; 5 ways to create objects</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Class</b></td><td>Code definition describing fields, constructors, and methods without allocating instance Heap space.</td></tr>
-        <tr><td><b>Object</b></td><td>Runtime instance of a class residing on the Heap with state, behavior, and unique memory identity.</td></tr>
-        <tr><td><b>Reference Aliasing</b></td><td>Two Stack variables storing the exact same Heap address so mutations via one appear through the other.</td></tr>
-        <tr><td><b>Factory Method</b></td><td>A static or helper method (like <code>By.id("username")</code>) that constructs and returns an object internally.</td></tr>
-        <tr><td><b>Reflection</b></td><td>Runtime introspection API (<code>Constructor.newInstance()</code>) used by TestNG and JUnit to instantiate test classes dynamically.</td></tr>
-        <tr><td><b><code>NullPointerException</code></b></td><td>Unchecked runtime exception thrown when attempting to dereference a <code>null</code> reference with <code>.</code>.</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Way to Create Object</th><th>Syntax Example</th><th>Real SDET Usage</th></tr>
+      <tr><td><code>new</code> keyword</td><td><code>new ChromeDriver()</code></td><td>Creating drivers and Page Objects</td></tr>
+      <tr><td>Static Factory method</td><td><code>By.id("username")</code></td><td>Locator factory returning a <code>By.ById</code> instance</td></tr>
+      <tr><td>Reflection</td><td><code>clazz.getDeclaredConstructor().newInstance()</code></td><td>TestNG creating <code>@Test</code> class instances automatically</td></tr>
+      <tr><td>Cloning</td><td><code>payload.clone()</code></td><td>Copying baseline API DTOs cleanly</td></tr>
+      <tr><td>Deserialization</td><td><code>mapper.readValue(json, User.class)</code></td><td>Jackson / RestAssured mapping API JSON responses</td></tr>
+    </table></section>
 
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
+  <section><h2>5. Code example: creating independent objects vs aliasing references</h2>
+<pre><code>class LoginPage {
+    String url;                       // Heap field defaults to null
+    void open() { System.out.println("Opening " + url); }
+}
 
-    <h3>Basics</h3>
+public class ObjectDemo {
+    public static void main(String[] args) {
+        LoginPage p1 = new LoginPage();           // allocates Heap object @A1
+        p1.url = "https://qkart-qa-web.labs.crio.do/login";
+        LoginPage p2 = new LoginPage();           // allocates Heap object @B2
+        p2.url = "https://www.selenium.dev/";
+        LoginPage p3 = p1;                        // alias: shares @A1 with p1
 
-    <p><b>What is the difference between a class and an object in Java?</b><br>
-    A class is a compile-time definition of fields and methods loaded into Metaspace that takes zero Heap memory for instance data. An object is a physical runtime instance allocated on the Heap via <code>new</code> that holds concrete values for those fields. A single <code>LoginPage</code> class can produce multiple independent <code>LoginPage</code> objects at runtime.</p>
+        System.out.println("p1==p2: " + (p1 == p2)); // false
+        System.out.println("p1==p3: " + (p1 == p3)); // true
+        p1.open();
+    }
+}</code></pre></section>
 
-    <p><b>What are the three defining properties of every Java object?</b><br>
-    Every object has State (values stored inside its instance fields), Behavior (methods it exposes to read or transform state), and Identity (a unique location in Heap memory distinguishing it from other objects even if field values match identically). Identity is tested via <code>==</code> while logical state equivalence is tested via <code>.equals()</code>.</p>
-
-    <p><b>Name all 5 ways to create an object in Java with one SDET example each.</b><br>
-    The 5 ways are: 1) <code>new</code> keyword (<code>new ChromeDriver()</code>), 2) Factory methods (<code>By.id("login")</code>), 3) Reflection (<code>Constructor.newInstance()</code> used internally by TestNG to instantiate <code>@Test</code> classes), 4) Cloning (<code>payload.clone()</code> for API request variations), and 5) Deserialization (Jackson/RestAssured converting JSON into a POJO via <code>response.as(User.class)</code>).</p>
-
-    <h3>How it works</h3>
-
-    <p><b>If you call <code>driver.findElement(By.id("q"))</code> twice into <code>WebElement a</code> and <code>WebElement b</code>, what do <code>a == b</code> and <code>a.equals(b)</code> return?</b><br>
-    Each call to <code>findElement()</code> instantiates a fresh <code>RemoteWebElement</code> Java wrapper object on the Heap, so <code>a == b</code> returns <code>false</code> because they sit at distinct memory addresses. However, <code>RemoteWebElement</code> overrides <code>.equals()</code> to compare the underlying W3C DOM element ID, so <code>a.equals(b)</code> returns <code>true</code>.</p>
-
-    <p><b>What happens step by step on the Stack and Heap during <code>LoginPage p = new LoginPage();</code>?</b><br>
-    First, <code>new</code> allocates memory on the Heap large enough for <code>LoginPage</code>'s fields plus an object header. Next, the JVM zeroes all field slots to type defaults and executes the <code>LoginPage()</code> constructor body. Finally, the resulting Heap address is returned and assigned into Stack reference variable <code>p</code>.</p>
-
-    <p><b>What happens in memory when you call <code>driver.quit()</code>?</b><br>
-    <code>driver.quit()</code> sends the W3C Delete Session HTTP request, terminating the external browser and driver executable processes, and clears the internal <code>sessionId</code> field to <code>null</code>. The Java <code>ChromeDriver</code> object itself remains on the Heap with <code>driver != null</code> until the reference leaves scope and Garbage Collection sweeps it.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>What are the top 3 causes of <code>NullPointerException</code> in Selenium Page Object frameworks?</b><br>
-    First, declaring a duplicate <code>WebDriver driver;</code> field in a test subclass that shadows the initialized <code>BaseTest.driver</code> field. Second, accessing <code>@FindBy</code> fields before calling <code>PageFactory.initElements(driver, this)</code>. Third, instantiating a Page Object inside a field initializer before <code>@BeforeMethod</code> has initialized <code>driver</code>.</p>
-
-    <p><b>Why does TestNG instantiate your <code>@Test</code> class without requiring you to write <code>new LoginTest()</code>?</b><br>
-    TestNG inspects the compiled test classes specified in <code>testng.xml</code> and uses Java Reflection (<code>getDeclaredConstructor().newInstance()</code>) at runtime to allocate test instances automatically. This is also why TestNG requires a public no-argument constructor unless a custom <code>IObjectFactory</code> or dependency injector is configured.</p>
-
-    <p><b>How do RestAssured and Jackson create response POJOs without explicit <code>new</code> calls in your test code?</b><br>
-    Jackson uses reflection and deserialization mechanisms to read the JSON stream, allocate a target POJO instance via its no-arg constructor (or annotated <code>@JsonCreator</code>), and populate fields before returning the hydrated Heap object to the test.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Why does calling <code>driver.get(...)</code> after <code>driver.quit()</code> throw <code>NoSuchSessionException</code> instead of <code>NullPointerException</code>?</b><br>
-    Because the Java <code>driver</code> reference on the Stack still points to a valid <code>ChromeDriver</code> Heap object, the JVM invokes <code>get()</code> cleanly rather than throwing NPE. Inside <code>RemoteWebDriver</code>, Selenium detects that its internal <code>sessionId</code> is <code>null</code> and throws <code>NoSuchSessionException: Session ID is null</code>.</p>
-
-    <p><b>Why does creating a Page Object at field level (<code>LoginPage login = new LoginPage(driver);</code>) inside a Test class cause NPE during clicks?</b><br>
-    Field initializers run during test class instantiation before <code>@BeforeMethod</code> launches the browser, so <code>driver</code> is still <code>null</code> when passed into <code>LoginPage</code>. Instantiate Page Objects inside the <code>@Test</code> method or lazily after <code>@BeforeMethod</code> sets up the driver.</p>
-
-    <p><b>Why does printing an object directly via <code>System.out.println(user)</code> output <code>User@4e25154f</code> instead of field values?</b><br>
-    By default, classes inherit <code>Object.toString()</code>, which prints the class name followed by the unsigned hexadecimal hash code. Overriding <code>toString()</code> in your POJO or test data class outputs meaningful field details in TestNG logs.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why do modern Selenium frameworks instantiate Page Objects via <code>new LoginPage(driver)</code> passing <code>driver</code> in the constructor?</b><br>
-    Injecting the active <code>WebDriver</code> through the Page Object constructor (Dependency Injection) ensures every Page Object operates strictly against the calling test thread's browser without relying on brittle global <code>static</code> fields. This makes parallel execution safe by construction.</p>
-
-    <p><b>Why should custom DTOs and Page Objects avoid exposing mutable public fields directly?</b><br>
-    Exposing raw public fields lets external test code bypass validation or hold inconsistent object state. Keeping fields <code>private</code> and exposing explicit methods enforces invariants across the test suite.</p>
-
-    <p><b>When building a test payload from a template object, why is cloning or a copy constructor safer than assigning <code>Payload copy = template;</code>?</b><br>
-    Simple assignment (<code>copy = template</code>) creates a reference alias to the identical Heap object, so modifying <code>copy.email</code> mutates <code>template.email</code> for subsequent tests. Creating a distinct Heap object via a copy constructor or clone keeps test inputs completely independent.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li><b>Does a class declaration allocate Heap memory for instance fields?</b> No; memory is allocated only when an object is instantiated.</li>
-      <li><b>What are the 5 ways to create an object in Java?</b> <code>new</code> keyword, Factory method, Reflection, Cloning, and Deserialization.</li>
-      <li><b>What does <code>==</code> check on object variables?</b> Heap memory address equality.</li>
-      <li><b>What does <code>driver.quit()</code> set to <code>null</code>?</b> The internal W3C session ID (not the Java <code>driver</code> variable itself).</li>
-      <li><b>What exception is thrown when calling a method on a <code>null</code> reference?</b> <code>java.lang.NullPointerException</code>.</li>
-      <li><b>Why do two separate <code>driver.findElement()</code> calls for the same button have <code>a.equals(b) == true</code>?</b> <code>RemoteWebElement</code> overrides <code>.equals()</code> to compare the underlying DOM element ID.</li>
-    </ol>
-  </section>
+      <li><code>new LoginPage()</code> allocates an object at Heap address <code>@A1</code> and clears its fields to <code>null</code>/<code>0</code>/<code>false</code>.</li>
+      <li><code>p1.url = ...</code> writes the QKart URL into <code>@A1</code>'s field slot.</li>
+      <li>The second <code>new LoginPage()</code> builds an independent object at <code>@B2</code> referenced by <code>p2</code>.</li>
+      <li><code>LoginPage p3 = p1</code> creates zero new Heap objects — it only copies address <code>@A1</code> into <code>p3</code>.</li>
+      <li>Calling <code>driver.quit()</code> later kills the browser session but leaves the Java <code>ChromeDriver</code> object on the Heap until GC runs (calling commands on it throws <code>NoSuchSessionException</code>, not NPE).</li>
+    </ol></section>
 
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-constructors-chaining-singleton.html">4.2 Constructors: Default, Parameterized, Chaining & Singleton &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+  <section><h2>7. Real-life analogy: cookie cutter and baked cookies</h2>
+    <table>
+      <tr><th>Bakery</th><th>Java</th></tr>
+      <tr><td>Metal star-shaped cookie cutter on the wall</td><td><code>class</code> definition (takes zero cookie dough)</td></tr>
+      <tr><td>Pressing dough twice to make two separate cookies</td><td><code>new LoginPage()</code> twice on the Heap</td></tr>
+      <tr><td>Writing two different names on icing of each cookie</td><td>Instance fields holding independent state</td></tr>
+      <tr><td>Two fingers pointing at Cookie #1 on the tray</td><td>Two reference variables pointing to the same object</td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Bundling data and operations inside objects stops brittle global variables and powers every OOP pattern and Page Object framework.</p>
+    <p><b>SDET link:</b> Every <code>LoginPage login = new LoginPage(driver);</code>, <code>By.id(...)</code>, and <code>WebElement</code> handle in Selenium is a Heap object; forgetting to initialize the field causes the #1 QA error: <code>NullPointerException</code>.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p><code>LoginPage a = new LoginPage(); LoginPage b = a;</code> — How many Heap objects exist? <b>1 object with 2 Stack references pointing to it.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Class</td><td>Compile-time template defining fields and methods</td></tr>
+      <tr><td>Object</td><td>Runtime Heap instance allocated from a class</td></tr>
+      <tr><td>Reference</td><td>Address variable holding where the object lives on the Heap</td></tr>
+      <tr><td>Aliasing</td><td>Two variables holding the exact same Heap address</td></tr>
+      <tr><td>NullPointerException</td><td>Crash when dereferencing a variable whose address is <code>null</code></td></tr>
+    </table>
+    <p>&larr; Previous: <a href="java-string-methods-regex.html">3.3 Essential String Methods &amp; Regex for SDETs</a> &middot; Next: <a href="java-constructors-chaining-singleton.html">4.2 Constructors: Default, Parameterized, Chaining &amp; Singleton &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

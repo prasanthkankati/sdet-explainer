@@ -3,203 +3,102 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>5.1 Collections Hierarchy &amp; Generics (Type Safety) | SDET Explainer</title>
+<title>Java: Collections Hierarchy &amp; Generics (Type Safety)</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>5.1 Collections Hierarchy &amp; Generics (Type Safety)</h1>
-  <div class="se-lead">The Collection vs Map root split, Collection interface vs Collections utility class, Generic type safety (&lt;T&gt;), wildcards, and Type Erasure.</div>
 
-  <p>The Java Collections Framework provides standardized interfaces and data structures inside <code>java.util</code> for storing, searching, sorting, and transforming groups of objects dynamically. Adding Generics (<code>&lt;T&gt;</code>) enforces compile-time type checking on containers like <code>List&lt;WebElement&gt;</code> so type mismatches fail during compilation instead of throwing <code>ClassCastException</code> at runtime.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">The Collections Framework splits into Iterable -&gt; Collection (List, Set, Queue) for single items and Map for key-value pairs, while Generics &lt;T&gt; enforce element types at compile time before Type Erasure.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-abstraction-abstract-interface.html">4.7 Abstraction: Abstract Class vs Interface</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>Single items extend Collection (List/Set/Queue); key-&gt;value uses Map separately; Collection is an interface, Collections is a helper class!</b></p>
+    <ul>
+      <li><b>Why Map is NOT under <code>Collection</code>:</b> <code>Collection</code> operates on single elements (<code>add(e)</code>), while <code>Map</code> pairs <code>put(k, v)</code>.</li>
+      <li><b><code>Collection</code> vs <code>Collections</code>:</b> <code>Collection</code> is the parent interface; <code>Collections</code> holds static helpers like <code>Collections.sort()</code> and <code>unmodifiableList()</code>.</li>
+      <li><b>Generics + Type Erasure:</b> <code>List&lt;WebElement&gt;</code> stops wrong types at compile time; at runtime bytecode erases <code>&lt;T&gt;</code> cleanly for backward compatibility.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Every call to <code>driver.findElements(By)</code> returns a generic <code>List&lt;WebElement&gt;</code>, <code>getWindowHandles()</code> returns a <code>Set&lt;String&gt;</code>, and test data loaders pass typed <code>Map&lt;String, String&gt;</code> records.</p>
-  </section>
+  <section><h2>3. Two Roots of Java Collections</h2>
+    <div class="arch">
+      <div class="lbl">Collections Family Tree</div>
+      <div class="note">Use List when order &amp; duplicates matter, Set for uniqueness, Queue for FIFO/priority, Map for key lookups.</div>
+      <div class="cols">
+        <div class="item"><b><code>Iterable</code> -&gt; <code>Collection</code></b><span><code>List</code> (ordered, duplicates OK)<br><code>Set</code> (no duplicates)<br><code>Queue / Deque</code> (FIFO / stack)</span></div>
+        <div class="item"><b><code>Map&lt;K, V&gt;</code> (Separate Root)</b><span>Unique keys mapped to values: <code>HashMap</code>, <code>LinkedHashMap</code>, <code>TreeMap</code></span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li>The framework has two root contracts: <code>Iterable&lt;T&gt; -&gt; Collection&lt;E&gt;</code> (extended by <code>List</code>, <code>Set</code>, and <code>Queue</code>) and the separate <code>Map&lt;K, V&gt;</code> hierarchy for key-value pairs.</li>
-      <li><code>Collection</code> (singular) is a core <code>java.util</code> interface, whereas <code>Collections</code> (plural) is a final utility class containing static algorithms including <code>Collections.sort()</code>, <code>Collections.unmodifiableList()</code>, and <code>Collections.reverse()</code>.</li>
-      <li>Generics (<code>&lt;T&gt;</code>) enforce compile-time type safety and eliminate manual downcasting when retrieving elements from lists, sets, and maps.</li>
-      <li>Java implements Generics via <b>Type Erasure</b>: <code>javac</code> enforces type parameters at compile time, inserts invisible casts, and erases type parameters to <code>Object</code> (or bounds) inside compiled <code>.class</code> bytecode.</li>
-      <li>Because of Type Erasure, generic primitives (<code>List&lt;int&gt;</code>), direct instantiation (<code>new T()</code>), and runtime type checks (<code>if (list instanceof List&lt;String&gt;)</code>) are illegal in Java.</li>
-      <li>Bounded wildcards control variance safely: <code>&lt;? extends T&gt;</code> supports reading subtypes (Producer Extends) while <code>&lt;? super T&gt;</code> supports writing supertypes (Consumer Super).</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. Collection vs Collections vs Generics &lt;T&gt;</h2>
     <table>
-      <thead>
-        <tr><th>Concept</th><th>Role / Signature</th><th>Key Rule &amp; SDET Example</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>Collection&lt;E&gt;</code></b></td><td>Root interface for <code>List</code>, <code>Set</code>, <code>Queue</code></td><td>Extends <code>Iterable&lt;E&gt;</code>; declares <code>add</code>, <code>remove</code>, <code>size</code>, <code>stream</code></td></tr>
-        <tr><td><b><code>Collections</code></b></td><td><code>java.util.Collections</code> utility class</td><td>Static helpers: <code>Collections.sort(prices)</code>, <code>Collections.emptyList()</code></td></tr>
-        <tr><td><b><code>Map&lt;K, V&gt;</code></b></td><td>Separate key-value root interface</td><td>Does NOT extend <code>Collection</code>; exposes <code>keySet()</code>, <code>values()</code>, <code>entrySet()</code></td></tr>
-        <tr><td><b>Raw Type (<code>List</code>)</b></td><td>Pre-Java 5 untyped collection</td><td>Bypasses compile-time checks and risks runtime <code>ClassCastException</code></td></tr>
-        <tr><td><b>Generic (<code>List&lt;WebElement&gt;</code>)</b></td><td>Parameterized type-safe collection</td><td>Rejects wrong element types at compile time; used by <code>findElements()</code></td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Concept</th><th>Kind</th><th>What It Does</th></tr>
+      <tr><td><b><code>Collection</code></b></td><td>Root Interface</td><td>Parent of <code>List</code>, <code>Set</code>, and <code>Queue</code></td></tr>
+      <tr><td><b><code>Collections</code></b></td><td>Utility Class</td><td>Static methods: <code>sort()</code>, <code>reverse()</code>, <code>synchronizedList()</code></td></tr>
+      <tr><td><b><code>Map&lt;K,V&gt;</code></b></td><td>Separate Interface</td><td>Stores unique keys mapped to values</td></tr>
+      <tr><td><b>Generics <code>&lt;T&gt;</code></b></td><td>Compile-time type check</td><td>Turns runtime <code>ClassCastException</code> into compile errors</td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: generics compile safety + generic Selenium helper</h2>
+<pre><code>import java.util.*;
+
+public class CollectionsOverviewDemo {
+    static &lt;T&gt; T firstOrNull(List&lt;T&gt; items) {       // reusable generic method
+        return (items == null || items.isEmpty()) ? null : items.get(0);
+    }
+
+    public static void main(String[] args) {
+        List&lt;String&gt; tabs = new ArrayList&lt;&gt;();    // diamond &lt;&gt; infers String on right side
+        tabs.add("https://www.selenium.dev/");
+        tabs.add("https://qkart-qa-web.labs.crio.do/");
+        // tabs.add(123);                         // compile error thanks to Generics!
+
+        Collections.sort(tabs);                   // Collections utility class helper
+        System.out.println("First URL: " + firstOrNull(tabs));
+    }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>Declare containers against interface types with explicit Generic arguments: <code>List&lt;WebElement&gt; items = driver.findElements(By.cssSelector(".card"));</code>.</li>
-      <li>During compilation, <code>javac</code> verifies only <code>WebElement</code> instances enter <code>items</code> and erases <code>&lt;WebElement&gt;</code> from the bytecode.</li>
-      <li>When reading an item inside a loop, the compiler inserts a safe cast automatically without noisy manual casting.</li>
-      <li>Write generic test helpers like <code>&lt;T&gt; T firstOrThrow(List&lt;T&gt; list)</code> to reuse bounds-safe logic across strings, integers, and Page Objects.</li>
-    </ol>
-    <p>Using Collections utility methods, type-safe Generics, and bounded wildcards in test helpers:</p>
-<pre><code>package dev.java.collections; // Declares package
+      <li><code>List&lt;String&gt; tabs = new ArrayList&lt;&gt;();</code> declares an interface variable pointing to a concrete <code>ArrayList</code>.</li>
+      <li>Adding an integer <code>tabs.add(123)</code> fails right during compilation rather than crashing a nightly Jenkins build.</li>
+      <li><code>Collections.sort(tabs)</code> sorts the list in-place using natural alphabetical order.</li>
+      <li>Calling generic helper <code>firstOrNull(tabs)</code> infers <code>T = String</code> and returns a typed <code>String</code> with zero manual casts.</li>
+      <li>After compilation, Type Erasure turns <code>&lt;T&gt;</code> into plain <code>Object</code> inside bytecode plus compiler-inserted safe casts.</li>
+    </ol></section>
 
-import java.util.ArrayList; // Imports ArrayList implementation
-import java.util.Collections; // Imports Collections utility class
-import java.util.List; // Imports List interface
-
-public class GenericsAndHierarchyDemo { // Demonstrates Generics and Collections
-    static &lt;T&gt; T getFirstOrThrow(List&lt;T&gt; items, String label) { // Generic helper works for any type T
-        if (items == null || items.isEmpty()) { // Guards empty or null list
-            throw new IllegalStateException("No items found for: " + label); // Fails fast with context
-        } // Ends empty guard
-        return items.get(0); // Returns strongly typed T without caller cast
-    } // Ends generic helper
-
-    static double sumNumbers(List&lt;? extends Number&gt; values) { // Upper-bounded wildcard accepts Integer or Double lists
-        double total = 0.0; // Accumulates numeric sum
-        for (Number n : values) { // Reads safely as upper bound Number
-            total += n.doubleValue(); // Converts each item cleanly
-        } // Ends loop
-        return total; // Returns sum
-    } // Ends sumNumbers
-
-    public static void main(String[] args) { // Main method starts
-        List&lt;String&gt; steps = new ArrayList&lt;&gt;(); // Diamond operator infers String type
-        steps.add("Open QKart"); // Adds first string safely
-        steps.add("Add Product"); // Adds second string safely
-        Collections.sort(steps); // Uses Collections utility class static method
-        String first = getFirstOrThrow(steps, "steps"); // Returns String directly without cast
-        System.out.println("First sorted: " + first + " | Sum: " + sumNumbers(List.of(10, 20.5))); // Prints: First sorted: Add Product | Sum: 30.5
-    } // Ends main method
-} // Ends class</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Claiming <code>Map</code> extends the <code>Collection</code> interface; <code>Map&lt;K, V&gt;</code> is an independent root interface in the Collections Framework because key-value pairs do not fit single-element <code>add(E)</code> semantics.</li>
-      <li>Using raw types like <code>List data = new ArrayList();</code> in modern Java; raw types disable compile-time checking and produce hidden <code>ClassCastException</code> failures later.</li>
-      <li>Writing <code>if (obj instanceof List&lt;String&gt;)</code>; Type Erasure strips <code>&lt;String&gt;</code> at compile time so the JVM cannot distinguish <code>List&lt;String&gt;</code> from <code>List&lt;Integer&gt;</code> at runtime (check <code>instanceof List&lt;?&gt;</code> instead).</li>
-      <li>Assuming <code>List&lt;Object&gt;</code> is a supertype of <code>List&lt;String&gt;</code>; Java generics are invariant, so pass <code>List&lt;?&gt;</code> or <code>List&lt;? extends CharSequence&gt;</code> when accepting subtypes.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: labeled storage containers</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>Collection</code></b></td><td>Root interface for linear and set data structures (<code>List</code>, <code>Set</code>, <code>Queue</code>) extending <code>Iterable</code>.</td></tr>
-        <tr><td><b><code>Collections</code></b></td><td>Static utility class providing sorting, searching, synchronization, and unmodifiable collection wrappers.</td></tr>
-        <tr><td><b>Generics</b></td><td>Parameterized type syntax (<code>&lt;T&gt;</code>) enabling type-safe reusable classes and methods verified at compile time.</td></tr>
-        <tr><td><b>Type Erasure</b></td><td>Compile-time process removing generic type parameters from bytecode and inserting automatic casts.</td></tr>
-        <tr><td><b>Wildcard (<code>?</code>)</b></td><td>Unknown type argument in generics, bounded via <code>? extends T</code> (upper) or <code>? super T</code> (lower).</td></tr>
-        <tr><td><b>Invariance</b></td><td>Property that <code>List&lt;SubType&gt;</code> is NOT a subtype of <code>List&lt;SuperType&gt;</code> despite inheritance between the elements.</td></tr>
-      </tbody>
+      <tr><th>Warehouse Bins</th><th>Java</th></tr>
+      <tr><td>Single-item crates: numbered shelf (List) vs unique stamp box (Set)</td><td><code>Collection</code> hierarchy</td></tr>
+      <tr><td>Coat-check counter pairing ticket # to coat</td><td><code>Map&lt;K, V&gt;</code></td></tr>
+      <tr><td>Shipping toolbox containing tape gun &amp; labels (not a box itself)</td><td><code>Collections</code> helper class</td></tr>
+      <tr><td>Sticker saying "SHOES ONLY" on bin rejecting hats at door</td><td>Generics <code>&lt;T&gt;</code></td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Program-to-interface declarations (<code>List&lt;T&gt;</code>, <code>Map&lt;K,V&gt;</code>) + Generics catch wrong types early and swap implementations effortlessly.</p>
+    <p><b>SDET link:</b> <code>driver.findElements(...)</code> returns <code>List&lt;WebElement&gt;</code>, <code>driver.getWindowHandles()</code> returns <code>Set&lt;String&gt;</code>, and test-data rows use <code>Map&lt;String, String&gt;</code> — covering every branch of Java Collections.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>Does <code>HashMap</code> implement the <code>Collection</code> interface? <b>No — <code>Map</code> is a separate root interface because entries take keys and values rather than single elements.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td><code>Collection</code></td><td>Root interface for <code>List</code>, <code>Set</code>, and <code>Queue</code></td></tr>
+      <tr><td><code>Collections</code></td><td>Static utility class holding algorithms like <code>sort()</code> and <code>shuffle()</code></td></tr>
+      <tr><td>Generics</td><td>Parameterized types (<code>List&lt;String&gt;</code>) enforcing type safety at compile time</td></tr>
+      <tr><td>Type Erasure</td><td>Compiler removing generic type parameters from runtime bytecode</td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>What is the difference between <code>Collection</code> and <code>Collections</code> in Java?</b><br>
-    <code>java.util.Collection&lt;E&gt;</code> is an interface extended by <code>List</code>, <code>Set</code>, and <code>Queue</code> that defines core container behaviors like <code>add()</code>, <code>remove()</code>, <code>size()</code>, and <code>iterator()</code>. <code>java.util.Collections</code> is a non-instantiable utility class containing static helper methods like <code>sort()</code>, <code>reverse()</code>, <code>shuffle()</code>, and <code>unmodifiableList()</code>. One is a data-structure contract; the other is an algorithm helper class.</p>
-
-    <p><b>Draw the core Collections Framework hierarchy and explain why <code>Map</code> stands apart.</b><br>
-    <code>Iterable&lt;E&gt;</code> is implemented by <code>Collection&lt;E&gt;</code>, which splits into three main sub-interfaces: <code>List&lt;E&gt;</code> (ordered, duplicates allowed), <code>Set&lt;E&gt;</code> (unique elements), and <code>Queue&lt;E&gt;</code> (FIFO/priority processing). <code>Map&lt;K, V&gt;</code> sits in its own hierarchy because each entry pairs a key with a value rather than storing standalone single elements compatible with <code>Collection.add(E)</code>.</p>
-
-    <p><b>What are Generics in Java and what problem did Java 5 solve by adding them?</b><br>
-    Generics allow classes, interfaces, and methods to accept types as parameters—like <code>List&lt;WebElement&gt;</code> instead of untyped <code>List</code>. Before Java 5, a list accepted anything descending from <code>Object</code>, causing accidental insertions of wrong types to compile cleanly and fail later with <code>ClassCastException</code> during iteration. Generics catch type mismatches immediately during compilation.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>What is Type Erasure and how does it affect Java bytecode?</b><br>
-    During compilation, <code>javac</code> verifies all generic type constraints, inserts explicit casts wherever elements are read, and then strips the generic type parameters—replacing unbounded <code>&lt;T&gt;</code> with <code>Object</code> and bounded <code>&lt;T extends Number&gt;</code> with <code>Number</code>. Consequently, at runtime both <code>ArrayList&lt;String&gt;</code> and <code>ArrayList&lt;Integer&gt;</code> share the identical compiled <code>ArrayList.class</code> in Metaspace. This preserved backward compatibility with pre-Java 5 bytecode.</p>
-
-    <p><b>Explain the PECS rule (<code>? extends T</code> vs <code>? super T</code>) for generic wildcards.</b><br>
-    PECS stands for Producer Extends, Consumer Super. Use <code>List&lt;? extends Number&gt;</code> when reading values produced by a list (every read guarantees at least a <code>Number</code>, though adding elements is forbidden because the exact subtype could be <code>Integer</code> or <code>Double</code>). Use <code>List&lt;? super Integer&gt;</code> when writing <code>Integer</code> objects into a consumer list (it safely accepts <code>List&lt;Integer&gt;</code>, <code>List&lt;Number&gt;</code>, or <code>List&lt;Object&gt;</code>).</p>
-
-    <p><b>Why does Java forbid creating generic arrays like <code>new T[10]</code> or <code>new ArrayList&lt;String&gt;[5]</code>?</b><br>
-    Arrays carry and enforce their exact component type at runtime (throwing <code>ArrayStoreException</code> on mismatch), whereas generic type arguments are erased at compile time. Mixing reified arrays with erased generics would allow type pollution that breaks array runtime guarantees.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>Why can you NOT pass a <code>List&lt;ChromeDriver&gt;</code> into a method expecting <code>List&lt;WebDriver&gt;</code>?</b><br>
-    Even though <code>ChromeDriver</code> extends <code>WebDriver</code>, Java Generics are invariant: <code>List&lt;ChromeDriver&gt;</code> is NOT a subtype of <code>List&lt;WebDriver&gt;</code> (otherwise the method could insert a <code>FirefoxDriver</code> into a <code>ChromeDriver</code> list). Changing the method signature to accept <code>List&lt;? extends WebDriver&gt;</code> allows passing lists of any specific driver subtype safely.</p>
-
-    <p><b>How do generic utility methods simplify custom Selenium wait and API deserialization wrappers?</b><br>
-    A generic REST helper like <code>public &lt;T&gt; T postAndParse(String endpoint, Object body, Class&lt;T&gt; responseType)</code> returns the exact deserialized POJO type without forcing every test to write manual casts. Notice how passing the explicit <code>Class&lt;T&gt;</code> token works around Type Erasure so Jackson knows which target POJO class to instantiate at runtime.</p>
-
-    <p><b>When reading config lists or product grids from Selenium, why declare variables as <code>List&lt;String&gt; names = new ArrayList&lt;&gt;();</code> instead of <code>ArrayList&lt;String&gt;</code>?</b><br>
-    Programming to the interface (<code>List</code>) decouples calling code from the concrete implementation. Later switching from <code>ArrayList</code> to <code>LinkedList</code> or <code>CopyOnWriteArrayList</code> requires changing only the single <code>new</code> expression without touching method parameters or return types.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>What causes 'heap pollution' warnings when mixing varargs with generics like <code>T... items</code>?</b><br>
-    Because varargs internally builds an array <code>T[]</code> and generic arrays are non-reifiable after Type Erasure, calling a generic varargs method emits an unchecked generic array creation warning. When the method strictly reads the array safely without exposing the raw array reference, annotate it with <code>@SafeVarargs</code> on <code>final</code> or <code>static</code> methods.</p>
-
-    <p><b>Why did <code>Collections.emptyList().add("QKart")</code> throw <code>UnsupportedOperationException</code>?</b><br>
-    Factory helpers like <code>Collections.emptyList()</code>, <code>Collections.singletonList()</code>, and Java 9+ <code>List.of()</code> return immutable collections that reject structural modification. Instantiate <code>new ArrayList&lt;&gt;()</code> whenever elements will be added dynamically at runtime.</p>
-
-    <p><b>Why did two overloaded methods <code>validate(List&lt;String&gt;)</code> and <code>validate(List&lt;Integer&gt;)</code> fail to compile?</b><br>
-    After Type Erasure, both parameter signatures reduce identically to <code>validate(List)</code> in the bytecode descriptor. The Java compiler rejects both overloads with 'name clash: both methods have the same erasure'.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why did Java design <code>Map</code> outside the <code>Collection</code> interface hierarchy?</b><br>
-    All <code>Collection</code> implementations manage single elements via uniform operations like <code>add(E)</code>, <code>contains(Object)</code>, and <code>iterator()</code> over elements. A <code>Map</code> associates two independent types (key and value), where insertion takes two arguments <code>put(K, V)</code> and iteration splits into keys, values, or entry pairs. Keeping <code>Map</code> separate preserves clean, non-bloated contracts.</p>
-
-    <p><b>Why did Java choose Type Erasure rather than full runtime reified generics (like C#)?</b><br>
-    Type Erasure ensured binary compatibility with millions of lines of pre-Java 5 unparameterized code and allowed non-generic callers to interoperate with newly generified standard collections without needing duplicate collection classes in the JVM.</p>
-
-    <p><b>Why should framework return types avoid raw <code>List</code> or <code>List&lt;Object&gt;</code>?</b><br>
-    Returning untyped containers shifts casting errors onto callers and loses IDE auto-completion. Strongly typed generic DTOs or interfaces catch data mismatches immediately at compile time.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>Does <code>Map</code> extend the <code>Collection</code> interface?</b> No; <code>Map</code> is a separate root interface in <code>java.util</code>.</li>
-      <li><b>What is the difference between <code>Collection</code> and <code>Collections</code>?</b> <code>Collection</code> is an interface; <code>Collections</code> is a static utility class.</li>
-      <li><b>What does Type Erasure do at compile time?</b> Verifies generic types, inserts casts, and strips type arguments from runtime bytecode.</li>
-      <li><b>Can you create <code>List&lt;int&gt;</code>?</b> No; use wrapper type <code>List&lt;Integer&gt;</code>.</li>
-      <li><b>What is the wildcard rule PECS?</b> Producer Extends (<code>? extends T</code> for reading), Consumer Super (<code>? super T</code> for writing).</li>
-      <li><b>What interface sits above <code>Collection</code> enabling enhanced <code>for-each</code> loops?</b> <code>java.lang.Iterable&lt;T&gt;</code>.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-list-arraylist-linkedlist.html">5.2 List: ArrayList vs LinkedList &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-abstraction-abstract-interface.html">4.7 Abstraction: Abstract Class vs Interface</a> &middot; Next: <a href="java-list-arraylist-linkedlist.html">5.2 List: ArrayList vs LinkedList &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

@@ -3,209 +3,105 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>4.4 Core Keywords: static, final, this, super &amp; instanceof | SDET Explainer</title>
+<title>Java: Core Keywords: static, final, this, super &amp; instanceof</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>4.4 Core Keywords: static, final, this, super &amp; instanceof</h1>
-  <div class="se-lead">Class-level static state vs parallel test hazards, final vs finally vs finalize(), this vs super disambiguation, and Java 16+ instanceof pattern matching.</div>
 
-  <p>Five keywords—<code>static</code>, <code>final</code>, <code>this</code>, <code>super</code>, and <code>instanceof</code>—control memory sharing, immutability, reference disambiguation, and safe runtime type checks. Misusing <code>static</code> on <code>WebDriver</code> is the leading cause of parallel TestNG failures, while confusing <code>final</code>, <code>finally</code>, and <code>finalize()</code> is a classic interview trap.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">static binds members to the class rather than instances, final prevents reassignment/overriding/inheritance, this and super distinguish current vs parent members, and instanceof checks runtime object type before downcasting.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-access-modifiers-encapsulation.html">4.3 Access Modifiers &amp; Encapsulation</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>static = 1 shared per class; final = Locked (const / no-override / no-extend); this = me; super = parent.</b></p>
+    <ul>
+      <li><b>Why <code>static WebDriver</code> fails in parallel:</b> all threads overwrite the same single class slot on the Heap.</li>
+      <li><b>3 uses of <code>final</code>:</b> <code>final</code> variable (cannot reassign ref), <code>final</code> method (cannot override), <code>final</code> class (cannot extend, like <code>String</code>).</li>
+      <li><b><code>final</code> vs <code>finally</code> vs <code>finalize</code>:</b> lock keyword vs exception cleanup block vs deprecated GC hook.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Framework utilities use <code>static</code> for stateless helpers, <code>final</code> for immutable Page Object locators and URLs, <code>this</code> and <code>super</code> inside constructors, and <code>instanceof</code> before downcasting <code>WebDriver</code> to <code>TakesScreenshot</code>.</p>
-  </section>
+  <section><h2>3. Keyword Quick Map (Class Scope vs Locks vs Pointers)</h2>
+    <div class="arch">
+      <div class="lbl">Core OOP &amp; Modifier Keywords</div>
+      <div class="note"><code>static</code> runs before any object; <code>this</code>/<code>super</code> require a live object (illegal inside <code>static</code>).</div>
+      <div class="cols">
+        <div class="item"><b><code>static</code></b><span>One copy per class; loaded once during class init</span></div>
+        <div class="item"><b><code>final</code></b><span>Constant value, non-overridable method, non-extendable class</span></div>
+        <div class="item"><b><code>this</code> / <code>super</code></b><span>Current object vs Parent slice of same object</span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li><code>static</code> binds a field, method, nested class, or initializer block to the <b>class itself</b> (one shared copy per JVM) rather than to individual object instances.</li>
-      <li>Declaring <code>public static WebDriver driver;</code> breaks parallel execution because concurrent TestNG threads overwrite and close each other's single shared browser reference.</li>
-      <li><code>final</code> prevents reassignment: a <code>final</code> variable can be assigned once, a <code>final</code> method cannot be overridden, and a <code>final</code> class (including <code>String</code> and <code>Integer</code>) cannot be extended.</li>
-      <li><b><code>final</code> vs <code>finally</code> vs <code>finalize()</code>:</b> <code>final</code> is a non-inheritance/immutability keyword, <code>finally</code> is a guaranteed cleanup block attached to <code>try-catch</code>, and <code>finalize()</code> is a deprecated pre-GC hook removed from modern design.</li>
-      <li><code>this</code> references the current object instance (disambiguating shadowed fields like <code>this.driver = driver;</code>), whereas <code>super</code> references the direct superclass to invoke overridden parent methods or parent fields.</li>
-      <li><code>instanceof</code> evaluates to <code>true</code> if an object is an instance of a given class/interface (or subclass) and safely returns <code>false</code> when the left operand is <code>null</code>; Java 16+ supports pattern matching (<code>if (driver instanceof TakesScreenshot ts)</code>).</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. final vs finally vs finalize &amp; instanceof</h2>
     <table>
-      <thead>
-        <tr><th>Keyword</th><th>Applied To / Context</th><th>Core Effect &amp; Constraint</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>final</code></b></td><td>Variables, methods, classes</td><td>Stops variable reassignment, method overriding, and class inheritance</td></tr>
-        <tr><td><b><code>finally</code></b></td><td>Exception handling block after <code>try</code>/<code>catch</code></td><td>Always executes cleanup code regardless of whether an exception occurred</td></tr>
-        <tr><td><b><code>finalize()</code></b></td><td>Protected method inherited from <code>Object</code></td><td>Deprecated in Java 9 (for-removal in Java 18); GC hook replaced by <code>AutoCloseable</code></td></tr>
-        <tr><td><b><code>static</code></b></td><td>Fields, methods, blocks, nested classes</td><td>Shared once per class; cannot access instance <code>this</code> or non-static members directly</td></tr>
-        <tr><td><b><code>this</code> / <code>super</code></b></td><td>Instance methods and constructors</td><td><code>this</code> refers to current instance; <code>super</code> refers to parent class implementation</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Keyword</th><th>What It Means</th><th>Common Trap</th></tr>
+      <tr><td><b><code>final</code></b></td><td>Locks variable reassignment, method overriding, or subclassing</td><td><code>final List</code> ref locks variable, NOT elements added to list!</td></tr>
+      <tr><td><b><code>finally</code></b></td><td>Block after <code>try/catch</code> that always runs cleanup</td><td>Avoid putting <code>return</code> inside <code>finally</code></td></tr>
+      <tr><td><b><code>finalize()</code></b></td><td>Deprecated pre-GC cleanup hook removed in modern Java</td><td>Never rely on it to close files or drivers</td></tr>
+      <tr><td><b><code>instanceof</code></b></td><td>Runtime type test (Java 16+ pattern: <code>if (d instanceof ChromeDriver cd)</code>)</td><td>Always check before manual downcasting</td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: this/super disambiguation, final constants &amp; pattern instanceof</h2>
+<pre><code>class ParentPage {
+    protected String title = "Base";
+}
+
+public class ChildPage extends ParentPage {
+    private final String title = "QKart Login";           // constant per page object
+    static int createdCount = 0;                          // shared across all ChildPage instances
+
+    ChildPage() { createdCount++; }
+
+    void inspect(Object driverObj) {
+        System.out.println("this=" + this.title + " super=" + super.title); // distinguishes shadowed field
+        if (driverObj instanceof String url) {            // Java 16 pattern matching instanceof
+            System.out.println("URL length=" + url.length());
+        }
+    }
+    public static void main(String[] args) { new ChildPage().inspect("https://www.selenium.dev/"); }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>Mark constant timeouts or base URLs <code>public static final</code> so one immutable copy loads once at class initialization.</li>
-      <li>Keep <code>private final WebDriver driver;</code> as a non-static field inside each Page Object, assigned via <code>this.driver = driver;</code> inside the constructor.</li>
-      <li>Use <code>super.click(locator)</code> when overriding a parent helper to extend parent behavior rather than replacing it completely.</li>
-      <li>Guard capability casts using <code>if (driver instanceof TakesScreenshot ts)</code> so non-screenshot drivers never throw <code>ClassCastException</code>.</li>
-    </ol>
-    <p>Using final, static, this, super, and Java 16+ instanceof pattern matching safely:</p>
-<pre><code>package dev.java.oop; // Declares package
+      <li><code>createdCount</code> belongs to <code>ChildPage</code> class once, incrementing on every constructor call.</li>
+      <li><code>this.title</code> resolves to <code>ChildPage</code>'s field (<code>"QKart Login"</code>), whereas <code>super.title</code> reaches parent field <code>"Base"</code>.</li>
+      <li><code>final String title</code> blocks any later <code>title = "Other"</code> assignment inside the class.</li>
+      <li><code>driverObj instanceof String url</code> verifies runtime type cleanly before binding typed variable <code>url</code> — zero risk of <code>ClassCastException</code>.</li>
+      <li>Trying to use <code>this</code> or <code>super</code> inside <code>main()</code> refuses to compile because <code>static</code> methods lack an instance.</li>
+    </ol></section>
 
-import org.openqa.selenium.OutputType; // Imports screenshot output format
-import org.openqa.selenium.TakesScreenshot; // Imports screenshot capability interface
-import org.openqa.selenium.WebDriver; // Imports WebDriver interface
-
-class ParentReporter { // Superclass defining baseline log behavior
-    protected final String envName; // Final instance field assigned once in constructor
-
-    ParentReporter(String envName) { // Parent constructor
-        this.envName = envName; // Disambiguates parameter from instance field using 'this'
-    } // Ends parent constructor
-
-    void logStep(String step) { // Overridable parent method
-        System.out.println("[" + envName + "] " + step); // Prints base log line
-    } // Ends logStep
-} // Ends ParentReporter
-
-public final class KeywordsDemo extends ParentReporter { // Final class cannot be subclassed
-    public static final int DEFAULT_WAIT_SEC = 10; // Class-wide immutable constant
-
-    public KeywordsDemo(String envName) { // Child constructor
-        super(envName); // Invokes ParentReporter constructor on line 1
-    } // Ends child constructor
-
-    @Override // Overrides parent method
-    void logStep(String step) { // Extends parent logging behavior
-        super.logStep("AUDIT -&gt; " + step); // Invokes parent implementation via 'super'
-    } // Ends override
-
-    public static byte[] captureIfSupported(WebDriver driver) { // Stateless static utility
-        if (driver instanceof TakesScreenshot ts) { // Java 16+ pattern matching checks and binds ts
-            return ts.getScreenshotAs(OutputType.BYTES); // Captures screenshot without explicit cast
-        } // Ends instanceof guard
-        return new byte[0]; // Returns empty array safely when unsupported or null
-    } // Ends captureIfSupported
-} // Ends KeywordsDemo</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Declaring <code>public static WebDriver driver;</code> in <code>BaseTest</code> to simplify sharing across classes; in parallel TestNG runs, Thread 2 overwrites Thread 1's <code>driver</code> and Thread 1 quits Thread 2's browser mid-test.</li>
-      <li>Assuming a <code>final List&lt;String&gt; list = new ArrayList&lt;&gt;();</code> makes the list contents immutable; <code>final</code> locks only the reference variable from reassignment, so <code>list.add("item")</code> still mutates the object on the Heap unless wrapped in <code>List.of()</code>.</li>
-      <li>Attempting to reference <code>this</code> or <code>super</code> inside a <code>static</code> method; static methods execute without any target object instance, triggering 'non-static variable this cannot be referenced from a static context'.</li>
-      <li>Writing <code>if (obj != null &amp;&amp; obj instanceof String)</code>; <code>null instanceof String</code> already evaluates cleanly to <code>false</code> without throwing NPE.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: office sign, permanent ink, and ID check</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>static</code></b></td><td>Modifier attaching a field, method, or block to the class itself rather than individual object instances.</td></tr>
-        <tr><td><b><code>final</code></b></td><td>Modifier preventing variable reassignment, method overriding, or class inheritance.</td></tr>
-        <tr><td><b><code>finally</code></b></td><td>Exception-handling block guaranteed to run cleanup logic after a <code>try</code> or <code>catch</code> block.</td></tr>
-        <tr><td><b><code>this</code></b></td><td>Implicit reference pointing to the current object instance inside constructors and instance methods.</td></tr>
-        <tr><td><b><code>super</code></b></td><td>Reference qualifier invoking the immediate superclass constructor or overridden method.</td></tr>
-        <tr><td><b><code>instanceof</code></b></td><td>Runtime type-check operator returning <code>true</code> if an object is type-compatible with a target class or interface.</td></tr>
-      </tbody>
+      <tr><th>Office</th><th>Java</th></tr>
+      <tr><td>Single office reception calendar shared by all staff</td><td><code>static</code> field</td></tr>
+      <tr><td>Laminating an ID badge so nothing can erase it</td><td><code>final</code> class / variable</td></tr>
+      <tr><td>Pointing at your own desk vs pointing at your manager's desk</td><td><code>this</code> vs <code>super</code></td></tr>
+      <tr><td>Checking security pass before letting a guest into the server room</td><td><code>instanceof</code> before casting</td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Mixing up <code>static</code> and instance lifetime causes race conditions across parallel tests, while skipping <code>final</code> allows subtle accidental reassignments.</p>
+    <p><b>SDET link:</b> Never store <code>public static WebDriver driver;</code> when running TestNG <code>parallel="methods"</code> — Thread 2 closes Thread 1's browser! Keep constants <code>public static final</code> (like <code>TIMEOUT_SEC = 15</code>) and use <code>ThreadLocal&lt;WebDriver&gt;</code> for browsers.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>If you declare <code>final List&lt;String&gt; names = new ArrayList&lt;&gt;();</code>, can you call <code>names.add("Chrome");</code>? <b>Yes — <code>final</code> only stops you writing <code>names = new ArrayList&lt;&gt;();</code>; the list contents can still change.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td><code>static</code></td><td>Member owned by the class itself rather than individual objects</td></tr>
+      <tr><td><code>final</code></td><td>Locks variable reference, blocks method override, or blocks subclassing</td></tr>
+      <tr><td><code>this</code></td><td>Reference to the currently executing object instance</td></tr>
+      <tr><td><code>super</code></td><td>Reference accessing overridden parent methods or hidden parent fields</td></tr>
+      <tr><td><code>instanceof</code></td><td>Operator returning true if runtime object matches target type/interface</td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>Explain the exact difference between <code>final</code>, <code>finally</code>, and <code>finalize()</code>.</b><br>
-    <code>final</code> is an access/immutability keyword that prevents variable reassignment, method overriding, or subclassing. <code>finally</code> is a control-flow block paired with <code>try</code>/<code>catch</code> that always runs cleanup code including closing a file or quitting a driver. <code>finalize()</code> was a protected method on <code>Object</code> invoked unpredictably before Garbage Collection, now deprecated for removal in favor of <code>try-with-resources</code>.</p>
-
-    <p><b>What are all the contexts where the <code>static</code> keyword can be used in Java?</b><br>
-    <code>static</code> applies in five places: static variables (shared class state), static methods (callable without an instance), static initializer blocks (executed once at class initialization), static nested classes (which hold no hidden reference to the enclosing outer instance), and static imports (<code>import static org.testng.Assert.assertEquals;</code>). Top-level classes cannot be <code>static</code>.</p>
-
-    <p><b>What does <code>final</code> restrict on a variable versus a method versus a class?</b><br>
-    A <code>final</code> variable can be assigned at most once (making primitives constants and preventing reference variables from pointing to a different Heap object). A <code>final</code> method cannot be overridden by subclasses, preserving critical invariants. A <code>final</code> class (for example, <code>String</code> or <code>System</code>) cannot be extended at all.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>Does declaring <code>final List&lt;String&gt; items = new ArrayList&lt;&gt;();</code> prevent calling <code>items.add("shoe")</code>?</b><br>
-    No. Marking a reference variable <code>final</code> only prevents pointing the variable <code>items</code> at a different list object (<code>items = new ArrayList&lt;&gt;();</code> fails compilation). The Heap <code>ArrayList</code> object itself remains fully mutable unless constructed via an unmodifiable collection like <code>List.of()</code>.</p>
-
-    <p><b>Why can a <code>static</code> method never override an instance method, or access instance fields directly?</b><br>
-    An instance method requires an active Heap object reference (<code>this</code>) to determine runtime polymorphism and read instance field memory. A <code>static</code> method runs on the class without any object on the Stack, so there is no <code>this</code> pointer. If a subclass declares a <code>static</code> method with the same signature as a parent's <code>static</code> method, that is <b>method hiding</b> resolved at compile time by reference type, not overriding.</p>
-
-    <p><b>How does Java 16+ pattern matching for <code>instanceof</code> simplify capability checks?</b><br>
-    Classic Java required checking <code>if (driver instanceof JavascriptExecutor)</code> followed by a manual cast <code>JavascriptExecutor js = (JavascriptExecutor) driver;</code>. Pattern matching combines both steps into <code>if (driver instanceof JavascriptExecutor js)</code>, binding the strongly typed variable <code>js</code> cleanly in scope only when the check succeeds.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>Why does declaring <code>public static WebDriver driver;</code> in <code>BaseTest</code> pass sequential local runs and fail in parallel CI execution?</b><br>
-    When running 1 thread sequentially, only one browser runs at a time, so a single shared <code>static</code> slot appears to work. When TestNG runs 4 classes in parallel inside one JVM, all 4 threads read and overwrite that single <code>static</code> field simultaneously, causing one test to click elements in another test's browser or hit <code>NoSuchSessionException</code> when another thread quits it. Replacing it with <code>ThreadLocal&lt;WebDriver&gt;</code> isolates one driver per thread.</p>
-
-    <p><b>Where are <code>static</code> initializer blocks useful vs harmful in an automation framework?</b><br>
-    Static blocks work well for loading immutable environment constants once on startup if errors are handled cleanly. Avoid launching browsers, opening database connections, or calling external APIs inside <code>static {}</code> blocks because any failure throws <code>ExceptionInInitializerError</code> and permanently bricks the class for the rest of the JVM run.</p>
-
-    <p><b>Why does Selenium's <code>Assert</code> use <code>import static org.testng.Assert.*;</code> cleanly in test classes?</b><br>
-    TestNG assertion helpers like <code>assertEquals</code> and <code>assertTrue</code> are stateless <code>public static</code> methods. Static imports let tests write concise assertions directly without repeating <code>Assert.</code> on every verification line.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Why does compilation fail with 'non-static variable driver cannot be referenced from a static context' inside a utility method?</b><br>
-    You attempted to read an instance field (owned by individual objects) directly inside a <code>static</code> method (which runs without an object). Fix this either by passing <code>WebDriver driver</code> as a parameter into the <code>static</code> method or by making the helper an instance method on <code>BasePage</code>.</p>
-
-    <p><b>Why did a subclass method named <code>takeScreenshot()</code> silently call the parent version instead of overriding when both were declared <code>static</code>?</b><br>
-    <code>static</code> methods do not participate in runtime polymorphism; they are resolved statically at compile time using the declared class type of the variable. Remove <code>static</code> if polymorphic overriding per subclass is required.</p>
-
-    <p><b>What happens if <code>driver instanceof TakesScreenshot</code> evaluates on a <code>null</code> driver?</b><br>
-    The <code>instanceof</code> operator is null-safe by specification: <code>null instanceof AnyType</code> always evaluates cleanly to <code>false</code> without throwing <code>NullPointerException</code>.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why are utility classes like <code>java.lang.Math</code> or custom <code>WaitUtils</code> marked <code>public final class</code> with a <code>private</code> constructor and <code>static</code> methods?</b><br>
-    Stateless utilities hold no instance state, so creating Heap objects via <code>new</code> wastes memory, and subclassing them makes no architectural sense. Making the class <code>final</code> and its constructor <code>private</code> communicates clearly that callers should invoke methods statically.</p>
-
-    <p><b>Why should Page Objects mark injected dependencies and locators <code>private final</code>?</b><br>
-    Marking <code>private final WebDriver driver;</code> and <code>private final By loginBtn;</code> guarantees that once the Page Object constructor finishes, neither the driver reference nor the locators can ever be accidentally reassigned or nulled out mid-test.</p>
-
-    <p><b>Why is calling <code>this.wait</code> or <code>super.wait</code> explicitly inside subclass overrides helpful for maintenance?</b><br>
-    Even when no local variable shadows a field, qualifying parent calls with <code>super.</code> explicitly communicates to maintainers that behavior builds upon the base class implementation rather than calling a local helper.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>Can a <code>static</code> method access non-static instance variables directly?</b> No; there is no <code>this</code> object instance in a static context.</li>
-      <li><b>What happens when a <code>final</code> class like <code>String</code> is subclassed?</b> Compilation fails.</li>
-      <li><b>Does a <code>final</code> list prevent calling <code>list.add(...)</code>?</b> No; <code>final</code> prevents reassigning the reference variable, not mutating the Heap object.</li>
-      <li><b>What does <code>null instanceof WebDriver</code> evaluate to?</b> <code>false</code> (never throws <code>NullPointerException</code>).</li>
-      <li><b>Difference between <code>final</code>, <code>finally</code>, and <code>finalize()</code>?</b> <code>final</code> restricts modification/inheritance, <code>finally</code> runs guaranteed cleanup after <code>try</code>, and <code>finalize()</code> is the deprecated pre-GC hook.</li>
-      <li><b>Why does <code>static WebDriver</code> break parallel TestNG tests?</b> All threads overwrite the same shared static variable instead of owning independent drivers.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-inheritance-vs-composition.html">4.5 Inheritance (IS-A) vs Composition (HAS-A) &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-access-modifiers-encapsulation.html">4.3 Access Modifiers &amp; Encapsulation</a> &middot; Next: <a href="java-inheritance-vs-composition.html">4.5 Inheritance (IS-A) vs Composition (HAS-A) &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

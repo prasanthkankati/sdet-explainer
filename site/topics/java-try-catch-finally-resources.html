@@ -3,202 +3,109 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>6.2 try-catch-finally, try-with-resources, throw/throws &amp;amp; Custom Exceptions | SDET Explainer</title>
+<title>Java: try-catch-finally, throw vs throws &amp; try-with-resources</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
-  <h1>6.2 try-catch-finally, try-with-resources, throw/throws &amp;amp; Custom Exceptions</h1>
-  <div class="se-lead">Deterministic cleanup, ordered multi-catch blocks, automatic <code>AutoCloseable</code> resource closing, and domain-specific test exceptions prevent leaked files and silent Selenium failures.</div>
+  <h1>6.2 try-catch-finally, throw vs throws &amp; try-with-resources</h1>
 
-  <p>Knowing the hierarchy is only half of safe error handling; an SDET must also write exception handlers that release Excel workbooks, close input streams automatically, avoid hiding real failures inside <code>finally</code>, and raise clear custom exceptions when a QKart checkout invariant breaks.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">try-catch intercepts errors in narrowest-to-broadest order, finally guarantees cleanup execution, throw raises an exception while throws declares propagation, and try-with-resources auto-closes AutoCloseable streams without hiding the real crash.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-exception-hierarchy.html">6.1 Exception Hierarchy (Checked vs Unchecked vs Error)</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>Specific catch BEFORE general catch; AutoCloseable -&gt; try(...) closes backward safely; throw = action, throws = warning!</b></p>
+    <ul>
+      <li><b>Order rule:</b> put <code>FileNotFoundException</code> before <code>IOException</code> (never superclass first!).</li>
+      <li><b>Why <code>try-with-resources</code> beats manual <code>finally</code>:</b> if both read and <code>close()</code> crash, Java keeps the real read crash as primary and tucks <code>close()</code> under Suppressed exceptions.</li>
+      <li><b>Exception chaining:</b> pass <code>new FrameworkEx("msg", cause)</code> so stack traces never lose the root line number.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Every Selenium framework relies on <code>try-catch</code> inside custom wait helpers, <code>try-with-resources</code> in data readers and screenshot savers, and custom unchecked exceptions to translate cryptic low-level errors into actionable failure messages in CI reports.</p>
-  </section>
+  <section><h2>3. try-with-resources Cleanup Flow</h2>
+    <div class="arch">
+      <div class="lbl"><code>try (R1 a = ...; R2 b = ...)</code> Lifecycle</div>
+      <div class="note">Resources close automatically in REVERSE order (<code>b.close()</code> then <code>a.close()</code>) right after the try block.</div>
+      <div class="cols">
+        <div class="item"><b>1. Open left -&gt; right</b><span>Opens stream <code>a</code>, then wrapper <code>b</code></span></div>
+        <div class="item"><b>2. Run block / crash</b><span>Runs test data read or throws real error</span></div>
+        <div class="item"><b>3. Auto-close right -&gt; left</b><span>Calls <code>b.close()</code> then <code>a.close()</code> before <code>catch</code> runs!</span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li><b>Ordered catch blocks:</b> Specific subclass <code>catch</code> blocks must come before broader superclass catches (e.g., <code>FileNotFoundException</code> before <code>IOException</code>), or compilation fails with an unreachable catch error.</li>
-      <li><b>Multi-catch (Java 7+):</b> A single handler can list unrelated siblings with a pipe, for example <code>catch (IOException | TimeoutException e)</code>, where <code>e</code> is effectively <code>final</code>.</li>
-      <li><b>The <code>finally</code> contract:</b> The <code>finally</code> block executes whether the <code>try</code> block succeeds or throws (unless the JVM exits via <code>System.exit()</code> or crashes natively), and overriding its return value suppresses pending exceptions.</li>
-      <li><b><code>try-with-resources</code>:</b> Any resource implementing <code>java.lang.AutoCloseable</code> (or <code>Closeable</code>) opened in <code>try (...)</code> is closed automatically in reverse declaration order, preserving the original failure as the primary exception and attaching any close error via <code>getSuppressed()</code>.</li>
-      <li><b><code>throw</code> vs <code>throws</code> and custom exceptions:</b> <code>throw</code> raises an instance inside code, while <code>throws</code> declares checked propagation on a method signature; custom framework exceptions should pass the original cause (`super(message, cause)`) so stack traces are never lost.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. throw vs throws &amp; Manual finally vs try-with-resources</h2>
     <table>
-      <thead>
-        <tr><th>Construct</th><th>Purpose</th><th>Guaranteed Execution / Cleanup</th><th>Effect on Stack Trace &amp; Suppressed Errors</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>try-catch-finally</code></b></td><td>Intercept exceptions and run manual cleanup code</td><td><code>finally</code> runs on normal exit, <code>return</code>, or exception (not on <code>System.exit()</code>)</td><td>If <code>finally</code> itself throws or returns, the original <code>try</code> exception is lost completely</td></tr>
-        <tr><td><b><code>try-with-resources</code></b></td><td>Automatic closing of <code>AutoCloseable</code> streams/readers/connections</td><td>Compiler generates hidden <code>finally</code> blocks closing all resources in reverse declaration order</td><td>Original <code>try</code> exception stays primary; <code>close()</code> exceptions attach via <code>addSuppressed()</code></td></tr>
-        <tr><td><b><code>throw</code> vs <code>throws</code></b></td><td>Raise one exception instance vs declare method signature propagation</td><td>N/A — control transfer vs compile-time contract</td><td>Preserves original cause only when chaining with <code>new CustomEx(msg, cause)</code></td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Construct</th><th>Key Role</th><th>Trap to Avoid</th></tr>
+      <tr><td><b><code>throw</code></b></td><td>Raises a single exception object inside code</td><td><code>throw new IllegalStateException("bad");</code></td></tr>
+      <tr><td><b><code>throws</code></b></td><td>Lists checked exceptions in method signature</td><td>Lazy <code>throws Exception</code> everywhere</td></tr>
+      <tr><td><b><code>finally</code></b></td><td>Always runs after try/catch (except <code>System.exit()</code>)</td><td><code>return</code> inside <code>finally</code> hides thrown exceptions!</td></tr>
+      <tr><td><b><code>try-with-resources</code></b></td><td>Auto-closes any <code>AutoCloseable</code></td><td>Trying to reassign resource variable inside <code>try</code></td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: AutoCloseable file reader with custom unchecked wrapper</h2>
+<pre><code>import java.io.*;
+import java.nio.file.*;
+
+class ConfigLoadException extends RuntimeException {
+    ConfigLoadException(String msg, Throwable cause) { super(msg, cause); } // keeps root cause
+}
+
+public class ResourceCleanupDemo {
+    static String firstLine(Path p) {
+        try (BufferedReader br = Files.newBufferedReader(p)) { // auto-closes even if readLine throws!
+            return br.readLine();
+        } catch (IOException ex) {
+            throw new ConfigLoadException("Missing config: " + p, ex); // wrap &amp; preserve stack trace
+        }
+    }
+
+    public static void main(String[] args) {
+        try { firstLine(Path.of("missing.properties")); }
+        catch (ConfigLoadException e) {
+            System.out.println(e.getMessage() + " | Cause: " + e.getCause().getClass().getSimpleName());
+        }
+    }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>When execution enters <code>try (R1 a = ...; R2 b = ...)</code>, resources <code>a</code> then <code>b</code> are initialized left to right.</li>
-      <li>If the body or an exception leaves the <code>try</code> block, Java closes <code>b</code> first and then <code>a</code> before entering any explicit <code>catch</code> or <code>finally</code> block attached to that <code>try-with-resources</code>.</li>
-      <li>If both the <code>try</code> body and a resource's <code>close()</code> method throw exceptions, Java keeps the body's exception as the main thrown exception and records the <code>close()</code> exception in its suppressed array.</li>
-      <li>When translating a checked error into a custom exception, calling <code>super(message, cause)</code> attaches the underlying stack trace under a <code>Caused by:</code> section for fast root-cause debugging.</li>
-    </ol>
-    <p>Using try-with-resources and a custom unchecked exception with cause chaining</p>
-<pre><code>package com.qkart.exceptions; // Package for resource handling and custom exceptions
+      <li><code>Files.newBufferedReader(p)</code> opens inside the <code>try (...)</code> header because <code>BufferedReader</code> implements <code>AutoCloseable</code>.</li>
+      <li>Whether <code>readLine()</code> returns a line or fails with <code>IOException</code>, Java closes <code>br</code> automatically first.</li>
+      <li>Any <code>IOException</code> is caught cleanly and wrapped inside custom unchecked <code>ConfigLoadException</code> with <code>ex</code> passed as cause.</li>
+      <li>Wait helpers can also catch two sibling exceptions in one block using pipe syntax: <code>catch (IOException | TimeoutException e)</code>.</li>
+      <li>Caller sees both the friendly context message and the root <code>NoSuchFileException</code>.</li>
+    </ol></section>
 
-import java.io.BufferedReader; // Reader with AutoCloseable support
-import java.io.IOException; // Checked I/O exception
-import java.nio.file.Files; // NIO file helper
-import java.nio.file.Path; // Path value object
-
-class QKartTestDataException extends RuntimeException { // Custom unchecked framework exception
-    public QKartTestDataException(String message, Throwable cause) { // Constructor preserving root cause
-        super(message, cause); // Chains original exception for full stack trace visibility
-    } // End constructor
-} // End QKartTestDataException
-
-public class SafeResourceReader { // Helper showing deterministic closing and custom wrapping
-
-    public static String readFirstLine(Path filePath) { // Clean signature without checked throws
-        try (BufferedReader reader = Files.newBufferedReader(filePath)) { // AutoCloseable opened in try header
-            String line = reader.readLine(); // Read first configuration line from file
-            if (line == null || line.isBlank()) { // Validate file is not empty
-                throw new IllegalStateException("Empty QKart test data file: " + filePath); // Fail loudly
-            } // End blank check
-            return line; // Reader closes automatically before returning to caller
-        } catch (IOException ex) { // Catch checked I/O failure after automatic close
-            throw new QKartTestDataException("Failed loading QKart config from " + filePath, ex); // Wrap with cause
-        } // End try-with-resources
-    } // End readFirstLine
-
-    public static void main(String[] args) { // Quick execution demo
-        try { // Attempt reading missing file
-            readFirstLine(Path.of("qkart-users.csv")); // Invokes safe reader
-        } catch (QKartTestDataException ex) { // Catches custom unchecked exception
-            System.out.println("Error: " + ex.getMessage()); // Prints friendly context message
-            System.out.println("Root cause: " + ex.getCause().getClass().getSimpleName()); // Prints NoSuchFileException
-        } // End demo catch
-    } // End main
-} // End SafeResourceReader</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li><b>Putting <code>return</code> inside a <code>finally</code> block:</b> Returning inside <code>finally</code> silently discards any exception thrown in <code>try</code> or <code>catch</code> and masks failures.</li>
-      <li><b>Placing <code>catch (Exception e)</code> before <code>catch (IOException e)</code>:</b> Superclass-first ordering fails to compile because the specific handler becomes unreachable.</li>
-      <li><b>Dropping the cause when rethrowing a custom exception:</b> Calling <code>throw new FrameworkException(ex.getMessage())</code> instead of <code>new FrameworkException(msg, ex)</code> deletes the original stack trace and line number.</li>
-      <li><b>Forgetting that resources in <code>try-with-resources</code> are implicitly <code>final</code> or effectively final:</b> Trying to reassign a resource variable declared inside the <code>try (...)</code> header fails compilation.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: a hotel auto-locking door vs manual key return</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>try-with-resources</b></td><td>Java 7 syntax <code>try (Resource r = ...)</code> that automatically closes <code>AutoCloseable</code> resources in reverse declaration order.</td></tr>
-        <tr><td><b>AutoCloseable</b></td><td>Standard interface declaring a single <code>void close() throws Exception</code> method required by <code>try-with-resources</code>.</td></tr>
-        <tr><td><b>Suppressed Exception</b></td><td>Secondary exception thrown inside an automatic <code>close()</code> call and attached to the primary exception via <code>getSuppressed()</code>.</td></tr>
-        <tr><td><b>Multi-catch</b></td><td>Pipe-separated catch clause (<code>catch (ExA | ExB e)</code>) handling unrelated exception types without duplicating handler code.</td></tr>
-        <tr><td><b>Exception Chaining</b></td><td>Passing the caught <code>Throwable</code> as the second argument (<code>cause</code>) when throwing a higher-level custom exception.</td></tr>
-      </tbody>
+      <tr><th>Security Door</th><th>Java</th></tr>
+      <tr><td>Warning sign on door: "Beware of high voltage"</td><td><code>throws</code> on method header</td></tr>
+      <tr><td>Pulling the red fire alarm handle right now</td><td><code>throw new ...</code> statement</td></tr>
+      <tr><td>Manual reminder note to turn off lights on exit (fails if you forget)</td><td>Manual <code>finally { close(); }</code></td></tr>
+      <tr><td>Self-closing fire door that shuts automatically whenever you leave</td><td><code>try-with-resources</code></td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Leaky open streams freeze Windows files in CI runners and silent catches hide root causes across multi-layer frameworks.</p>
+    <p><b>SDET link:</b> Open Apache POI workbooks and JSON streams strictly inside <code>try (...)</code> so Windows CI agents never lock <code>testdata.xlsx</code> after a failed test, and pass the root <code>Throwable cause</code> into custom framework exceptions.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>What happens if a method executes <code>return true;</code> in <code>try</code> and <code>return false;</code> in <code>finally</code>? <b><code>false</code> returns — and any exception thrown in <code>try</code> is silently lost. Never put <code>return</code> inside <code>finally</code>.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td><code>AutoCloseable</code></td><td>Interface requiring <code>close()</code> so objects work inside <code>try (...)</code></td></tr>
+      <tr><td><code>try-with-resources</code></td><td>Try block that guarantees reverse-order resource closing</td></tr>
+      <tr><td>Suppressed exception</td><td>Close-time error attached alongside the main exception via <code>addSuppressed()</code></td></tr>
+      <tr><td>Exception chaining</td><td>Passing caught <code>cause</code> into <code>super(message, cause)</code></td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>What is the exact difference between <code>throw</code> and <code>throws</code>?</b><br>
-    <code>throw</code> is an executable statement inside a block that throws a single exception object (e.g., <code>throw new IllegalArgumentException();</code>). <code>throws</code> appears in a method declaration header to list checked exceptions the method may propagate to callers.</p>
-
-    <p><b>Does a <code>finally</code> block run even when <code>try</code> contains a <code>return</code> statement?</b><br>
-    Yes. Before transferring control back to the caller with the computed return value, the JVM executes the <code>finally</code> block.</p>
-
-    <p><b>What interface must an object implement to be managed by <code>try-with-resources</code>?</b><br>
-    <code>java.lang.AutoCloseable</code> (or its subinterface <code>java.io.Closeable</code>).</p>
-
-    <h3>How it works</h3>
-
-    <p><b>Why is <code>try-with-resources</code> safer than closing a stream inside a manual <code>finally</code> block?</b><br>
-    In a manual <code>finally</code> block, an exception inside <code>stream.close()</code> overwrites and hides any exception that occurred inside the <code>try</code> block. <code>try-with-resources</code> preserves the original exception as primary and attaches any <code>close()</code> failure via <code>addSuppressed()</code>.</p>
-
-    <p><b>In what order are multiple resources closed in a <code>try (R1 a = ...; R2 b = ...)</code> statement?</b><br>
-    Reverse order of declaration: <code>b.close()</code> runs first, then <code>a.close()</code>, because later resources commonly wrap earlier ones (for example, a <code>BufferedReader</code> wrapping a <code>FileReader</code>).</p>
-
-    <p><b>Why is the exception variable in a multi-catch block (<code>catch (IOException | TimeoutException e)</code>) implicitly <code>final</code>?</b><br>
-    Because <code>e</code> has no single concrete static type better than their common supertype (for example, <code>Exception</code>), so Java disallows reassigning <code>e</code> inside the block to avoid type-safety violations.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>Should a custom framework exception (for example <code>ExcelReadException</code>) extend <code>Exception</code> or <code>RuntimeException</code>?</b><br>
-    Extend <code>RuntimeException</code>. Checked custom exceptions force every test and Page Object in the call chain to declare <code>throws ExcelReadException</code>, whereas an unchecked exception keeps tests clean and still triggers TestNG failure reporting.</p>
-
-    <p><b>Can Selenium's <code>WebDriver</code> be wrapped in an <code>AutoCloseable</code> helper or closed in <code>finally</code>?</b><br>
-    In TestNG, lifecycle hooks (<code>@AfterMethod</code>) normally call <code>driver.quit()</code> rather than local <code>try-with-resources</code> so listeners can take screenshots before quitting. However, small standalone scripts or utility checks can safely wrap a driver wrapper in <code>AutoCloseable</code> calling <code>driver.quit()</code>.</p>
-
-    <p><b>In a QKart checkout helper, <code>clickBuyNow()</code> fails and an automatic cleanup also fails. Which exception appears first in the report?</b><br>
-    If the cleanup ran through <code>try-with-resources</code>, the <code>clickBuyNow()</code> failure remains the top exception and cleanup failure appears under <code>Suppressed:</code> in the stack trace.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>A method returns <code>true</code> inside <code>try</code> and returns <code>false</code> inside <code>finally</code>. Which value does the caller receive?</b><br>
-    <code>false</code>, because the <code>finally</code> block's <code>return</code> overrides the pending return value from <code>try</code> — and would even cancel any thrown exception.</p>
-
-    <p><b>Why does <code>catch (FileNotFoundException | IOException e)</code> refuse to compile?</b><br>
-    Multi-catch syntax forbids listing a subclass alongside its own superclass (<code>FileNotFoundException</code> extends <code>IOException</code>). Catch only the broader <code>IOException</code> or write two separate ordered <code>catch</code> blocks.</p>
-
-    <p><b>Stack traces in Jenkins show only your custom <code>TestConfigException</code> line without showing where the underlying JSON syntax broke. Why?</b><br>
-    The custom exception constructor omitted the <code>cause</code> parameter (e.g., called <code>super(msg)</code> instead of <code>super(msg, ex)</code>), breaking the exception chain.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Should you override <code>equals</code> or leave default Constructors on a custom exception?</b><br>
-    Provide at least two standard constructors: <code>(String message)</code> and <code>(String message, Throwable cause)</code> so every call site can supply context and preserve chained failures.</p>
-
-    <p><b>When is an exception better logged and rethrown versus only wrapped and rethrown?</b><br>
-    Avoid logging and rethrowing at every intermediate layer, because that prints the same huge stack trace three or four times per failure. Wrap with context and rethrow cleanly, letting the top-level TestNG listener log it once.</p>
-
-    <p><b>Under what rare condition does a <code>finally</code> block fail to execute?</b><br>
-    If the JVM is killed via <code>System.exit(0)</code>, receives a fatal OS termination signal (`SIGKILL`), runs on an unresponsive daemon thread when all non-daemon threads end, or suffers power loss.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>How do you ensure automatic closing of streams and workbooks?</b> Declare them inside <code>try (...)</code> so Java closes every <code>AutoCloseable</code> in reverse order.</li>
-      <li><b>What happens if <code>finally</code> executes a <code>return</code>?</b> It overwrites the <code>try</code> return value and silently swallows any pending exception.</li>
-      <li><b>How do you keep original stack traces in custom exceptions?</b> Pass the caught exception as the second parameter: <code>super(message, cause)</code>.</li>
-      <li><b>Can one <code>catch</code> block handle unrelated exception classes?</b> Yes, via multi-catch: <code>catch (IOException | SQLException ex)</code>.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-file-io-properties-json-poi.html">6.3 File I/O: Properties, JSON (Jackson) &amp; Excel (Apache POI) &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-exception-hierarchy.html">6.1 Exception Hierarchy: Checked vs Unchecked &amp; Error</a> &middot; Next: <a href="java-file-io-properties-json-poi.html">6.3 File I/O: Properties, JSON &amp; Apache POI (Excel) &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

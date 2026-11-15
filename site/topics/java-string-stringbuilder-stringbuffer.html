@@ -3,194 +3,96 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>3.2 String vs StringBuilder vs StringBuffer | SDET Explainer</title>
+<title>Java: String vs StringBuilder vs StringBuffer</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>3.2 String vs StringBuilder vs StringBuffer</h1>
-  <div class="se-lead">Eliminating O(n^2) concatenation garbage using mutable StringBuilder and thread-safe StringBuffer with dynamic capacity expansion.</div>
 
-  <p>Because <code>String</code> is immutable, concatenating strings inside a loop with <code>+</code> allocates and copies progressively larger intermediate strings on every pass. Java provides <code>StringBuilder</code> for fast single-threaded string construction and <code>StringBuffer</code> for synchronized multi-threaded mutation using an expandable internal character array.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">String creates a brand-new Heap object on every edit, whereas StringBuilder edits an internal array in place for fast single-thread building and StringBuffer adds synchronized locks for thread safety.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-string-immutability-pool.html">3.1 String Immutability &amp; String Constant Pool</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>Fixed text = String; Loops/JSON building = StringBuilder; Legacy thread-shared buffer = StringBuffer.</b></p>
+    <ul>
+      <li><b>Why <code>+</code> inside loops hurts:</b> appending 1,000 times with <code>String +=</code> allocates ~1,000 dead intermediate String objects.</li>
+      <li><b><code>StringBuilder</code> (Java 5+):</b> fast, un-synchronized, mutable — the default pick inside test methods.</li>
+      <li><b><code>StringBuffer</code> (Java 1.0):</b> every method has <code>synchronized</code> overhead.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Dynamic XPath generation, HTML report formatting, CSV/JSON payload assembly, and multi-row table log capture in Selenium utilities rely on <code>StringBuilder</code> to avoid unnecessary Heap garbage.</p>
-  </section>
+  <section><h2>3. Immutable String copy vs Mutable Builder buffer</h2>
+    <div class="arch">
+      <div class="lbl">Concatenation Under the Hood <small>1000 appends in a loop</small></div>
+      <div class="note">Immutable Strings discard old arrays; mutable builders resize one backing <code>byte[]</code>.</div>
+      <div class="cols">
+        <div class="item"><b><code>s += row</code> (String)</b><span>Step 1: copy <code>"A"</code> -> Step 2: new <code>"AB"</code> -> Step 3: new <code>"ABC"</code> (garbage flood)</span></div>
+        <div class="item"><b><code>sb.append(row)</code> (Builder)</b><span>Appends directly into one expandable internal buffer; call <code>toString()</code> once</span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li>Concatenating a <code>String</code> inside a loop (<code>s += item;</code>) creates $O(n^2)$ total character copies because each pass constructs a brand-new <code>String</code> object and copies all previous characters.</li>
-      <li><code>StringBuilder</code> (Java 5+) is mutable, non-synchronized, and the fastest choice for building strings inside local method scopes and single-threaded automation utilities.</li>
-      <li><code>StringBuffer</code> (Java 1.0) exposes the exact same API as <code>StringBuilder</code>, except all public mutation methods carry the <code>synchronized</code> keyword, making it thread-safe at the cost of monitor locking overhead.</li>
-      <li>Both <code>StringBuilder</code> and <code>StringBuffer</code> default to an internal capacity of <code>16</code> characters (or <code>str.length() + 16</code>) and expand automatically using <code>(oldCapacity * 2) + 2</code> when exceeded.</li>
-      <li>Neither <code>StringBuilder</code> nor <code>StringBuffer</code> overrides <code>Object.equals()</code>; comparing two <code>StringBuilder</code> objects directly checks reference identity, so convert with <code>.toString().equals(...)</code> first.</li>
-      <li>Single-statement concatenations like <code>"User: " + user + " passed"</code> outside loops are already optimized by the Java compiler, whereas loops always require an explicit <code>StringBuilder</code>.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. String vs StringBuilder vs StringBuffer</h2>
     <table>
-      <thead>
-        <tr><th>Feature</th><th><code>String</code></th><th><code>StringBuilder</code></th><th><code>StringBuffer</code></th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Mutability</b></td><td>Immutable (new object per edit)</td><td>Mutable (edits internal buffer in place)</td><td>Mutable (edits internal buffer in place)</td></tr>
-        <tr><td><b>Thread-Safety</b></td><td>Thread-safe (immutable)</td><td>Not thread-safe (no synchronization)</td><td>Thread-safe (methods are <code>synchronized</code>)</td></tr>
-        <tr><td><b>Speed in Loops</b></td><td>Slow ($O(n^2)$ copies + GC churn)</td><td>Fastest ($O(n)$ amortized)</td><td>Slower than <code>StringBuilder</code> due to lock overhead</td></tr>
-        <tr><td><b>Storage Pool</b></td><td>String Constant Pool + Heap</td><td>Heap only</td><td>Heap only</td></tr>
-        <tr><td><b>Overrides <code>equals()</code>?</b></td><td>Yes (compares characters)</td><td>No (inherits <code>==</code> from <code>Object</code>)</td><td>No (inherits <code>==</code> from <code>Object</code>)</td></tr>
-        <tr><td><b>Introduced In</b></td><td>Java 1.0</td><td>Java 5</td><td>Java 1.0</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Feature</th><th><code>String</code></th><th><code>StringBuilder</code></th><th><code>StringBuffer</code></th></tr>
+      <tr><td>Mutable?</td><td>No (immutable)</td><td>Yes</td><td>Yes</td></tr>
+      <tr><td>Thread-safe?</td><td>Yes (because immutable)</td><td>No</td><td>Yes (<code>synchronized</code>)</td></tr>
+      <tr><td>Speed in loops</td><td>Slowest (O(n^2) copies)</td><td>Fastest</td><td>Medium (lock overhead)</td></tr>
+      <tr><td>Has Pool?</td><td>Yes (literals)</td><td>No</td><td>No</td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: building a dynamic Selenium report row cleanly</h2>
+<pre><code>public class BuilderSpeedDemo {
+    public static void main(String[] args) {
+        StringBuilder log = new StringBuilder(); // mutable buffer on Heap
+        String[] steps = { "Open", "Login", "Checkout" };
+        for (String step : steps) {
+            log.append("[").append(step).append("] "); // modifies same array in place
+        }
+        String finalLine = log.toString();             // convert to String once when done
+        System.out.println(finalLine);                 // [Open] [Login] [Checkout]
+    }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>Instantiate <code>StringBuilder sb = new StringBuilder(64);</code> inside a method to pre-allocate an internal buffer on the Heap.</li>
-      <li>On each loop iteration, <code>sb.append(rowText)</code> writes characters directly into the existing array without allocating intermediate <code>String</code> objects.</li>
-      <li>If appended text exceeds the current capacity, <code>StringBuilder</code> allocates a new array of size <code>(oldCapacity * 2) + 2</code> and copies once.</li>
-      <li>Call <code>sb.toString()</code> after the loop finishes to freeze the accumulated characters into a final immutable <code>String</code>.</li>
-    </ol>
-    <p>Building a formatted table report and reversing text using StringBuilder:</p>
-<pre><code>package dev.java.strings; // Declares package
+      <li><code>new StringBuilder()</code> creates one small expandable byte buffer (default capacity 16 characters).</li>
+      <li>Each <code>log.append(...)</code> writes characters straight into the tail of that single buffer.</li>
+      <li>If the buffer fills up, <code>StringBuilder</code> doubles capacity smoothly (similar to <code>ArrayList</code>).</li>
+      <li>No throwaway Strings get left behind per loop lap.</li>
+      <li>Calling <code>log.toString()</code> at the end snapshots one clean immutable <code>String</code>.</li>
+    </ol></section>
 
-import java.util.List; // Imports List interface
-
-public class BuilderVsBufferDemo { // Compares StringBuilder operations
-    static String buildAuditLog(List&lt;String&gt; items) { // Builds log cleanly in O(n) time
-        StringBuilder sb = new StringBuilder(128); // Pre-sizes internal buffer on Heap
-        for (int i = 0; i &lt; items.size(); i++) { // Iterates over collected element texts
-            sb.append("Row ").append(i + 1).append(": ").append(items.get(i)).append("\n"); // Fluent chaining mutates buffer in place
-        } // Zero intermediate String objects created inside loop
-        return sb.toString(); // Converts final mutable buffer into immutable String
-    } // Ends buildAuditLog
-
-    public static void main(String[] args) { // Main execution entry
-        List&lt;String&gt; rows = List.of("Login Pass", "Cart Updated", "Checkout OK"); // Sample step names
-        System.out.println(buildAuditLog(rows)); // Prints assembled multi-line log
-        StringBuilder rev = new StringBuilder("QKart"); // Initializes mutable buffer with QKart
-        rev.reverse(); // Reverses characters in place without extra method loop
-        System.out.println("Reversed: " + rev.toString()); // Prints: traKQ
-    } // Ends main method
-} // Ends class</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Concatenating strings with <code>+=</code> inside a <code>for</code> loop over hundreds of Excel or table rows; this allocates hundreds of discarded <code>String</code> objects and causes quadratic $O(n^2)$ memory copies.</li>
-      <li>Using <code>StringBuffer</code> inside a single method's local variable; because a local variable on the Stack is never shared across threads, synchronization locks add pointless overhead where <code>StringBuilder</code> is strictly faster.</li>
-      <li>Asserting <code>sb1.equals(sb2)</code> directly on two <code>StringBuilder</code> instances; because <code>StringBuilder</code> does not override <code>equals()</code>, the assertion returns <code>false</code> even for identical text unless you call <code>sb1.toString().equals(sb2.toString())</code>.</li>
-      <li>Storing a single shared <code>static StringBuilder</code> field across parallel TestNG threads without synchronization, corrupting output when concurrent threads interleave <code>append()</code> calls.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: engraving stone vs whiteboard vs locked whiteboard</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>StringBuilder</code></b></td><td>Mutable, non-synchronized character sequence class optimized for single-threaded string construction.</td></tr>
-        <tr><td><b><code>StringBuffer</code></b></td><td>Legacy mutable character sequence class whose methods are marked <code>synchronized</code> for thread-safe mutation.</td></tr>
-        <tr><td><b>Capacity</b></td><td>Allocated size of the internal backing array before an automatic resize is triggered (default <code>16</code>).</td></tr>
-        <tr><td><b>Monitor Lock</b></td><td>Mutual exclusion lock acquired by <code>synchronized</code> methods in <code>StringBuffer</code>, allowing one thread inside at a time.</td></tr>
-        <tr><td><b>Fluent Chaining</b></td><td>Calling <code>sb.append(a).append(b)</code> consecutively because <code>append()</code> returns <code>this</code>.</td></tr>
-        <tr><td><b>Amortized $O(n)$</b></td><td>Total linear work across $n$ appends despite occasional array doubling resizes.</td></tr>
-      </tbody>
+      <tr><th>Writing Board</th><th>Java</th></tr>
+      <tr><td>Carving a fresh stone tablet for every new word added</td><td><code>String</code> concatenation loop</td></tr>
+      <tr><td>Private whiteboard on your desk: fast erase and append</td><td><code>StringBuilder</code></td></tr>
+      <tr><td>Shared hallway whiteboard with a key lock per turn</td><td><code>StringBuffer</code></td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Replacing loop concatenation with <code>StringBuilder</code> turns quadratic O(n^2) memory churn into linear O(n) buffer writes.</p>
+    <p><b>SDET link:</b> When assembling custom HTML email summaries, dynamic XPath fragments, or large CSV/JSON payloads inside a Selenium listener or API helper, use <code>StringBuilder</code> inside each test method (or per-thread log).</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>Does <code>StringBuilder</code> override <code>equals()</code> to compare text like <code>String</code>? <b>No — <code>sb1.equals(sb2)</code> checks address equality; compare <code>sb1.toString().equals(sb2.toString())</code>.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Mutable</td><td>Object whose internal characters can be changed without making a new object</td></tr>
+      <tr><td>Buffer</td><td>Expandable backing character/byte array inside <code>StringBuilder</code></td></tr>
+      <tr><td><code>synchronized</code></td><td>Lock allowing only one thread at a time inside <code>StringBuffer</code> methods</td></tr>
+      <tr><td>Capacity</td><td>Allocated array room before expansion is needed</td></tr>
+      <tr><td><code>toString()</code></td><td>Snapshots current builder text as an immutable <code>String</code></td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>Compare <code>String</code>, <code>StringBuilder</code>, and <code>StringBuffer</code> in one concise overview.</b><br>
-    <code>String</code> is immutable and stored in the String Constant Pool or Heap, making every edit allocate a new object. <code>StringBuilder</code> is mutable and unsynchronized, giving the fastest performance for single-threaded loops. <code>StringBuffer</code> is also mutable, with <code>synchronized</code> methods that guarantee thread-safety at a slight locking cost.</p>
-
-    <p><b>When should you choose <code>StringBuilder</code> instead of <code>String</code>?</b><br>
-    Choose <code>StringBuilder</code> whenever text is assembled iteratively across a loop, conditional branch sequence, or dynamic query/XPath generator. For fixed constants or a single <code>"Hello " + name</code> expression outside loops, plain <code>String</code> stays cleaner and equally fast because the compiler optimizes single-expression concatenation automatically.</p>
-
-    <p><b>Why did Java 5 introduce <code>StringBuilder</code> when <code>StringBuffer</code> already existed?</b><br>
-    In real Java programs, over 99% of string-building buffers live strictly as local variables inside one method and are never shared between threads. Paying synchronization lock acquisition and release cost on every single <code>append()</code> call in <code>StringBuffer</code> wasted CPU cycles, so Java 5 added <code>StringBuilder</code> as a drop-in unsynchronized replacement.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>Why does <code>String res = ""; for (int i=0; i&lt;1000; i++) res += i;</code> harm Heap performance?</b><br>
-    Because <code>String</code> is immutable, each <code>res += i</code> iteration allocates a new internal concatenation buffer, copies all existing characters from <code>res</code> plus the new digits, produces a brand-new Heap <code>String</code>, and abandons the previous <code>String</code> as garbage. Over 1,000 iterations, this generates roughly 1,000 dead Heap strings and copies characters quadratically. Using a single <code>StringBuilder</code> performs all appends in one array.</p>
-
-    <p><b>How does <code>StringBuilder</code> grow its capacity when appended text exceeds initial capacity?</b><br>
-    An empty <code>new StringBuilder()</code> allocates an initial backing array of <code>16</code> characters (<code>new StringBuilder("abc")</code> allocates <code>3 + 16 = 19</code>). When an <code>append()</code> exceeds capacity, <code>StringBuilder</code> computes a new capacity of <code>(oldCapacity * 2) + 2</code> (or exact required length if larger) and copies contents via <code>Arrays.copyOf()</code>. Passing an estimated capacity like <code>new StringBuilder(512)</code> avoids intermediate array copies altogether.</p>
-
-    <p><b>Does <code>sb.toString()</code> share the backing array with <code>StringBuilder</code>?</b><br>
-    No; calling <code>sb.toString()</code> allocates a fresh immutable <code>String</code> with a copy of the active characters (from index <code>0</code> to <code>sb.length()</code>). Subsequent <code>sb.append()</code> mutations on the <code>StringBuilder</code> never affect the previously returned <code>String</code>.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>In a Selenium WebTable test, how should you collect and compare text from 500 table rows?</b><br>
-    Create a local <code>StringBuilder</code> inside the extraction method, loop through row elements calling <code>sb.append(row.getText()).append('|')</code>, and return <code>sb.toString()</code>. Keeping the <code>StringBuilder</code> local ensures every TestNG parallel thread gets its own isolated buffer on its own Stack frame without needing <code>StringBuffer</code>.</p>
-
-    <p><b>When building a shared multi-threaded custom logger buffer accessed concurrently by 4 TestNG threads, which mutable class avoids garbled text?</b><br>
-    If multiple threads genuinely append to one shared mutable buffer instance, choose <code>StringBuffer</code> (or a thread-safe queue/logger like SLF4J/Log4j2) so concurrent <code>append()</code> calls serialize cleanly without corrupting character indices. However, using <code>ThreadLocal&lt;StringBuilder&gt;</code> or Log4j2 appenders scales better under heavy concurrency.</p>
-
-    <p><b>How do you check whether a UI string is a palindrome during an SDET coding interview?</b><br>
-    Normalize case and characters first, then pass the string into <code>new StringBuilder(cleaned).reverse().toString().equals(cleaned)</code>, or scan inward with two index pointers (<code>left</code> and <code>right</code>) for zero extra Heap allocation.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Why did <code>new StringBuilder("OK").equals(new StringBuilder("OK"))</code> return <code>false</code> in a unit test?</b><br>
-    Neither <code>StringBuilder</code> nor <code>StringBuffer</code> overrides <code>Object.equals()</code> or <code>hashCode()</code>, so <code>equals()</code> falls back to reference identity (<code>==</code>). Always convert both buffers via <code>.toString()</code> or compare via Java 11 <code>sb1.compareTo(sb2) == 0</code>.</p>
-
-    <p><b>Why did a shared <code>static StringBuilder reportBuffer</code> throw <code>ArrayIndexOutOfBoundsException</code> during parallel TestNG runs?</b><br>
-    <code>StringBuilder</code> provides zero thread synchronization; when two worker threads append concurrently, one thread reads an outdated internal <code>count</code> field while another expands the buffer, causing index corruption or out-of-bounds failures. Make the buffer local to each method or replace it with a thread-safe structure.</p>
-
-    <p><b>What happens if you pass <code>null</code> directly into <code>new StringBuilder((String) null)</code> vs <code>sb.append((String) null)</code>?</b><br>
-    Passing <code>null</code> into the <code>new StringBuilder(String)</code> constructor throws <code>NullPointerException</code> immediately because it calls <code>str.length()</code>. By contrast, calling <code>sb.append((String) null)</code> safely appends the literal four characters <code>"null"</code> without throwing.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why does modern Java (Java 11+) use <code>StringJoiner</code> or <code>String.join(", ", list)</code> instead of manual <code>StringBuilder</code> loops for comma-separated text?</b><br>
-    Manual loops building delimited lists require clumsy trailing-comma checks (<code>if (i &gt; 0) sb.append(", ")</code>). <code>String.join(", ", list)</code> and <code>Collectors.joining(", ")</code> handle delimiters cleanly in one readable call using <code>StringJoiner</code> internally.</p>
-
-    <p><b>Why should public method signatures return <code>String</code> rather than <code>StringBuilder</code>?</b><br>
-    Returning a mutable <code>StringBuilder</code> exposes an internal buffer that callers could accidentally mutate downstream, violating encapsulation. Convert to an immutable <code>String</code> via <code>toString()</code> at the method boundary.</p>
-
-    <p><b>When is <code>StringBuffer</code> legitimately preferred over <code>StringBuilder</code> today?</b><br>
-    Only when maintaining legacy APIs expecting a <code>StringBuffer</code> parameter (including older <code>java.util.regex.Matcher</code> methods prior to Java 9) or sharing a single mutable text accumulator directly across threads without external locking.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>Which class is fastest for single-threaded string concatenation in loops?</b> <code>StringBuilder</code>.</li>
-      <li><b>What makes <code>StringBuffer</code> thread-safe?</b> Its mutation methods are declared <code>synchronized</code>.</li>
-      <li><b>What is the default initial capacity of <code>new StringBuilder()</code>?</b> <code>16</code> characters.</li>
-      <li><b>How does <code>StringBuilder.equals()</code> compare two instances?</b> By reference identity (<code>==</code>), because it does not override <code>Object.equals()</code>.</li>
-      <li><b>What happens when calling <code>new StringBuilder((String) null)</code>?</b> Throws <code>NullPointerException</code>.</li>
-      <li><b>What does <code>sb.append((String) null)</code> append?</b> The four characters <code>"null"</code>.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-string-methods-regex.html">3.3 Essential String Methods & Regex for SDETs &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-string-immutability-pool.html">3.1 String Immutability &amp; String Constant Pool</a> &middot; Next: <a href="java-string-methods-regex.html">3.3 Essential String Methods &amp; Regex for SDETs &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

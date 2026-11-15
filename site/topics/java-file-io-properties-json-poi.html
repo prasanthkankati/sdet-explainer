@@ -3,229 +3,107 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>6.3 File I/O: Properties, JSON (Jackson) &amp;amp; Excel (Apache POI) | SDET Explainer</title>
+<title>Java: File I/O: Properties, JSON &amp; Apache POI (Excel)</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
-  <h1>6.3 File I/O: Properties, JSON (Jackson) &amp;amp; Excel (Apache POI)</h1>
-  <div class="se-lead">Externalizing URLs, credentials, and multi-row datasets keeps test code decoupled from hardcoded values across environments.</div>
+  <h1>6.3 File I/O: Properties, JSON &amp; Apache POI (Excel)</h1>
 
-  <p>Hardcoding <code>https://qkart-qa-web.labs.crio.do/</code> or login passwords inside Java test methods forces code edits and recompiles whenever staging URLs or test accounts change. Every production SDET framework reads key-value configuration from <code>.properties</code> files, hierarchical payloads from JSON with Jackson, and tabular matrices from Excel workbooks using Apache POI.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">Externalizing test data keeps URLs, credentials, and multi-row datasets out of Java source code by reading .properties for flat settings, Jackson ObjectMapper for nested JSON, and Apache POI Workbooks for Excel sheets.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-try-catch-finally-resources.html">6.2 try-catch-finally, try-with-resources, throw/throws &amp;amp; Custom Exceptions</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>.properties = flat settings (CLI -D overrides first!); JSON = nested POJOs; Excel/POI = 2D QA sheets (DataFormatter avoids crashes!).</b></p>
+    <ul>
+      <li><b>Override hierarchy:</b> always check <code>System.getProperty(key)</code> before reading <code>config.properties</code> so Maven flags (<code>-Dbrowser=chrome</code>) win in CI.</li>
+      <li><b>JSON with Jackson:</b> reuse one static <code>ObjectMapper</code> instance and pass <code>TypeReference&lt;List&lt;User&gt;&gt;</code> for generic collections.</li>
+      <li><b>Apache POI gotcha:</b> numeric ZIP codes crash <code>getStringCellValue()</code> — use <code>DataFormatter.formatCellValue(cell)</code> + <code>CREATE_NULL_AS_BLANK</code>!</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Data-driven testing sits right behind TestNG <code>@DataProvider</code> and environment configuration. A clean framework loads environment flags at suite startup from <code>config.properties</code>, deserializes nested API/UI test data from JSON via Jackson <code>ObjectMapper</code>, and reads spreadsheet sheets cleanly through Apache POI inside <code>try-with-resources</code>.</p>
-  </section>
+  <section><h2>3. Choosing the Right Test Data File Format</h2>
+    <div class="arch">
+      <div class="lbl">Framework File I/O Layers</div>
+      <div class="note">Use cross-platform <code>Path.of("src", "test", "resources", ...)</code> — never hardcoded Windows backslashes!</div>
+      <div class="cols">
+        <div class="item"><b><code>.properties</code></b><span><code>baseUrl=https://qkart-qa-web.labs.crio.do/</code><br>Flat env settings</span></div>
+        <div class="item"><b>JSON (Jackson)</b><span>Nested objects &amp; arrays mapped cleanly to POJOs/records</span></div>
+        <div class="item"><b>Excel (Apache POI)</b><span>2D rows/columns read into TestNG <code>Object[][]</code></span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li><b>Modern <code>java.nio.file</code> foundation:</b> Prefer <code>Path.of(...)</code> and <code>Files</code> over legacy <code>java.io.File</code> for cross-platform path joining and cleaner I/O exceptions.</li>
-      <li><b><code>Properties</code> for flat config:</b> Load <code>key=value</code> settings from <code>src/test/resources</code> via <code>ClassLoader.getResourceAsStream()</code> or <code>Files.newInputStream()</code>, and check <code>System.getProperty()</code> first so CI command-line flags (<code>-Denv=staging</code>) override file defaults.</li>
-      <li><b>Jackson <code>ObjectMapper</code> for JSON:</b> Reuse a single thread-safe <code>ObjectMapper</code> instance to bind JSON objects to Java POJOs or collections using <code>TypeReference&lt;List&lt;LoginData&gt;&gt;</code>.</li>
-      <li><b>Apache POI for Excel (<code>.xlsx</code> vs <code>.xls</code>):</b> Use <code>XSSFWorkbook</code> (or <code>WorkbookFactory.create(stream)</code>) for modern OOXML <code>.xlsx</code> files instead of legacy <code>HSSFWorkbook</code>, and iterate rows with <code>DataFormatter</code> to convert numbers and dates safely to strings without type crashes.</li>
-      <li><b>Always stream-close and handle blank cells:</b> Open streams and workbooks inside <code>try-with-resources</code> and pass <code>Row.MissingCellPolicy.CREATE_NULL_AS_BLANK</code> to avoid <code>NullPointerException</code> on empty Excel cells.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. Properties vs JSON vs Excel (Apache POI)</h2>
     <table>
-      <thead>
-        <tr><th>Format &amp; Tool</th><th>Best Data Shape</th><th>Primary Java API</th><th>Typical SDET Use Case</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>.properties</code></b><br><code>java.util.Properties</code></td><td>Flat <code>key=value</code> string pairs</td><td><code>props.load(inputStream)</code> &amp; <code>props.getProperty(key)</code></td><td>Base URLs (<code>https://www.selenium.dev/</code>), browser type, default timeouts</td></tr>
-        <tr><td><b>JSON</b><br>Jackson <code>ObjectMapper</code></td><td>Nested objects, arrays, typed booleans/numbers</td><td><code>mapper.readValue(file, Pojo.class)</code> / <code>TypeReference</code></td><td>Multi-field QKart user registration payloads and expected cart items</td></tr>
-        <tr><td><b>Excel (<code>.xlsx</code>)</b><br>Apache POI</td><td>2D rows and columns maintained by manual QA/BAs</td><td><code>WorkbookFactory.create(in)</code>, <code>Sheet</code>, <code>DataFormatter</code></td><td>Large TestNG <code>@DataProvider</code> login and search matrices</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Format</th><th>Java API</th><th>Strength</th><th>Main Gotcha</th></tr>
+      <tr><td><b><code>.properties</code></b></td><td><code>java.util.Properties</code></td><td>Simple zero-dependency key=value</td><td>Flat strings only (no nested lists)</td></tr>
+      <tr><td><b>JSON</b></td><td>Jackson <code>ObjectMapper</code></td><td>Rich nested payloads, clean Git diffs</td><td>Needs <code>TypeReference</code> for generic lists</td></tr>
+      <tr><td><b>Excel (<code>.xlsx</code>)</b></td><td>Apache POI <code>WorkbookFactory</code> + <code>XSSFWorkbook</code></td><td>Easy bulk editing by non-coders</td><td>Blank/numeric cells crash without <code>DataFormatter</code></td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: reading properties with CLI override + POI DataFormatter helper</h2>
+<pre><code>import java.io.*;
+import java.nio.file.*;
+import java.util.Properties;
+import org.apache.poi.ss.usermodel.*;
+
+public class DataReaders {
+    static String readProp(Path path, String key) throws IOException {
+        String cli = System.getProperty(key);         // -Dkey=val from CI overrides file
+        if (cli != null &amp;&amp; !cli.isBlank()) return cli;
+        Properties props = new Properties();
+        try (InputStream in = Files.newInputStream(path)) {
+            props.load(in);
+            return props.getProperty(key);
+        }
+    }
+
+    static String safeCell(Row row, int col) {
+        Cell cell = row.getCell(col, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+        return new DataFormatter().formatCellValue(cell); // reads text/numbers safely as String
+    }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>For configuration properties, resolve environment variable or <code>System.getProperty(key)</code> first; if absent, fall back to the loaded <code>Properties</code> object.</li>
-      <li>For Jackson JSON deserialization, define a matching POJO with no-arg constructor and fields (or getters/setters), then call <code>mapper.readValue(input, new TypeReference&lt;List&lt;UserCase&gt;&gt;() {})</code>.</li>
-      <li>For Apache POI Excel reading, open both the <code>InputStream</code> and the <code>Workbook</code> in <code>try-with-resources</code>, locate row 0 as headers or start at row 1 for test cases, and wrap each cell in <code>new DataFormatter().formatCellValue(cell)</code>.</li>
-      <li>Convert the parsed records into an <code>Object[][]</code> matrix or an iterator so TestNG's <code>@DataProvider</code> feeds one scenario per test invocation.</li>
-    </ol>
-    <p>Reading config.properties, Jackson JSON list, and Apache POI Excel rows safely</p>
-<pre><code>package com.qkart.io; // Data and configuration readers package
+      <li><code>readProp</code> checks <code>System.getProperty(key)</code> first so <code>mvn test -Durl=https://www.selenium.dev/</code> overrides local defaults instantly.</li>
+      <li>Otherwise, <code>Files.newInputStream(path)</code> opens the file stream inside <code>try (...)</code> so handles close automatically.</li>
+      <li>In Excel readers, <code>WorkbookFactory.create(in)</code> handles both <code>.xlsx</code> and legacy <code>.xls</code> without manual class branching.</li>
+      <li><code>MissingCellPolicy.CREATE_NULL_AS_BLANK</code> prevents <code>NullPointerException</code> on skipped spreadsheet cells.</li>
+      <li><code>DataFormatter.formatCellValue(cell)</code> safely formats integer pins or dates as Strings without throwing <code>IllegalStateException</code>.</li>
+    </ol></section>
 
-import com.fasterxml.jackson.core.type.TypeReference; // Captures generic List&lt;T&gt; type at runtime
-import com.fasterxml.jackson.databind.ObjectMapper; // Thread-safe Jackson JSON parser
-import java.io.IOException; // Checked I/O failure from readers
-import java.io.InputStream; // Stream closed via try-with-resources
-import java.nio.file.Files; // NIO helper for safe file streams
-import java.nio.file.Path; // OS-independent file path
-import java.util.Properties; // Key-value properties loader
-import org.apache.poi.ss.usermodel.Cell; // Excel cell abstraction (works for xls/xlsx)
-import org.apache.poi.ss.usermodel.DataFormatter; // Formats numeric/date/boolean cells cleanly to String
-import org.apache.poi.ss.usermodel.Row; // Excel row interface
-import org.apache.poi.ss.usermodel.Sheet; // Excel worksheet interface
-import org.apache.poi.ss.usermodel.Workbook; // Workbook implementing Closeable
-import org.apache.poi.ss.usermodel.WorkbookFactory; // Auto-detects HSSF vs XSSF workbook format
-
-public class TestDataReaders { // Unified file I/O utility class
-
-    private static final ObjectMapper MAPPER = new ObjectMapper(); // Reuse one heavy ObjectMapper instance
-
-    public static String getConfig(Path propsPath, String key) { // Reads system override then properties file
-        String cliOverride = System.getProperty(key); // Checks -Dkey=value passed from Maven/CI
-        if (cliOverride != null &amp;&amp; !cliOverride.isBlank()) { // Prefer command-line override when provided
-            return cliOverride; // Returns CI value immediately
-        } // End CLI check
-        Properties props = new Properties(); // Empty properties table
-        try (InputStream in = Files.newInputStream(propsPath)) { // Auto-closes file stream
-            props.load(in); // Parses key=value lines into memory
-            return props.getProperty(key); // Returns configured URL e.g. https://qkart-qa-web.labs.crio.do/
-        } catch (IOException ex) { // Wrap checked error into descriptive runtime failure
-            throw new IllegalStateException("Cannot read properties: " + propsPath, ex); // Fail fast with cause
-        } // End try-with-resources
-    } // End getConfig
-
-    public static &lt;T&gt; T readJson(Path jsonPath, TypeReference&lt;T&gt; typeRef) { // Generic typed JSON reader
-        try (InputStream in = Files.newInputStream(jsonPath)) { // Opens JSON stream safely
-            return MAPPER.readValue(in, typeRef); // Maps JSON array or object cleanly to Java types
-        } catch (IOException ex) { // Handle missing file or malformed JSON syntax
-            throw new IllegalStateException("Cannot parse JSON file: " + jsonPath, ex); // Keep root cause
-        } // End JSON try-with-resources
-    } // End readJson
-
-    public static Object[][] readExcelMatrix(Path xlsxPath, String sheetName) { // Reads non-header rows for @DataProvider
-        DataFormatter formatter = new DataFormatter(); // Converts numbers like ZIP codes cleanly to String
-        try (InputStream in = Files.newInputStream(xlsxPath); // Opens workbook input stream
-             Workbook wb = WorkbookFactory.create(in)) { // Closes workbook and releases ZIP file handles
-            Sheet sheet = wb.getSheet(sheetName); // Selects named tab in Excel workbook
-            int rowCount = sheet.getPhysicalNumberOfRows(); // Counts populated rows starting from header
-            int colCount = sheet.getRow(0).getLastCellNum(); // Width determined from header row
-            Object[][] matrix = new Object[rowCount - 1][colCount]; // Allocate rows minus header row
-            for (int r = 1; r &lt; rowCount; r++) { // Skip header row 0 and read test data rows
-                Row row = sheet.getRow(r); // Fetch row safely
-                for (int c = 0; c &lt; colCount; c++) { // Walk each expected column index
-                    Cell cell = row.getCell(c, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK); // Avoid NPE on blank cell
-                    matrix[r - 1][c] = formatter.formatCellValue(cell); // Preserve exact text formatting
-                } // End column loop
-            } // End row loop
-            return matrix; // Return Object[][] directly usable by TestNG @DataProvider
-        } catch (IOException ex) { // Catch corrupt workbook or missing path
-            throw new IllegalStateException("Failed reading Excel file: " + xlsxPath, ex); // Rethrow unchecked
-        } // End Excel try-with-resources
-    } // End readExcelMatrix
-} // End TestDataReaders</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li><b>Calling <code>cell.getStringCellValue()</code> on numeric Excel cells:</b> Reading an integer password or PIN via <code>getStringCellValue()</code> throws <code>IllegalStateException</code>; always use <code>DataFormatter.formatCellValue(cell)</code>.</li>
-      <li><b>Hardcoding Windows backslashes like <code>src\test\resources\data.json</code>:</b> This breaks immediately on Linux Jenkins runners; always use <code>Path.of("src", "test", "resources", "data.json")</code> or classpath resources.</li>
-      <li><b>Creating a brand-new <code>new ObjectMapper()</code> inside every test row:</b> Instantiating <code>ObjectMapper</code> repeatedly wastes CPU scanning annotations and allocating reflection caches.</li>
-      <li><b>Leaving <code>Workbook</code> or <code>FileInputStream</code> unclosed:</b> Open handles lock Excel files on Windows agents and trigger file-descriptor exhaustion on long suites.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: a menu card, nested recipe box, and ledger sheet</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>java.nio.file.Path</b></td><td>Modern platform-independent representation of a filesystem path introduced in Java 7.</td></tr>
-        <tr><td><b>Properties</b></td><td><code>Hashtable</code>-backed utility loading flat <code>key=value</code> configuration lines from streams or files.</td></tr>
-        <tr><td><b>ObjectMapper</b></td><td>Primary Jackson class used to serialize Java objects to JSON and deserialize JSON into POJOs or generic collections.</td></tr>
-        <tr><td><b>XSSFWorkbook</b></td><td>Apache POI implementation supporting XML-based <code>.xlsx</code> spreadsheets (as opposed to binary <code>HSSFWorkbook</code> for <code>.xls</code>).</td></tr>
-        <tr><td><b>DataFormatter</b></td><td>Apache POI helper that converts any cell type (numeric, boolean, formula, date, string) into its displayed string representation.</td></tr>
-      </tbody>
+      <tr><th>Paperwork</th><th>Java</th></tr>
+      <tr><td>Sticky note on monitor: "env=qa, browser=chrome"</td><td><code>config.properties</code></td></tr>
+      <tr><td>Structured order slip with buyer info + nested list of items</td><td>JSON + Jackson <code>ObjectMapper</code></td></tr>
+      <tr><td>2D accounting ledger grid maintained by QA analysts</td><td>Excel + Apache POI <code>XSSFWorkbook</code></td></tr>
+      <tr><td>Translating handwritten digits &amp; dates cleanly onto plain paper</td><td><code>DataFormatter.formatCellValue</code></td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Clean external data separation lets one automation binary test dev, QA, and staging environments reliably without recompiling code.</p>
+    <p><b>SDET link:</b> TestNG <code>@DataProvider</code> methods call POI/Jackson loaders at suite startup, keeping base URLs (<code>https://www.selenium.dev/</code>, <code>https://qkart-qa-web.labs.crio.do/</code>) configurable in <code>src/test/resources</code>.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>Why does <code>cell.getStringCellValue()</code> crash on a ZIP code like <code>560001</code> in Excel? <b>Excel stores 560001 as numeric type; always call <code>new DataFormatter().formatCellValue(cell)</code> instead.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td><code>java.nio.file.Path</code></td><td>OS-independent file path API (works cleanly on Windows &amp; Linux)</td></tr>
+      <tr><td><code>Properties</code></td><td>Utility loading key-value configuration files</td></tr>
+      <tr><td><code>ObjectMapper</code></td><td>Thread-safe reusable Jackson engine converting JSON &lt;-&gt; Java POJOs</td></tr>
+      <tr><td><code>XSSFWorkbook</code></td><td>Apache POI class backing modern XML <code>.xlsx</code> spreadsheets</td></tr>
+      <tr><td><code>DataFormatter</code></td><td>POI helper converting numeric/date/formula cells safely to <code>String</code></td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>Why use <code>Properties</code> instead of a static Java constants class for URLs and browsers?</b><br>
-    Changing a static constant requires editing source code and recompiling the project, whereas <code>.properties</code> files and CLI <code>-D</code> overrides let Jenkins or testers switch from local Chrome to staging headless runs without recompiling.</p>
-
-    <p><b>What is the difference between <code>HSSFWorkbook</code> and <code>XSSFWorkbook</code> in Apache POI?</b><br>
-    <code>HSSFWorkbook</code> reads legacy binary <code>.xls</code> spreadsheets (Office 97–2003), while <code>XSSFWorkbook</code> reads modern ZIP-XML <code>.xlsx</code> files. Calling <code>WorkbookFactory.create(stream)</code> handles both automatically.</p>
-
-    <p><b>Why prefer <code>Path.of(...)</code> over concatenating strings with <code>/</code> or <code>\\</code>?</b><br>
-    <code>Path.of("src", "test", "resources", "qkart.json")</code> lets Java insert the host OS file separator automatically on both Windows developer laptops and Linux CI containers.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>How does Jackson know the element type inside <code>List&lt;User&gt;</code> when type erasure removes <code>User</code> at runtime?</b><br>
-    Passing an anonymous subclass <code>new TypeReference&lt;List&lt;User&gt;&gt;() {}</code> retains the parameterized superclass metadata in bytecode, which Jackson reads via reflection.</p>
-
-    <p><b>How does <code>DataFormatter.formatCellValue(cell)</code> prevent type mismatch crashes in Excel readers?</b><br>
-    Instead of forcing a single cell type getter like <code>getStringCellValue()</code> or <code>getNumericCellValue()</code>, <code>DataFormatter</code> inspects the cell type and formatting mask and converts numbers, dates, booleans, or formulas cleanly to a Java <code>String</code>.</p>
-
-    <p><b>What happens when you load a file from <code>src/test/resources</code> via <code>getClass().getClassLoader().getResourceAsStream("config.properties")</code>?</b><br>
-    Maven/Gradle copies <code>src/test/resources</code> onto the runtime classpath, so loading via the classloader works even when the project runs from a packaged test JAR where direct filesystem paths differ.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>How do you pass nested order payloads (address object + array of product SKUs) into a Selenium end-to-end test?</b><br>
-    Store them in JSON instead of Excel. Modeling nested arrays and objects cleanly in flat Excel columns turns messy quickly, whereas Jackson deserializes nested JSON into typed Java records or POJOs cleanly.</p>
-
-    <p><b>Your Maven command passes <code>mvn test -Durl=https://www.selenium.dev/</code>, yet tests still hit QKart from <code>config.properties</code>. Why?</b><br>
-    Your config loader checked <code>props.getProperty("url")</code> without checking <code>System.getProperty("url")</code> first; system properties passed with <code>-D</code> must always take precedence over file defaults.</p>
-
-    <p><b>How does a reader avoid failing on trailing blank rows formatted in Excel?</b><br>
-    Either check for empty row values (`row == null` or every cell blank) before adding to the result list, or iterate using <code>sheet.getLastRowNum()</code> while skipping rows where the first key cell is empty.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Apache POI throws <code>IllegalStateException: Cannot get a STRING value from a NUMERIC cell</code> when reading test zip codes. What is the fix?</b><br>
-    Replace <code>cell.getStringCellValue()</code> with <code>formatter.formatCellValue(cell)</code> or call <code>DataFormatter</code> across every column uniformly.</p>
-
-    <p><b>Jackson throws <code>UnrecognizedPropertyException</code> after adding a new <code>notes</code> column to a JSON test fixture. How can the POJO stay resilient?</b><br>
-    Either add the matching field to your POJO, annotate the class with <code>@JsonIgnoreProperties(ignoreUnknown = true)</code>, or configure <code>DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES</code> to <code>false</code> on the <code>ObjectMapper</code>.</p>
-
-    <p><b>Why does <code>getResourceAsStream("config.properties")</code> return <code>null</code>?</b><br>
-    Either the file sits outside <code>src/test/resources</code> (so Maven did not copy it to <code>target/test-classes</code>) or a leading slash mismatch happened between <code>Class.getResourceAsStream</code> (relative to package without leading slash) and <code>ClassLoader.getResourceAsStream</code> (always from classpath root without leading slash).</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>When should a QA team pick JSON over Excel for Selenium test data?</b><br>
-    Pick JSON when engineers own the data, tests need nested objects/arrays, and clean Git line-by-line code reviews matter. Pick Excel when non-technical analysts author flat tables in spreadsheets.</p>
-
-    <p><b>Should <code>ObjectMapper</code> be created per test or stored as a static singleton?</b><br>
-    Store a single configured <code>ObjectMapper</code> constant. Once configured at startup, it is thread-safe and caches bean serializers/deserializers for fast execution across parallel threads.</p>
-
-    <p><b>Why avoid storing sensitive production passwords directly inside committed <code>.properties</code> or JSON files?</b><br>
-    Credentials committed to Git leak into history permanently. Inject secrets via CI environment variables (<code>System.getenv()</code>) or Maven <code>-D</code> arguments overriding placeholder properties.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>How should CLI flags override config files?</b> Check <code>System.getProperty(key)</code> first and fall back to the loaded <code>Properties</code> object.</li>
-      <li><b>What fixes POI numeric-vs-string crashes on Excel cells?</b> Use <code>DataFormatter.formatCellValue(cell)</code> alongside <code>CREATE_NULL_AS_BLANK</code>.</li>
-      <li><b>How does Jackson deserialize a <code>List&lt;User&gt;</code>?</b> Pass <code>new TypeReference&lt;List&lt;User&gt;&gt;() {}</code> to <code>ObjectMapper.readValue()</code>.</li>
-      <li><b>Should <code>ObjectMapper</code> be shared across threads?</b> Yes; once configured, a single static instance is thread-safe and faster.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-multithreading-threadlocal.html">6.4 Multithreading, synchronized &amp; ThreadLocal WebDriver for Parallel TestNG &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-try-catch-finally-resources.html">6.2 try-catch-finally, throw vs throws &amp; try-with-resources</a> &middot; Next: <a href="java-multithreading-threadlocal.html">6.4 Multithreading &amp; ThreadLocal&lt;WebDriver&gt; for Parallel Tests &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

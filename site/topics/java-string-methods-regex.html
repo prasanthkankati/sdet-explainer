@@ -3,193 +3,102 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>3.3 Essential String Methods &amp; Regex for SDETs | SDET Explainer</title>
+<title>Java: Essential String Methods &amp; Regex for SDETs</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>3.3 Essential String Methods &amp; Regex for SDETs</h1>
-  <div class="se-lead">High-frequency String methods (trim vs strip, split, substring, replace vs replaceAll, String.format) and Java regex Pattern/Matcher extraction.</div>
 
-  <p>UI and API assertions constantly extract numbers, order IDs, prices, and tokenized labels from messy DOM strings returned by <code>element.getText()</code>. Mastering exact String parsing methods alongside Java's regex engine prevents silent splitting bugs and fragile substring assertions.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">Java String methods clean browser whitespace, slice UI labels, split tables, and pair with Regular Expressions in replaceAll() and matches() to extract numbers, IDs, and prices.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-string-stringbuilder-stringbuffer.html">3.2 String vs StringBuilder vs StringBuffer</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>strip() cleans Unicode UI spaces; replace() is literal; replaceAll() runs Regex!</b></p>
+    <ul>
+      <li><b><code>strip()</code> vs <code>trim()</code>:</b> <code>trim()</code> misses non-breaking web spaces (<code>&amp;nbsp;</code> / <code>\u00A0</code>); <code>strip()</code> (Java 11+) clears all Unicode whitespace.</li>
+      <li><b><code>replace()</code> vs <code>replaceAll()</code>:</b> <code>replace(".", "-")</code> matches a literal dot; <code>replaceAll(".", "-")</code> treats <code>.</code> as Regex ANY char and erases every letter!</li>
+      <li><b>Regex essentials:</b> <code>\d+</code> digits, <code>\s+</code> spaces, <code>[^0-9.]</code> anything except numbers/dot.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Parsing product prices like <code>"$1,299.50"</code> on QKart, extracting dynamic OTP codes or order IDs, formatting parameterized Page Object XPaths, and validating response texts all rely on these <code>String</code> and regex APIs.</p>
-  </section>
+  <section><h2>3. UI Text Cleanup Pipeline <small>from noisy getText() to clean assertion</small></h2>
+    <div class="arch">
+      <div class="lbl">Cleaning Real Browser Text <small>example from checkout</small></div>
+      <div class="note"><code>el.getText()</code> often carries currency signs, extra spaces, and order IDs together.</div>
+      <div class="cols">
+        <div class="item"><b>1. Raw UI Text</b><span><code>"  Total: Rs. 1,499.50 (3 items) "</code></span></div>
+        <div class="item"><b>2. <code>.strip()</code></b><span>Removes leading &amp; trailing spaces + Unicode blanks</span></div>
+        <div class="item"><b>3. <code>.replaceAll("[^0-9.]", "")</code></b><span>Keeps only <code>"1499.50"</code> -> <code>Double.parseDouble()</code></span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li><code>trim()</code> removes characters <code>&lt;= '\u0020'</code> (ASCII space and control chars), whereas Java 11+ <code>strip()</code> uses <code>Character.isWhitespace()</code> to remove Unicode spaces including non-breaking spaces (<code>&amp;nbsp;</code> / <code>\u00A0</code>).</li>
-      <li><code>isEmpty()</code> returns <code>true</code> only when <code>length() == 0</code>, whereas Java 11+ <code>isBlank()</code> returns <code>true</code> for empty or whitespace-only strings.</li>
-      <li><code>substring(beginIndex, endIndex)</code> is inclusive of <code>beginIndex</code> and <b>exclusive</b> of <code>endIndex</code> (throwing <code>StringIndexOutOfBoundsException</code> if indices fall out of range).</li>
-      <li><code>replace(CharSequence, CharSequence)</code> performs literal substring replacement, whereas <code>replaceAll(String regex, String replacement)</code> treats the first argument as a regular expression.</li>
-      <li><code>split(String regex)</code> splits by regex—special regex metacharacters like dot (<code>.</code>), pipe (<code>|</code>), and dollar (<code>$</code>) must be double-escaped inside Java string literals (<code>split("\\.")</code>).</li>
-      <li><code>Pattern.compile()</code> and <code>Matcher</code> extract structured substrings (for example, <code>Order #QK-4821</code>) without brittle fixed-offset <code>substring()</code> indices.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. Must-know String methods for Selenium checks</h2>
     <table>
-      <thead>
-        <tr><th>Method Pair</th><th>First Method Behavior</th><th>Second Method Behavior</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>trim()</code> vs <code>strip()</code></td><td>Strips ASCII chars <code>&lt;= \u0020</code> only</td><td>Strips all Unicode whitespace including <code>\u00A0</code> (<code>&amp;nbsp;</code>)</td></tr>
-        <tr><td><code>isEmpty()</code> vs <code>isBlank()</code></td><td><code>true</code> only if <code>length() == 0</code></td><td><code>true</code> if empty OR contains only whitespace</td></tr>
-        <tr><td><code>replace(a, b)</code> vs <code>replaceAll(regex, b)</code></td><td>Literal text match across all occurrences</td><td>Regex pattern match (throws <code>PatternSyntaxException</code> on bad regex)</td></tr>
-        <tr><td><code>contains(seq)</code> vs <code>matches(regex)</code></td><td>Checks literal substring anywhere inside text</td><td>Requires entire string to match regex pattern (anchored)</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Method</th><th>What It Does</th><th>Trap to Watch Out For</th></tr>
+      <tr><td><code>strip()</code> / <code>isBlank()</code></td><td>Trims all Unicode whitespace (Java 11+)</td><td><code>isEmpty()</code> returns false on <code>"   "</code></td></tr>
+      <tr><td><code>split("\\|")</code></td><td>Splits string into <code>String[]</code> by Regex</td><td>Pipe <code>|</code> and dot <code>.</code> need escaping <code>\\</code></td></tr>
+      <tr><td><code>replace(a, b)</code></td><td>Literal text swap (zero Regex)</td><td>Fastest for plain characters</td></tr>
+      <tr><td><code>replaceAll(regex, b)</code></td><td>Regex pattern swap</td><td>Pass <code>"\\."</code> not <code>"."</code> for literal dot</td></tr>
+      <tr><td><code>substring(start, end)</code></td><td>Extracts slice <code>start</code> inclusive to <code>end</code> exclusive</td><td>Indices outside length throw exception</td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: extracting order ID and price from UI text</h2>
+<pre><code>import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class StringRegexSdet {
+    public static void main(String[] args) {
+        String banner = "  Order #QK-9042 confirmed | Total: $49.99  ".strip(); // Unicode trim
+        String cleanAmount = banner.split("\\|")[1].replaceAll("[^0-9.]", "");      // "49.99"
+        double paid = Double.parseDouble(cleanAmount);
+
+        Matcher m = Pattern.compile("QK-(\\d+)").matcher(banner); // capture digits after QK-
+        String orderNum = m.find() ? m.group(1) : "";             // "9042"
+        System.out.println("Order=" + orderNum + " Paid=" + paid);
+    }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>Capture raw UI text via <code>element.getText()</code> and clean leading/trailing browser <code>&amp;nbsp;</code> spaces using <code>.strip()</code>.</li>
-      <li>Remove formatting symbols (<code>$</code>, commas) via <code>price.replaceAll("[^0-9.]", "")</code> before numeric conversion.</li>
-      <li>Use <code>String.format("//button[normalize-space()='%s']", productName)</code> to generate parameterized locators cleanly.</li>
-      <li>For dynamic confirmations containing embedded IDs, compile a <code>Pattern</code> with capturing group <code>([A-Z0-9-]+)</code> and extract via <code>matcher.group(1)</code>.</li>
-    </ol>
-    <p>Parsing QKart UI prices, splitting delimited strings, and extracting order IDs with regex:</p>
-<pre><code>package dev.java.strings; // Declares package
+      <li><code>.strip()</code> cleans surrounding spaces from the raw Selenium <code>getText()</code> string.</li>
+      <li><code>split("\\|")</code> splits on literal <code>|</code> (escaped because <code>|</code> means OR in Regex) into two parts.</li>
+      <li><code>replaceAll("[^0-9.]", "")</code> strips currency symbols, words, and spaces, leaving <code>"49.99"</code>.</li>
+      <li><code>Pattern.compile("QK-(\\d+)")</code> builds a compiled Regex matcher with a capture group <code>(\\d+)</code>.</li>
+      <li><code>m.find()</code> locates the match and <code>m.group(1)</code> extracts the numeric ID <code>"9042"</code>.</li>
+    </ol></section>
 
-import java.util.regex.Matcher; // Imports regex Matcher engine
-import java.util.regex.Pattern; // Imports compiled regex Pattern
-
-public class StringRegexSdetDemo { // Demonstrates SDET string and regex operations
-    public static void main(String[] args) { // Main method entry
-        String rawPrice = " \u00A0$1,249.50\u00A0 "; // Includes Unicode non-breaking space from DOM
-        String cleanDigits = rawPrice.strip().replaceAll("[^0-9.]", ""); // Strips Unicode spaces and non-numeric chars
-        double price = Double.parseDouble(cleanDigits); // Parses 1249.50 cleanly
-        System.out.println("Parsed price: " + price); // Prints: 1249.5
-
-        String version = "4.26.0"; // Dot-separated Selenium version string
-        String[] parts = version.split("\\."); // Double-escapes dot so regex matches literal '.'
-        System.out.println("Major: " + parts[0] + ", Minor: " + parts[1]); // Prints: Major: 4, Minor: 26
-
-        String toast = "Order ID: QK-90842 confirmed successfully"; // Dynamic UI toast message
-        Matcher m = Pattern.compile("Order ID: ([A-Z0-9-]+)").matcher(toast); // Capturing group for ID
-        String orderId = m.find() ? m.group(1) : ""; // Extracts matched group 1 if present
-        System.out.println("Extracted ID: " + orderId); // Prints: QK-90842
-    } // Ends main method
-} // Ends class</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Calling <code>version.split(".")</code> without escaping the dot; in regex, unescaped <code>.</code> matches every single character and returns an empty zero-length array <code>[]</code>.</li>
-      <li>Using <code>replaceAll("$10", "$20")</code> for literal text replacement; <code>$</code> is a regex anchor/group reference in both arguments of <code>replaceAll()</code>, so use literal <code>replace()</code> instead unless regex is required.</li>
-      <li>Relying on <code>text.trim()</code> when HTML elements contain <code>&amp;nbsp;</code> (<code>\u00A0</code>); <code>trim()</code> leaves non-breaking spaces intact, causing exact assertions to fail where <code>strip()</code> succeeds.</li>
-      <li>Calling <code>matcher.group(1)</code> without calling <code>if (matcher.find())</code> first; calling <code>group()</code> prior to a successful match throws <code>IllegalStateException: No match found</code>.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: washing vegetables and slicing a receipt</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>strip()</code></b></td><td>Java 11 <code>String</code> method that removes all leading and trailing Unicode whitespace characters.</td></tr>
-        <tr><td><b><code>replaceAll()</code></b></td><td><code>String</code> method accepting a regular expression pattern and replacing every match across the string.</td></tr>
-        <tr><td><b>Regex Metacharacter</b></td><td>A special regex symbol (<code>.</code>, <code>*</code>, <code>+</code>, <code>?</code>, <code>|</code>, <code>$</code>, <code>^</code>, <code>[</code>, <code>]</code>) requiring <code>\\</code> escaping when matching literally in Java.</td></tr>
-        <tr><td><b><code>Pattern</code></b></td><td>Compiled immutable representation of a regular expression created once via <code>Pattern.compile()</code>.</td></tr>
-        <tr><td><b><code>Matcher</code></b></td><td>Stateful cursor object executing match operations against a character sequence using a compiled <code>Pattern</code>.</td></tr>
-        <tr><td><b><code>StringIndexOutOfBoundsException</code></b></td><td>Unchecked exception thrown when <code>charAt()</code> or <code>substring()</code> receives negative or oversized indices.</td></tr>
-      </tbody>
+      <tr><th>Receipt Cleanup</th><th>Java</th></tr>
+      <tr><td>Brushing dirt off ends before cooking</td><td><code>strip()</code></td></tr>
+      <tr><td>Cutting a printed receipt along the <code>|</code> dashed line</td><td><code>split("\\|")</code></td></tr>
+      <tr><td>Blacking out every character that is not a digit</td><td><code>replaceAll("\\D", "")</code></td></tr>
+      <tr><td>Reading only digits right after "Order #"</td><td>Regex capture group <code>group(1)</code></td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Real web pages rarely render raw clean integers — fluent cleanup + Regex turns messy DOM strings into reliable assertions.</p>
+    <p><b>SDET link:</b> When validating product totals on QKart or version badges on <code>https://www.selenium.dev/</code>, strip currency prefixes/non-breaking spaces cleanly before parsing doubles or matching dynamic order numbers.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>What does <code>"a.b.c".replaceAll(".", "X")</code> return? <b>"XXXXX" — unescaped dot matches EVERY character in Regex; use <code>replace(".", "X")</code> for literal dot.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td><code>strip()</code></td><td>Java 11 method removing all Unicode leading/trailing whitespace</td></tr>
+      <tr><td>Regex</td><td>Pattern syntax matching classes of characters like <code>\d+</code></td></tr>
+      <tr><td>Escape <code>\\</code></td><td>Tells Java + Regex to treat special symbols like <code>.</code> or <code>|</code> literally</td></tr>
+      <tr><td><code>Pattern / Matcher</code></td><td>Pre-compiled Regex engine extracting capture groups cleanly</td></tr>
+      <tr><td><code>isBlank()</code></td><td>True when a string is empty or holds only whitespace</td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>What is the difference between <code>replace()</code> and <code>replaceAll()</code> in Java?</b><br>
-    Both methods replace every matching occurrence across the entire string, NOT just the first occurrence. The real difference is that <code>replace(CharSequence, CharSequence)</code> matches exact literal text with zero regex parsing, whereas <code>replaceAll(String regex, String replacement)</code> compiles and matches a regular expression. When replacing literal substrings like <code>"$"</code> or <code>"C:\path"</code>, always choose <code>replace()</code> for speed and safety.</p>
-
-    <p><b>How do <code>trim()</code> and <code>strip()</code> differ?</b><br>
-    <code>trim()</code> dates back to Java 1.0 and only removes leading and trailing characters whose Unicode value is <code>&lt;= '\u0020'</code> (ASCII space, tab, newline), missing Unicode whitespace like HTML non-breaking space (<code>\u00A0</code>). <code>strip()</code>, added in Java 11, uses <code>Character.isWhitespace()</code> to remove all Unicode whitespace characters cleanly.</p>
-
-    <p><b>Explain the index arguments of <code>"Selenium".substring(1, 4)</code>.</b><br>
-    The first index <code>1</code> is inclusive (character <code>'e'</code>) and the second index <code>4</code> is exclusive (stops before character <code>'n'</code> at index 4), returning <code>"ele"</code> of length <code>4 - 1 = 3</code>. If <code>beginIndex &gt; endIndex</code> or either index is out of bounds, Java throws <code>StringIndexOutOfBoundsException</code>.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>Why does <code>"192.168.1.1".split(".")</code> return an empty array of length 0?</b><br>
-    <code>split()</code> accepts a regular expression, and an unescaped dot <code>.</code> is a regex wildcard matching any character. Every character becomes a delimiter, producing empty strings that <code>split(regex)</code> trims off the trailing end by default, leaving a 0-length array. Escaping the dot inside a Java string literal as <code>split("\\.")</code> or <code>split(Pattern.quote("."))</code> splits into 4 octets correctly.</p>
-
-    <p><b>How do <code>Pattern</code> and <code>Matcher</code> extract a numeric order ID from <code>"Order #QK-8421 confirmed"</code>?</b><br>
-    Compile <code>Pattern p = Pattern.compile("#(QK-\\d+)");</code> using parentheses around <code>QK-\\d+</code> to form capturing group 1. Create a matcher via <code>Matcher m = p.matcher(text);</code> and call <code>m.find()</code> to scan the text for the pattern. When <code>find()</code> returns <code>true</code>, <code>m.group(1)</code> returns <code>"QK-8421"</code>.</p>
-
-    <p><b>Why does <code>str.matches("\\d+")</code> return <code>false</code> for <code>"Order 123"</code> even though digits exist?</b><br>
-    Unlike JavaScript's regex test or <code>Matcher.find()</code>, Java's <code>String.matches(regex)</code> implicitly wraps the pattern as if anchored with <code>^...$</code>, demanding that the <b>entire string</b> match the pattern. To check if digits appear anywhere inside text, use <code>Pattern.compile("\\d+").matcher(text).find()</code>.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>In a Selenium test on QKart, product prices render as <code>"₹1,499"</code> or <code>"$1,299.50"</code>. How do you assert numeric total math reliably?</b><br>
-    Extract the price text with <code>getText()</code>, remove everything except digits and decimal points via <code>text.replaceAll("[^0-9.]", "")</code>, and pass the clean string into <code>new BigDecimal(cleanText)</code> or <code>Double.parseDouble(cleanText)</code>. That avoids brittle hardcoded currency symbol removals or fixed <code>substring(1)</code> offsets.</p>
-
-    <p><b>How does <code>String.format()</code> help build dynamic XPath or CSS selectors inside a Page Object?</b><br>
-    Define a private template like <code>private static final String PRODUCT_CARD = "//p[normalize-space()='%s']/ancestor::div[contains(@class,'card')]";</code> and resolve it via <code>By.xpath(String.format(PRODUCT_CARD, productName))</code>. Note that if <code>productName</code> can contain single quotes, wrap it via an XPath quote-escaping helper.</p>
-
-    <p><b>How do you verify a Selenium page title or error message ignoring irregular spacing and casing?</b><br>
-    Normalize whitespace using <code>actual.strip().replaceAll("\\s+", " ")</code> and assert with <code>equalsIgnoreCase(expected)</code>. Collapsing runs of tabs and newlines via <code>\\s+</code> prevents multi-line HTML formatting differences from causing flaky failures.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Why does <code>matcher.group(1)</code> throw <code>IllegalStateException: No match found</code>?</b><br>
-    A <code>Matcher</code> starts before the beginning of the input string and holds no match state until <code>matcher.find()</code> or <code>matcher.matches()</code> returns <code>true</code>. Calling <code>group()</code> unconditionally without wrapping it inside <code>if (matcher.find())</code> crashes whenever the pattern misses or <code>find()</code> was skipped.</p>
-
-    <p><b>What causes <code>StringIndexOutOfBoundsException</code> when using <code>substring(text.indexOf(":") + 1)</code>?</b><br>
-    If the expected delimiter <code>":"</code> is missing from the UI string, <code>indexOf(":")</code> returns <code>-1</code>; adding <code>1</code> passes <code>0</code> silently or negative offsets fail when computing end indices. Always verify <code>int idx = text.indexOf(":"); if (idx != -1)</code> before slicing with <code>substring()</code>.</p>
-
-    <p><b>Why does <code>"a,b,,".split(",")</code> return length 2 instead of 4?</b><br>
-    The single-argument <code>split(regex)</code> discards trailing empty strings by default. Passing <code>-1</code> as the second limit parameter (<code>"a,b,,".split(",", -1)</code>) preserves all trailing empty columns, which is essential when parsing CSV test data with blank trailing cells.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why should repeated regex patterns inside a test helper or loop use a <code>private static final Pattern</code> field rather than <code>String.replaceAll()</code> or <code>String.matches()</code>?</b><br>
-    Every invocation of <code>String.matches()</code>, <code>String.split()</code> (for multi-char regex), or <code>String.replaceAll()</code> recompiles the regular expression state machine from scratch. Pre-compiling once via <code>private static final Pattern ORDER_ID = Pattern.compile(...);</code> shares the immutable compiled <code>Pattern</code> safely across threads with zero repeated compilation cost.</p>
-
-    <p><b>When parsing HTML text in Selenium, when should you prefer XPath <code>normalize-space()</code> vs Java <code>strip()</code>?</b><br>
-    Use XPath <code>normalize-space()</code> inside locators when matching exact DOM text that has leading/trailing HTML indentation so the selector matches directly in the browser. Use Java <code>strip()</code> and regex on retrieved <code>getText()</code> values before TestNG assertions.</p>
-
-    <p><b>Why should dynamic XPath templates created with <code>String.format()</code> sanitize inputs that contain single quotes?</b><br>
-    If test data includes an apostrophe like <code>Men's Watch</code> inside <code>//p[text()='%s']</code>, the unescaped quote terminates the XPath string literal prematurely and throws <code>InvalidSelectorException</code>. Wrapping dynamic values in an XPath <code>concat()</code> helper or using a parameterized <code>By</code> builder prevents syntax failures.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>What does <code>replace()</code> use vs <code>replaceAll()</code>?</b> <code>replace()</code> matches literal characters; <code>replaceAll()</code> matches regular expressions.</li>
-      <li><b>What does <code>strip()</code> handle that <code>trim()</code> misses?</b> Unicode whitespace including non-breaking spaces (<code>\u00A0</code>).</li>
-      <li><b>How do you split a string on a literal dot <code>.</code>?</b> <code>str.split("\\.")</code> or <code>str.split(Pattern.quote("."))</code>.</li>
-      <li><b>Does <code>String.matches(regex)</code> check partial substrings or the entire string?</b> The entire string.</li>
-      <li><b>What method must return <code>true</code> before calling <code>matcher.group(1)</code>?</b> <code>matcher.find()</code> (or <code>matcher.matches()</code>).</li>
-      <li><b>How do you preserve trailing empty fields in <code>split(",")</code>?</b> Pass <code>-1</code> as the second argument: <code>split(",", -1)</code>.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-object.html">4.1 Class & Object (Selenium + Interview Edition) &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-string-stringbuilder-stringbuffer.html">3.2 String vs StringBuilder vs StringBuffer</a> &middot; Next: <a href="java-object.html">4.1 Class &amp; Object &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

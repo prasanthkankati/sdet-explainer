@@ -3,219 +3,106 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>4.6 Polymorphism: Overloading vs Overriding &amp; Upcasting | SDET Explainer</title>
+<title>Java: Polymorphism: Overloading vs Overriding &amp; Upcasting</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>4.6 Polymorphism: Overloading vs Overriding &amp; Upcasting</h1>
-  <div class="se-lead">Compile-time Method Overloading vs runtime Method Overriding, @Override rules, Covariant return types, and Upcasting WebDriver driver = new ChromeDriver().</div>
 
-  <p>Polymorphism lets one interface or method name handle distinct concrete types cleanly—either at compile time by picking among overloaded parameter lists or at runtime via Dynamic Method Dispatch on an overridden child class. In Selenium, Upcasting every browser driver behind the <code>WebDriver</code> interface is what makes cross-browser automation possible without rewriting test steps.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">Polymorphism lets one method call behave differently by signature at compile time (Overloading) or by the actual Heap object type at runtime (Overriding + Upcasting).</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-inheritance-vs-composition.html">4.5 Inheritance (IS-A) vs Composition (HAS-A)</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>Overloading = Same class, different params (Compile time); Overriding = Parent/Child, same signature (Runtime).</b></p>
+    <ul>
+      <li><b>Upcasting runs framework magic:</b> <code>WebDriver driver = new ChromeDriver();</code> lets the entire test suite work against Chrome, Firefox, or Edge identically.</li>
+      <li><b><code>static</code> and <code>private</code> methods NEVER override:</b> they hide or stay local, resolved from reference type at compile time.</li>
+      <li><b>Always add <code>@Override</code>:</b> lets <code>javac</code> catch typos in overridden method names immediately.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Every Selenium test uses Polymorphism on line 1 (<code>WebDriver driver = new ChromeDriver();</code> upcasting), calls overloaded methods like <code>driver.switchTo().frame(...)</code>, and relies on runtime overriding inside driver and Page Object subclasses.</p>
-  </section>
+  <section><h2>3. Compile-Time Overloading vs Runtime Dynamic Dispatch</h2>
+    <div class="arch">
+      <div class="lbl">Two Kinds of Polymorphism</div>
+      <div class="note">Reference type decides WHAT methods you are allowed to call; Heap object decides WHICH override runs.</div>
+      <div class="cols">
+        <div class="item"><b>Overloading (Compile Time)</b><span><code>driver.switchTo().frame(0)</code><br><code>driver.switchTo().frame("auth")</code><br><code>driver.switchTo().frame(webEl)</code></span></div>
+        <div class="item"><b>Overriding + Upcasting (Runtime)</b><span>Reference: <code>WebDriver d</code><br>Heap object: <code>new ChromeDriver()</code><br><code>d.get(...)</code> runs ChromeDriver's code!</span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li><b>Compile-Time Polymorphism (Method Overloading)</b> occurs inside the same class (or subclass) when multiple methods share the exact same name with <b>different parameter lists</b> (different count, types, or order).</li>
-      <li><b>Runtime Polymorphism (Method Overriding)</b> occurs when a subclass provides a specific implementation for an inherited instance method sharing the exact same name and parameter list.</li>
-      <li>Overriding rules: access modifier cannot be more restrictive, checked exceptions thrown cannot be broader, and return type must match or be a <b>covariant subtype</b> (for example, overriding <code>BasePage submit()</code> to return <code>HomePage</code>).</li>
-      <li><code>private</code>, <code>final</code>, and <code>static</code> methods can NEVER be overridden; redefining a matching <code>static</code> signature in a subclass is compile-time <b>Method Hiding</b>, not overriding.</li>
-      <li><b>Upcasting</b> (<code>WebDriver driver = new ChromeDriver();</code>) assigns a child object to a parent/interface reference automatically; compile-time checks look at <code>WebDriver</code> while runtime calls dispatch dynamically to <code>ChromeDriver</code>.</li>
-      <li><b>Downcasting</b> (<code>((TakesScreenshot) driver)</code>) narrows back to a subtype explicitly and throws <code>ClassCastException</code> at runtime if the actual Heap object does not implement that type.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. Method Overloading vs Method Overriding</h2>
     <table>
-      <thead>
-        <tr><th>Property</th><th>Method Overloading (Compile-Time)</th><th>Method Overriding (Runtime)</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Scope</b></td><td>Same class or inherited subclass</td><td>Strictly parent-child class inheritance</td></tr>
-        <tr><td><b>Parameter List</b></td><td>Must differ (count, types, or type order)</td><td>Must match identically</td></tr>
-        <tr><td><b>Return Type</b></td><td>May differ (cannot vary ONLY by return type)</td><td>Must match or be a covariant subtype</td></tr>
-        <tr><td><b><code>static</code> / <code>private</code> / <code>final</code></b></td><td>Can be overloaded freely</td><td>Cannot be overridden (<code>static</code> is hidden)</td></tr>
-        <tr><td><b>Resolution Timing</b></td><td>Bound by <code>javac</code> at compile time</td><td>Bound by JVM Dynamic Method Dispatch at runtime</td></tr>
-        <tr><td><b>Selenium Example</b></td><td><code>switchTo().frame(int)</code>, <code>frame(String)</code>, <code>frame(WebElement)</code></td><td><code>RemoteWebElement.click()</code>, <code>WebDriver driver = new ChromeDriver()</code></td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Rule</th><th>Overloading</th><th>Overriding</th></tr>
+      <tr><td>Where?</td><td>Same class (or subclass adds overload)</td><td>Subclass rewriting Parent's method</td></tr>
+      <tr><td>Parameters</td><td>MUST differ (count, type, or order)</td><td>MUST match identically</td></tr>
+      <tr><td>Return type</td><td>Can differ ONLY if parameters differ</td><td>Same type or narrower Covariant subtype</td></tr>
+      <tr><td>Visibility</td><td>Any modifier</td><td>Cannot narrow visibility (e.g., <code>public</code> -&gt; <code>protected</code> illegal)</td></tr>
+      <tr><td>Resolved when?</td><td>Compile time (by reference + args)</td><td>Runtime (by actual Heap object)</td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: upcasting WebDriver interface &amp; overloading helpers</h2>
+<pre><code>interface MiniDriver {
+    void open(String url);                    // contract method
+}
+
+class MiniChrome implements MiniDriver {
+    @Override public void open(String url) { System.out.println("Chrome opening " + url); }
+}
+
+public class PolyDemo {
+    static void waitAndClick(String locator) { waitAndClick(locator, 10); } // overload 1
+    static void waitAndClick(String locator, int sec) {                     // overload 2
+        System.out.println("Clicking " + locator + " wait=" + sec + "s");
+    }
+
+    public static void main(String[] args) {
+        MiniDriver d = new MiniChrome();      // Upcasting: interface ref -&gt; Chrome object
+        d.open("https://www.selenium.dev/");  // Runtime dispatch picks MiniChrome.open()
+        waitAndClick("#submit");              // Compile time picks overload 1 -&gt; overload 2
+    }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>Write <code>WebDriver driver = new ChromeDriver();</code>—the Stack variable type is interface <code>WebDriver</code> while the Heap object is <code>ChromeDriver</code>.</li>
-      <li>When calling <code>driver.get(url)</code>, <code>javac</code> verifies <code>get(String)</code> exists on the <code>WebDriver</code> interface.</li>
-      <li>At runtime, the JVM inspects the actual Heap object (<code>ChromeDriver</code> / <code>FirefoxDriver</code>) via Dynamic Method Dispatch and runs that browser driver's overridden implementation.</li>
-      <li>When invoking overloaded helpers like <code>click(By)</code> vs <code>click(By, int timeoutSec)</code>, <code>javac</code> locks the exact method target at compile time based on the arguments supplied.</li>
-    </ol>
-    <p>Overloading wait helpers, covariant overriding in Page Objects, and polymorphic WebDriver upcasting:</p>
-<pre><code>package dev.java.oop; // Declares package
+      <li>Writing two <code>waitAndClick</code> methods with different parameters gives convenient default timeout overloading.</li>
+      <li><code>javac</code> resolves <code>waitAndClick("#submit")</code> to overload 1 before the program even runs.</li>
+      <li><code>MiniDriver d = new MiniChrome();</code> stores a <code>MiniChrome</code> Heap instance in a <code>MiniDriver</code> interface variable (upcasting).</li>
+      <li>At runtime, <code>d.open(...)</code> checks the real Heap object (<code>MiniChrome</code>) and dispatches dynamically to Chrome's version.</li>
+      <li>Switching <code>new MiniChrome()</code> to <code>new MiniFirefox()</code> needs zero edits across any test calling <code>d.open(...)</code>.</li>
+    </ol></section>
 
-import org.openqa.selenium.By; // Imports By locator
-import org.openqa.selenium.WebDriver; // Imports WebDriver interface
-import org.openqa.selenium.chrome.ChromeDriver; // Imports ChromeDriver class
-import org.openqa.selenium.firefox.FirefoxDriver; // Imports FirefoxDriver class
-
-class BaseActionPage { // Parent page class
-    protected final WebDriver driver; // Polymorphic interface reference
-
-    BaseActionPage(WebDriver driver) { // Constructor accepts any WebDriver implementation
-        this.driver = driver; // Stores upcast driver reference
-    } // Ends constructor
-
-    public BaseActionPage open(String url) { // Base method eligible for covariant override
-        driver.get(url); // Dispatches dynamically to ChromeDriver or FirefoxDriver at runtime
-        return this; // Returns parent page type
-    } // Ends open
-
-    public void click(By locator) { // Overloaded method #1 (1 parameter)
-        driver.findElement(locator).click(); // Clicks immediately
-    } // Ends click(By)
-
-    public void click(By locator, int maxAttempts) { // Overloaded method #2 (2 parameters)
-        for (int i = 0; i &lt; maxAttempts; i++) { // Retries up to maxAttempts times
-            click(locator); // Calls 1-arg overload directly
-            return; // Exits once click succeeds
-        } // Ends retry loop
-    } // Ends click(By, int)
-} // Ends BaseActionPage
-
-public class PolymorphicLoginPage extends BaseActionPage { // Subclass overriding open
-    public PolymorphicLoginPage(WebDriver driver) { // Constructor forwarding driver
-        super(driver); // Calls parent constructor
-    } // Ends constructor
-
-    @Override // Compiler verifies exact override signature
-    public PolymorphicLoginPage open(String url) { // Covariant return narrows BaseActionPage to child
-        super.open(url); // Calls parent navigation step
-        return this; // Returns child type for fluent chaining
-    } // Ends override
-
-    static WebDriver createBrowser(String name) { // Returns upcast WebDriver interface
-        return "firefox".equalsIgnoreCase(name) ? new FirefoxDriver() : new ChromeDriver(); // Polymorphic factory
-    } // Ends createBrowser
-} // Ends PolymorphicLoginPage</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Writing <code>ChromeDriver driver = new ChromeDriver();</code> everywhere in framework signatures instead of upcasting to <code>WebDriver driver</code>; this locks every Page Object and listener strictly to Chrome and breaks Firefox/Edge/Grid runs.</li>
-      <li>Omitting the <code>@Override</code> annotation when overriding <code>equals()</code> or a parent helper; a subtle typo in parameter types like <code>equals(User o)</code> silently creates an overload instead of an override, and <code>@Override</code> catches that bug at compile time.</li>
-      <li>Expecting Dynamic Method Dispatch to apply to instance fields or <code>static</code> methods; fields and <code>static</code> methods always resolve according to the <b>reference variable type</b> at compile time, never the runtime Heap object.</li>
-      <li>Casting <code>((ChromeDriver) driver)</code> blindly inside a listener when <code>RemoteWebDriver</code> is returned by Selenium Grid, causing <code>ClassCastException</code>.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: a universal TV remote control</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Method Overloading</b></td><td>Declaring multiple methods with the same name and distinct parameter lists inside one class hierarchy.</td></tr>
-        <tr><td><b>Method Overriding</b></td><td>Redefining an inherited parent instance method in a subclass with the exact same signature.</td></tr>
-        <tr><td><b>Dynamic Method Dispatch</b></td><td>JVM runtime mechanism selecting which overridden method implementation executes based on the actual Heap object type.</td></tr>
-        <tr><td><b>Covariant Return Type</b></td><td>Allowing an overriding subclass method to declare a more specific subtype return type than the parent method.</td></tr>
-        <tr><td><b>Upcasting</b></td><td>Assigning a subclass object to a superclass or interface reference implicitly to achieve polymorphism.</td></tr>
-        <tr><td><b><code>ClassCastException</code></b></td><td>Unchecked runtime exception thrown when an explicit downcast attempts to cast an object to an incompatible type.</td></tr>
-      </tbody>
+      <tr><th>Universal Remote</th><th>Java</th></tr>
+      <tr><td>Pressing Power on a universal remote while pointing at Sony vs LG TV</td><td>Upcasting + Runtime Overriding (<code>driver.get()</code>)</td></tr>
+      <tr><td>Same coffee machine button pressed with Small vs Large cup setting</td><td>Compile-time Overloading (<code>frame(0)</code> vs <code>frame("id")</code>)</td></tr>
+      <tr><td>Checking the remote label at compile time to see if a Record button exists</td><td>Reference type checks available methods</td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Polymorphism decouples caller code from concrete driver implementations so new browsers or adapters plug in without touching tests.</p>
+    <p><b>SDET link:</b> <code>WebDriver driver = new ChromeDriver();</code> is textbook upcasting + runtime polymorphism, while <code>driver.switchTo().frame(int)</code>, <code>frame(String)</code>, and <code>frame(WebElement)</code> (plus <code>Actions.click()</code> vs <code>click(el)</code>) are textbook overloading.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>What happens if a Parent static method <code>static void run()</code> is re-written in Child and called via <code>Parent p = new Child(); p.run();</code>? <b>Parent's version runs (Method Hiding), NOT overriding, because static binds at compile time.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Overloading</td><td>Multiple methods sharing a name with different parameter lists</td></tr>
+      <tr><td>Overriding</td><td>Subclass redefining an inherited parent method with identical signature</td></tr>
+      <tr><td>Upcasting</td><td>Storing a subclass/implementation object in a parent/interface reference</td></tr>
+      <tr><td>Dynamic dispatch</td><td>JVM choosing the overridden method at runtime based on the Heap object</td></tr>
+      <tr><td>Covariant return</td><td>Overriding method returning a subtype of the parent method's return type</td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>What is the core difference between Method Overloading and Method Overriding?</b><br>
-    Method Overloading (compile-time polymorphism) defines multiple methods sharing the same name with different parameter types, counts, or order, resolved statically by <code>javac</code>. Method Overriding (runtime polymorphism) lets a subclass replace a parent's instance method with the identical signature, resolved dynamically at runtime by the JVM based on the Heap object type. Both improve API cleanliness and extensibility.</p>
-
-    <p><b>Why do we write <code>WebDriver driver = new ChromeDriver();</code> instead of <code>ChromeDriver driver = new ChromeDriver();</code>?</b><br>
-    Upcasting to the <code>WebDriver</code> interface decouples test code and Page Objects from any single browser vendor. The same <code>driver</code> variable can hold a <code>ChromeDriver</code> locally, a <code>FirefoxDriver</code> via CLI flag, or a <code>RemoteWebDriver</code> on Selenium Grid without changing a single line of Page Object code. Calling browser-proprietary methods only available on <code>ChromeDriver</code> is intentionally prevented unless explicitly checked.</p>
-
-    <p><b>Why is the <code>@Override</code> annotation considered essential even though Java does not strictly require it?</b><br>
-    <code>@Override</code> instructs the compiler to prove that an annotated method actually overrides an inherited parent or interface method. Without it, misspelling a method name or using the wrong parameter type (for instance, writing <code>public boolean equals(LoginPage p)</code> instead of <code>Object</code>) silently compiles as a brand-new overload and causes subtle runtime bugs.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>How does the JVM perform Dynamic Method Dispatch at runtime?</b><br>
-    When code invokes an instance method on a polymorphic reference like <code>driver.get(url)</code>, the bytecode emits an <code>invokevirtual</code> or <code>invokeinterface</code> instruction. At runtime, the JVM reads the class metadata pointer in the Heap object's header, looks up that class's virtual method table (vtable), and jumps directly to the subclass's overridden method body. If the Heap object is a <code>FirefoxDriver</code>, Firefox's implementation runs automatically.</p>
-
-    <p><b>Which methods in Java can be overloaded vs overridden?</b><br>
-    Almost any method—including <code>static</code>, <code>final</code>, <code>private</code>, and constructors—can be overloaded with a different parameter list. By contrast, only non-<code>final</code>, non-<code>static</code>, non-<code>private</code> instance methods can be overridden. Redefining a matching <code>static</code> method signature in a subclass hides the parent method rather than overriding it.</p>
-
-    <p><b>What is a covariant return type and how does it help Page Object hierarchies?</b><br>
-    Java 5 introduced covariant return types, allowing an overriding subclass method to narrow the return type to a subclass of the parent method's return type. For example, if <code>BasePage.refresh()</code> returns <code>BasePage</code>, <code>CartPage.refresh()</code> can override it to return <code>CartPage</code> directly so callers keep fluent access to cart-specific methods without manual casting.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>Name three real examples of Method Overloading inside the Selenium WebDriver API.</b><br>
-    1) <code>driver.switchTo().frame(int index)</code>, <code>frame(String nameOrId)</code>, and <code>frame(WebElement frameElement)</code>. 2) <code>Actions.click()</code> (clicks at current mouse coordinates) vs <code>Actions.click(WebElement target)</code> (moves to element and clicks). 3) <code>Select.selectByIndex(int)</code>, <code>selectByValue(String)</code>, and <code>selectByVisibleText(String)</code> (or TestNG's overloaded <code>Assert.assertEquals</code> signatures).</p>
-
-    <p><b>How does <code>Method Overriding</code> power custom Selenium <code>ExpectedConditions</code>?</b><br>
-    When writing a custom wait condition, you pass an anonymous implementation or lambda overriding <code>ExpectedCondition&lt;Boolean&gt;.apply(WebDriver driver)</code>. Inside <code>WebDriverWait.until()</code>, Selenium polls that overridden <code>apply()</code> method polymorphically until it returns <code>true</code> or times out.</p>
-
-    <p><b>When running tests against Selenium Grid with <code>RemoteWebDriver</code>, how do you safely take a screenshot?</b><br>
-    <code>RemoteWebDriver</code> already implements <code>TakesScreenshot</code>, so check <code>if (driver instanceof TakesScreenshot ts)</code> or wrap <code>new Augmenter().augment(driver)</code> when needed before calling <code>ts.getScreenshotAs(OutputType.FILE)</code>. That avoids hardcoding casts to <code>ChromeDriver</code> that crash on remote Grid sessions.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Why did <code>((ChromeDriver) driver).executeCdpCommand(...)</code> pass locally and throw <code>ClassCastException</code> on Selenium Grid?</b><br>
-    Locally, <code>driver</code> held a <code>ChromeDriver</code> instance, so the downcast succeeded. On Selenium Grid, the DriverFactory instantiated a <code>RemoteWebDriver</code>, which does NOT inherit from <code>ChromeDriver</code>, causing an immediate <code>ClassCastException: class RemoteWebDriver cannot be cast to class ChromeDriver</code>. Always guard downcasts with <code>instanceof</code> or use <code>HasCdp</code> / <code>Augmenter</code>.</p>
-
-    <p><b>Why did calling <code>p.printVersion()</code> on <code>Parent p = new Child();</code> execute <code>Parent.printVersion()</code> instead of <code>Child.printVersion()</code>?</b><br>
-    <code>printVersion()</code> was declared <code>static</code> in both classes. Because <code>static</code> methods bind at compile time to the declared reference type (<code>Parent</code>) rather than the Heap object type (<code>Child</code>), method hiding occurred instead of runtime overriding.</p>
-
-    <p><b>Why does an overloaded pair <code>process(Object o)</code> and <code>process(String s)</code> invoke <code>process(Object)</code> when called through a variable typed as <code>Object x = "hello";</code>?</b><br>
-    Method overload selection happens strictly at <b>compile time</b> using the declared static types of the arguments (<code>Object</code>), never the runtime Heap type (<code>String</code>). Only overriding uses the runtime Heap type.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why should framework code always program to the <code>WebDriver</code> interface rather than concrete driver classes?</b><br>
-    Coding against interfaces isolates tests from browser implementation changes, enables instant cross-browser switching via config flags, and supports wrapping drivers in Selenium Grid's <code>RemoteWebDriver</code> or <code>EventFiringDecorator</code> proxies transparently.</p>
-
-    <p><b>Why should you avoid creating excessive confusing overloads that take identical argument counts of convertible types (like <code>int</code> vs <code>long</code> vs <code>Integer</code>)?</b><br>
-    Overloading methods with numeric promotions and boxing types forces maintainers to memorize Java's implicit overload precedence rules and risks ambiguous method call errors. Give distinct behavioral variants distinct, descriptive method names instead.</p>
-
-    <p><b>Why does Java forbid overriding <code>private</code> methods?</b><br>
-    A <code>private</code> method is invisible outside its declaring class and represents purely internal mechanics. Allowing subclasses to intercept a parent's internal private helpers would break parent invariants silently; if a child defines a method with the same signature, Java treats it as an unrelated new method.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>Can two overloaded methods differ ONLY by return type?</b> No; parameter lists must differ.</li>
-      <li><b>When is Method Overloading resolved vs Method Overriding?</b> Overloading resolves at compile time; Overriding resolves at runtime.</li>
-      <li><b>Can a <code>static</code> or <code>private</code> method be overridden?</b> No.</li>
-      <li><b>What exception occurs on an invalid downcast?</b> <code>java.lang.ClassCastException</code>.</li>
-      <li><b>What is Upcasting in Selenium?</b> <code>WebDriver driver = new ChromeDriver();</code> (subclass object assigned to interface/parent variable).</li>
-      <li><b>What does a covariant return type allow?</b> An overriding subclass method to return a narrower subtype of the parent's return type.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-abstraction-abstract-interface.html">4.7 Abstraction: Abstract Class vs Interface &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-inheritance-vs-composition.html">4.5 Inheritance (IS-A) vs Composition (HAS-A)</a> &middot; Next: <a href="java-abstraction-abstract-interface.html">4.7 Abstraction: Abstract Class vs Interface &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

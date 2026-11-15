@@ -3,194 +3,101 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>5.2 List: ArrayList vs LinkedList | SDET Explainer</title>
+<title>Java: List: ArrayList vs LinkedList</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>5.2 List: ArrayList vs LinkedList</h1>
-  <div class="se-lead">Ordered duplicate-allowing List implementations, ArrayList 1.5x resizing vs doubly-linked LinkedList nodes, time complexities, and Selenium findElements().</div>
 
-  <p>The <code>List&lt;E&gt;</code> interface maintains insertion order, permits duplicate elements and <code>null</code> entries, and supports positional zero-based indexing. Selecting between <code>ArrayList</code> (backed by a contiguous dynamic array) and <code>LinkedList</code> (backed by doubly-linked node objects) depends on access patterns, memory footprint, and insertion positions.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">ArrayList stores references inside a dynamic array that grows by 1.5x for instant O(1) indexed lookup, whereas LinkedList chains doubly-linked nodes for fast head/tail edits at the cost of O(n) index walks.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-collections-hierarchy-generics.html">5.1 Collections Hierarchy &amp; Generics (Type Safety)</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>Default to ArrayList (O(1) get(i), 1.5x grow); LinkedList chases pointers node by node!</b></p>
+    <ul>
+      <li><b>Internal capacity:</b> <code>ArrayList</code> defaults to capacity <code>10</code> on first <code>add()</code> and grows by <code>newCap = old + (old &gt;&gt; 1)</code> (1.5x).</li>
+      <li><b>Why indexed <code>for</code> fails on <code>LinkedList</code>:</b> calling <code>linked.get(i)</code> inside a loop walks from head/tail each step (O(n^2) slow!).</li>
+      <li><b><code>Arrays.asList</code> vs <code>List.of</code>:</b> <code>Arrays.asList</code> throws on <code>add/remove</code> (allows <code>set</code> &amp; <code>null</code>); <code>List.of</code> is strictly unmodifiable and forbids <code>null</code>.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Selenium's <code>driver.findElements(By)</code> returns a <code>List&lt;WebElement&gt;</code> (specifically an <code>ArrayList</code> under the hood), and product catalog validations store ordered titles and prices in <code>List</code> structures.</p>
-  </section>
+  <section><h2>3. ArrayList Contiguous Array vs LinkedList Node Chain</h2>
+    <div class="arch">
+      <div class="lbl">Memory Layout Inside Heap</div>
+      <div class="note">CPU cache prefetches contiguous <code>ArrayList</code> slots quickly; <code>LinkedList</code> nodes jump randomly in RAM.</div>
+      <div class="cols">
+        <div class="item"><b><code>ArrayList</code>: Object[] block</b><span><code>[0 | 1 | 2 | 3]</code> -&gt; instant jump <code>list.get(2)</code> in O(1)</span></div>
+        <div class="item"><b><code>LinkedList</code>: Doubly-linked Nodes</b><span><code>[prev|item0|next] &lt;-&gt; [prev|item1|next]</code> -&gt; walks links for index <code>i</code></span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li><code>List&lt;E&gt;</code> preserves insertion order, allows duplicate values, and supports indexed methods (<code>get(i)</code>, <code>set(i, e)</code>, <code>indexOf(e)</code>).</li>
-      <li><code>ArrayList</code> is backed internally by a contiguous <code>Object[] elementData</code> array with an initial default capacity of <code>10</code> (allocated lazily upon adding the first element).</li>
-      <li>When an <code>ArrayList</code> reaches capacity, it allocates a new array <b>1.5x larger</b> using <code>oldCapacity + (oldCapacity &gt;&gt; 1)</code> and copies elements via <code>Arrays.copyOf()</code>.</li>
-      <li><code>ArrayList.get(index)</code> runs in constant <b>O(1)</b> time, whereas inserting or removing in the middle requires shifting trailing elements in <b>O(n)</b> time.</li>
-      <li><code>LinkedList</code> implements both <code>List&lt;E&gt;</code> and <code>Deque&lt;E&gt;</code> using doubly-linked <code>Node&lt;E&gt;</code> objects storing <code>item</code>, <code>prev</code>, and <code>next</code> references; random <code>get(index)</code> requires traversing nodes in <b>O(n)</b> time.</li>
-      <li><code>driver.findElements(By)</code> returns an empty list (<code>size() == 0</code>) when no elements match—unlike <code>driver.findElement(By)</code>, which throws <code>NoSuchElementException</code>.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. ArrayList vs LinkedList at a glance</h2>
     <table>
-      <thead>
-        <tr><th>Operation / Aspect</th><th><code>ArrayList&lt;E&gt;</code></th><th><code>LinkedList&lt;E&gt;</code></th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Internal Backing Structure</b></td><td>Resizable contiguous <code>Object[]</code> array</td><td>Doubly-linked <code>Node&lt;E&gt;</code> objects (<code>prev</code>, <code>item</code>, <code>next</code>)</td></tr>
-        <tr><td><b><code>get(index)</code> Random Access</b></td><td>O(1) instant offset lookup</td><td>O(n) sequential node traversal</td></tr>
-        <tr><td><b>Append at End (<code>add(e)</code>)</b></td><td>O(1) amortized (O(n) on resize)</td><td>O(1)</td></tr>
-        <tr><td><b>Insert/Delete at Front (index 0)</b></td><td>O(n) (shifts every element right/left)</td><td>O(1) (updates head/prev/next pointers)</td></tr>
-        <tr><td><b>Memory Overhead</b></td><td>Compact; single array reference per element</td><td>High; separate Heap Node + 2 pointer fields per element</td></tr>
-        <tr><td><b>Interfaces Implemented</b></td><td><code>List</code>, <code>RandomAccess</code></td><td><code>List</code>, <code>Deque</code>, <code>Queue</code></td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Operation / Trait</th><th><code>ArrayList</code></th><th><code>LinkedList</code></th></tr>
+      <tr><td>Backing store</td><td>Resizable <code>Object[]</code> array</td><td>Doubly-linked <code>Node</code> chain (implements <code>Deque</code> too)</td></tr>
+      <tr><td><code>get(index)</code></td><td>O(1) instant jump</td><td>O(n) walk from nearest end</td></tr>
+      <tr><td><code>add(e)</code> at tail</td><td>O(1) amortized (occasional 1.5x copy)</td><td>O(1)</td></tr>
+      <tr><td>Insert/Remove at head or middle</td><td>O(n) array shift</td><td>O(1) once node pointer found (search still O(n))</td></tr>
+      <tr><td>RAM per item</td><td>Low (just reference slot)</td><td>Higher (+prev and +next pointers per node)</td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: capturing Selenium product names safely in ArrayList</h2>
+<pre><code>import java.util.*;
+
+public class ListDemo {
+    public static void main(String[] args) {
+        List&lt;String&gt; expectedTabs = List.of("Downloads", "Documentation", "Projects"); // immutable Java 9+
+        List&lt;String&gt; actualTabs = new ArrayList&lt;&gt;(10); // dynamic array sized for fast index read
+
+        actualTabs.add("Downloads");
+        actualTabs.add("Documentation");
+        actualTabs.add("Projects");
+
+        System.out.println("Index 1 = " + actualTabs.get(1));        // O(1) direct jump
+        System.out.println("Matches expected? " + actualTabs.equals(expectedTabs)); // true (same order)
+    }
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>Call <code>List&lt;WebElement&gt; cards = driver.findElements(By.cssSelector(".card"));</code> to capture matching DOM items safely without exception.</li>
-      <li>Notice <code>findElements()</code> returns a <code>List</code> backed by an array; iterating or reading <code>cards.get(0)</code> executes in O(1) time.</li>
-      <li>If the list grows dynamically beyond 10 elements, <code>ArrayList</code> expands capacity by 50% automatically (<code>10 -&gt; 15 -&gt; 22 -&gt; 33</code>).</li>
-      <li>For immutable test expectations, construct <code>List.of("A", "B")</code> (Java 9+) rather than mutating a shared array-backed list.</li>
-    </ol>
-    <p>Using ArrayList capacity growth, Selenium findElements(), and Java 9+ immutable List.of():</p>
-<pre><code>package dev.java.collections; // Declares package
+      <li><code>List.of(...)</code> creates a compact immutable baseline list (zero <code>add</code>, <code>set</code>, or <code>null</code> allowed).</li>
+      <li><code>new ArrayList&lt;&gt;(10)</code> allocates a single backing array ready for 10 elements before resizing by 1.5x.</li>
+      <li>Adding three strings fills slots <code>0</code>, <code>1</code>, and <code>2</code> in order, preserving duplicates and insertion sequence.</li>
+      <li><code>actualTabs.get(1)</code> computes the offset immediately in O(1) time without walking prior elements.</li>
+      <li><code>actualTabs.equals(expectedTabs)</code> passes <code>true</code> because any two <code>List</code> implementations match when size and order match element for element.</li>
+    </ol></section>
 
-import org.openqa.selenium.By; // Imports By locator
-import org.openqa.selenium.WebDriver; // Imports WebDriver interface
-import org.openqa.selenium.WebElement; // Imports WebElement interface
-import java.util.ArrayList; // Imports ArrayList implementation
-import java.util.List; // Imports List interface
-
-public class ListComparisonDemo { // Demonstrates ArrayList usage in Selenium
-    static List&lt;String&gt; extractVisibleTitles(WebDriver driver, By locator) { // Extracts DOM text safely
-        List&lt;WebElement&gt; elements = driver.findElements(locator); // Returns empty list if 0 matches (no exception)
-        List&lt;String&gt; titles = new ArrayList&lt;&gt;(elements.size()); // Pre-sizes ArrayList to avoid resizes
-        for (WebElement el : elements) { // Iterates elements in DOM order
-            String text = el.getText().strip(); // Captures trimmed visible text
-            if (!text.isEmpty()) { // Skips empty text nodes
-                titles.add(text); // Appends text in O(1) time with zero resize churn
-            } // Ends empty guard
-        } // Ends iteration
-        return List.copyOf(titles); // Returns unmodifiable defensive copy (Java 10+)
-    } // Ends extractVisibleTitles
-} // Ends class</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Iterating a <code>LinkedList</code> with an indexed <code>for (int i = 0; i &lt; list.size(); i++) list.get(i)</code> loop; calling <code>get(i)</code> on a <code>LinkedList</code> walks from the head/tail on every step, turning a linear loop into quadratic O(n^2) time.</li>
-      <li>Calling <code>driver.findElements(By).get(0)</code> without checking <code>!list.isEmpty()</code>; when 0 elements appear, <code>findElements()</code> returns an empty list and <code>get(0)</code> immediately throws <code>IndexOutOfBoundsException</code>.</li>
-      <li>Passing <code>null</code> into Java 9+ <code>List.of(...)</code> or attempting <code>List.of("a").add("b")</code>; <code>List.of()</code> rejects <code>null</code> elements with <code>NullPointerException</code> and rejects mutation with <code>UnsupportedOperationException</code>.</li>
-      <li>Using legacy <code>Vector</code> instead of <code>ArrayList</code>; every <code>Vector</code> method synchronizes unconditionally and doubles capacity (2x), wasting both CPU locks and RAM.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: numbered stadium seats vs holding hands in a line</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b><code>ArrayList</code></b></td><td>Resizable array-backed <code>List</code> implementation offering O(1) indexed access and O(1) amortized end appends.</td></tr>
-        <tr><td><b><code>LinkedList</code></b></td><td>Doubly-linked node <code>List</code> and <code>Deque</code> implementation offering O(1) head/tail operations and O(n) random access.</td></tr>
-        <tr><td><b><code>RandomAccess</code></b></td><td>Marker interface implemented by <code>ArrayList</code> signaling fast O(1) positional index lookup.</td></tr>
-        <tr><td><b><code>List.of()</code></b></td><td>Java 9 factory creating compact unmodifiable lists that forbid <code>null</code> elements and structural changes.</td></tr>
-        <tr><td><b><code>IndexOutOfBoundsException</code></b></td><td>Unchecked exception thrown when calling <code>get(i)</code> with <code>i &lt; 0</code> or <code>i &gt;= size()</code>.</td></tr>
-        <tr><td><b>Capacity</b></td><td>Length of the internal backing array inside an <code>ArrayList</code> before the next 1.5x resize triggers.</td></tr>
-      </tbody>
+      <tr><th>Queue vs Seats</th><th>Java</th></tr>
+      <tr><td>Row of numbered theater seats — walk straight to seat #47</td><td><code>ArrayList.get(47)</code> in O(1)</td></tr>
+      <tr><td>Moving up to a larger 15-seat row when 10 seats fill up</td><td><code>ArrayList</code> 1.5x resize</td></tr>
+      <tr><td>Chain of people holding hands; only person #1 knows who person #2 is</td><td><code>LinkedList</code> nodes</td></tr>
+      <tr><td>Welded bench that rejects extra chairs</td><td>Immutable <code>List.of(...)</code></td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Choosing <code>ArrayList</code> by default avoids scattered node memory overhead and gives instant random access on 95%+ of real list workloads.</p>
+    <p><b>SDET link:</b> <code>driver.findElements(By.cssSelector(".product-title"))</code> returns a <code>List&lt;WebElement&gt;</code>; extracting strings with <code>new ArrayList&lt;&gt;()</code> preserves exact UI order so you can assert sorted prices and check order equality cleanly.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>What exception does <code>List.of("A", null)</code> throw? <b><code>NullPointerException</code> — Java 9+ immutable factory collections forbid null elements.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Dynamic array</td><td>Array that allocates a bigger block and copies items when capacity runs out</td></tr>
+      <tr><td>O(1) access</td><td>Constant time lookup regardless of how huge the list grows</td></tr>
+      <tr><td>Doubly-linked node</td><td>Object storing data plus pointers to both previous and next nodes</td></tr>
+      <tr><td>Immutable list</td><td>List rejecting <code>add</code>, <code>set</code>, and <code>remove</code> with <code>UnsupportedOperationException</code></td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>Compare <code>ArrayList</code> and <code>LinkedList</code> on internal structure, access speed, and memory usage.</b><br>
-    <code>ArrayList</code> uses a single contiguous <code>Object[]</code> array, giving O(1) indexed lookup (<code>get(i)</code>) and low per-element memory overhead while paying O(n) cost to shift elements when inserting or deleting in the middle. <code>LinkedList</code> wraps every element in a separate <code>Node</code> object holding <code>prev</code> and <code>next</code> references, consuming roughly 3x–4x more memory and requiring O(n) traversal for <code>get(i)</code> while offering O(1) insertion/removal at both ends.</p>
-
-    <p><b>How does <code>driver.findElement(By)</code> differ from <code>driver.findElements(By)</code> when an element is missing?</b><br>
-    <code>driver.findElement(By)</code> expects at least one matching node and immediately throws <code>NoSuchElementException</code> (after any active implicit wait) if none exist. <code>driver.findElements(By)</code> returns a <code>List&lt;WebElement&gt;</code> containing all matching elements, or a clean empty list (<code>size() == 0</code>) without throwing an exception when zero elements match.</p>
-
-    <p><b>Are <code>ArrayList</code> and <code>LinkedList</code> thread-safe?</b><br>
-    Neither is thread-safe. Concurrent structural modification from multiple threads causes lost elements or <code>ConcurrentModificationException</code>. For thread-safe lists across threads, use <code>CopyOnWriteArrayList</code> (for read-heavy listener lists) or synchronize explicitly around shared mutations.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>Explain how <code>ArrayList</code> grows dynamically when its internal array fills up.</b><br>
-    When constructed via <code>new ArrayList&lt;&gt;()</code>, Java initially shares a zero-length empty array and lazily allocates capacity <code>10</code> upon the very first <code>add()</code>. Once adding an 11th element overflows capacity, <code>ArrayList.grow()</code> computes <code>newCapacity = oldCapacity + (oldCapacity &gt;&gt; 1)</code> (1.5x growth: 10 -&gt; 15 -&gt; 22) and copies existing references into the newly allocated Heap array via <code>Arrays.copyOf()</code>.</p>
-
-    <p><b>Why is <code>ArrayList</code> faster than <code>LinkedList</code> even for repeated sequential scans and middle edits in practice?</b><br>
-    <code>ArrayList</code> elements sit contiguously in RAM (actually their object references sit sequentially in one array), enabling hardware CPU cache lines to prefetch adjacent slots effortlessly. <code>LinkedList</code> scatters individual <code>Node</code> objects randomly across the Heap, causing frequent CPU cache misses during pointer chasing.</p>
-
-    <p><b>What is the difference between <code>list.remove(1)</code> and <code>list.remove(Integer.valueOf(1))</code> on a <code>List&lt;Integer&gt;</code>?</b><br>
-    <code>List&lt;E&gt;</code> overloads <code>remove(int index)</code> and <code>remove(Object o)</code>. Calling <code>list.remove(1)</code> invokes the primitive <code>int</code> overload and deletes the element at <b>index 1</b>, whereas calling <code>list.remove(Integer.valueOf(1))</code> invokes the <code>Object</code> overload and removes the first occurrence of value <code>1</code>.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>When writing a Selenium helper that checks whether an optional modal banner appeared without failing the test, how does <code>List&lt;WebElement&gt;</code> help?</b><br>
-    Use <code>List&lt;WebElement&gt; banners = driver.findElements(By.id("promo-modal"));</code> and check <code>if (!banners.isEmpty() &amp;&amp; banners.get(0).isDisplayed())</code>. Notice that if implicit wait is set to 10s, <code>findElements()</code> still waits up to 10s when absent—so keep implicit wait at 0s and rely on explicit waits.</p>
-
-    <p><b>When collecting text from 200 product cards via <code>List&lt;WebElement&gt; cards</code>, why pre-size <code>new ArrayList&lt;&gt;(cards.size())</code>?</b><br>
-    Passing <code>cards.size()</code> to the <code>ArrayList(int initialCapacity)</code> constructor allocates the exact array size in one shot, eliminating repeated 1.5x array copies (10 -&gt; 15 -&gt; 22 -&gt; 33 -&gt; 49 -&gt; 73 -&gt; 109 -&gt; 163 -&gt; 244) and wasted array garbage.</p>
-
-    <p><b>How do you implement a FIFO test-queue or undo stack cleanly in Java?</b><br>
-    Although <code>LinkedList</code> implements <code>Deque</code>, the official Java documentation recommends <code>ArrayDeque&lt;E&gt;</code> for both stacks and FIFO queues because a resizable circular array beats node-per-element allocation in speed and Heap memory.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Why does <code>List&lt;String&gt; list = List.of("a", "b"); list.set(0, "c");</code> throw <code>UnsupportedOperationException</code> while <code>Arrays.asList("a", "b")</code> allows <code>set()</code>?</b><br>
-    <code>List.of()</code> constructs a strictly immutable unmodifiable collection introduced in Java 9 that forbids <code>add</code>, <code>remove</code>, <code>set</code>, and <code>null</code> elements. <code>Arrays.asList()</code> returns a fixed-size mutable wrapper backed by the original array, allowing <code>set()</code> while forbidding <code>add</code> and <code>remove</code>.</p>
-
-    <p><b>Why does <code>list.subList(1, 3).clear();</code> unexpectedly remove elements from the original parent list?</b><br>
-    <code>List.subList(from, to)</code> does NOT copy elements into a standalone new list; it returns a live backed view over a slice of the original list. Any mutation on the subList reflects directly in the parent list, and structural edits directly on the parent list afterward throw <code>ConcurrentModificationException</code> on the subList.</p>
-
-    <p><b>Why did <code>driver.findElements(locator).get(0).click()</code> throw <code>IndexOutOfBoundsException: Index 0 out of bounds for length 0</code>?</b><br>
-    The page had not yet rendered the element or the locator matched zero nodes, so <code>findElements()</code> returned an empty list of length 0. Use <code>WebDriverWait</code> with <code>ExpectedConditions.numberOfElementsToBeMoreThan(locator, 0)</code> before calling <code>.get(0)</code>.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why is <code>ArrayList</code> the default choice over <code>LinkedList</code> in 95% of Java and SDET applications?</b><br>
-    Most lists in tests and business code are populated sequentially at the tail and iterated or indexed randomly, where <code>ArrayList</code>'s contiguous memory layout delivers vastly higher CPU cache locality and lower memory overhead. Only choose <code>LinkedList</code> (or preferably <code>ArrayDeque</code>) when frequent O(1) insertions/deletions at both the head and tail dominate.</p>
-
-    <p><b>Why should Page Objects return unmodifiable lists (<code>List.copyOf(result)</code>) when exposing scraped UI rows?</b><br>
-    Returning an unmodifiable defensive copy prevents test assertions or utility helpers from mutating Page Object internal lists inadvertently while protecting against accidental <code>null</code> insertions.</p>
-
-    <p><b>Why was legacy <code>Vector</code> effectively replaced by <code>ArrayList</code> and <code>CopyOnWriteArrayList</code>?</b><br>
-    Synchronizing every single <code>get()</code> and <code>size()</code> method on <code>Vector</code> imposes unnecessary lock contention even for single-threaded usage and still fails compound check-then-act sequences (<code>if (!v.isEmpty()) v.get(0)</code>). Modern code uses local <code>ArrayList</code> for isolated threads or <code>CopyOnWriteArrayList</code> for concurrent shared reads.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>What is the default initial capacity of <code>ArrayList</code>?</b> <code>10</code> (allocated lazily on the first <code>add</code>).</li>
-      <li><b>By what factor does <code>ArrayList</code> grow when full?</b> <code>1.5x</code> (<code>oldCapacity + (oldCapacity &gt;&gt; 1)</code>).</li>
-      <li><b>What is the time complexity of <code>ArrayList.get(i)</code> vs <code>LinkedList.get(i)</code>?</b> O(1) for <code>ArrayList</code>; O(n) for <code>LinkedList</code>.</li>
-      <li><b>What does <code>driver.findElements(By)</code> return if zero elements match?</b> An empty <code>List&lt;WebElement&gt;</code> (<code>size() == 0</code>), never <code>NoSuchElementException</code>.</li>
-      <li><b>Does <code>List.of()</code> allow <code>null</code> elements?</b> No; it throws <code>NullPointerException</code>.</li>
-      <li><b>Which interface allows <code>ArrayList</code> to signal O(1) indexed access?</b> <code>java.util.RandomAccess</code>.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-set-hashset-linkedhashset-treeset.html">5.3 Set: HashSet vs LinkedHashSet vs TreeSet &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-collections-hierarchy-generics.html">5.1 Collections Hierarchy &amp; Generics (Type Safety)</a> &middot; Next: <a href="java-set-hashset-linkedhashset-treeset.html">5.3 Set: HashSet vs LinkedHashSet vs TreeSet &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>

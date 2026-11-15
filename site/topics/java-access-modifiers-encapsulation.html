@@ -3,198 +3,99 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>4.3 Access Modifiers &amp; Encapsulation | SDET Explainer</title>
+<title>Java: Access Modifiers &amp; Encapsulation</title>
 <link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter" data-track="Java">
+<body>
 <div class="wrap">
+<p><a href="../index.html">&larr; All topics</a></p>
 <article>
   <span class="tag Java">Java</span>
   <h1>4.3 Access Modifiers &amp; Encapsulation</h1>
-  <div class="se-lead">The 4 visibility levels (private, default, protected, public), complete scope matrix, and why Page Objects encapsulate private By locators.</div>
 
-  <p>Java controls which classes and packages can read or invoke fields, constructors, and methods through four explicit visibility levels. Combining restrictive access modifiers with controlled public methods enforces <b>Encapsulation</b>, keeping internal implementation details hidden while exposing clean contracts.</p>
+  <section><h2>1. Definition</h2>
+    <p class="def">Access modifiers restrict which classes can read or call a member (from private inside the class out to public everywhere), while Encapsulation hides internal fields behind private modifiers and exposes validated methods.</p></section>
 
-  <section id="before-you-start">
-    <h2>Before you start</h2>
-    <p>Prerequisite: <a href="java-constructors-chaining-singleton.html">4.2 Constructors: Default, Parameterized, Chaining &amp; Singleton</a></p>
-  </section>
+  <section><h2>2. Memory hook</h2>
+    <p><b>private -&gt; package-default -&gt; protected -&gt; public. Hide locators private; expose actions public.</b></p>
+    <ul>
+      <li><b>Narrowest first:</b> <code>private</code> (same class) &lt; <code>default</code> (same package) &lt; <code>protected</code> (same package + subclasses anywhere) &lt; <code>public</code> (all packages).</li>
+      <li><b>Top-level class rule:</b> outer classes allow only <code>public</code> or package-default (not <code>private</code> or <code>protected</code>).</li>
+      <li><b>Encapsulation = Data Hiding + Safe API:</b> guard invariants inside setters instead of leaving fields <code>public</code>.</li>
+    </ul></section>
 
-  <section id="where-it-fits">
-    <h2>Where it fits</h2>
-    <p>Encapsulation is the structural backbone of the Selenium Page Object Model (<code>private final By</code> locators paired with <code>public</code> business methods) and API data POJOs.</p>
-  </section>
+  <section><h2>3. Visibility Rings Across Packages</h2>
+    <div class="arch">
+      <div class="lbl">4 Concentric Visibility Levels</div>
+      <div class="note">Start with <code>private</code> by default and widen visibility only when needed.</div>
+      <div class="cols">
+        <div class="item"><b>1. <code>private</code></b><span>Same class ONLY (<code>private final By loginBtn</code>)</span></div>
+        <div class="item"><b>2. default (no keyword)</b><span>Same package ONLY</span></div>
+        <div class="item"><b>3. <code>protected</code></b><span>Same package + subclasses in any other package</span></div>
+        <div class="item"><b>4. <code>public</code></b><span>Visible across every package (<code>loginAs(u, p)</code>)</span></div>
+      </div>
+    </div></section>
 
-  <section id="key-points">
-    <h2>Key points</h2>
-    <ol>
-      <li>Java's four access modifiers ordered from narrowest to widest scope are: <code>private</code> &lt; <code>default</code> (package-private, no keyword) &lt; <code>protected</code> &lt; <code>public</code>.</li>
-      <li><code>private</code> members are accessible strictly inside the declaring class itself (never in subclasses or external classes).</li>
-      <li><b>Default (package-private)</b> members (omitting any modifier keyword) are accessible inside the declaring class and any class inside the exact same package.</li>
-      <li><code>protected</code> members are accessible inside the same package AND inside subclasses residing in different packages (via inheritance).</li>
-      <li><code>public</code> members are accessible from any class across every package.</li>
-      <li>Top-level classes and interfaces may only be declared <code>public</code> or package-private (never <code>private</code> or <code>protected</code>), whereas nested classes support all four modifiers.</li>
-      <li><b>Encapsulation</b> bundles data and methods while hiding internal fields with <code>private</code> and exposing validated public accessors or business actions.</li>
-    </ol>
-  </section>
-
-  <section id="comparison-table">
-    <h2>Comparison table</h2>
+  <section><h2>4. Exact Access Matrix</h2>
     <table>
-      <thead>
-        <tr><th>Modifier</th><th>Same Class</th><th>Same Package</th><th>Different Pkg Subclass</th><th>Different Pkg Non-Subclass</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>private</code></td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
-        <tr><td><i>default</i> (no keyword)</td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
-        <tr><td><code>protected</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
-        <tr><td><code>public</code></td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
-      </tbody>
-    </table>
-  </section>
+      <tr><th>Modifier</th><th>Same Class</th><th>Same Package</th><th>Subclass (Other Pkg)</th><th>World (Other Pkg)</th></tr>
+      <tr><td><b><code>private</code></b></td><td>Yes</td><td>No</td><td>No</td><td>No</td></tr>
+      <tr><td><b>default (none)</b></td><td>Yes</td><td>Yes</td><td>No</td><td>No</td></tr>
+      <tr><td><b><code>protected</code></b></td><td>Yes</td><td>Yes</td><td>Yes</td><td>No</td></tr>
+      <tr><td><b><code>public</code></b></td><td>Yes</td><td>Yes</td><td>Yes</td><td>Yes</td></tr>
+    </table></section>
 
-  <section id="how-it-works">
-    <h2>How it works</h2>
+  <section><h2>5. Code example: encapsulated Page Object hiding locators behind actions</h2>
+<pre><code>package com.qkart.pages;
+
+public class AuthPage {
+    private final String loginEndpoint = "https://qkart-qa-web.labs.crio.do/login"; // hidden
+    private int waitTimeoutSec = 10;                                               // guarded state
+
+    public void setWaitTimeoutSec(int sec) {
+        if (sec &lt;= 0) throw new IllegalArgumentException("Timeout must be &gt; 0");  // validation guard
+        this.waitTimeoutSec = sec;
+    }
+
+    public String getLoginEndpoint() { return loginEndpoint; }                    // read-only getter
+}</code></pre></section>
+
+  <section><h2>6. Execution flow, step by step</h2>
     <ol>
-      <li>Declare DOM selectors as <code>private final By</code> inside a Page Object class (for instance, inside package <code>pages</code>).</li>
-      <li>Declare shared framework helpers on <code>BasePage</code> as <code>protected</code> so Page Objects in sub-packages inherit them while test classes in package <code>tests</code> cannot invoke raw driver primitives directly.</li>
-      <li>Expose domain actions like <code>loginAs(user, pass)</code> as <code>public</code> so TestNG classes call clean business workflows without coupling to DOM locators.</li>
-      <li>For API request/response POJOs, keep fields <code>private</code> and enforce data constraints inside setters or constructors.</li>
-    </ol>
-    <p>Applying Encapsulation and visibility scopes across BasePage and LoginPage:</p>
-<pre><code>package dev.java.oop; // Declares package
+      <li><code>loginEndpoint</code> and <code>waitTimeoutSec</code> are marked <code>private</code> so tests outside <code>AuthPage</code> cannot corrupt them.</li>
+      <li>Calling <code>authPage.waitTimeoutSec = -5</code> fails to compile immediately.</li>
+      <li>Callers must go through <code>setWaitTimeoutSec(...)</code>, which rejects invalid timeouts cleanly before saving.</li>
+      <li><code>loginEndpoint</code> has only a public getter (no setter), making it effectively read-only outside.</li>
+      <li>Other framework tests stay unaffected even if internal locators or field types change inside <code>AuthPage</code>.</li>
+    </ol></section>
 
-import org.openqa.selenium.By; // Imports By locator
-import org.openqa.selenium.WebDriver; // Imports WebDriver
-
-class EncapsulatedLoginPage { // Package-private top-level class
-    private final WebDriver driver; // Encapsulated driver cannot be reassigned externally
-    private final By emailField = By.id("username"); // Private locator hidden from @Test classes
-    private final By loginBtn = By.cssSelector("button[type='submit']"); // Single source of truth
-
-    public EncapsulatedLoginPage(WebDriver driver) { // Public constructor for test packages
-        this.driver = driver; // Stores driver reference privately
-    } // Ends constructor
-
-    protected void clickLocator(By locator) { // Protected helper accessible to package and subclasses
-        driver.findElement(locator).click(); // Executes Selenium click safely
-    } // Ends protected helper
-
-    public void submitLogin(String email) { // Public business method exposed to tests
-        if (email == null || email.isBlank()) { // Enforces validation invariant at boundary
-            throw new IllegalArgumentException("Email must not be blank"); // Fails fast on bad test input
-        } // Ends validation check
-        driver.findElement(emailField).sendKeys(email); // Interacts with private locator
-        clickLocator(loginBtn); // Reuses protected helper internally
-    } // Ends submitLogin
-} // Ends class</code></pre>
-  </section>
-
-  <section id="common-mistakes">
-    <h2>Common mistakes</h2>
-    <ol>
-      <li>Declaring Page Object locators as <code>public static By usernameInput = ...;</code>; exposing public locators lets <code>@Test</code> classes leak DOM details and duplicate click/wait logic outside the Page Object.</li>
-      <li>Writing the literal word <code>default</code> before a field (<code>default int count;</code>); package-private access uses NO modifier keyword—<code>default</code> is valid only in <code>switch</code> blocks and <code>interface</code> default methods.</li>
-      <li>Making helper fields on <code>BaseTest</code> package-private when tests live in sub-packages (<code>tests.auth</code> vs <code>base</code>); sub-packages are completely separate packages in Java, so subclasses need <code>protected</code> access.</li>
-      <li>Attempting to narrow visibility when overriding a method (for example, overriding a <code>public</code> parent method as <code>protected</code> or <code>private</code>); Java forbids making an overridden method less visible.</li>
-    </ol>
-  </section>
-
-  <section id="terms-to-know">
-    <h2>Terms to know</h2>
+  <section><h2>7. Real-life analogy: an ATM machine &amp; car dashboard</h2>
     <table>
-      <thead>
-        <tr><th>Term</th><th>Meaning</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><b>Encapsulation</b></td><td>OOP principle of hiding internal object state behind <code>private</code> fields and exposing controlled behavior via public methods.</td></tr>
-        <tr><td><b><code>private</code></b></td><td>Restrictive access modifier limiting visibility strictly to the declaring class.</td></tr>
-        <tr><td><b>Package-Private</b></td><td>Default visibility applied when no access modifier is written, accessible only inside the same package.</td></tr>
-        <tr><td><b><code>protected</code></b></td><td>Access modifier allowing access within the same package plus subclasses in any external package.</td></tr>
-        <tr><td><b><code>public</code></b></td><td>Unrestricted access modifier visible to all packages and modules.</td></tr>
-        <tr><td><b>Data Hiding</b></td><td>Using <code>private</code> fields so callers cannot directly corrupt internal invariants or couple to representation details.</td></tr>
-      </tbody>
+      <tr><th>ATM Machine</th><th>Java</th></tr>
+      <tr><td>Locked cash vault inside the ATM</td><td><code>private</code> fields (cash balance / By locators)</td></tr>
+      <tr><td>Internal service door only bank branches share</td><td>package-default / <code>protected</code> helper</td></tr>
+      <tr><td>Public keypad checking PIN before dispensing cash</td><td><code>public</code> setter/action methods enforcing validation</td></tr>
+    </table></section>
+
+  <section><h2>8. Why it matters</h2>
+    <p>Encapsulation localizes changes inside one class so refactoring internal representation never breaks external callers.</p>
+    <p><b>SDET link:</b> This is Rule #1 of the Page Object Model (POM): keep every <code>private final By</code> locator private inside its Page Object class and expose only public business actions like <code>loginAs(user, pass)</code> to tests.</p></section>
+
+  <section><h2>9. Quick test</h2>
+    <p>Can a subclass in package <code>tests</code> call a <code>protected</code> method declared in package <code>base</code>? <b>Yes — <code>protected</code> permits subclasses in different packages to inherit it.</b></p></section>
+
+  <section><h2>10. Mini glossary</h2>
+    <table>
+      <tr><th>Term</th><th>Plain meaning</th></tr>
+      <tr><td>Encapsulation</td><td>Bundling fields and validation methods while hiding raw fields with <code>private</code></td></tr>
+      <tr><td>Package-private</td><td>Default visibility when no modifier is written (same package only)</td></tr>
+      <tr><td><code>protected</code></td><td>Accessible within same package and by subclasses across packages</td></tr>
+      <tr><td>Getter / Setter</td><td>Public accessor and mutator methods controlling field reads/writes</td></tr>
     </table>
-  </section>
-
-  <section id="interview-questions">
-    <h2>Interview questions</h2>
-
-    <h3>Basics</h3>
-
-    <p><b>List Java's four access modifiers in order from most restrictive to least restrictive.</b><br>
-    From tightest to widest visibility: <code>private</code> (same class only), package-private / default (same class and same package), <code>protected</code> (same package plus subclasses in external packages), and <code>public</code> (accessible everywhere). Choosing the narrowest visibility that compiles keeps coupling minimal.</p>
-
-    <p><b>What is Encapsulation in Java and why does it matter in test automation?</b><br>
-    Encapsulation wraps state (fields) and behavior (methods) inside a single class while restricting direct external access to internal representation via <code>private</code> fields. In Selenium Page Objects, hiding <code>private final By</code> locators ensures test classes call public business methods like <code>addProductToCart()</code> rather than directly referencing fragile CSS/XPath selectors. When UI markup changes, only the Page Object changes.</p>
-
-    <p><b>Can a top-level Java class be marked <code>private</code> or <code>protected</code>?</b><br>
-    No. Top-level classes and interfaces can only be <code>public</code> or package-private (no modifier). Only nested member classes, fields, constructors, and methods support <code>private</code> and <code>protected</code>.</p>
-
-    <h3>How it works</h3>
-
-    <p><b>How does <code>protected</code> behave across packages when a subclass holds a reference to a parent object?</b><br>
-    Inside a subclass in package B extending parent class <code>BasePage</code> in package A, the subclass can access <code>protected</code> members inherited on <code>this</code> or on another instance of the subclass itself. However, the subclass in package B cannot create a raw <code>new BasePage()</code> parent reference and access its <code>protected</code> members directly—cross-package <code>protected</code> access works strictly through inheritance.</p>
-
-    <p><b>Are sub-packages like <code>com.qkart.tests.login</code> considered part of <code>com.qkart.tests</code> for default/package-private access?</b><br>
-    No. In Java, packages have a flat visibility boundary regardless of folder nesting. <code>com.qkart.tests</code> and <code>com.qkart.tests.login</code> are treated as completely separate packages with zero package-private sharing between them.</p>
-
-    <p><b>Does encapsulation still allow mutating an object's internal state if a getter returns a mutable <code>List</code>?</b><br>
-    Returning a raw reference to a mutable private <code>List</code> or array breaks encapsulation because external callers can invoke <code>page.getItems().clear()</code> and mutate internal state silently. Return an unmodifiable copy using <code>List.copyOf(items)</code> or <code>Collections.unmodifiableList(items)</code> to protect internal state.</p>
-
-    <h3>Real situations</h3>
-
-    <p><b>In an enterprise Selenium framework, which modifier should be used for <code>BasePage.driver</code>, <code>By</code> locators, and <code>PageObject</code> action methods?</b><br>
-    Declare <code>By</code> locators as <code>private final</code> inside each specific Page Object so neither tests nor other pages depend on them. Declare shared wait/click helpers and <code>driver</code> on <code>BasePage</code> as <code>protected</code> so child Page Objects across packages reuse them while <code>@Test</code> classes cannot call raw Selenium primitives. Mark business workflow methods like <code>checkout()</code> as <code>public</code>.</p>
-
-    <p><b>How does Encapsulation protect test data POJOs used in API testing?</b><br>
-    Marking fields <code>private</code> inside an API request POJO lets setter or builder methods validate constraints—including rejecting negative quantities or malformed emails—before serializing JSON to the API endpoint.</p>
-
-    <p><b>Why does TestNG require <code>@Test</code> methods and constructors to be <code>public</code> (or package-visible in matching packages) in typical CI suites?</b><br>
-    TestNG scans classes from outside your test package using reflection, and <code>@Test</code> methods represent entry points invoked by the external runner. Keeping <code>@Test</code> methods <code>public</code> guarantees TestNG discovers and runs them reliably.</p>
-
-    <h3>Troubleshooting</h3>
-
-    <p><b>Why did moving <code>WaitHelper</code> from package <code>pages</code> into <code>utils</code> break compilation on package-private helper methods?</b><br>
-    Methods written without an access modifier default to package-private visibility, so relocating callers into a separate package immediately cuts off visibility with 'method is not public in WaitHelper; cannot be accessed from outside package'. Explicitly add <code>public</code> for cross-package utilities.</p>
-
-    <p><b>Why does overriding a parent method with narrower visibility like changing <code>public void click()</code> to <code>protected void click()</code> fail compilation?</b><br>
-    Java enforces Liskov Substitution rules on overridden methods: any caller holding a parent reference expects <code>public</code> access, so narrowing visibility on a child override breaks polymorphic calls and triggers 'attempting to assign weaker access privileges'. You may widen visibility (for example, <code>protected</code> to <code>public</code>), never narrow it.</p>
-
-    <p><b>Why can two instances of the exact same class read each other's <code>private</code> fields?</b><br>
-    In Java, <code>private</code> restricts visibility at the <b>class boundary</b>, not the individual object boundary. Inside <code>equals(Object o)</code> on <code>User</code>, casting to <code>User other</code> allows reading <code>other.id</code> directly even though <code>id</code> is <code>private</code>.</p>
-
-    <h3>Design choices</h3>
-
-    <p><b>Why should automated framework engineers start every new field or helper as <code>private</code> and widen only when needed?</b><br>
-    Minimizing surface area prevents external classes from accidentally coupling to internal fields or helper details. Once a member is made <code>public</code>, refactoring or removing it requires auditing the entire codebase; keeping helpers <code>private</code> or package-private preserves refactoring freedom.</p>
-
-    <p><b>When building a fluent Page Object API, why should low-level methods like <code>waitForElement(By)</code> be <code>protected</code> rather than <code>public</code>?</b><br>
-    Exposing low-level wait or click primitives publicly invites test authors to pass raw <code>By</code> locators inside <code>@Test</code> classes, eroding Page Object Model boundaries. Making those primitives <code>protected</code> in <code>BasePage</code> keeps them strictly inside the Page Object hierarchy.</p>
-
-    <p><b>Why do modern Java 16+ <code>record</code> classes make fields <code>private final</code> automatically?</b><br>
-    Records model immutable data carriers (like API response DTOs or test configuration pairs) where encapsulation forbids post-construction field tampering. Generating <code>private final</code> fields alongside read-only accessors enforces immutability with zero boilerplate.</p>
-  </section>
-
-  <section id="quick-answers">
-    <h2>Quick answers</h2>
-    <ol>
-      <li><b>What are Java's 4 access levels?</b> <code>private</code>, default (package-private), <code>protected</code>, and <code>public</code>.</li>
-      <li><b>Which keyword applies package-private visibility?</b> No keyword at all (omitting any access modifier).</li>
-      <li><b>Can an overridden method have narrower visibility than the parent method?</b> No; it can only keep the same visibility or widen it.</li>
-      <li><b>What visibility modifier should Page Object <code>By</code> locators use?</b> <code>private final</code>.</li>
-      <li><b>What access modifiers are legal on a top-level class?</b> <code>public</code> or package-private only.</li>
-      <li><b>What is the difference between package-private and <code>protected</code>?</b> <code>protected</code> additionally grants access to subclasses residing in different packages.</li>
-    </ol>
-  </section>
-
-  <section id="next-topic" class="qa-footer-nav" style="margin-top:28px;border-top:1px solid var(--border);padding-top:20px;">
-    <p><b>Next topic:</b> <a href="java-keywords-static-final-this-super.html">4.4 Core Keywords: static, final, this, super & instanceof &rarr;</a></p>
-    <a class="qa-chip" href="../index.html#Java">&larr; Back to Java Track</a>
-  </section>
+    <p>&larr; Previous: <a href="java-constructors-chaining-singleton.html">4.2 Constructors: Default, Parameterized, Chaining &amp; Singleton</a> &middot; Next: <a href="java-keywords-static-final-this-super.html">4.4 Core Keywords: static, final, this, super &amp; instanceof &rarr;</a></p></section>
 </article>
 </div>
-<footer></footer>
+<footer>SDET Explainer</footer>
 <script src="../app.js"></script>
 </body>
 </html>
