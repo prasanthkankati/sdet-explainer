@@ -11,80 +11,170 @@
 <p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-operators-control-flow-loops.html">&larr; Back to Concept Page: J2.4 Operators, Control Flow &amp; Loops</a></p>
 <article>
   <span class="tag Interview">Interview</span>
-  <h1>J2.4 Question Bank: Operators, Control Flow &amp; Loops (21 Questions)</h1>
+  <h1>J2.4 Question Bank: Operators, Control Flow &amp; Loops (35 Questions)</h1>
 
-  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q7)</h2>
     <ol>
-      <li><b>What is the difference between <code>&amp;&amp;</code> and <code>&amp;</code> in Java?</b><br>
-      When applied to booleans, <code>&amp;&amp;</code> (logical short-circuit AND) evaluates the left expression first and skips the right expression completely if the left side is <code>false</code>. Single <code>&amp;</code> evaluates both sides unconditionally and also functions as a bitwise AND operator on integers. For null checks like <code>driver != null &amp;&amp; driver.getTitle().contains("QKart")</code>, only <code>&amp;&amp;</code> prevents <code>NullPointerException</code>.</li>
+      <li><b>What is the mechanical difference between <code>&amp;&amp;</code> (logical short-circuit AND) and <code>&amp;</code> (bitwise / non-short-circuit AND)?</b><br>
+      <code>&amp;&amp;</code> evaluates the left operand first. If the left operand evaluates to <code>false</code>, the JVM immediately skips evaluating the right-hand operand because the result is guaranteed to be false. Single <code>&amp;</code> evaluates both operands unconditionally regardless of the left operand's outcome, and also functions as a bitwise AND operator on integers. In Selenium null guards like <code>if (element != null &amp;&amp; element.isDisplayed())</code>, using single <code>&amp;</code> results in a fatal <code>NullPointerException</code> if <code>element</code> is null.</li>
 
-      <li><b>How do <code>while</code> and <code>do-while</code> loops differ?</b><br>
-      A <code>while</code> loop evaluates its boolean condition before entering the loop body, meaning the body executes zero times if the condition starts out <code>false</code>. A <code>do-while</code> loop runs its body first and evaluates the condition at the bottom, guaranteeing at least one execution. Pagination helpers often use <code>do-while</code> to inspect page 1 before checking if a Next button is enabled.</li>
+      <li><b>How do <code>while</code> loops and <code>do-while</code> loops differ in execution guarantees?</b><br>
+      A <code>while</code> loop is an entry-condition loop: it evaluates its boolean condition prior to executing the loop body. If the condition begins as <code>false</code>, the body executes zero times. A <code>do-while</code> loop is an exit-condition loop: it executes the body first and evaluates the condition at the bottom, guaranteeing at least one execution pass. In UI testing, <code>do-while</code> is frequently used to scrape page 1 before checking if a "Next" pagination button exists.</li>
 
-      <li><b>What is the difference between <code>break</code> and <code>continue</code> inside a loop?</b><br>
-      <code>break</code> terminates the enclosing loop entirely and resumes execution at the first statement after the loop. <code>continue</code> aborts only the current pass through the loop body and jumps immediately to the next iteration's update/condition check. Neither keyword exits the enclosing method itself—use <code>return</code> for that.</li>
+      <li><b>Contrast the behavior of <code>break</code>, <code>continue</code>, and <code>return</code> within a loop.</b><br>
+      <code>break</code> immediately terminates the innermost enclosing loop or switch block and transfers execution to the first statement following the loop. <code>continue</code> aborts only the remaining statements in the current iteration, jumping straight to the loop's update step or condition check. <code>return</code> exits the entire enclosing method, destroying the current Stack Frame and returning control (and an optional value) to the caller.</li>
+
+      <li><b>What data types are legally permitted as selector expressions in a Java <code>switch</code> statement?</b><br>
+      Java permits 4 primitive types (<code>byte</code>, <code>short</code>, <code>int</code>, <code>char</code>), their corresponding wrapper classes (<code>Byte</code>, <code>Short</code>, <code>Integer</code>, <code>Character</code>), <code>java.lang.String</code>, and <code>enum</code> types. Floating-point primitives (<code>float</code>, <code>double</code>), <code>long</code>, and <code>boolean</code> are strictly forbidden as switch selectors.</li>
+
+      <li><b>Explain operator precedence between <code>!</code>, <code>&amp;&amp;</code>, and <code>||</code>. Give an example of an SDET logic bug caused by precedence.</b><br>
+      Unary logical NOT (<code>!</code>) has the highest precedence, followed by conditional AND (<code>&amp;&amp;</code>), followed by conditional OR (<code>||</code>). Writing <code>isWarning || isError &amp;&amp; shouldFail</code> evaluates as <code>isWarning || (isError &amp;&amp; shouldFail)</code>. If the engineer intended <code>(isWarning || isError) &amp;&amp; shouldFail</code>, the test will incorrectly trigger whenever <code>isWarning</code> is true, ignoring <code>shouldFail</code> entirely.</li>
+
+      <li><b>What is the difference between prefix increment (<code>++i</code>) and postfix increment (<code>i++</code>) at the bytecode / operand stack level?</b><br>
+      Both increment the variable by 1 in local variable memory. However, prefix increment (<code>++i</code>) increments the value first and then pushes the new incremented value onto the operand stack for evaluation. Postfix increment (<code>i++</code>) pushes the current original value onto the operand stack first, and then executes the local variable increment in memory.</li>
+
+      <li><b>How does a compound assignment operator like <code>b += 5;</code> handle data types differently than <code>b = b + 5;</code> when <code>b</code> is a <code>byte</code>?</b><br>
+      In <code>b = b + 5;</code>, binary addition promotes the operands to <code>int</code>, producing an <code>int</code> result of <code>15</code>, which causes a compile error because an <code>int</code> cannot be assigned to a <code>byte</code> without an explicit cast. In contrast, compound assignment <code>b += 5;</code> automatically injects an implicit narrowing cast: <code>b = (byte)(b + 5);</code>, compiling cleanly.</li>
     </ol></section>
-  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
-    <ol start="4">
-      <li><b>Explain operator precedence pitfalls between <code>!</code>, <code>&amp;&amp;</code>, and <code>||</code>.</b><br>
-      Unary negation <code>!</code> binds tightest, <code>&amp;&amp;</code> binds tighter than <code>||</code>, and assignment <code>=</code> binds last. Writing <code>a || b &amp;&amp; c</code> evaluates as <code>a || (b &amp;&amp; c)</code> even if the author intended <code>(a || b) &amp;&amp; c</code>. Adding explicit parentheses around compound boolean checks prevents subtle logic defects.</li>
 
-      <li><b>How do Java 14+ arrow switch expressions eliminate fall-through bugs?</b><br>
-      With arrow labels (<code>case "chrome" -&gt; new ChromeDriver();</code>), only the single expression or block to the right of the arrow executes, and control exits the switch automatically without needing <code>break</code>. Comma-separated labels (<code>case "chrome", "chromium" -&gt; ...</code>) handle shared branches cleanly. If a switch expression assigns to a variable, the compiler also enforces exhaustiveness via <code>default</code>.</li>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q8&ndash;Q14)</h2>
+    <ol start="8">
+      <li><b>How does the CPU and JVM execute short-circuit evaluation at the bytecode instruction level?</b><br>
+      The JVM compiles <code>conditionA &amp;&amp; conditionB</code> into a conditional branch instruction such as <code>ifeq</code> (jump if equal to zero/false). If <code>conditionA</code> produces <code>0</code> (false), the CPU immediately updates the Program Counter (PC) Register with the memory offset past <code>conditionB</code>, skipping the instructions for <code>conditionB</code> entirely.</li>
 
-      <li><b>How does a labeled <code>break outer;</code> behave inside nested loops?</b><br>
-      By placing a label like <code>outer:</code> directly above an outer <code>for</code> loop, a nested inner loop can execute <code>break outer;</code> to exit both loops simultaneously instead of only escaping the inner loop. This removes the need for awkward boolean exit flags when scanning a 2D HTML table for a target cell.</li>
+      <li><b>What happens inside the CPU's Arithmetic Logic Unit (ALU) when executing relational comparisons like <code>a == b</code> or <code>a &lt; b</code>?</b><br>
+      The ALU performs a subtraction operation: <code>a - b</code>. It does not store the arithmetic result; instead, it updates the CPU's internal Status/Flags Register:
+      * If <code>a - b == 0</code>, the CPU sets the <b>Zero Flag (ZF = 1)</b>, indicating equality.
+      * If <code>a - b &lt; 0</code>, the CPU sets the <b>Sign Flag (SF = 1)</b>, indicating that <code>a</code> is less than <code>b</code>.
+      Subsequent conditional jump instructions (such as <code>je</code> or <code>jl</code> in x86, or <code>if_icmpeq</code> in JVM bytecode) read these CPU hardware flags to branch execution.</li>
+
+      <li><b>How does Java 14+ arrow <code>switch</code> syntax eliminate fall-through defects at compile time?</b><br>
+      Classic colon <code>switch</code> syntax relies on C-style fall-through semantics where execution cascades across cases unless an explicit <code>break;</code> is encountered. Java 14+ arrow syntax (<code>case "chrome" -&gt; ...</code>) introduces rule-based branch isolation: only the single expression, statement, or block to the right of the arrow executes, making accidental fall-through physically impossible at the syntax level.</li>
+
+      <li><b>Explain how a labeled <code>break outer;</code> statement operates at the JVM bytecode jump level.</b><br>
+      A labeled loop associates an identifier with the start and end offsets of a loop block. When the JVM compiler encounters <code>break outer;</code> inside an inner nested loop, it calculates the instruction offset directly following the <i>outer</i> loop's termination and emits an unconditional jump instruction (<code>goto &lt;outer_exit_offset&gt;</code>), bypassing both inner and outer loop control frames in a single instruction.</li>
+
+      <li><b>What bytecode instruction is generated when compiling an enhanced <code>for-each</code> loop over an array versus an <code>ArrayList</code>?</b><br>
+      For an array (e.g. <code>int[]</code>), the compiler transforms the enhanced for-loop into a classic index-based loop using an internal counter with array length check (<code>arraylength</code>) and array element load (<code>iaload</code> / <code>aaload</code>). For a collection (like <code>ArrayList</code>), the compiler translates the loop into an explicit <code>Iterator</code> sequence: invoking <code>list.iterator()</code>, checking <code>iterator.hasNext()</code>, and extracting elements via <code>iterator.next()</code>.</li>
+
+      <li><b>Why does integer division <code>5 / 2</code> evaluate to <code>2</code> rather than <code>2.5</code>? How does CPU integer division handle remainders?</b><br>
+      At the hardware level, the CPU's ALU contains dedicated integer division circuitry (e.g. the <code>idiv</code> instruction in x86 and JVM bytecode). Integer division stores the whole quotient in one CPU register and drops or isolates the remainder in a separate register (accessible only via modulus <code>%</code>). The fractional part is truncated toward zero without rounding. Floating-point division requires at least one IEEE 754 operand (e.g. <code>5 / 2.0</code>).</li>
+
+      <li><b>Explain the ternary operator auto-unboxing trap: why does <code>Integer val = condition ? 1 : null;</code> throw <code>NullPointerException</code> when condition is false?</b><br>
+      According to the Java Language Specification (JLS §15.25), if one branch of a ternary conditional operator is a numeric primitive (<code>1</code> is an <code>int</code>) and the other branch is a wrapper or <code>null</code>, the entire conditional expression is subject to numeric type promotion, converting the result type to primitive <code>int</code>. When <code>condition</code> is <code>false</code>, Java evaluates the <code>null</code> branch and immediately attempts to auto-unbox it to primitive <code>int</code> by calling <code>.intValue()</code> on <code>null</code>, triggering an instant <code>NullPointerException</code> before assignment.</li>
     </ol></section>
-  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
-    <ol start="7">
-      <li><b>In Selenium, when should you choose an index-based <code>for (int i = 0; ...)</code> loop over an enhanced <code>for-each</code> loop?</b><br>
-      Use enhanced <code>for-each</code> when reading every element sequentially without needing its position, including collecting text from <code>List&lt;WebElement&gt;</code> product titles. Choose a classic indexed <code>for</code> loop when you need the numeric row/column index to construct a dynamic XPath like <code>//tr[" + (i + 1) + "]/td[3]</code> or to avoid <code>StaleElementReferenceException</code> by re-fetching elements by index.</li>
 
-      <li><b>How does short-circuit <code>||</code> help in fallback locator or retry checks?</b><br>
-      In <code>isVisible(primaryLocator) || isVisible(fallbackLocator)</code>, if the primary locator succeeds and returns <code>true</code>, Java skips evaluating <code>isVisible(fallbackLocator)</code> completely. This prevents paying an unnecessary implicit or explicit wait timeout on the fallback locator when the primary locator already matched.</li>
+  <section><h2>Tier 3: Practical Selenium Automation &amp; Framework Scenarios (Q15&ndash;Q21)</h2>
+    <ol start="15">
+      <li><b>When iterating through a dynamic list of <code>WebElement</code> cards, when should you choose a classic indexed <code>for</code> loop over an enhanced <code>for-each</code> loop?</b><br>
+      Choose a classic indexed <code>for (int i = 0; i &lt; items.size(); i++)</code> loop when you need the numerical index <code>i</code> to construct dynamic positional XPaths (e.g., <code>//div[@class='card'][" + (i + 1) + "]//button</code>) or when mitigating <code>StaleElementReferenceException</code> by re-fetching the element by index from the driver after interacting with a previous element on the page. Enhanced <code>for-each</code> loops discard index positioning.</li>
 
-      <li><b>Why does <code>String flag = headless ? "--headless=new" : "";</code> keep Page Object setup concise?</b><br>
-      The ternary operator assigns a conditional configuration value in a single expression without declaring an uninitialized mutable variable beforehand. It allows marking the target variable <code>final</code> immediately at declaration.</li>
+      <li><b>How does short-circuit <code>||</code> optimize fallback locator strategies in Selenium Page Objects?</b><br>
+      In fallback locator checking: <code>if (isElementPresent(primaryBy) || isElementPresent(secondaryBy))</code>, if the primary locator matches and returns <code>true</code>, short-circuit evaluation skips the right operand completely. This prevents the framework from incurring an expensive wait timeout against the secondary fallback locator when the primary element was already located.</li>
+
+      <li><b>How do you implement a robust web pagination loop in Selenium that guarantees termination if the "Next" button breaks?</b><br>
+      Always combine a boolean condition with a bounded safety counter:
+<pre><code>int page = 1;
+final int MAX_PAGES = 15;
+while (page &lt;= MAX_PAGES) {
+    scrapeCurrentPageData();
+    List&lt;WebElement&gt; nextBtn = driver.findElements(By.cssSelector("button.next"));
+    if (!nextBtn.isEmpty() &amp;&amp; nextBtn.get(0).isEnabled()) {
+        nextBtn.get(0).click();
+        page++;
+    } else {
+        break; // Clean termination on last page
+    }
+}</code></pre></li>
+
+      <li><b>How do you use a labeled loop to scan a 2D HTML web table (rows and columns) and click a specific cell without unnecessary iterations?</b><br>
+      Place a label on the outer row loop. As soon as the matching column text is identified, perform the click and execute a labeled break:
+<pre><code>rowScan:
+for (WebElement row : tableRows) {
+    for (WebElement cell : row.findElements(By.tagName("td"))) {
+        if (cell.getText().trim().equalsIgnoreCase("QKart Admin")) {
+            row.findElement(By.xpath(".//input[@type='checkbox']")).click();
+            break rowScan; // Immediately terminates both row and column loops
+        }
+    }
+}</code></pre></li>
+
+      <li><b>In a multi-browser DriverFactory, how does a modern Java 14+ arrow <code>switch</code> expression improve maintainability over classic <code>if-else</code> chains?</b><br>
+      Arrow <code>switch</code> expressions enforce compile-time branch exhaustiveness, eliminate fall-through defects, permit comma-separated aliases (<code>case "chrome", "google-chrome" -&gt;</code>), and allow returning the constructed <code>WebDriver</code> instance directly as an expression, reducing cyclomatic complexity.</li>
+
+      <li><b>How do you write a null-safe condition checking if a dynamic element returned by <code>driver.findElements()</code> is present and visible?</b><br>
+      Use short-circuit evaluation in strict order:
+<pre><code>List&lt;WebElement&gt; elements = driver.findElements(By.id("banner"));
+boolean isVisible = !elements.isEmpty() &amp;&amp; elements.get(0) != null &amp;&amp; elements.get(0).isDisplayed();</code></pre>
+      If the list is empty, <code>!elements.isEmpty()</code> short-circuits to <code>false</code>, never executing <code>.get(0)</code> or <code>.isDisplayed()</code>.</li>
+
+      <li><b>How do you handle <code>StaleElementReferenceException</code> when iterating over a list of elements that mutate upon interaction?</b><br>
+      Use an indexed <code>for</code> loop and re-query the list of WebElements from the driver inside the loop body using the same locator, accessing the target by index <code>i</code> rather than holding onto stale element references acquired before DOM re-renders.</li>
     </ol></section>
-  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
-    <ol start="10">
-      <li><b>Why did a DriverFactory <code>switch (browser)</code> pass Chrome into FirefoxDriver initialization?</b><br>
-      In a classic colon-syntax <code>switch</code> statement, omitting <code>break;</code> at the end of <code>case "chrome":</code> causes execution to fall straight into <code>case "firefox":</code>, overwriting the <code>driver</code> variable. Converting the factory to a modern arrow <code>switch</code> expression makes fall-through syntactically impossible.</li>
 
-      <li><b>Why does <code>for (int i = 0; i &lt;= rows.size(); i++)</code> crash on the final iteration?</b><br>
-      Zero-based Java collections and arrays index valid elements from <code>0</code> up to <code>size() - 1</code>. Using <code>&lt;=</code> attempts to access index <code>rows.size()</code> on the last pass and throws <code>IndexOutOfBoundsException</code>. Always use strict <code>&lt;</code> (<code>i &lt; rows.size()</code>).</li>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Flaky Test Traps (Q22&ndash;Q28)</h2>
+    <ol start="22">
+      <li><b>Why does omitting <code>break;</code> in a classic <code>switch</code> statement create ghost browser sessions in a Selenium framework?</b><br>
+      If <code>case "chrome": driver = new ChromeDriver();</code> lacks a <code>break;</code> statement, execution falls through into <code>case "firefox": driver = new FirefoxDriver();</code>. The ChromeDriver instance is instantiated and opens a visible Chrome browser window, but the variable reference is immediately overwritten by FirefoxDriver, leaving an orphaned Chrome process running in the OS background that consumes RAM and CPU.</li>
 
-      <li><b>Why does passing <code>null</code> into <code>switch (browser)</code> throw <code>NullPointerException</code>?</b><br>
-      Classic and standard <code>switch</code> statements call <code>browser.hashCode()</code> internally during dispatch, crashing immediately if the selector expression is <code>null</code>. Either validate <code>Objects.requireNonNullElse(browser, "chrome")</code> beforehand or use a Java 21 <code>case null -&gt;</code> branch.</li>
+      <li><b>What causes <code>IndexOutOfBoundsException</code> in Selenium table verification loops, and how do you prevent off-by-one errors?</b><br>
+      Writing <code>i &lt;= elements.size()</code> instead of <code>i &lt; elements.size()</code>. Java collections and arrays are zero-indexed, with the last valid element at index <code>size() - 1</code>. On the final loop iteration when <code>i == elements.size()</code>, invoking <code>elements.get(i)</code> throws <code>IndexOutOfBoundsException</code>. Always use strict inequality (<code>&lt;</code>).</li>
+
+      <li><b>Why does passing a <code>null</code> String variable into a <code>switch</code> statement throw <code>NullPointerException</code>? How do you defend against it?</b><br>
+      Under the hood, the JVM compiles <code>switch (String)</code> by calling <code>string.hashCode()</code> and <code>string.equals()</code> to branch execution. If the selector is <code>null</code>, calling <code>.hashCode()</code> on address <code>0x0</code> throws <code>NullPointerException</code>. Defend against this by sanitizing inputs with <code>Objects.requireNonNullElse(browser, "chrome")</code> or using a Java 21+ <code>case null -&gt;</code> branch.</li>
+
+      <li><b>What causes <code>ConcurrentModificationException</code> when removing items from a collection during an enhanced <code>for-each</code> loop? What is the correct pattern?</b><br>
+      The enhanced for-loop uses an <code>Iterator</code>. Directly calling <code>list.remove(item)</code> alters the collection's structure without notifying the iterator, which detects a mismatch in <code>modCount</code> and throws <code>ConcurrentModificationException</code>. The correct pattern is to use <code>Iterator.remove()</code> or Java 8's <code>list.removeIf(item -&gt; condition)</code>.</li>
+
+      <li><b>Why does an unbounded <code>while (element.isDisplayed())</code> loop cause CI/CD pipeline hangs in Jenkins / GitHub Actions?</b><br>
+      If an asynchronous AJAX request fails or a loading spinner freezes in the DOM, the condition <code>element.isDisplayed()</code> never flips to <code>false</code>. Without an explicit timeout or maximum attempt counter, the loop spins indefinitely, exhausting runner timeouts and stalling automated build pipelines.</li>
+
+      <li><b>Explain the bug in this assertion check: <code>if (!driver.getTitle().equals("QKart") || driver == null)</code>. Why does it crash?</b><br>
+      The order of operands is reversed. The logical short-circuit operator evaluates left-to-right. If <code>driver</code> is <code>null</code>, the program attempts to execute <code>driver.getTitle()</code> before ever reaching the <code>driver == null</code> check, crashing immediately with a <code>NullPointerException</code>. Correct order: <code>if (driver == null || !driver.getTitle().equals("QKart"))</code>.</li>
+
+      <li><b>Why does <code>byte b = 127; b++; System.out.println(b);</code> print <code>-128</code> without throwing an error? How does overflow impact loop counters?</b><br>
+      In Java, integer types use two's complement arithmetic and wrap around upon reaching their maximum value without throwing an overflow exception. If a loop counter is typed as <code>byte i = 0; while (i &lt;= 127) { i++; }</code>, when <code>i</code> reaches 127, <code>i++</code> wraps it to <code>-128</code>, causing the loop condition <code>i &lt;= 127</code> to remain perpetually true, creating an accidental infinite loop.</li>
     </ol></section>
-  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
-    <ol start="13">
-      <li><b>Why should complex nested <code>if-else</code> chains in DriverFactory or test helpers be replaced with <code>switch</code> expressions or early returns?</b><br>
-      Deeply nested <code>if-else</code> ladders increase cyclomatic complexity and make missing edge cases hard to spot in code reviews. Early-return guard clauses flatten nesting, while Java 14+ <code>switch</code> expressions enforce exhaustive handling at compile time.</li>
 
-      <li><b>Why should you avoid nesting multiple ternary operators inside a single expression?</b><br>
-      While single ternary expressions (<code>a ? b : c</code>) improve readability for simple defaults, chaining nested ternaries creates dense, error-prone precedence puzzles. Replace multi-branch ternary expressions with an <code>if-else</code> or <code>switch</code> expression.</li>
+  <section><h2>Tier 5: Senior/Staff SDET Design Choices &amp; Interview Rubrics (Q29&ndash;Q35)</h2>
+    <ol start="29">
+      <li><b>How does reducing cyclomatic complexity in test automation frameworks reduce flakiness and maintenance costs?</b><br>
+      Cyclomatic complexity measures the number of linearly independent paths through code. Deeply nested <code>if-else</code> structures in page objects and test listeners create combinatoric execution branches that are difficult to test and verify, increasing the likelihood that unexpected UI states fall into unhandled gaps. Flattening branching with guard clauses, arrow switches, and polymorphism makes tests deterministic and easily maintainable.</li>
 
-      <li><b>Why should a loop checking dynamic page state include a maximum iteration or timeout bound?</b><br>
-      Unbounded <code>while (true)</code> or <code>while (!ready)</code> loops hang a CI pipeline indefinitely if an AJAX call fails or a spinner freezes in the DOM. Always bound polling loops with a maximum attempt count or <code>Duration</code> deadline (preferring Selenium's built-in <code>WebDriverWait</code>).</li>
+      <li><b>When should you replace a complex <code>switch</code> statement or <code>if-else</code> ladder with polymorphism (Strategy Pattern) in test frameworks?</b><br>
+      When the set of cases grows beyond 4–5 branches and each branch contains unique setup logic (such as configuring ChromeOptions, FirefoxProfile, EdgeOptions, and SafariOptions). Instead of a bloated switch statement, implement a <code>DriverSupplier</code> interface with dedicated strategy classes (<code>ChromeDriverSupplier</code>, <code>FirefoxDriverSupplier</code>) registered in a Map factory. This adheres to the Open/Closed Principle (OCP).</li>
 
-      <li><b>Which operator skips the right side when the left side is <code>false</code>?</b><br>
-      <code>&amp;&amp;</code> (short-circuit logical AND).</li>
+      <li><b>Why is defensive programming with short-circuit operators preferred over <code>try-catch</code> blocks for presence checking in Selenium?</b><br>
+      Catching exceptions (like <code>NoSuchElementException</code>) introduces significant performance overhead: instantiating an exception captures the entire JVM thread stack trace, slowing down test execution by orders of magnitude when repeated across thousands of test cases. Using <code>driver.findElements(by).isEmpty()</code> leverages short-circuit checks, operates cleanly in memory, and produces zero exception generation overhead.</li>
 
-      <li><b>Which operator skips the right side when the left side is <code>true</code>?</b><br>
-      <code>||</code> (short-circuit logical OR).</li>
+      <li><b>In framework architecture, why are arrow <code>switch</code> expressions preferred over colon <code>switch</code> statements for test configuration parsing?</b><br>
+      Arrow switch expressions return values directly, allowing configuration variables to be declared <code>final</code> immediately upon initialization. They eliminate intermediate mutable state, enforce compiler-checked exhaustiveness with <code>default</code>, and eliminate fall-through defects.</li>
 
-      <li><b>How many times does a <code>do-while</code> loop execute at minimum?</b><br>
-      At least 1 time.</li>
+      <li><b>How does Project Amber's pattern matching in <code>switch</code> (Java 21+) modernize test event handling and API response mapping?</b><br>
+      Pattern matching allows switching directly on object types and extracting variables in a single step (e.g., <code>case SuccessResponse sr -&gt; handleSuccess(sr); case ErrorResponse er -&gt; handleError(er);</code>), eliminating manual <code>instanceof</code> checks and unsafe type casting when processing polymorphic API test responses.</li>
 
-      <li><b>What happens when <code>break</code> is omitted in a classic <code>switch</code> case?</b><br>
-      Execution falls through into the next <code>case</code> block.</li>
+      <li><b>How should an SDET architect a retry loop for flaky network requests without creating infinite hangs?</b><br>
+      Implement an exponential backoff loop bounded by both a maximum attempt count and an elapsed duration ceiling:
+<pre><code>int attempts = 0;
+long waitMs = 500;
+while (attempts &lt; 3) {
+    try {
+        Response res = executeApiCall();
+        if (res.getStatusCode() == 200) return res;
+    } catch (Exception e) {
+        attempts++;
+        Thread.sleep(waitMs);
+        waitMs *= 2; // Exponential backoff: 500ms, 1000ms, 2000ms
+    }
+}
+throw new RuntimeException("API failed after 3 retry attempts");</code></pre></li>
 
-      <li><b>How do you exit both outer and inner loops at once in Java?</b><br>
-      Use a labeled <code>break labelName;</code> statement.</li>
-
-      <li><b>Does Java 14+ arrow syntax (<code>case "x" -&gt; ...</code>) fall through?</b><br>
-      No, fall-through is impossible with arrow labels.</li>
+      <li><b>Senior SDET Evaluation Rubric: How would you evaluate a candidate who validates an element's visibility using <code>try { return el.isDisplayed(); } catch (Exception e) { return false; }</code> vs <code>!driver.findElements(by).isEmpty() &amp;&amp; driver.findElement(by).isDisplayed()</code>?</b><br>
+      <ul>
+        <li><b>Junior Answer:</b> "Both work. The try-catch is safer because it catches any error." (Fails to understand exception overhead, implicit wait penalties, and locator design).</li>
+        <li><b>Mid-Level Answer:</b> "The <code>findElements</code> approach is better because it avoids throwing <code>NoSuchElementException</code>. Try-catch is slow because generating exceptions wastes memory." (Understands exception performance, but may miss implicit wait timing).</li>
+        <li><b>Senior/Staff Answer:</b> "Using <code>try-catch</code> with <code>findElement</code> forces the driver to pause for the full implicit wait timeout before failing, dramatically bloating suite runtime. Furthermore, catching raw <code>Exception</code> masks fatal session crashes (like <code>NoSuchSessionException</code>) as mere element absences. The <code>findElements(by).isEmpty()</code> short-circuit pattern executes immediately, allocates zero exception stack traces, and distinguishes between element absence and actual browser failure."</li>
+      </ul></li>
     </ol></section>
 
   <section><h2>Navigation</h2>

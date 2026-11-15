@@ -1164,9 +1164,9 @@ const TOPICS = [
     track: "Interview",
     section: "I-J2. Java: Core Java Fundamentals Q&A",
     order: 4,
-    title: "J2.4 Q&A: Operators, Control Flow & Loops (21 Questions)",
+    title: "J2.4 Q&A: Operators, Control Flow & Loops (35 Questions)",
     file: "interview-j2-4-qa.html",
-    summary: "21 interview questions across 5 tiers: Basics, How it works, Real situations, Troubleshooting & Design choices.",
+    summary: "35 questions across 5 tiers: ALU branching, short-circuit bytecode, arrow switch expressions, pagination while loops, labeled breaks & senior evaluation rubrics.",
     keywords: "java J2.4 interview questions, operators, control flow & loops",
     status: "done",
     date: "2026-11-15"

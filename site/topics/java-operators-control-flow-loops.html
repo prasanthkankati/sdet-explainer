@@ -13,105 +13,239 @@
   <span class="tag Java">Java</span>
   <h1>2.4 Operators, Control Flow &amp; Loops</h1>
 
-  <section><h2>1. Definition</h2>
-    <p class="def">Short-circuit operators skip unnecessary right-hand checks when the result is already known, and loops walk fixed counts, element collections, or retry conditions with break/continue.</p></section>
+  <section><h2>1. The Root Problem &amp; Complete Technical Definition</h2>
+    <p class="def">Operators and control flow statements are the decision-making and execution-steering mechanisms of the Java Virtual Machine, allowing an automation program to manipulate scalar bits, evaluate conditional branches at the CPU instruction level, and iterate over collections of web elements without crashing or entering infinite execution loops.</p>
+    <p>In test automation engineering, test scripts cannot execute in a single rigid, straight line. Web applications are dynamic, asynchronous, and state-dependent. Test automation frameworks must evaluate boolean conditions (such as whether an element is visible before interacting), branch dynamically based on configuration environments (such as selecting Chrome, Firefox, or Edge), and iterate through variable-length lists of DOM elements (such as extracting all product prices on a search page). If an engineer misunderstands how operators evaluate or how loops terminate, tests either crash with <code>NullPointerException</code> or hang CI/CD pipelines indefinitely inside infinite loops.</p></section>
 
-  <section><h2>2. Memory hook</h2>
-    <p><b>&amp;&amp; stops on first false, || stops on first true — &amp; and | evaluate both sides.</b></p>
-    <ul>
-      <li><b>Null-safe guard:</b> <code>if (el != null &amp;&amp; el.isDisplayed())</code> skips <code>el.isDisplayed()</code> when <code>el</code> is null.</li>
-      <li><b>Choose the right loop:</b> <code>for (int i)</code> when you need indexes, enhanced <code>for (T x : list)</code> when scanning items, <code>while</code> when waiting for a state.</li>
-      <li><b>Modern <code>switch -&gt;</code> (Java 14+):</b> arrow syntax returns values directly with zero accidental fall-through.</li>
-    </ul></section>
+  <section><h2>2. Foundational Architecture: Physical Hardware, the ALU &amp; CPU Branch Prediction</h2>
+    <p>To write bulletproof test logic, you must understand how computer hardware physically computes expressions and branches execution.</p>
 
-  <section><h2>3. Short-circuit evaluation &amp; loop chooser</h2>
+    <p><b>The Arithmetic Logic Unit (ALU):</b><br>
+    Inside the Central Processing Unit (CPU) silicon sits the <b>Arithmetic Logic Unit (ALU)</b>. The ALU is a digital electronic circuit dedicated to performing arithmetic calculations (addition, subtraction, multiplication) and logical operations (AND, OR, NOT, comparisons). When your Java program executes an expression like <code>retryCount + 1</code> or compares <code>actualStatus == 200</code>, the CPU loads the values from Stack memory into internal CPU registers, and the ALU executes the operation in a single clock cycle.</p>
+
     <div class="arch">
-      <div class="lbl">Control Flow Decision Map</div>
-      <div class="note">Stop-early checks prevent crashes; loop choice matches what you iterate.</div>
+      <div class="lbl">CPU Branching &amp; Program Counter (PC) Register Jump</div>
       <div class="cols">
-        <div class="item"><b>Short-Circuit <code>&amp;&amp; / ||</code></b><span>Stops right away once left side decides outcome</span></div>
-        <div class="item"><b>Index <code>for (i=0; i&lt;n; i++)</code></b><span>Best for clicking N items by index or step size</span></div>
-        <div class="item"><b>For-Each <code>for (WebElement e : els)</code></b><span>Cleanest scan over every returned element</span></div>
+        <div class="item"><b>1. ALU Condition Evaluation</b><span>The ALU subtracts operand B from A. If the result is 0, the CPU sets the internal <b>Zero Flag (ZF = 1)</b> in the Status Register, signifying equality.</span></div>
+        <div class="item"><b>2. Bytecode Branch Instruction</b><span>Bytecode instruction (e.g. <code>ifeq</code> or <code>if_icmpne</code>) reads the Zero Flag. If condition is met, the CPU overrides the <b>Program Counter (PC) Register</b> with a new target memory address.</span></div>
       </div>
-      <div class="flow">branch cleanly without fall-through using</div>
-      <div class="arch">
-        <div class="lbl">Java 14+ Switch Expression <small>zero missing break bugs</small></div>
-        <div class="cols">
-          <div class="item"><b><code>case "chrome" -&gt; new ChromeDriver();</code></b><span>No <code>break;</code> needed; arrow returns value cleanly</span></div>
-        </div>
+    </div>
+
+    <p><b>What Happens During Short-Circuit Evaluation at the Hardware Level?</b><br>
+    In Java, the logical operators <code>&amp;&amp;</code> (conditional AND) and <code>||</code> (conditional OR) perform <b>short-circuit evaluation</b>. 
+    At the CPU level, short-circuiting is implemented as an immediate conditional branch (jump):
+    * For <code>conditionA &amp;&amp; conditionB</code>: The CPU evaluates <code>conditionA</code>. If <code>conditionA</code> evaluates to <code>false</code> (Zero Flag is not set), the JVM executes an immediate jump instruction (<code>ifeq</code>) skipping the evaluation of <code>conditionB</code> entirely.
+    * For <code>conditionA || conditionB</code>: If <code>conditionA</code> evaluates to <code>true</code>, the JVM immediately jumps past <code>conditionB</code> without executing it.
+    This hardware-level jump is what makes the classic SDET null-guard possible:
+    <code>if (element != null &amp;&amp; element.isDisplayed())</code>. If <code>element</code> is <code>null</code>, the CPU skips <code>element.isDisplayed()</code> completely, preventing the CPU from attempting to dereference memory address <code>0x00000000</code> and avoiding a fatal <code>NullPointerException</code>.</p></section>
+
+  <section><h2>3. Complete Enumeration: All Java Operators Categorized</h2>
+    <p>Java classifies operators into distinct functional categories. Every SDET must master each category without gaps:</p>
+
+    <p><b>1. Arithmetic Operators (Binary &amp; Unary):</b><br>
+    - <code>+</code> (Addition / String Concatenation) &middot; <code>-</code> (Subtraction) &middot; <code>*</code> (Multiplication) &middot; <code>/</code> (Division) &middot; <code>%</code> (Modulus / Remainder).<br>
+    <i>Critical Rule:</i> Integer division truncates the fractional decimal part toward zero: <code>5 / 2</code> evaluates to <code>2</code>. To retain precision, at least one operand must be a floating-point type: <code>5 / 2.0</code> evaluates to <code>2.5</code>.</p>
+
+    <p><b>2. Relational &amp; Comparison Operators:</b><br>
+    - <code>==</code> (Equal to) &middot; <code>!=</code> (Not equal to) &middot; <code>&gt;</code> (Greater than) &middot; <code>&lt;</code> (Less than) &middot; <code>&gt;=</code> (Greater than or equal) &middot; <code>&lt;=</code> (Less than or equal).<br>
+    <i>Critical Rule:</i> For primitives, <code>==</code> compares raw binary scalar values. For objects, <code>==</code> compares hexadecimal Heap memory addresses.</p>
+
+    <p><b>3. Logical &amp; Bitwise Operators:</b><br>
+    - <code>&amp;&amp;</code> (Logical Short-Circuit AND): Evaluates right-hand side ONLY if left-hand side is <code>true</code>.<br>
+    - <code>||</code> (Logical Short-Circuit OR): Evaluates right-hand side ONLY if left-hand side is <code>false</code>.<br>
+    - <code>!</code> (Logical NOT / Inversion): Inverts a boolean condition.<br>
+    - <code>&amp;</code> (Non-Short-Circuit / Bitwise AND): Evaluates both operands unconditionally.<br>
+    - <code>|</code> (Non-Short-Circuit / Bitwise OR): Evaluates both operands unconditionally.</p>
+
+    <p><b>4. Assignment &amp; Compound Assignment Operators:</b><br>
+    - Simple: <code>=</code><br>
+    - Compound: <code>+=</code>, <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>%=</code>.<br>
+    <i>Critical Rule:</i> Compound assignment operators automatically insert an <b>implicit narrowing cast</b>: <code>byte b = 10; b += 5;</code> compiles cleanly because it translates to <code>b = (byte)(b + 5);</code>, whereas <code>b = b + 5;</code> fails at compile time because <code>b + 5</code> promotes to <code>int</code>.</p>
+
+    <p><b>5. Increment and Decrement Operators (Prefix vs Postfix):</b><br>
+    - Prefix (<code>++x</code>, <code>--x</code>): Increments the variable first, then evaluates the updated value in the expression.<br>
+    - Postfix (<code>x++</code>, <code>x--</code>): Evaluates the current value in the expression first, then increments the variable in memory.</p>
+
+    <p><b>6. Ternary Conditional Operator (<code>condition ? expr1 : expr2</code>):</b><br>
+    An inline expression returning <code>expr1</code> if <code>condition</code> is true, or <code>expr2</code> if false.<br>
+    <i>Critical Rule:</i> If one branch is a primitive and the other is a wrapper or <code>null</code>, Java promotes the entire expression to the primitive type, auto-unboxing <code>null</code> and crashing with <code>NullPointerException</code>.</p>
+
+    <p><b>7. Type Comparison Operator (<code>instanceof</code>):</b><br>
+    Tests whether an object reference implements an interface or inherits from a class. In modern Java 16+, pattern matching eliminates manual downcasting: <code>if (driver instanceof TakesScreenshot ts) { ts.getScreenshotAs(...); }</code>.</p></section>
+
+  <section><h2>4. Control Flow: Branching &amp; Decision-Making Constructs</h2>
+    <p>Java provides two primary decision-making structures to steer execution based on dynamic conditions:</p>
+
+    <p><b>1. <code>if</code>, <code>else if</code>, and <code>else</code> Chains:</b><br>
+    Evaluates sequential boolean expressions from top to bottom. As soon as one branch evaluates to <code>true</code>, its block executes, and all remaining branches are skipped.</p>
+
+    <p><b>2. Classic Colon <code>switch</code> Statement vs Modern Java 14+ Arrow <code>switch</code> Expression:</b><br>
+    The <code>switch</code> statement matches a selector variable against multiple constant values. Supported selector types: <code>byte</code>, <code>short</code>, <code>int</code>, <code>char</code>, their corresponding wrapper classes, <code>String</code>, and <code>enum</code>.</p>
+
+    <div class="arch">
+      <div class="lbl">Classic Colon Switch vs Modern Java 14+ Arrow Switch Expression</div>
+      <div class="cols">
+        <div class="item"><b>Classic Colon Syntax (Bug-Prone)</b><span>Requires explicit <code>break;</code> on every branch.<br><b>Danger:</b> Forgetting <code>break;</code> causes execution to fall through into the next case, executing unwanted driver initialization!</span></div>
+        <div class="item"><b>Modern Arrow Syntax (Java 14+ Standard)</b><span>Uses <code>case "chrome" -&gt;</code> arrow notation.<br><b>Advantage:</b> Zero fall-through possible. Returns values directly as an expression. Enforces exhaustiveness via <code>default</code>.</span></div>
       </div>
-    </div></section>
+    </div>
 
-  <section><h2>4. Loop types &amp; break/continue at a glance</h2>
-    <table>
-      <tr><th>Construct</th><th>Runs When</th><th>Best Used For</th><th>Danger</th></tr>
-      <tr><td><b>Indexed <code>for</code></b></td><td>Known count / need position <code>i</code></td><td>Compare two lists index-by-index</td><td>Off-by-one <code>i &lt;= len</code></td></tr>
-      <tr><td><b>Enhanced <code>for</code></b></td><td>Every item in array / <code>Iterable</code></td><td>Reading text of all QKart products</td><td>Removing items throws <code>ConcurrentModificationException</code></td></tr>
-      <tr><td><b><code>while</code> / <code>do-while</code></b></td><td>Condition stays true</td><td>Polling / next-page pagination until disabled</td><td>Infinite loop if state never flips</td></tr>
-      <tr><td><b><code>break</code> vs <code>continue</code></b></td><td>Inside loop body</td><td><code>break</code> exits loop; <code>continue</code> jumps to next lap</td><td>Skipping loop counter in <code>while</code></td></tr>
-    </table></section>
+<pre><code>// Modern Java 14+ Arrow Switch Expression in a Selenium DriverFactory:
+public static WebDriver createDriver(String browser) {
+    return switch (browser.toLowerCase().trim()) {
+        case "chrome", "google-chrome" -&gt; new ChromeDriver();
+        case "firefox", "mozilla"      -&gt; new FirefoxDriver();
+        case "edge", "msedge"          -&gt; new EdgeDriver();
+        default -&gt; throw new IllegalArgumentException("Unsupported browser: " + browser);
+    };
+}</code></pre></section>
 
-  <section><h2>5. Code example: short-circuit safety, arrow switch &amp; Selenium pagination</h2>
-<pre><code>import java.util.List;
+  <section><h2>5. Looping Constructs: The 4 Loops &amp; Jump Statements</h2>
+    <p>Java provides exactly <b>4 looping structures</b> to repeat code execution:</p>
 
-public class FlowControlDemo {
-    static String browserUrl(String env) {
-        return switch (env) {                             // Java 14+ switch expression (no break needed)
-            case "prod" -&gt; "https://www.selenium.dev/";
-            case "qa"   -&gt; "https://qkart-qa-web.labs.crio.do/";
-            default     -&gt; throw new IllegalArgumentException("Unknown env: " + env);
+    <p><b>1. Classic Indexed <code>for</code> Loop:</b><br>
+    <code>for (initialization; terminationCondition; updateStep) { ... }</code><br>
+    Used when the iteration count is known in advance or when the numerical index <code>i</code> is required to build dynamic locators (e.g. <code>//table/tbody/tr[" + (i + 1) + "]</code>).</p>
+
+    <p><b>2. Enhanced <code>for-each</code> Loop:</b><br>
+    <code>for (ElementType element : iterableCollection) { ... }</code><br>
+    Used to traverse arrays and classes implementing <code>java.lang.Iterable</code> (such as <code>List&lt;WebElement&gt;</code>). Internally compiled to an <code>Iterator</code>. Attempting to structurally modify (add/remove) the collection during iteration throws <code>ConcurrentModificationException</code>.</p>
+
+    <p><b>3. <code>while</code> Loop (Entry-Condition Loop):</b><br>
+    <code>while (condition) { ... }</code><br>
+    Evaluates its boolean condition <i>before</i> entering the loop body. If the condition is false initially, the body executes zero times. Ideal for polling asynchronous states and web pagination.</p>
+
+    <p><b>4. <code>do-while</code> Loop (Exit-Condition Loop):</b><br>
+    <code>do { ... } while (condition);</code><br>
+    Executes its body <i>first</i>, then evaluates the condition at the bottom. <b>Guaranteed to execute at least once</b>, regardless of initial state.</p>
+
+    <p><b>Loop Jump Statements:</b><br>
+    - <code>break</code>: Terminates the innermost enclosing loop or switch immediately.<br>
+    - <code>continue</code>: Aborts only the current iteration and jumps directly to the loop's update step or condition check.<br>
+    - <b>Labeled <code>break</code> &amp; <code>continue</code> (<code>outer: for (...)</code>):</b> Allows escaping from deeply nested loops (such as searching a 2D web table matrix) in a single statement without messy boolean flags.</p></section>
+
+  <section><h2>6. Multi-Context Selenium Java &amp; SDET Framework Code Templates</h2>
+    <p>Below are 4 production-grade test automation implementations demonstrating operators, branching, and loops:</p>
+
+<pre><code>import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.edge.EdgeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.Assert;
+import java.util.List;
+
+public class FlowControlAutomationSuite {
+
+    // Context 1: Short-Circuit Null Guard in Page Object Locators
+    public boolean isWarningBannerDisplayed(WebDriver driver) {
+        List&lt;WebElement&gt; banners = driver.findElements(By.id("error-banner"));
+        
+        // SHORT-CIRCUIT GUARD:
+        // 1. If banners is empty, banners.get(0) is NEVER called (prevents IndexOutOfBoundsException).
+        // 2. If element is null, isDisplayed() is NEVER called (prevents NullPointerException).
+        return !banners.isEmpty() &amp;&amp; banners.get(0) != null &amp;&amp; banners.get(0).isDisplayed();
+    }
+
+    // Context 2: Modern Java 14+ Arrow Switch in Browser DriverFactory
+    public static WebDriver initializeDriver(String targetBrowser, boolean isHeadless) {
+        String cleanBrowser = (targetBrowser == null) ? "chrome" : targetBrowser.toLowerCase().trim();
+
+        return switch (cleanBrowser) {
+            case "chrome" -&gt; {
+                // Return configured ChromeDriver
+                yield new ChromeDriver();
+            }
+            case "firefox" -&gt; new FirefoxDriver();
+            case "edge"    -&gt; new EdgeDriver();
+            default        -&gt; throw new IllegalArgumentException("Unknown browser type: " + targetBrowser);
         };
     }
 
-    public static void main(String[] args) {
-        List&lt;String&gt; items = List.of("Shoe", "", "Watch");
-        for (String item : items) {
-            if (item == null || item.isBlank()) continue; // || short-circuits if null; skip blanks
-            System.out.println("Found: " + item + " at " + browserUrl("qa"));
-            if (item.equals("Shoe")) break;               // stop scanning once target is matched
+    // Context 3: Dynamic 2D HTML Web Table Search with Labeled Break
+    public boolean selectProductInWebTable(WebDriver driver, String targetProductName) {
+        List&lt;WebElement&gt; rows = driver.findElements(By.xpath("//table[@id='products']/tbody/tr"));
+        boolean productFound = false;
+
+        // LABELED LOOP: Allows breaking out of both outer row and inner column loops
+        tableSearch:
+        for (int i = 0; i &lt; rows.size(); i++) {
+            List&lt;WebElement&gt; cells = rows.get(i).findElements(By.tagName("td"));
+            
+            for (int j = 0; j &lt; cells.size(); j++) {
+                String cellText = cells.get(j).getText().trim();
+                
+                if (cellText.equalsIgnoreCase(targetProductName)) {
+                    // Click the checkbox in column 0 of this specific row
+                    rows.get(i).findElement(By.xpath("./td[1]/input[@type='checkbox']")).click();
+                    productFound = true;
+                    break tableSearch; // Immediately exits BOTH nested loops!
+                }
+            }
         }
+        return productFound;
+    }
+
+    // Context 4: Bounded While-Loop Pagination with Safety Counter
+    public int collectTotalItemsAcrossPages(WebDriver driver) {
+        int totalItemCount = 0;
+        int currentPage = 1;
+        final int MAX_PAGE_SAFETY_CAP = 10; // Prevents infinite loop from hanging CI pipeline
+
+        while (currentPage &lt;= MAX_PAGE_SAFETY_CAP) {
+            List&lt;WebElement&gt; itemsOnPage = driver.findElements(By.className("product-card"));
+            totalItemCount += itemsOnPage.size();
+
+            List&lt;WebElement&gt; nextButtons = driver.findElements(By.cssSelector("button.next-page"));
+            
+            // Check if next button exists and is clickable
+            if (!nextButtons.isEmpty() &amp;&amp; nextButtons.get(0).isEnabled()) {
+                nextButtons.get(0).click();
+                currentPage++;
+            } else {
+                break; // Final page reached; terminate pagination loop
+            }
+        }
+        return totalItemCount;
     }
 }</code></pre></section>
 
-  <section><h2>6. Execution flow, step by step</h2>
-    <ol>
-      <li><code>browserUrl("qa")</code> matches <code>"qa"</code> and returns the QKart URL directly without checking <code>default</code>.</li>
-      <li>The enhanced <code>for</code> loop pulls <code>"Shoe"</code>, checks <code>item == null || item.isBlank()</code>, finds both false, and prints it.</li>
-      <li>Because <code>item.equals("Shoe")</code> is true, <code>break</code> immediately exits the loop without visiting <code>"Watch"</code>.</li>
-      <li>Had an item been <code>null</code>, <code>||</code> evaluates left-to-right, sees <code>true</code> on <code>item == null</code>, and skips <code>item.isBlank()</code> so no <code>NullPointerException</code> occurs.</li>
-      <li><code>continue</code> would only skip the current element while letting the loop move to <code>"Watch"</code>.</li>
-    </ol></section>
+  <section><h2>7. Practical Java &amp; Selenium Automation Interview Section</h2>
+    <p><a class="qa-chip" href="interview-j2-4-qa.html"><span class="tag Interview">Interview</span>J2.4 Question Bank (35 Questions) &rarr;</a></p>
+    <ul>
+      <li><b>Q1: Why must an SDET use <code>&amp;&amp;</code> instead of <code>&amp;</code> when validating that a web element is displayed?</b><br>
+      <code>&amp;&amp;</code> is a short-circuit operator. In <code>if (element != null &amp;&amp; element.isDisplayed())</code>, if <code>element</code> is <code>null</code>, Java evaluates the left operand as <code>false</code> and skips <code>element.isDisplayed()</code> completely. If single <code>&amp;</code> were used, Java would evaluate both operands unconditionally, attempting to invoke <code>.isDisplayed()</code> on address <code>0x00000000</code> and crashing with a runtime <code>NullPointerException</code>.</li>
 
-  <section><h2>7. Real-life analogy: a checklist with quick exits</h2>
-    <table>
-      <tr><th>Checklist</th><th>Java</th></tr>
-      <tr><td>Check "Did badge arrive?" before reading the name on it</td><td>Short-circuit <code>el != null &amp;&amp; ...</code></td></tr>
-      <tr><td>Flipping through 5 numbered pages one by one</td><td>Indexed <code>for (i=0; i&lt;5; i++)</code></td></tr>
-      <tr><td>Handing a flyer to every person in a row</td><td>Enhanced <code>for-each</code> loop</td></tr>
-      <tr><td>Keep pressing Next until the button grays out</td><td><code>while (nextEnabled)</code></td></tr>
-      <tr><td>Walking out of the store as soon as you find the item</td><td><code>break</code></td></tr>
-    </table></section>
+      <li><b>Q2: How does a missing <code>break;</code> in a classic colon <code>switch</code> statement create catastrophic defects in a Selenium DriverFactory?</b><br>
+      In classic colon <code>switch</code> syntax, omitting <code>break;</code> causes execution to "fall through" into the subsequent case. For example, if <code>case "chrome":</code> lacks <code>break;</code>, execution falls straight into <code>case "firefox":</code>, re-instantiating <code>driver</code> as a <code>FirefoxDriver</code> and leaving an orphaned Chrome browser process consuming RAM in the background. Modern Java 14+ arrow <code>switch</code> expressions eliminate fall-through entirely.</li>
 
-  <section><h2>8. Why it matters</h2>
-    <p>Short-circuit guards (<code>&amp;&amp;</code> / <code>||</code>) prevent <code>NullPointerException</code> and <code>ArrayIndexOutOfBoundsException</code> in one expression.</p>
-    <p><b>SDET link:</b> When looping through <code>driver.findElements(By.cssSelector(".card"))</code>, break early once the matching QKart item is clicked, or use a <code>while (hasNextPage)</code> loop with a max-page safety cap so broken pagination never hangs CI forever.</p></section>
+      <li><b>Q3: When iterating over a dynamic table of web elements, when should you use a classic indexed <code>for</code> loop instead of an enhanced <code>for-each</code> loop?</b><br>
+      Use a classic indexed <code>for (int i = 0; i &lt; count; i++)</code> loop when you need the numerical index <code>i</code> to construct dynamic positional XPaths (e.g., <code>//table/tbody/tr[" + (i + 1) + "]</code>) or when mitigating <code>StaleElementReferenceException</code> by re-querying elements by index after a DOM mutation. Enhanced <code>for-each</code> loops do not expose the loop index.</li>
 
-  <section><h2>9. Quick test</h2>
-    <p>What is the difference between <code>break</code> and <code>continue</code> inside a loop? <b><code>break</code> exits the loop completely; <code>continue</code> skips only the rest of the current iteration.</b></p></section>
+      <li><b>Q4: What causes <code>IndexOutOfBoundsException</code> in Selenium table processing loops?</b><br>
+      Using a <code>&lt;=</code> comparison operator instead of <code>&lt;</code> against collection size: <code>for (int i = 0; i &lt;= elements.size(); i++)</code>. Because Java collections are zero-indexed, valid indices run from <code>0</code> to <code>size() - 1</code>. On the final iteration where <code>i == elements.size()</code>, invoking <code>elements.get(i)</code> throws <code>IndexOutOfBoundsException</code>.</li>
 
-  <section><h2>10. Mini glossary</h2>
-    <table>
-      <tr><th>Term</th><th>Plain meaning</th></tr>
-      <tr><td>Short-circuit</td><td>Skipping evaluation of the right operand once the left operand fixes the answer</td></tr>
-      <tr><td>Ternary</td><td>Inline 1-line conditional <code>cond ? a : b</code></td></tr>
-      <tr><td>Switch expression</td><td>Arrow <code>-&gt;</code> switch that returns a value without fall-through</td></tr>
-      <tr><td>break</td><td>Exits the innermost loop or classic switch immediately</td></tr>
-      <tr><td>continue</td><td>Jumps straight to the next iteration of the loop</td></tr>
-    </table>
+      <li><b>Q5: Why should a <code>while</code> loop implementing test pagination always include a safety iteration limit?</b><br>
+      Web pagination can fail due to asynchronous JavaScript defects where the "Next" button remains enabled or the URL never increments. An unbounded <code>while (nextButton.isEnabled())</code> will spin forever, causing the automation pipeline in Jenkins or GitHub Actions to hang until the job-level timeout kills it. Always include a safety cap (e.g. <code>maxPages = 20</code>).</li>
+
+      <li><b>Q6: What is the difference between <code>break</code> and <code>continue</code> inside a test data verification loop?</b><br>
+      <code>break</code> terminates the entire loop immediately, skipping all remaining iterations. <code>continue</code> skips only the remainder of the current iteration and jumps directly to the next element or increment step.</li>
+
+      <li><b>Q7: How does a labeled <code>break outer;</code> simplify scanning multi-page web tables?</b><br>
+      When scanning rows and columns across nested loops, a standard <code>break</code> only exits the innermost column loop. A labeled break (<code>break tableSearch;</code>) allows the program to terminate both outer and inner loops simultaneously as soon as the target cell data is matched, avoiding the need for boolean flag checks.</li>
+
+      <li><b>Q8: Why does passing <code>null</code> to a <code>switch (browser)</code> statement throw <code>NullPointerException</code>?</b><br>
+      Java's <code>switch</code> implementation invokes <code>.hashCode()</code> on non-primitive selector expressions (like <code>String</code>) during table dispatch. If the selector reference is <code>null</code>, the JVM dereferences memory address <code>0x0</code> and throws <code>NullPointerException</code>. Always sanitize inputs with <code>Objects.requireNonNullElse(browser, "chrome")</code>.</li>
+
+      <li><b>Q9: What happens if you structurally remove an item from a list during an enhanced <code>for-each</code> loop?</b><br>
+      It throws <code>ConcurrentModificationException</code>. The enhanced for-loop uses an internal <code>Iterator</code>. Modifying the underlying list directly without using <code>Iterator.remove()</code> invalidates the iterator's modification count (<code>modCount</code>).</li>
+
+      <li><b>Q10: Why is <code>boolean isSelected = (status == 1) ? true : false;</code> considered an anti-pattern in code reviews?</b><br>
+      It is redundant boilerplate. The relational comparison <code>status == 1</code> already evaluates directly to a primitive boolean. Writing <code>boolean isSelected = (status == 1);</code> is cleaner, faster, and avoids unnecessary ternary branching.</li>
+    </ul>
+    <p><a class="qa-chip" href="interview-j2-4-qa.html"><span class="tag Interview">Interview</span>Open Full J2.4 Question Bank (35 Questions) &rarr;</a></p>
     <p>&larr; Previous: <a href="java-wrapper-autoboxing-cache.html">2.3 Wrapper Classes, Autoboxing &amp; Integer Cache</a> &middot; Next: <a href="java-arrays-1d-2d-dataprovider.html">2.5 Arrays (1D &amp; 2D Object[][]) &rarr;</a></p></section>
-
-  <section><h2>11. Q&amp;A</h2>
-    <p><a class="qa-chip" href="interview-j2-4-qa.html"><span class="tag Interview">Interview</span>J2.4 Question Bank (21 Questions) &rarr;</a></p></section>
 </article>
 </div>
 <footer>SDET Explainer</footer>
