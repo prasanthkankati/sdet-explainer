@@ -1153,9 +1153,9 @@ const TOPICS = [
     track: "Interview",
     section: "I-J2. Java: Core Java Fundamentals Q&A",
     order: 3,
-    title: "J2.3 Q&A: Wrapper Classes, Autoboxing & Integer Cache (-128 to 127) (21 Questions)",
+    title: "J2.3 Q&A: Wrapper Classes, Autoboxing & Integer Cache (-128 to 127) (35 Questions)",
     file: "interview-j2-3-qa.html",
-    summary: "21 interview questions across 5 tiers: Basics, How it works, Real situations, Troubleshooting & Design choices.",
+    summary: "35 questions across 5 tiers: Core definitions, bytecodes, IntegerCache mechanics, REST API POJO nullability, parsing traps & senior evaluation rubric.",
     keywords: "java J2.3 interview questions, wrapper classes, autoboxing & integer cache (-128 to 127)",
     status: "done",
     date: "2026-11-15"
