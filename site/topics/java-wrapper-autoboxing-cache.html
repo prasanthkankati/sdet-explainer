@@ -13,281 +13,241 @@
   <span class="tag Java">Java</span>
   <h1>2.3 Wrapper Classes, Autoboxing &amp; Integer Cache (-128 to 127)</h1>
 
-  <section><h2>1. What Wrapper Classes Are</h2>
-    <p class="def">A wrapper class is an immutable object representation in <code>java.lang</code> that encapsulates a single primitive value inside a Heap object, bridging the gap between Java's raw primitive types and its object-oriented type system (Generics, Collections, and Reflection).</p>
-    <p>Java is not a pure object-oriented language because it retains 8 primitive types (like <code>int</code> and <code>boolean</code>) for raw performance and minimal memory usage. However, Java's Collection framework (<code>List</code>, <code>Set</code>, <code>Map</code>), Generics (<code>&lt;T&gt;</code>), and utility APIs only operate on object references descending from <code>java.lang.Object</code>. Wrapper classes provide the typed object containers required to store primitives in collections, allow <code>null</code> to represent uninitialized or missing state, and provide essential parsing and conversion utility methods.</p></section>
+  <section><h2>1. The Root Problem &amp; Complete Technical Definition</h2>
+    <p class="def">A wrapper class is an immutable reference type in <code>java.lang</code> that encapsulates a single primitive value inside a 64-bit Heap object, enabling primitive scalar data to participate in Java's object-oriented type systems (Generics, Collections, and Reflection) and allowing <code>null</code> to represent unassigned or missing state.</p>
+    <p>In Java, all data is strictly divided into two distinct representation models: <b>Primitive Value Types</b> and <b>Object Reference Types</b>. This architectural split creates a fundamental dilemma in automation framework design, as demonstrated by the following three lines of code:</p>
+<pre><code>// Line 1: Compiles cleanly. String is an Object Reference Type.
+ArrayList&lt;String&gt; locatorNames = new ArrayList&lt;&gt;();
 
-  <section><h2>2. Basic Syntax, Word-by-Word Explanation &amp; Syntax Rules</h2>
-    <p>The standard syntax for creating and using wrapper classes:</p>
-<pre><code>// 1. Modern Autoboxing syntax (recommended)
-Integer retryLimit = 3;
+// Line 2: Compiles cleanly. Integer is an Object Reference Type.
+ArrayList&lt;Integer&gt; statusCodes = new ArrayList&lt;&gt;();
 
-// 2. Explicit factory method syntax (recommended when not autoboxing)
-Integer port = Integer.valueOf(4444);
+// Line 3: COMPILE ERROR! Java halts compilation immediately.
+// ArrayList&lt;int&gt; itemCounts = new ArrayList&lt;&gt;(); // Syntax error, insert "Dimensions" to complete ReferenceType</code></pre>
+    <p>To understand why Line 3 fails while Lines 1 and 2 succeed, you must examine how computer hardware and the Java Virtual Machine physically organize memory.</p></section>
 
-// 3. String parsing syntax (converts String to primitive or wrapper)
-int timeout = Integer.parseInt("30");
-Integer waitTime = Integer.valueOf("30");</code></pre>
-    <p>Word-by-word breakdown of <code>Integer retryLimit = 3;</code>:</p>
+  <section><h2>2. Foundational Architecture: Physical Hardware, Memory Addresses &amp; JVM Topography</h2>
+    <p>At the physical silicon layer, your computer's Random Access Memory (RAM) consists of billions of microscopic semiconductor circuits containing transistors and capacitors. Each capacitor holds an electrical charge representing a binary <code>1</code>, or discharged state representing a binary <code>0</code>. Eight bits form a single <b>byte</b>.</p>
+    
+    <p><b>What is a Memory Address, and Why Is It Required?</b><br>
+    Physical RAM is laid out as an array of sequential 1-byte storage cells. Every single byte in memory possesses a permanent numerical identifier called its <b>Memory Address</b>, represented in hexadecimal notation (e.g., <code>0x7FFF0120</code>). The Central Processing Unit (CPU) requires memory addresses because it communicates with RAM across a physical set of electrical lines called the <i>Address Bus</i>. To read or write any object, the CPU must transmit that object's exact hexadecimal coordinate.</p>
+
+    <div class="arch">
+      <div class="lbl">JVM Memory Topography During Test Execution</div>
+      <div class="cols">
+        <div class="item"><b>Thread-Private Memory (Per Thread)</b><span><b>1. CPU Registers &amp; Program Counter (PC):</b> Stores the memory address of the bytecode instruction currently executing.<br><b>2. Stack Memory:</b> Allocates a <i>Stack Frame</i> per method call in LIFO order. Stores local primitive variables and 64-bit Heap address pointers. Destroyed immediately when the method returns.</span></div>
+        <div class="item"><b>JVM-Shared Memory (All Threads)</b><span><b>Heap Memory:</b> Large global memory area storing all class instances (objects) and arrays. Managed asynchronously by the Garbage Collector.<br><b>Examples:</b> <code>new ChromeDriver()</code>, <code>"https://qkart-qa-web.labs.crio.do/"</code>, <code>Integer.valueOf(200)</code>.</span></div>
+      </div>
+    </div>
+
+    <p><b>Why Can a Primitive Never Be Empty or <code>null</code>, and Why Does It Store Zero?</b><br>
+    A primitive variable allocates a fixed number of physical transistors in memory. A 32-bit <code>int</code> allocates exactly 32 semiconductor switches. Transistors cannot be in a state of metaphysical non-existence: they are physically present and are either electrically charged or grounded. When an <code>int</code> field is allocated on the Heap without an explicit initial value, the JVM writes 32 zero bits: <code>00000000 00000000 00000000 00000000</code>. In binary two's complement, 32 zeroes evaluate numerically to <b><code>0</code></b>.<br>
+    In contrast, <b><code>null</code> is a software reference concept</b>. A reference variable stores a memory address. The keyword <code>null</code> is a reserved address value (numerically <code>0x00000000</code>) indicating that a pointer points to no allocated object block on the Heap. Because a primitive variable stores raw scalar binary bits directly—not an address pointer—it is physically and syntactically impossible for a primitive to hold <code>null</code>.</p>
+
+    <p><b>The ArrayList Paradox Explained:</b><br>
+    Inside <code>java.util.ArrayList</code>, elements are stored in an internal backing array: <code>transient Object[] elementData;</code>. An array of <code>Object[]</code> is an array of <b>memory address pointers</b>. Furthermore, Java Generics employ <b>Type Erasure</b>, replacing type parameters like <code>&lt;E&gt;</code> with <code>java.lang.Object</code> at compile time. <code>String</code> is a class inheriting from <code>Object</code>, so its Heap memory address fits cleanly into <code>elementData</code>. But primitive <code>int</code> is a 4-byte scalar value with no object header and no inheritance from <code>Object</code>. The compiler rejects <code>ArrayList&lt;int&gt;</code> because primitive bits cannot be stored inside an array of object memory addresses.</p></section>
+
+  <section><h2>3. Complete Enumeration: The 8 Primitives and Their 8 Wrapper Classes</h2>
+    <p>Java defines <b>exactly 8 primitive types</b>. Every primitive has a corresponding Wrapper Class in <code>java.lang</code>. Six numeric wrappers extend abstract class <code>java.lang.Number</code>, while two extend <code>java.lang.Object</code> directly:</p>
+    <ol>
+      <li><b><code>byte</code> (8 bits / 1 byte signed, range -128 to 127) &rarr; <code>java.lang.Byte</code></b>: Extends <code>Number</code>. Implements <code>Comparable&lt;Byte&gt;</code>.</li>
+      <li><b><code>short</code> (16 bits / 2 bytes signed, range -32,768 to 32,767) &rarr; <code>java.lang.Short</code></b>: Extends <code>Number</code>. Implements <code>Comparable&lt;Short&gt;</code>.</li>
+      <li><b><code>int</code> (32 bits / 4 bytes signed, range -2,147,483,648 to 2,147,483,647) &rarr; <code>java.lang.Integer</code></b>: Extends <code>Number</code>. Spelled out in full.</li>
+      <li><b><code>long</code> (64 bits / 8 bytes signed, range -2^63 to 2^63 - 1) &rarr; <code>java.lang.Long</code></b>: Extends <code>Number</code>. Requires <code>L</code> literal suffix for primitives.</li>
+      <li><b><code>float</code> (32 bits / 4 bytes IEEE 754 float) &rarr; <code>java.lang.Float</code></b>: Extends <code>Number</code>. Requires <code>f</code> literal suffix for primitives.</li>
+      <li><b><code>double</code> (64 bits / 8 bytes IEEE 754 float) &rarr; <code>java.lang.Double</code></b>: Extends <code>Number</code>. Default floating literal type.</li>
+      <li><b><code>char</code> (16 bits / 2 bytes unsigned Unicode, range 0 to 65,535) &rarr; <code>java.lang.Character</code></b>: Extends <code>Object</code> directly. Spelled out in full.</li>
+      <li><b><code>boolean</code> (1-byte logical state true/false) &rarr; <code>java.lang.Boolean</code></b>: Extends <code>Object</code> directly. Exposes <code>TRUE</code> and <code>FALSE</code> singletons.</li>
+    </ol>
+    <p><b>Explicit Clarification:</b> <code>String</code> is NOT a primitive. <code>String</code> is an Object Reference Type (class <code>java.lang.String</code>) storing an internal byte array (<code>byte[] value</code>) and object header on the Heap, addressed via a 64-bit reference pointer.</p>
+    <p><b>Immutability:</b> All 8 wrapper classes are declared <code>public final class</code> and encapsulate their value in a <code>private final</code> field. Their value cannot be altered once constructed; any modification allocates a brand-new object on the Heap.</p></section>
+
+  <section><h2>4. Official Java Operations: Boxing, Unboxing, Autoboxing &amp; Auto-Unboxing</h2>
+    <p>In senior technical interviews, you must describe operations between primitives and wrappers using their exact formal designations:</p>
     <ul>
-      <li><b><code>Integer</code> (Class Name):</b> The wrapper class type from <code>java.lang</code> representing a 32-bit signed integer object.</li>
-      <li><b><code>retryLimit</code> (Variable Name):</b> An object reference variable living on the thread Stack pointing to an <code>Integer</code> object in Heap memory.</li>
-      <li><b><code>=</code> (Assignment Operator):</b> Assigns the resulting Heap object reference to the variable.</li>
-      <li><b><code>3</code> (Primitive Literal):</b> The compiler automatically translates this literal to <code>Integer.valueOf(3)</code> (Autoboxing).</li>
-      <li><b><code>;</code> (Semicolon):</b> Terminates the Java statement.</li>
+      <li><b>Manual Boxing:</b> Explicit programmatic conversion of a primitive into a wrapper object using static factory methods: <code>Integer boxed = Integer.valueOf(4444);</code></li>
+      <li><b>Manual Unboxing:</b> Explicit programmatic extraction of the primitive scalar value using accessor methods: <code>int unboxed = boxed.intValue();</code></li>
+      <li><b>Autoboxing:</b> The automatic compiler translation introduced in Java 5 where assigning a primitive to a wrapper reference variable emits <code>invokestatic Integer.valueOf(I)</code>.</li>
+      <li><b>Auto-Unboxing:</b> The automatic compiler translation where using a wrapper in an arithmetic expression, logical condition, or primitive assignment emits <code>invokevirtual Integer.intValue()</code>.</li>
     </ul>
-    <p><b>Syntax and Compiler Rules:</b></p>
-    <ul>
-      <li><b>Exact Names:</b> Six wrappers match their primitive name with a capital letter (<code>Byte</code>, <code>Short</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>, <code>Boolean</code>). Two spell out complete words: <code>int -&gt; Integer</code> and <code>char -&gt; Character</code>.</li>
-      <li><b>Deprecated Constructors:</b> Calling <code>new Integer(30)</code> or <code>new Boolean(true)</code> has been deprecated since Java 9 and marked for removal in modern Java. Always use autoboxing or static factory methods like <code>Integer.valueOf(30)</code>.</li>
-      <li><b>Nullability:</b> Because wrapper variables are object references, they can hold <code>null</code>. Primitives can never hold <code>null</code>.</li>
-      <li><b>No Cross-Casting:</b> You cannot cast an <code>Integer</code> directly to a <code>Long</code> or <code>Double</code> (e.g. <code>Long l = (Long) Integer.valueOf(5);</code> causes a compile error). Conversion must use conversion methods such as <code>.longValue()</code>.</li>
-    </ul></section>
 
-  <section><h2>3. Core Lifecycle / Operations: Boxing, Unboxing, Autoboxing &amp; Auto-Unboxing</h2>
-    <p>These four operations define the lifecycle of data moving between the primitive domain and the object domain:</p>
-    <ul>
-      <li><b>Manual Boxing:</b> Explicitly wrapping a primitive into an object using factory methods: <code>Integer.valueOf(100)</code>.</li>
-      <li><b>Manual Unboxing:</b> Explicitly extracting the primitive value out of a wrapper object using accessor methods: <code>obj.intValue()</code>.</li>
-      <li><b>Autoboxing:</b> The Java compiler automatically converting a primitive into its corresponding wrapper object when an object reference is expected.</li>
-      <li><b>Auto-Unboxing:</b> The Java compiler automatically converting a wrapper object into its raw primitive value when an expression, operator, or primitive variable requires it.</li>
-    </ul>
-<pre><code>// 1. Manual Boxing (pre-Java 5 style)
-int rawPort = 8080;
-Integer boxedPort = Integer.valueOf(rawPort); // explicitly calling valueOf()
+<pre><code>// 1. Manual Boxing (Pre-Java 5 standard, still used for custom parsing)
+int rawTimeout = 30;
+Integer boxedTimeout = Integer.valueOf(rawTimeout); // Explicit factory call
 
 // 2. Manual Unboxing
-int unboxedPort = boxedPort.intValue();       // explicitly calling intValue()
+int explicitTimeout = boxedTimeout.intValue();      // Explicit accessor call
 
-// 3. Autoboxing (compiler generates Integer.valueOf(50))
-Integer maxWait = 50; 
+// 3. Autoboxing in Action
+Integer maxRetries = 3;                             // Compiler emits: Integer.valueOf(3)
 
-// 4. Auto-Unboxing (compiler generates maxWait.intValue())
-int currentTimeout = maxWait; 
-int doubledTimeout = maxWait * 2;             // unboxed automatically before arithmetic operation
+// 4. Auto-Unboxing in Action
+int currentRetries = maxRetries;                    // Compiler emits: maxRetries.intValue()
+int incremented = maxRetries + 1;                   // maxRetries.intValue() + 1 before addition runs
 
-// 5. In Collections
-List&lt;Integer&gt; statusCodes = new ArrayList&lt;&gt;();
-statusCodes.add(200);                         // Autoboxing: 200 -> Integer.valueOf(200)
-int firstCode = statusCodes.get(0);           // Auto-unboxing: statusCodes.get(0).intValue()</code></pre></section>
+// 5. Autoboxing and Auto-Unboxing inside Generic Collections
+List&lt;Integer&gt; portList = new ArrayList&lt;&gt;();
+portList.add(4444);                                 // Autoboxing: 4444 -> Integer.valueOf(4444)
+int defaultPort = portList.get(0);                  // Auto-unboxing: portList.get(0).intValue()</code></pre></section>
 
-  <section><h2>4. All 8 Wrapper Classes Grouped &amp; Detailed</h2>
-    <p>Java provides exactly <b>8 wrapper classes</b> corresponding to the 8 primitive types. Six descend from <code>java.lang.Number</code>, while two descend directly from <code>java.lang.Object</code>:</p>
-    <ol>
-      <li><b><code>Byte</code></b> (wraps <code>byte</code>, 8-bit signed integer, extends <code>Number</code>)</li>
-      <li><b><code>Short</code></b> (wraps <code>short</code>, 16-bit signed integer, extends <code>Number</code>)</li>
-      <li><b><code>Integer</code></b> (wraps <code>int</code>, 32-bit signed integer, extends <code>Number</code>)</li>
-      <li><b><code>Long</code></b> (wraps <code>long</code>, 64-bit signed integer, extends <code>Number</code>)</li>
-      <li><b><code>Float</code></b> (wraps <code>float</code>, 32-bit IEEE 754 float, extends <code>Number</code>)</li>
-      <li><b><code>Double</code></b> (wraps <code>double</code>, 64-bit IEEE 754 float, extends <code>Number</code>)</li>
-      <li><b><code>Character</code></b> (wraps <code>char</code>, 16-bit Unicode character, extends <code>Object</code>)</li>
-      <li><b><code>Boolean</code></b> (wraps <code>boolean</code>, <code>true</code> or <code>false</code>, extends <code>Object</code>)</li>
-    </ol>
+  <section><h2>5. Deep Mechanical Principles: The Flyweight Integer Cache &amp; Memory Footprint</h2>
+    
+    <p><b>The Integer Cache Pool (-128 to 127):</b><br>
+    To prevent excessive object allocation and garbage collection churn for frequently used numbers, the JVM pre-allocates an internal static array called <code>IntegerCache</code> initialized with objects representing values from <b>-128 through 127 inclusive</b>.</p>
 
     <div class="arch">
-      <div class="lbl">Java Wrapper Class Inheritance Hierarchy</div>
+      <div class="lbl">Memory Allocation: 100 == 100 (True) vs 200 == 200 (False)</div>
       <div class="cols">
-        <div class="item"><b>java.lang.Number (Abstract)</b><span>Byte, Short, Integer, Long, Float, Double<br>Provides: byteValue(), intValue(), longValue(), doubleValue()</span></div>
-        <div class="item"><b>java.lang.Object (Direct)</b><span>Character, Boolean<br>Both implement: Comparable&lt;T&gt;, Serializable</span></div>
+        <div class="item"><b>Values inside Cache (-128 to 127)</b><span><code>Integer a = 100; Integer b = 100;</code><br>Both <code>a</code> and <code>b</code> receive the <b>identical memory address</b> (e.g., <code>0x33440010</code>).<br><code>a == b</code> compares addresses &rarr; <b>true</b>.</span></div>
+        <div class="item"><b>Values outside Cache (&gt; 127 or &lt; -128)</b><span><code>Integer x = 200; Integer y = 200;</code><br>JVM executes <code>new Integer(200)</code> twice: <code>x</code> gets <code>0x44550010</code>, <code>y</code> gets <code>0x66770020</code>.<br><code>x == y</code> compares addresses &rarr; <b>false</b>!</span></div>
       </div>
-      <div class="note">All 8 wrapper classes are marked <code>public final class</code> with private final internal value fields, guaranteeing 100% immutability.</div>
+      <div class="note">Crucial Rule: When comparing two Wrapper variables for numerical equality, NEVER use <code>==</code>. Always invoke <code>.equals()</code>, which compares the encapsulated primitive values.</div>
     </div>
 
-    <h3>4.1 The 6 Numeric Wrapper Classes (<code>Byte</code>, <code>Short</code>, <code>Integer</code>, <code>Long</code>, <code>Float</code>, <code>Double</code>)</h3>
-    <p>All numeric wrappers extend the abstract class <code>java.lang.Number</code>. This class defines 6 concrete conversion methods implemented by every numeric wrapper:</p>
-    <ul>
-      <li><code>byte byteValue()</code> &middot; <code>short shortValue()</code> &middot; <code>int intValue()</code></li>
-      <li><code>long longValue()</code> &middot; <code>float floatValue()</code> &middot; <code>double doubleValue()</code></li>
-    </ul>
-    <p>They also expose standard useful constants:</p>
-<pre><code>int max = Integer.MAX_VALUE; // 2,147,483,647
-int min = Integer.MIN_VALUE; // -2,147,483,648
-int bytes = Integer.BYTES;   // 4 (number of bytes)
-int size = Integer.SIZE;     // 32 (number of bits)</code></pre>
+    <p><b>Caching Support Across All 8 Wrappers:</b><br>
+    - <code>Byte</code>: Caches all 256 possible byte values (-128 to 127).<br>
+    - <code>Short</code> &amp; <code>Long</code>: Caches -128 to 127.<br>
+    - <code>Character</code>: Caches 0 to 127 (<code>\u0000</code> to <code>\u007f</code>, standard ASCII).<br>
+    - <code>Boolean</code>: Caches both <code>Boolean.TRUE</code> and <code>Boolean.FALSE</code>.<br>
+    - <code>Float</code> &amp; <code>Double</code>: <b>Never cache any values</b>. Real numbers possess an infinite number of decimal fractions; caching would consume gigabytes of Heap with virtually zero cache-hit probability.</p>
 
-    <h3>4.2 The Character Wrapper Class (<code>Character</code>)</h3>
-    <p><code>Character</code> encapsulates a <code>char</code> and provides static utility inspection methods essential for test assertions and DOM text parsing:</p>
-<pre><code>char ch = '7';
-boolean isDigit = Character.isDigit(ch);          // true
-boolean isLetter = Character.isLetter(ch);        // false
-boolean isWhitespace = Character.isWhitespace(' ');// true
-char upper = Character.toUpperCase('a');          // 'A'</code></pre>
+    <p><b>Memory Footprint Analysis (64-Bit HotSpot JVM):</b><br>
+    - <b>Primitive <code>int</code></b>: Occupies exactly <b>4 bytes</b> of raw memory on the Stack or packed directly in an array. Zero GC overhead.<br>
+    - <b>Wrapper <code>Integer</code></b>: Occupies <b>24 bytes total</b> on a 64-bit JVM: an 8-byte reference pointer on the Stack pointing to a 16-byte object on the Heap (8-byte Mark Word + 4-byte Klass Word + 4-byte int value). That is a <b>6x memory overhead</b> per element!</p>
 
-    <h3>4.3 The Boolean Wrapper Class (<code>Boolean</code>)</h3>
-    <p><code>Boolean</code> encapsulates a <code>boolean</code> and exposes two pre-instantiated singleton instances:</p>
-<pre><code>Boolean trueObj = Boolean.TRUE;                   // Pre-built singleton
-Boolean falseObj = Boolean.FALSE;                 // Pre-built singleton
-boolean parsed = Boolean.parseBoolean("True");    // true (case-insensitive)
-boolean invalid = Boolean.parseBoolean("yes");    // false (anything other than "true" is false)</code></pre>
+    <p><b>Nullability &amp; The Auto-Unboxing NullPointerException Trap:</b><br>
+    Because wrapper variables store memory addresses, they can hold <code>null</code> (`0x00000000`). Attempting to auto-unbox a <code>null</code> wrapper invokes an instance method on address zero:</p>
+<pre><code>Boolean isElementLoaded = null; // Valid reference holding 0x00000000
 
-    <table>
-      <tr><th>Primitive</th><th>Wrapper Class</th><th>Extends</th><th>Default Field Value</th><th>Object Footprint (64-bit JVM)</th><th>Values Cached?</th></tr>
-      <tr><td><code>byte</code></td><td><code>Byte</code></td><td><code>Number</code></td><td><code>null</code></td><td>16 bytes (12B header + 1B + 3B padding)</td><td><b>All 256 (-128 to 127)</b></td></tr>
-      <tr><td><code>short</code></td><td><code>Short</code></td><td><code>Number</code></td><td><code>null</code></td><td>16 bytes (12B header + 2B + 2B padding)</td><td><b>-128 to 127</b></td></tr>
-      <tr><td><code>int</code></td><td><code>Integer</code></td><td><code>Number</code></td><td><code>null</code></td><td>16 bytes (12B header + 4B payload)</td><td><b>-128 to 127 (Configurable)</b></td></tr>
-      <tr><td><code>long</code></td><td><code>Long</code></td><td><code>Number</code></td><td><code>null</code></td><td>24 bytes (12B header + 8B + 4B padding)</td><td><b>-128 to 127</b></td></tr>
-      <tr><td><code>float</code></td><td><code>Float</code></td><td><code>Number</code></td><td><code>null</code></td><td>16 bytes (12B header + 4B payload)</td><td><b>No</b> (None)</td></tr>
-      <tr><td><code>double</code></td><td><code>Double</code></td><td><code>Number</code></td><td><code>null</code></td><td>24 bytes (12B header + 8B + 4B padding)</td><td><b>No</b> (None)</td></tr>
-      <tr><td><code>char</code></td><td><code>Character</code></td><td><code>Object</code></td><td><code>null</code></td><td>16 bytes (12B header + 2B + 2B padding)</td><td><b>0 to 127 (ASCII range)</b></td></tr>
-      <tr><td><code>boolean</code></td><td><code>Boolean</code></td><td><code>Object</code></td><td><code>null</code></td><td>16 bytes (12B header + 1B + 3B padding)</td><td><b>TRUE &amp; FALSE (100%)</b></td></tr>
-    </table></section>
-
-  <section><h2>5. Must-Know Deep Concepts &amp; Critical Edge Cases</h2>
-
-    <h3>5.1 Bytecode Mechanics: What <code>javac</code> Actually Generates</h3>
-    <p>Autoboxing is purely syntactic sugar handled by the compiler. At the bytecode level, Java has no concept of autoboxing:</p>
-<pre><code>// Source code:
-Integer count = 100;
-int next = count + 1;
-
-// What javac actually emits (decompiled bytecode equivalent):
-Integer count = Integer.valueOf(100);
-int next = count.intValue() + 1;</code></pre>
-    <p>Every time you assign a primitive to a wrapper, the compiler emits an <code>invokestatic Integer.valueOf(I)</code> instruction. Every time you perform arithmetic or assign a wrapper to a primitive, the compiler emits an <code>invokevirtual Integer.intValue()</code> instruction.</p>
-
-    <h3>5.2 The Integer Cache / Flyweight Pattern (-128 to 127)</h3>
-    <p>To prevent massive memory allocation and garbage collection thrashing, the JVM caches pre-built <code>Integer</code> objects for the most frequently used numbers:</p>
-    <div class="arch">
-      <div class="lbl">Inside Integer.valueOf(int i) Implementation</div>
-      <div class="cols">
-        <div class="item"><b>Range: -128 &lt;= i &lt;= 127</b><span>Returns pre-instantiated instance from <code>IntegerCache.cache[i + 128]</code>.<br><b>Result:</b> Same memory address. <code>==</code> returns <code>true</code>.</span></div>
-        <div class="item"><b>Range: i &lt; -128 OR i &gt; 127</b><span>Executes <code>new Integer(i)</code> creating a fresh object on the Heap.<br><b>Result:</b> Different memory addresses. <code>==</code> returns <code>false</code>!</span></div>
-      </div>
-    </div>
-    <p>This is an implementation of the <b>Flyweight Design Pattern</b>. The lower bound is fixed at <code>-128</code>, while the upper bound defaults to <code>127</code>. The upper bound can be tuned in high-performance JVMs using the JVM flag <code>-XX:AutoBoxCacheMax=&lt;size&gt;</code> or <code>-Djava.lang.Integer.IntegerCache.high=&lt;size&gt;</code>.</p>
-
-    <h3>5.3 Caching Matrix Across All 8 Wrappers</h3>
-    <ul>
-      <li><b><code>Byte</code>:</b> Caches all possible values (<code>-128</code> to <code>127</code>). Every <code>Byte.valueOf()</code> call is guaranteed to return a cached instance.</li>
-      <li><b><code>Short</code> &amp; <code>Long</code>:</b> Caches <code>-128</code> to <code>127</code> inclusive.</li>
-      <li><b><code>Character</code>:</b> Caches <code>\u0000</code> to <code>\u007f</code> (decimal <code>0</code> to <code>127</code>), covering the entire standard ASCII character set.</li>
-      <li><b><code>Boolean</code>:</b> Caches both <code>Boolean.TRUE</code> and <code>Boolean.FALSE</code>. No new instances are ever needed.</li>
-      <li><b><code>Float</code> &amp; <code>Double</code>:</b> <b>Never cache any values</b>. Because there are infinite floating-point numbers between 0 and 1, caching is meaningless. Every autoboxed float/double creates a fresh Heap object.</li>
-    </ul>
-
-    <h3>5.4 The <code>==</code> vs <code>.equals()</code> Trap</h3>
-    <p>Because wrappers are objects, <code>==</code> compares <b>object memory addresses (references)</b>, while <code>.equals()</code> compares the <b>underlying primitive values</b>:</p>
-<pre><code>Integer a = 100, b = 100;
-System.out.println(a == b);      // true  (Both point to identical cached object)
-System.out.println(a.equals(b)); // true  (Values 100 == 100)
-
-Integer x = 200, y = 200;
-System.out.println(x == y);      // FALSE! (Different Heap addresses outside cache)
-System.out.println(x.equals(y)); // true  (Values 200 == 200)</code></pre>
-    <p><b>Mixed Primitive and Wrapper Comparison:</b> When one operand is a primitive and the other is a wrapper, Java auto-unbox the wrapper to primitive before comparing, so <code>==</code> evaluates value:</p>
-<pre><code>Integer obj = 200;
-int prim = 200;
-System.out.println(obj == prim); // true! (obj is unboxed to int 200 before == runs)</code></pre>
-
-    <h3>5.5 <code>NullPointerException</code> on Auto-Unboxing (The Silent Production Killer)</h3>
-    <p>Because wrapper variables can hold <code>null</code>, attempting to auto-unbox a <code>null</code> wrapper invokes <code>.intValue()</code> or <code>.booleanValue()</code> on a <code>null</code> pointer, immediately throwing <code>java.lang.NullPointerException</code> at runtime:</p>
-<pre><code>Integer count = null;
-// int items = count; // Runtime: java.lang.NullPointerException (count.intValue() on null)
-
-Boolean isAvailable = null;
-// if (isAvailable) { ... } // Runtime: NullPointerException (isAvailable.booleanValue())
-
-// Safe comparison pattern for nullable wrappers:
-if (Boolean.TRUE.equals(isAvailable)) {
-    // executes ONLY if isAvailable is non-null AND true
-}</code></pre>
-    <p><b>Ternary Operator Auto-Unboxing Trap:</b></p>
-<pre><code>boolean condition = false;
-Integer val = condition ? Integer.valueOf(1) : null; // Safe: both operands are wrappers
-// int num = condition ? 1 : null; // Runtime NPE! Compiler promotes result to int, unboxing null</code></pre>
-
-    <h3>5.6 Memory Footprint &amp; Performance Comparison</h3>
-    <p>In high-throughput automation suites or data-heavy loops, wrappers introduce significant RAM and CPU overhead:</p>
-    <ul>
-      <li><b>Primitive <code>int</code>:</b> 4 bytes of raw memory, stored in CPU registers or on the thread Stack. Zero garbage collection.</li>
-      <li><b>Wrapper <code>Integer</code>:</b> 16 bytes on a 64-bit JVM (12-byte object header + 4-byte int payload), plus an 8-byte reference pointer on 64-bit architectures = <b>24 bytes total</b> (a 6x memory increase per value).</li>
-      <li><b>Loop Overhead:</b> In loops doing arithmetic with wrappers, every iteration unboxes, calculates, and allocates a new Heap object, generating intense garbage collector pressure.</li>
-    </ul>
-
-    <h3>5.7 Why Collections Require Wrappers: Generics &amp; Type Erasure</h3>
-    <p>Java Collections cannot store primitives:</p>
-<pre><code>// List&lt;int&gt; numbers = new ArrayList&lt;&gt;();       // COMPILE ERROR: Syntax error, insert "Dimensions"
-List&lt;Integer&gt; numbers = new ArrayList&lt;&gt;();   // Correct: uses Wrapper class
-numbers.add(10);                             // Autoboxed: numbers.add(Integer.valueOf(10));
-int first = numbers.get(0);                  // Auto-unboxed: numbers.get(0).intValue();</code></pre>
-    <p>This is because Java Generics use <b>Type Erasure</b>: at compile time, type parameters like <code>&lt;T&gt;</code> are erased to <code>Object</code>. Since primitives do not inherit from <code>Object</code>, they cannot substitute for <code>&lt;T&gt;</code>.</p>
-
-    <h3>5.8 String Parsing: <code>parseInt()</code> vs <code>valueOf()</code> vs <code>toString()</code></h3>
-    <p>Every SDET must choose the correct parsing method based on the destination type:</p>
-    <table>
-      <tr><th>Method</th><th>Argument</th><th>Return Type</th><th>Memory Allocation</th><th>Throws</th></tr>
-      <tr><td><code>Integer.parseInt(str)</code></td><td><code>String</code></td><td>primitive <code>int</code></td><td><b>Zero</b> (pure primitive)</td><td><code>NumberFormatException</code></td></tr>
-      <tr><td><code>Integer.valueOf(str)</code></td><td><code>String</code></td><td><code>Integer</code> object</td><td>Reuses Cache or creates Heap object</td><td><code>NumberFormatException</code></td></tr>
-      <tr><td><code>String.valueOf(num)</code></td><td><code>int</code></td><td><code>String</code> object</td><td>Allocates new <code>String</code></td><td>Never</td></tr>
-      <tr><td><code>Integer.toString(num)</code></td><td><code>int</code></td><td><code>String</code> object</td><td>Allocates new <code>String</code></td><td>Never</td></tr>
-    </table>
-<pre><code>// Radix parsing:
-int binary = Integer.parseInt("1010", 2);   // 10
-int hex = Integer.parseInt("FF", 16);       // 255</code></pre>
-
-    <h3>5.9 Real-World Selenium &amp; SDET Automation Patterns</h3>
-    <p>In automation engineering, wrappers are central to UI parsing, API assertions, and TestNG data providers:</p>
-<pre><code>// 1. Parsing UI cart badge count in Selenium
-WebElement cartBadge = driver.findElement(By.className("cart-count"));
-String badgeText = cartBadge.getText().trim(); // e.g. "3"
-int itemCount = Integer.parseInt(badgeText);   // Preferred: primitive int, no wrapper overhead
-Assert.assertTrue(itemCount &gt; 0, "Cart should contain items");
-
-// 2. Comparing API response status codes
-Integer actualStatus = response.getStatusCode(); // returns int, autoboxed to Integer
-Integer expectedStatus = 200;
-// Dangerous: actualStatus == expectedStatus (works for 200 only if unboxed or inside cache!)
-Assert.assertEquals(actualStatus, expectedStatus); // Safe: invokes .equals()
-
-// 3. Handling optional/nullable fields in JSON POJOs
-public class UserResponse {
-    public String username;
-    public Integer age;       // Wrapper used so null indicates "field omitted by API"
-    public Boolean isPremium; // Wrapper used so null indicates "not evaluated"
+// RUNTIME DISASTER:
+// javac auto-unboxes this condition into: if (isElementLoaded.booleanValue())
+// At runtime, invoking .booleanValue() on address 0x0 throws java.lang.NullPointerException!
+if (isElementLoaded) { 
+    System.out.println("Loaded"); 
 }
 
-// 4. TestNG DataProvider passing mixed arguments
-@DataProvider(name = "loginData")
-public Object[][] getData() {
-    return new Object[][] {
-        { "standard_user", "secret_sauce", 3 }, // int 3 is autoboxed into Integer object
-        { "locked_out_user", "secret_sauce", 0 }
-    };
+// PRODUCTION DEFENSIVE PATTERN (Zero Risk of NPE):
+if (Boolean.TRUE.equals(isElementLoaded)) {
+    // Executes ONLY if isElementLoaded is non-null AND true.
+    // If isElementLoaded is null or false, it returns false safely without throwing NPE!
 }</code></pre></section>
 
-  <section><h2>6. Summary &amp; Mini Glossary</h2>
-    <ul>
-      <li><b>Wrapper Classes:</b> Provide immutable object forms of the 8 primitives; required for Collections and Generics.</li>
-      <li><b>Autoboxing &amp; Unboxing:</b> Syntactic sugar for <code>valueOf()</code> and <code>xxxValue()</code>; unboxing a <code>null</code> wrapper crashes with <code>NullPointerException</code>.</li>
-      <li><b>The Integer Cache:</b> Reuses pre-created objects for <code>-128</code> to <code>127</code>; comparing wrappers outside this range with <code>==</code> evaluates to <code>false</code>. Always use <code>.equals()</code>.</li>
-      <li><b>Parsing:</b> Use <code>parseInt()</code> for raw primitive numbers, and <code>valueOf()</code> when an <code>Integer</code> object reference is required.</li>
-      <li><b>Immutability:</b> All 8 wrappers are <code>final</code> and immutable; operations never mutate the existing instance.</li>
-    </ul>
+  <section><h2>6. Multi-Context Selenium Java &amp; SDET Framework Code Templates</h2>
+    <p>Below are 4 production-grade automation engineering scenarios where SDETs must understand and manipulate Wrapper Classes:</p>
 
-    <table>
-      <tr><th>Term</th><th>Plain Meaning</th></tr>
-      <tr><td>Wrapper Class</td><td>An immutable object enclosing a single primitive value (e.g. <code>Integer</code> wraps <code>int</code>).</td></tr>
-      <tr><td>Autoboxing</td><td>Automatic compiler conversion of a primitive to its corresponding wrapper (via <code>valueOf()</code>).</td></tr>
-      <tr><td>Auto-Unboxing</td><td>Automatic compiler conversion of a wrapper to its primitive value (via <code>xxxValue()</code>).</td></tr>
-      <tr><td>Integer Cache</td><td>JVM flyweight cache of pre-allocated <code>Integer</code> objects for values <code>-128</code> through <code>127</code>.</td></tr>
-      <tr><td><code>NullPointerException</code></td><td>Runtime exception thrown when auto-unboxing attempts to call <code>xxxValue()</code> on a <code>null</code> wrapper.</td></tr>
-      <tr><td><code>NumberFormatException</code></td><td>Runtime unchecked exception thrown by <code>parseInt()</code> or <code>valueOf()</code> when parsing invalid text.</td></tr>
-      <tr><td>Type Erasure</td><td>Java Generics compiler process replacing type parameters with <code>Object</code>, preventing primitive usage in Collections.</td></tr>
-    </table></section>
+<pre><code>import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-  <section><h2>7. Q&amp;A</h2>
+public class SdetWrapperAutomationSuite {
+
+    // Context 1: Parsing UI Text into Numbers on QKart (WebElement.getText())
+    public void verifyCartBadgeAndPricing(WebDriver driver) {
+        // Selenium WebElement.getText() strictly returns a java.lang.String
+        WebElement badge = driver.findElement(By.className("cart-badge"));
+        String badgeText = badge.getText().trim(); // e.g., "3"
+
+        // Pattern A: Parsing to primitive int (Zero Heap allocation overhead)
+        int itemCount = Integer.parseInt(badgeText);
+        Assert.assertTrue(itemCount &gt; 0, "Cart badge count must be greater than zero");
+
+        // Pattern B: Sanitizing and parsing price text with currency symbols
+        WebElement priceElement = driver.findElement(By.className("product-price"));
+        String rawPriceText = priceElement.getText().trim(); // e.g., "$1,299.99 USD"
+        String sanitizedPrice = rawPriceText.replaceAll("[^0-9.]", ""); // "1299.99"
+        double price = Double.parseDouble(sanitizedPrice);
+        Assert.assertEquals(price, 1299.99, 0.001, "Product price mismatch");
+    }
+
+    // Context 2: Handling Optional / Nullable Fields in REST API POJOs
+    public static class OrderResponse {
+        public String orderId;
+        // WRAPPER USED: Allows null to represent "discount was omitted from JSON payload"
+        // If primitive int were used, Jackson would default it to 0, masking missing fields!
+        public Integer discountPercentage; 
+        public Boolean isExpressShipping;
+    }
+
+    public void validateOrderResponse(OrderResponse response) {
+        // Assert that the backend did not omit the discount field entirely
+        Assert.assertNotNull(response.discountPercentage, 
+            "API Failure: 'discountPercentage' field was completely omitted from JSON response");
+        
+        // Safe auto-unboxing after null verification
+        if (response.discountPercentage &gt; 15) {
+            System.out.println("High-tier discount verified");
+        }
+    }
+
+    // Context 3: TestNG @DataProvider Matrix with Autoboxed Primitives
+    @DataProvider(name = "loginTestMatrix")
+    public Object[][] getLoginData() {
+        return new Object[][] {
+            // String is an Object
+            // Primitive int literal 3 is AUTOBOXED by javac into Integer.valueOf(3)
+            // Primitive boolean literal true is AUTOBOXED into Boolean.TRUE
+            { "standard_user", 3, true },
+            { "locked_out_user", 0, false }
+        };
+    }
+
+    @Test(dataProvider = "loginTestMatrix")
+    public void testUserLoginLimits(String username, Integer allowedRetries, Boolean shouldLogin) {
+        Assert.assertNotNull(allowedRetries, "Retries parameter cannot be null");
+        if (Boolean.TRUE.equals(shouldLogin)) {
+            // Auto-unboxed in comparison
+            Assert.assertTrue(allowedRetries &gt; 0, "Active user must have positive retry attempts");
+        }
+    }
+
+    // Context 4: Assertion Integrity & Avoiding the == Comparison Trap
+    public void validateApiStatusCodes(Integer actualStatus, Integer expectedStatus) {
+        // DEFECTIVE CODE:
+        // If status is 200, actualStatus == expectedStatus compares Heap memory addresses!
+        // Because 200 is outside the Integer Cache (-128..127), this asserts FALSE even when values match!
+        // Assert.assertTrue(actualStatus == expectedStatus); // FLAKY TEST BUG!
+
+        // CORRECT SDET STANDARD:
+        // Assert.assertEquals invokes .equals(), asserting true value equality:
+        Assert.assertEquals(actualStatus, expectedStatus, "HTTP Status Code validation mismatch");
+    }
+}</code></pre></section>
+
+  <section><h2>7. Practical Java &amp; Selenium Automation Interview Section</h2>
     <p><a class="qa-chip" href="interview-j2-3-qa.html"><span class="tag Interview">Interview</span>J2.3 Question Bank (35 Questions) &rarr;</a></p>
     <ul>
-      <li><b>Q: Why does <code>Integer a = 127, b = 127; a == b</code> print <code>true</code>, but <code>Integer c = 128, d = 128; c == d</code> prints <code>false</code>?</b><br>Java caches <code>Integer</code> objects from <code>-128</code> to <code>127</code> inside <code>IntegerCache</code>. Values in that range reuse the identical Heap reference, while <code>128</code> creates two separate Heap objects with different addresses.</li>
-      <li><b>Q: How does the Java compiler implement autoboxing behind the scenes?</b><br>The compiler replaces primitive assignments with static factory calls: <code>Integer.valueOf(primitive)</code> for boxing, and virtual method calls like <code>wrapper.intValue()</code> for unboxing.</li>
-      <li><b>Q: What happens if you auto-unbox a wrapper variable that is <code>null</code>?</b><br>It throws <code>java.lang.NullPointerException</code> at runtime because the JVM attempts to invoke <code>.intValue()</code> or <code>.booleanValue()</code> on a null reference.</li>
-      <li><b>Q: Which wrapper classes support caching, and for what ranges?</b><br><code>Byte</code> (-128..127), <code>Short</code> (-128..127), <code>Integer</code> (-128..127), <code>Long</code> (-128..127), <code>Character</code> (0..127), and <code>Boolean</code> (TRUE and FALSE). <code>Float</code> and <code>Double</code> never cache.</li>
-      <li><b>Q: What is the difference between <code>Integer.parseInt("42")</code> and <code>Integer.valueOf("42")</code>?</b><br><code>parseInt()</code> returns a primitive <code>int</code> with zero object allocation; <code>valueOf()</code> returns an <code>Integer</code> wrapper object, utilizing <code>IntegerCache</code> if applicable.</li>
-      <li><b>Q: Why does <code>List&lt;int&gt;</code> fail to compile in Java?</b><br>Java Generics operate on references that inherit from <code>java.lang.Object</code> due to Type Erasure; primitives are not objects and cannot replace generic type parameters.</li>
-      <li><b>Q: Can you cast an <code>Integer</code> object directly to a <code>Long</code> object?</b><br>No. <code>Integer</code> and <code>Long</code> are sibling classes under <code>Number</code> with no inheritance relationship. Direct casting causes a compile-time error.</li>
-      <li><b>Q: Why was <code>new Integer(10)</code> deprecated in Java 9 and marked for removal?</b><br>Calling <code>new Integer()</code> forces a new Heap object allocation on every call, bypassing the performance benefits of <code>IntegerCache</code>.</li>
-      <li><b>Q: Are wrapper classes mutable?</b><br>No. All 8 wrapper classes are <code>public final</code> with <code>private final</code> internal value fields, guaranteeing that their values can never be altered after construction.</li>
-      <li><b>Q: What exception is thrown when parsing <code>Integer.parseInt("abc")</code>?</b><br><code>java.lang.NumberFormatException</code> (a subclass of <code>IllegalArgumentException</code>).</li>
+      <li><b>Q1: Why does <code>Assert.assertTrue(response.getStatusCode() == 200)</code> pass while comparing two <code>Integer</code> variables holding <code>200</code> with <code>==</code> can fail?</b><br>
+      <code>response.getStatusCode()</code> returns a primitive <code>int</code>. When comparing a primitive <code>int</code> against an <code>Integer</code> or <code>int</code> literal <code>200</code>, Java auto-unboxes the wrapper and evaluates numerical value equality. However, when comparing two <code>Integer</code> wrapper variables (e.g., <code>actualCode == expectedCode</code>), Java compares Heap memory addresses. Because <code>200</code> is outside the <code>-128..127</code> Integer Cache, they have different addresses and <code>==</code> evaluates to <code>false</code>! Always use <code>Assert.assertEquals()</code>.</li>
+
+      <li><b>Q2: In Selenium DOM parsing, why should an SDET prefer <code>Integer.parseInt()</code> over <code>Integer.valueOf()</code> when verifying cart quantities?</b><br>
+      <code>Integer.parseInt()</code> returns a raw primitive <code>int</code> with zero Heap object allocation, placing no pressure on the Garbage Collector during rapid test loops. <code>Integer.valueOf()</code> returns a Heap-allocated <code>Integer</code> wrapper object, adding memory overhead unless the value falls between -128 and 127.</li>
+
+      <li><b>Q3: How do you prevent <code>NullPointerException</code> when evaluating a nullable <code>Boolean</code> flag in a Page Object class?</b><br>
+      Never write <code>if (isLoaded)</code> because the compiler auto-unboxes it into <code>if (isLoaded.booleanValue())</code>, which throws <code>NullPointerException</code> if <code>isLoaded</code> is <code>null</code>. Instead, write <code>if (Boolean.TRUE.equals(isLoaded))</code>. Because <code>Boolean.TRUE</code> is guaranteed non-null, <code>.equals()</code> returns <code>false</code> safely if <code>isLoaded</code> is <code>null</code>.</li>
+
+      <li><b>Q4: Why does TestNG require <code>Object[][]</code> in <code>@DataProvider</code> rather than allowing primitive arrays?</b><br>
+      TestNG is designed to pass heterogeneous method arguments (such as a <code>String</code> username, an <code>int</code> retry limit, and a <code>boolean</code> flag) in a single test parameter row. Because Java arrays are strictly typed, only an array of <code>Object</code> can hold different types. Primitive literals passed in the data provider matrix are automatically autoboxed into their wrapper equivalents by the compiler.</li>
+
+      <li><b>Q5: What exception occurs if <code>WebElement.getText()</code> returns an empty string <code>""</code> and you execute <code>Integer.parseInt()</code>? How do you fix it?</b><br>
+      It throws <code>java.lang.NumberFormatException: For input string: ""</code>. In Selenium, this happens when an element is located before its text has rendered asynchronously. Fix: Apply a <code>WebDriverWait</code> with <code>ExpectedConditions.textToBePresentInElementLocated()</code> or check <code>if (!text.isBlank())</code> before parsing.</li>
+
+      <li><b>Q6: Why must REST API DTO models use wrapper classes (like <code>Integer</code>) instead of primitives (like <code>int</code>)?</b><br>
+      JSON fields can be omitted or returned as <code>null</code>. If a DTO uses primitive <code>int</code>, JSON parsers like Jackson automatically default missing fields to <code>0</code>, preventing test assertions from distinguishing between an intentional <code>0</code> and an omitted field. Wrapper classes retain the distinct <code>null</code> state.</li>
+
+      <li><b>Q7: What happens when an explicit wait timeout like <code>Duration.ofSeconds(10)</code> receives a wrapper vs primitive?</b><br>
+      <code>Duration.ofSeconds(long seconds)</code> takes a primitive <code>long</code>. If you pass a wrapper <code>Long</code>, Java automatically unboxes it via <code>.longValue()</code>. If that wrapper object happens to be <code>null</code>, it crashes with <code>NullPointerException</code> before the wait is ever initiated.</li>
+
+      <li><b>Q8: Can you store <code>int</code> primitives directly in a Selenium Page Object list: <code>List&lt;int&gt; itemCounts</code>?</b><br>
+      No, it produces a compile error. Java Generics use Type Erasure, replacing generic parameters with <code>java.lang.Object</code>. Because primitives do not inherit from <code>Object</code>, only <code>List&lt;Integer&gt;</code> is permitted.</li>
+
+      <li><b>Q9: What is the risk of using an <code>Integer</code> wrapper as an accumulator in a 100,000-row test data processing loop?</b><br>
+      Because wrapper classes are immutable, executing <code>sum += value</code> unboxes <code>sum</code>, performs addition, and allocates a brand-new <code>Integer</code> object on the Heap for every iteration. In 100,000 iterations, this allocates nearly 2.4 MB of garbage Heap objects, triggering Garbage Collector pauses and slowing test execution. Always use primitive <code>long sum = 0;</code> for accumulators.</li>
+
+      <li><b>Q10: Why did Java deprecate <code>new Integer(int)</code> in Java 9 and mark it for removal in modern Java?</b><br>
+      Calling <code>new Integer()</code> forces a brand-new object allocation on the Heap on every call, completely bypassing the memory savings and speed of the <code>IntegerCache</code> pool. Using <code>Integer.valueOf()</code> or autoboxing allows the JVM to reuse cached instances.</li>
     </ul>
     <p><a class="qa-chip" href="interview-j2-3-qa.html"><span class="tag Interview">Interview</span>Open Full J2.3 Question Bank (35 Questions) &rarr;</a></p>
     <p>&larr; Previous: <a href="java-variables-primitives-casting.html">2.2 Variables, Primitive vs Reference Types &amp; Casting</a> &middot; Next: <a href="java-operators-control-flow-loops.html">2.4 Operators, Control Flow &amp; Loops &rarr;</a></p></section>
