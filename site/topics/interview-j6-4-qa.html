@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J6.4 Multithreading, synchronized &amp;amp; ThreadLocal WebDriver for Parallel TestNG</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-multithreading-threadlocal.html">&larr; Back to Concept Page: J6.4 Multithreading, synchronized &amp;amp; ThreadLocal WebDriver for Parallel TestNG</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J6.4 Question Bank: Multithreading, synchronized &amp;amp; ThreadLocal WebDriver for Parallel TestNG (19 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Why is implementing <code>Runnable</code> preferred over extending <code>Thread</code> when creating tasks?</b><br>
+      Java supports single class inheritance, so extending <code>Thread</code> prevents extending another parent class and couples task logic directly to thread creation. Implementing <code>Runnable</code> separates the work from thread management and lets thread pools (<code>ExecutorService</code>) execute it.</li>
+
+      <li><b>What is the difference between calling <code>thread.start()</code> and calling <code>thread.run()</code>?</b><br>
+      <code>start()</code> asks the JVM and OS scheduler to allocate a new call stack and execute <code>run()</code> concurrently on a fresh thread. Calling <code>run()</code> directly just executes a plain method synchronously on the caller's existing thread.</li>
+
+      <li><b>Why do local variables inside a <code>@Test</code> method not interfere across parallel threads?</b><br>
+      Every thread owns its own private JVM Stack frame for every method call, so primitive values and object reference variables stored in stack slots are never shared between threads.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How does <code>ThreadLocal.get()</code> know which <code>WebDriver</code> belongs to the current test?</b><br>
+      Each <code>java.lang.Thread</code> object holds a private package-internal <code>ThreadLocalMap</code> field. Calling <code>DRIVER_POOL.get()</code> looks up <code>Thread.currentThread()</code>'s own map using <code>DRIVER_POOL</code> as the key.</li>
+
+      <li><b>Why does <code>ThreadLocal.remove()</code> prevent memory leaks in thread pools?</b><br>
+      In a pooled executor (for example, TestNG's parallel runner), threads stay alive across tests. Each <code>ThreadLocalMap</code> holds entries while the thread lives; calling <code>remove()</code> drops the strong value reference to the closed driver object immediately.</li>
+
+      <li><b>How does <code>synchronized</code> on a <code>static</code> method lock differently from an instance method?</b><br>
+      An instance <code>synchronized</code> method locks on <code>this</code> (blocking only threads calling synchronized methods on that specific object), whereas a <code>static synchronized</code> method locks on the single <code>ClassName.class</code> monitor across the entire JVM.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>How do Page Objects receive the driver when <code>ThreadLocal</code> manages browsers?</b><br>
+      Either pass <code>DriverManager.getDriver()</code> to the Page Object constructor in the test method or let a thread-safe base page method fetch <code>DriverManager.getDriver()</code> on demand — never cache it in a <code>static</code> field on the Page Object.</li>
+
+      <li><b>When should a Selenium suite use an actual lock (<code>synchronized</code>) alongside <code>ThreadLocal</code>?</b><br>
+      Only when every worker writes into a genuinely shared singleton target, for example appending rows into a single in-memory summary buffer or flushing a custom CSV report file.</li>
+
+      <li><b>How do <code>parallel="classes"</code>, <code>parallel="methods"</code>, and <code>parallel="tests"</code> in <code>testng.xml</code> differ for Java state?</b><br>
+      With <code>parallel="classes"</code>, one thread executes all methods in one class sequentially; with <code>parallel="methods"</code>, multiple threads execute methods inside the same test class concurrently, so even instance fields (not just <code>static</code> fields) become unsafe if mutated without isolation!</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>During parallel runs against QKart and Selenium docs, Thread-1 clicks an element only to fail with <code>NoSuchSessionException: Session ID is null</code>. Why?</b><br>
+      Both threads shared a <code>static WebDriver</code> field (or cached driver field); Thread-2 finished early and called <code>driver.quit()</code> while Thread-1 was mid-test.</li>
+
+      <li><b>Why can spawning a child <code>new Thread(...)</code> inside a <code>@Test</code> return <code>null</code> from <code>DriverManager.getDriver()</code>?</b><br>
+      Standard <code>ThreadLocal</code> binds values strictly to the thread that called <code>set()</code>; helper child threads do not inherit parent thread locals unless you explicitly pass references or use <code>InheritableThreadLocal</code>.</li>
+
+      <li><b>Two parallel threads deadlock inside custom reporting code. What caused it?</b><br>
+      Thread A locked resource X and waits for resource Y while Thread B simultaneously locked Y and waits for X. Always acquire locks in a fixed global order or avoid nested synchronized locks altogether.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q19)</h2>
+    <ol start="13">
+      <li><b>Why choose <code>ThreadLocal&lt;WebDriver&gt;</code> over synchronizing a single shared driver?</b><br>
+      Synchronizing a single shared driver removes all concurrency (tests execute one at a time in one browser). <code>ThreadLocal</code> gives every thread an independent browser so tests achieve true parallel speedup.</li>
+
+      <li><b>Should <code>WebDriver</code> live in an instance field of a Page Object when running <code>parallel="methods"</code>?</b><br>
+      Page Objects created fresh per test method as local variables on the stack are thread-safe. If you instantiate Page Objects as class fields in the TestNG test class, multiple threads running <code>parallel="methods"</code> share that single test class instance — either declare Page Objects locally inside each <code>@Test</code> or resolve <code>DriverManager.getDriver()</code> cleanly.</li>
+
+      <li><b>When would you choose <code>AtomicInteger</code> over <code>synchronized</code> for tracking passed/failed counts in a listener?</b><br>
+      <code>AtomicInteger</code> uses lock-free hardware Compare-And-Swap (CAS) instructions, offering higher throughput and zero lock contention for single-variable counters.</li>
+
+      <li><b>Why do parallel Selenium tests fail with a shared <code>static WebDriver</code>?</b><br>
+      Concurrent threads overwrite the same driver handle on the heap and close each other's active browser sessions.</li>
+
+      <li><b>How does <code>ThreadLocal&lt;WebDriver&gt;</code> fix parallel collisions?</b><br>
+      Each thread gets its own isolated driver slot in its internal <code>ThreadLocalMap</code>.</li>
+
+      <li><b>Why must <code>remove()</code> always run in <code>@AfterMethod</code>?</b><br>
+      To discard finished driver references from reusable TestNG worker threads and avoid memory leaks.</li>
+
+      <li><b>Is <code>volatile</code> enough for <code>count++</code>?</b><br>
+      No; <code>volatile</code> guarantees visibility, not atomicity — use <code>AtomicInteger</code> or <code>synchronized</code>.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-multithreading-threadlocal.html"><span class="tag Java">Java</span>&larr; Back to J6.4 Concept Page</a></p>
+    <p><a href="interview-j6-3-qa.html">&larr; J6.3 Q&amp;A</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

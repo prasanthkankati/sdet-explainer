@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J4.6 Polymorphism: Overloading vs Overriding &amp; Upcasting</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-polymorphism-overloading-overriding.html">&larr; Back to Concept Page: J4.6 Polymorphism: Overloading vs Overriding &amp; Upcasting</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J4.6 Question Bank: Polymorphism: Overloading vs Overriding &amp; Upcasting (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What is the core difference between Method Overloading and Method Overriding?</b><br>
+      Method Overloading (compile-time polymorphism) defines multiple methods sharing the same name with different parameter types, counts, or order, resolved statically by <code>javac</code>. Method Overriding (runtime polymorphism) lets a subclass replace a parent's instance method with the identical signature, resolved dynamically at runtime by the JVM based on the Heap object type. Both improve API cleanliness and extensibility.</li>
+
+      <li><b>Why do we write <code>WebDriver driver = new ChromeDriver();</code> instead of <code>ChromeDriver driver = new ChromeDriver();</code>?</b><br>
+      Upcasting to the <code>WebDriver</code> interface decouples test code and Page Objects from any single browser vendor. The same <code>driver</code> variable can hold a <code>ChromeDriver</code> locally, a <code>FirefoxDriver</code> via CLI flag, or a <code>RemoteWebDriver</code> on Selenium Grid without changing a single line of Page Object code. Calling browser-proprietary methods only available on <code>ChromeDriver</code> is intentionally prevented unless explicitly checked.</li>
+
+      <li><b>Why is the <code>@Override</code> annotation considered essential even though Java does not strictly require it?</b><br>
+      <code>@Override</code> instructs the compiler to prove that an annotated method actually overrides an inherited parent or interface method. Without it, misspelling a method name or using the wrong parameter type (for instance, writing <code>public boolean equals(LoginPage p)</code> instead of <code>Object</code>) silently compiles as a brand-new overload and causes subtle runtime bugs.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How does the JVM perform Dynamic Method Dispatch at runtime?</b><br>
+      When code invokes an instance method on a polymorphic reference like <code>driver.get(url)</code>, the bytecode emits an <code>invokevirtual</code> or <code>invokeinterface</code> instruction. At runtime, the JVM reads the class metadata pointer in the Heap object's header, looks up that class's virtual method table (vtable), and jumps directly to the subclass's overridden method body. If the Heap object is a <code>FirefoxDriver</code>, Firefox's implementation runs automatically.</li>
+
+      <li><b>Which methods in Java can be overloaded vs overridden?</b><br>
+      Almost any method—including <code>static</code>, <code>final</code>, <code>private</code>, and constructors—can be overloaded with a different parameter list. By contrast, only non-<code>final</code>, non-<code>static</code>, non-<code>private</code> instance methods can be overridden. Redefining a matching <code>static</code> method signature in a subclass hides the parent method rather than overriding it.</li>
+
+      <li><b>What is a covariant return type and how does it help Page Object hierarchies?</b><br>
+      Java 5 introduced covariant return types, allowing an overriding subclass method to narrow the return type to a subclass of the parent method's return type. For example, if <code>BasePage.refresh()</code> returns <code>BasePage</code>, <code>CartPage.refresh()</code> can override it to return <code>CartPage</code> directly so callers keep fluent access to cart-specific methods without manual casting.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>Name three real examples of Method Overloading inside the Selenium WebDriver API.</b><br>
+      1) <code>driver.switchTo().frame(int index)</code>, <code>frame(String nameOrId)</code>, and <code>frame(WebElement frameElement)</code>. 2) <code>Actions.click()</code> (clicks at current mouse coordinates) vs <code>Actions.click(WebElement target)</code> (moves to element and clicks). 3) <code>Select.selectByIndex(int)</code>, <code>selectByValue(String)</code>, and <code>selectByVisibleText(String)</code> (or TestNG's overloaded <code>Assert.assertEquals</code> signatures).</li>
+
+      <li><b>How does <code>Method Overriding</code> power custom Selenium <code>ExpectedConditions</code>?</b><br>
+      When writing a custom wait condition, you pass an anonymous implementation or lambda overriding <code>ExpectedCondition&lt;Boolean&gt;.apply(WebDriver driver)</code>. Inside <code>WebDriverWait.until()</code>, Selenium polls that overridden <code>apply()</code> method polymorphically until it returns <code>true</code> or times out.</li>
+
+      <li><b>When running tests against Selenium Grid with <code>RemoteWebDriver</code>, how do you safely take a screenshot?</b><br>
+      <code>RemoteWebDriver</code> already implements <code>TakesScreenshot</code>, so check <code>if (driver instanceof TakesScreenshot ts)</code> or wrap <code>new Augmenter().augment(driver)</code> when needed before calling <code>ts.getScreenshotAs(OutputType.FILE)</code>. That avoids hardcoding casts to <code>ChromeDriver</code> that crash on remote Grid sessions.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why did <code>((ChromeDriver) driver).executeCdpCommand(...)</code> pass locally and throw <code>ClassCastException</code> on Selenium Grid?</b><br>
+      Locally, <code>driver</code> held a <code>ChromeDriver</code> instance, so the downcast succeeded. On Selenium Grid, the DriverFactory instantiated a <code>RemoteWebDriver</code>, which does NOT inherit from <code>ChromeDriver</code>, causing an immediate <code>ClassCastException: class RemoteWebDriver cannot be cast to class ChromeDriver</code>. Always guard downcasts with <code>instanceof</code> or use <code>HasCdp</code> / <code>Augmenter</code>.</li>
+
+      <li><b>Why did calling <code>p.printVersion()</code> on <code>Parent p = new Child();</code> execute <code>Parent.printVersion()</code> instead of <code>Child.printVersion()</code>?</b><br>
+      <code>printVersion()</code> was declared <code>static</code> in both classes. Because <code>static</code> methods bind at compile time to the declared reference type (<code>Parent</code>) rather than the Heap object type (<code>Child</code>), method hiding occurred instead of runtime overriding.</li>
+
+      <li><b>Why does an overloaded pair <code>process(Object o)</code> and <code>process(String s)</code> invoke <code>process(Object)</code> when called through a variable typed as <code>Object x = "hello";</code>?</b><br>
+      Method overload selection happens strictly at <b>compile time</b> using the declared static types of the arguments (<code>Object</code>), never the runtime Heap type (<code>String</code>). Only overriding uses the runtime Heap type.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why should framework code always program to the <code>WebDriver</code> interface rather than concrete driver classes?</b><br>
+      Coding against interfaces isolates tests from browser implementation changes, enables instant cross-browser switching via config flags, and supports wrapping drivers in Selenium Grid's <code>RemoteWebDriver</code> or <code>EventFiringDecorator</code> proxies transparently.</li>
+
+      <li><b>Why should you avoid creating excessive confusing overloads that take identical argument counts of convertible types (like <code>int</code> vs <code>long</code> vs <code>Integer</code>)?</b><br>
+      Overloading methods with numeric promotions and boxing types forces maintainers to memorize Java's implicit overload precedence rules and risks ambiguous method call errors. Give distinct behavioral variants distinct, descriptive method names instead.</li>
+
+      <li><b>Why does Java forbid overriding <code>private</code> methods?</b><br>
+      A <code>private</code> method is invisible outside its declaring class and represents purely internal mechanics. Allowing subclasses to intercept a parent's internal private helpers would break parent invariants silently; if a child defines a method with the same signature, Java treats it as an unrelated new method.</li>
+
+      <li><b>Can two overloaded methods differ ONLY by return type?</b><br>
+      No; parameter lists must differ.</li>
+
+      <li><b>When is Method Overloading resolved vs Method Overriding?</b><br>
+      Overloading resolves at compile time; Overriding resolves at runtime.</li>
+
+      <li><b>Can a <code>static</code> or <code>private</code> method be overridden?</b><br>
+      No.</li>
+
+      <li><b>What exception occurs on an invalid downcast?</b><br>
+      <code>java.lang.ClassCastException</code>.</li>
+
+      <li><b>What is Upcasting in Selenium?</b><br>
+      <code>WebDriver driver = new ChromeDriver();</code> (subclass object assigned to interface/parent variable).</li>
+
+      <li><b>What does a covariant return type allow?</b><br>
+      An overriding subclass method to return a narrower subtype of the parent's return type.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-polymorphism-overloading-overriding.html"><span class="tag Java">Java</span>&larr; Back to J4.6 Concept Page</a></p>
+    <p><a href="interview-j4-5-qa.html">&larr; J4.5 Q&amp;A</a> &middot; <a href="interview-j4-7-qa.html">J4.7 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J2.2 Variables, Primitive vs Reference Types &amp; Type Casting</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-variables-primitives-casting.html">&larr; Back to Concept Page: J2.2 Variables, Primitive vs Reference Types &amp; Type Casting</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J2.2 Question Bank: Variables, Primitive vs Reference Types &amp; Type Casting (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Name all 8 primitive data types in Java and their byte sizes.</b><br>
+      The 4 signed integer types are <code>byte</code> (1 byte, -128 to 127), <code>short</code> (2 bytes), <code>int</code> (4 bytes), and <code>long</code> (8 bytes). The 2 IEEE 754 floating-point types are <code>float</code> (4 bytes) and <code>double</code> (8 bytes). The remaining 2 types are <code>char</code> (2-byte unsigned UTF-16 character, 0 to 65,535) and <code>boolean</code> (logical <code>true</code> or <code>false</code>).</li>
+
+      <li><b>What are the key differences between primitive types and reference types?</b><br>
+      A primitive variable stores its exact binary value directly in its variable slot (on the Stack if local, or inline inside an object on the Heap) and can never be <code>null</code>. A reference variable stores a memory address pointing to an object on the Heap, defaults to <code>null</code> when declared as a field, and supports calling methods using the dot operator.</li>
+
+      <li><b>Which variable kinds receive default values from the JVM?</b><br>
+      Instance fields and <code>static</code> class fields always receive automatic default values when allocated: <code>0</code> for integer types, <code>0.0</code> for floating-point types, <code>'\u0000'</code> for <code>char</code>, <code>false</code> for <code>boolean</code>, and <code>null</code> for references. Local variables inside methods never receive default values and fail to compile if read prior to explicit assignment.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Why does <code>byte a = 50; byte b = a + 1;</code> fail to compile?</b><br>
+      Java automatically applies binary numeric promotion to any arithmetic operation involving <code>byte</code>, <code>short</code>, or <code>char</code>, widening both operands to <code>int</code> before computing the result. Because <code>a + 1</code> produces an <code>int</code> expression, assigning it back into a <code>byte</code> without an explicit cast <code>(byte) (a + 1)</code> fails compilation. Using compound assignment <code>a += 1;</code> compiles because compound operators insert an implicit narrowing cast.</li>
+
+      <li><b>What happens internally during a narrowing cast like <code>int n = (int) 130L;</code> or <code>byte b = (byte) 130;</code>?</b><br>
+      During a narrowing primitive cast, the JVM keeps only the lower-order bits that fit in the target bit width and discards the higher-order bits. Casting <code>130</code> (binary <code>10000010</code> in 8 bits) to a signed <code>byte</code> interprets the leading <code>1</code> as a two's-complement negative sign bit, silently wrapping around to <code>-126</code> without throwing any exception. Casting a <code>double</code> to <code>int</code> drops the fractional part toward zero.</li>
+
+      <li><b>Why can a <code>long</code> (8 bytes) widen implicitly to a <code>float</code> (4 bytes)?</b><br>
+      Although <code>float</code> uses only 4 bytes of memory compared to 8 bytes for <code>long</code>, IEEE 754 floating-point encoding uses an exponent field that represents magnitudes up to roughly <code>3.4e38</code>, far wider than <code>long</code>'s maximum of ~<code>9.2e18</code>. Therefore Java classifies <code>long -&gt; float</code> as a widening conversion, even though very large <code>long</code> values lose lower-digit precision.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>In a Selenium e-commerce test on QKart, why should currency and price calculations avoid <code>float</code> or <code>double</code>?</b><br>
+      Binary floating-point types (<code>float</code> and <code>double</code>) cannot represent base-10 decimals like <code>0.1</code> or <code>0.2</code> exactly, causing assertions like <code>19.99 + 0.01</code> or tax sums to evaluate to <code>19.999999999999996</code>. When asserting cart totals against expected prices, use <code>java.math.BigDecimal</code> constructed from <code>String</code> values (<code>new BigDecimal("19.99")</code>) or integer cents (<code>long</code>) to guarantee exact decimal equality.</li>
+
+      <li><b>Why does declaring <code>WebDriver driver;</code> locally inside <code>@BeforeMethod</code> fail to initialize the class field?</b><br>
+      Writing <code>WebDriver driver = new ChromeDriver();</code> inside <code>@BeforeMethod</code> declares a brand-new <b>local variable</b> that shadows the class-level instance field <code>driver</code>. Once <code>@BeforeMethod</code> finishes, the local variable disappears off the Stack while the instance field <code>this.driver</code> remains <code>null</code>. Then the <code>@Test</code> method throws <code>NullPointerException</code> on <code>driver.get()</code>.</li>
+
+      <li><b>When a Selenium test calls <code>((TakesScreenshot) driver).getScreenshotAs(...)</code>, is that widening or narrowing reference casting?</b><br>
+      That is a narrowing reference downcast from the super-interface <code>WebDriver</code> to the sibling capability interface <code>TakesScreenshot</code> implemented by <code>RemoteWebDriver</code>. Because the compiler only sees the declared type <code>WebDriver</code>, it requires the explicit cast and checks at runtime whether the underlying Heap object actually implements <code>TakesScreenshot</code>.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>How do you fix 'variable timeout might not have been initialized' when compiling a helper method?</b><br>
+      Locate the local variable inside the method and trace all conditional branches (<code>if</code>, <code>else</code>, <code>try-catch</code>). If any execution path skips assigning a value before the variable is read, initialize the local variable at declaration (for example, <code>int timeout = 10;</code>) or ensure every <code>if-else</code> branch assigns it.</li>
+
+      <li><b>Why does <code>int big = 1000000 * 10000;</code> produce a negative number instead of <code>10,000,000,000</code>?</b><br>
+      Both literals are <code>int</code> values, so Java computes the multiplication in 32-bit signed <code>int</code> arithmetic first, overflowing past <code>Integer.MAX_VALUE</code> (<code>2,147,483,647</code>) before assignment even if stored in a <code>long</code>. Adding the <code>L</code> suffix to at least one operand (<code>1000000L * 10000</code>) promotes the calculation to 64-bit <code>long</code>.</li>
+
+      <li><b>What causes <code>double rate = 5 / 2;</code> to evaluate to <code>2.0</code> instead of <code>2.5</code>?</b><br>
+      Dividing two <code>int</code> literals performs integer division first, truncating <code>2.5</code> to <code>2</code> before widening to <code>2.0</code>. Making at least one operand a double literal (<code>5.0 / 2</code> or <code>(double) 5 / 2</code>) performs floating-point division and produces <code>2.5</code>.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why did Java keep 8 primitive types instead of making every number an object?</b><br>
+      Wrapping every loop counter and array index in a Heap object adds object header memory overhead and pointer dereferencing on every read. Keeping 8 stack-allocatable primitive types allows the JVM to store values compactly in CPU registers and Stack frames, matching native C-like numerical speed.</li>
+
+      <li><b>Why does Java forbid silent narrowing conversions like assigning a <code>double</code> to an <code>int</code>?</b><br>
+      Silent narrowing would hide accidental truncation bugs where decimals or upper bits vanish unnoticed during refactoring. Requiring an explicit cast forces the programmer to acknowledge potential precision loss directly at the call site.</li>
+
+      <li><b>Why should framework configuration constants like default timeouts be declared <code>public static final</code> rather than plain <code>static</code>?</b><br>
+      Mutable <code>static</code> variables allow any test method to overwrite global settings mid-run, creating order-dependent flakiness across tests. Adding <code>final</code> locks the constant value once at class initialization so no test can mutate shared timeouts.</li>
+
+      <li><b>How many primitive types exist in Java?</b><br>
+      Exactly 8: <code>byte</code>, <code>short</code>, <code>int</code>, <code>long</code>, <code>float</code>, <code>double</code>, <code>char</code>, <code>boolean</code>.</li>
+
+      <li><b>What is the default value of a local variable?</b><br>
+      None; local variables are not default-initialized and cause a compile error if read before assignment.</li>
+
+      <li><b>What is the default value of an uninitialized <code>boolean</code> instance field?</b><br>
+      <code>false</code>.</li>
+
+      <li><b>Which suffix is required for a <code>long</code> literal?</b><br>
+      <code>L</code> (uppercase preferred, e.g., <code>30000L</code>).</li>
+
+      <li><b>What is the result of <code>(int) 9.99</code>?</b><br>
+      <code>9</code> (truncates toward zero, never rounds).</li>
+
+      <li><b>Why should financial cart prices avoid <code>double</code>?</b><br>
+      IEEE 754 binary floating-point introduces decimal rounding drift; use <code>BigDecimal</code> instead.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-variables-primitives-casting.html"><span class="tag Java">Java</span>&larr; Back to J2.2 Concept Page</a></p>
+    <p><a href="interview-j2-1-qa.html">&larr; J2.1 Q&amp;A</a> &middot; <a href="interview-j2-3-qa.html">J2.3 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

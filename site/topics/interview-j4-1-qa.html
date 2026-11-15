@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J4.1 Class &amp; Object (Selenium + Interview Edition)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-object.html">&larr; Back to Concept Page: J4.1 Class &amp; Object (Selenium + Interview Edition)</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J4.1 Question Bank: Class &amp; Object (Selenium + Interview Edition) (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What is the difference between a class and an object in Java?</b><br>
+      A class is a compile-time definition of fields and methods loaded into Metaspace that takes zero Heap memory for instance data. An object is a physical runtime instance allocated on the Heap via <code>new</code> that holds concrete values for those fields. A single <code>LoginPage</code> class can produce multiple independent <code>LoginPage</code> objects at runtime.</li>
+
+      <li><b>What are the three defining properties of every Java object?</b><br>
+      Every object has State (values stored inside its instance fields), Behavior (methods it exposes to read or transform state), and Identity (a unique location in Heap memory distinguishing it from other objects even if field values match identically). Identity is tested via <code>==</code> while logical state equivalence is tested via <code>.equals()</code>.</li>
+
+      <li><b>Name all 5 ways to create an object in Java with one SDET example each.</b><br>
+      The 5 ways are: 1) <code>new</code> keyword (<code>new ChromeDriver()</code>), 2) Factory methods (<code>By.id("login")</code>), 3) Reflection (<code>Constructor.newInstance()</code> used internally by TestNG to instantiate <code>@Test</code> classes), 4) Cloning (<code>payload.clone()</code> for API request variations), and 5) Deserialization (Jackson/RestAssured converting JSON into a POJO via <code>response.as(User.class)</code>).</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>If you call <code>driver.findElement(By.id("q"))</code> twice into <code>WebElement a</code> and <code>WebElement b</code>, what do <code>a == b</code> and <code>a.equals(b)</code> return?</b><br>
+      Each call to <code>findElement()</code> instantiates a fresh <code>RemoteWebElement</code> Java wrapper object on the Heap, so <code>a == b</code> returns <code>false</code> because they sit at distinct memory addresses. However, <code>RemoteWebElement</code> overrides <code>.equals()</code> to compare the underlying W3C DOM element ID, so <code>a.equals(b)</code> returns <code>true</code>.</li>
+
+      <li><b>What happens step by step on the Stack and Heap during <code>LoginPage p = new LoginPage();</code>?</b><br>
+      First, <code>new</code> allocates memory on the Heap large enough for <code>LoginPage</code>'s fields plus an object header. Next, the JVM zeroes all field slots to type defaults and executes the <code>LoginPage()</code> constructor body. Finally, the resulting Heap address is returned and assigned into Stack reference variable <code>p</code>.</li>
+
+      <li><b>What happens in memory when you call <code>driver.quit()</code>?</b><br>
+      <code>driver.quit()</code> sends the W3C Delete Session HTTP request, terminating the external browser and driver executable processes, and clears the internal <code>sessionId</code> field to <code>null</code>. The Java <code>ChromeDriver</code> object itself remains on the Heap with <code>driver != null</code> until the reference leaves scope and Garbage Collection sweeps it.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>What are the top 3 causes of <code>NullPointerException</code> in Selenium Page Object frameworks?</b><br>
+      First, declaring a duplicate <code>WebDriver driver;</code> field in a test subclass that shadows the initialized <code>BaseTest.driver</code> field. Second, accessing <code>@FindBy</code> fields before calling <code>PageFactory.initElements(driver, this)</code>. Third, instantiating a Page Object inside a field initializer before <code>@BeforeMethod</code> has initialized <code>driver</code>.</li>
+
+      <li><b>Why does TestNG instantiate your <code>@Test</code> class without requiring you to write <code>new LoginTest()</code>?</b><br>
+      TestNG inspects the compiled test classes specified in <code>testng.xml</code> and uses Java Reflection (<code>getDeclaredConstructor().newInstance()</code>) at runtime to allocate test instances automatically. This is also why TestNG requires a public no-argument constructor unless a custom <code>IObjectFactory</code> or dependency injector is configured.</li>
+
+      <li><b>How do RestAssured and Jackson create response POJOs without explicit <code>new</code> calls in your test code?</b><br>
+      Jackson uses reflection and deserialization mechanisms to read the JSON stream, allocate a target POJO instance via its no-arg constructor (or annotated <code>@JsonCreator</code>), and populate fields before returning the hydrated Heap object to the test.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does calling <code>driver.get(...)</code> after <code>driver.quit()</code> throw <code>NoSuchSessionException</code> instead of <code>NullPointerException</code>?</b><br>
+      Because the Java <code>driver</code> reference on the Stack still points to a valid <code>ChromeDriver</code> Heap object, the JVM invokes <code>get()</code> cleanly rather than throwing NPE. Inside <code>RemoteWebDriver</code>, Selenium detects that its internal <code>sessionId</code> is <code>null</code> and throws <code>NoSuchSessionException: Session ID is null</code>.</li>
+
+      <li><b>Why does creating a Page Object at field level (<code>LoginPage login = new LoginPage(driver);</code>) inside a Test class cause NPE during clicks?</b><br>
+      Field initializers run during test class instantiation before <code>@BeforeMethod</code> launches the browser, so <code>driver</code> is still <code>null</code> when passed into <code>LoginPage</code>. Instantiate Page Objects inside the <code>@Test</code> method or lazily after <code>@BeforeMethod</code> sets up the driver.</li>
+
+      <li><b>Why does printing an object directly via <code>System.out.println(user)</code> output <code>User@4e25154f</code> instead of field values?</b><br>
+      By default, classes inherit <code>Object.toString()</code>, which prints the class name followed by the unsigned hexadecimal hash code. Overriding <code>toString()</code> in your POJO or test data class outputs meaningful field details in TestNG logs.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why do modern Selenium frameworks instantiate Page Objects via <code>new LoginPage(driver)</code> passing <code>driver</code> in the constructor?</b><br>
+      Injecting the active <code>WebDriver</code> through the Page Object constructor (Dependency Injection) ensures every Page Object operates strictly against the calling test thread's browser without relying on brittle global <code>static</code> fields. This makes parallel execution safe by construction.</li>
+
+      <li><b>Why should custom DTOs and Page Objects avoid exposing mutable public fields directly?</b><br>
+      Exposing raw public fields lets external test code bypass validation or hold inconsistent object state. Keeping fields <code>private</code> and exposing explicit methods enforces invariants across the test suite.</li>
+
+      <li><b>When building a test payload from a template object, why is cloning or a copy constructor safer than assigning <code>Payload copy = template;</code>?</b><br>
+      Simple assignment (<code>copy = template</code>) creates a reference alias to the identical Heap object, so modifying <code>copy.email</code> mutates <code>template.email</code> for subsequent tests. Creating a distinct Heap object via a copy constructor or clone keeps test inputs completely independent.</li>
+
+      <li><b>Does a class declaration allocate Heap memory for instance fields?</b><br>
+      No; memory is allocated only when an object is instantiated.</li>
+
+      <li><b>What are the 5 ways to create an object in Java?</b><br>
+      <code>new</code> keyword, Factory method, Reflection, Cloning, and Deserialization.</li>
+
+      <li><b>What does <code>==</code> check on object variables?</b><br>
+      Heap memory address equality.</li>
+
+      <li><b>What does <code>driver.quit()</code> set to <code>null</code>?</b><br>
+      The internal W3C session ID (not the Java <code>driver</code> variable itself).</li>
+
+      <li><b>What exception is thrown when calling a method on a <code>null</code> reference?</b><br>
+      <code>java.lang.NullPointerException</code>.</li>
+
+      <li><b>Why do two separate <code>driver.findElement()</code> calls for the same button have <code>a.equals(b) == true</code>?</b><br>
+      <code>RemoteWebElement</code> overrides <code>.equals()</code> to compare the underlying DOM element ID.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-object.html"><span class="tag Java">Java</span>&larr; Back to J4.1 Concept Page</a></p>
+    <p><a href="interview-j3-3-qa.html">&larr; J3.3 Q&amp;A</a> &middot; <a href="interview-j4-2-qa.html">J4.2 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

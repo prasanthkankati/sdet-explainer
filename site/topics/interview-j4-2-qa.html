@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J4.2 Constructors: Default, Parameterized, Chaining &amp; Singleton</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-constructors-chaining-singleton.html">&larr; Back to Concept Page: J4.2 Constructors: Default, Parameterized, Chaining &amp; Singleton</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J4.2 Question Bank: Constructors: Default, Parameterized, Chaining &amp; Singleton (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What are the strict rules that distinguish a constructor from a normal method?</b><br>
+      A constructor must match its enclosing class name character-for-character and must declare zero return type (not even <code>void</code>). Constructors cannot be marked <code>static</code>, <code>final</code>, or <code>abstract</code>, and they are never inherited by subclasses. They execute automatically once during object creation via <code>new</code>.</li>
+
+      <li><b>When does the Java compiler generate a default no-argument constructor, and when does it omit it?</b><br>
+      If a class contains zero written constructors, <code>javac</code> generates a hidden no-arg constructor whose access modifier matches the class and whose body simply calls <code>super();</code>. The moment you write any explicit constructor—for example, <code>public LoginPage(WebDriver driver)</code>—the compiler stops generating the implicit no-arg constructor. Any caller attempting <code>new LoginPage()</code> afterward fails compilation unless you declare a no-arg constructor explicitly.</li>
+
+      <li><b>Why can a constructor be declared <code>private</code>, and where is it useful?</b><br>
+      Marking a constructor <code>private</code> prevents external classes from instantiating the class directly with <code>new</code>. It is used in stateless utility classes (like <code>java.lang.Math</code> or a <code>WaitUtils</code> helper with only <code>static</code> methods) and in the Singleton pattern (like a read-only <code>ConfigReader</code>) where a single shared instance is returned via <code>getInstance()</code>.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Explain the execution order of constructors when <code>ChildPage</code> extends <code>BasePage</code>.</b><br>
+      When <code>new ChildPage(driver)</code> runs, the child constructor invokes <code>super(driver)</code> on its very first line before executing its own body. <code>BasePage</code>'s constructor runs first (after implicitly calling <code>Object()</code>), initializes inherited fields, and returns control to <code>ChildPage</code>'s remaining constructor statements. Parent fields are always ready before child constructor code runs.</li>
+
+      <li><b>Why must <code>this(...)</code> and <code>super(...)</code> always be the very first statement inside a constructor?</b><br>
+      Guaranteeing the superclass or delegated constructor executes first ensures all parent invariants and inherited fields are initialized before the current constructor attempts to read them. Because both require position 1, a constructor can invoke at most one of them, and any constructor using <code>this()</code> delegates the responsibility of calling <code>super()</code> to the target constructor.</li>
+
+      <li><b>What happens if a recursive constructor call occurs, for instance Constructor A calling <code>this(x)</code> which calls <code>this()</code>?</b><br>
+      Java detects direct or cyclic constructor recursion at compile time and immediately rejects the file with 'recursive constructor invocation'.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>Why do TestNG <code>@Test</code> classes and Jackson POJOs normally require a public no-argument constructor?</b><br>
+      TestNG instantiates test classes via reflection using the zero-argument constructor unless a custom object factory is configured. Similarly, Jackson deserializes JSON strings into Java objects by invoking the class's no-arg constructor first and then populating fields or setters. Adding only a parameterized constructor to a POJO without adding an explicit no-arg constructor breaks JSON deserialization.</li>
+
+      <li><b>When is the Singleton pattern safe vs dangerous in a Selenium automation framework?</b><br>
+      Singleton is safe and beneficial for immutable, read-only resources like loading <code>config.properties</code> once via <code>ConfigReader.getInstance()</code> so tests do not re-read disk files 100 times. Singleton is dangerous for <code>WebDriver</code> because parallel threads would share one browser instance, leading to session collisions and <code>NoSuchSessionException</code>.</li>
+
+      <li><b>How can a <code>BasePage</code> constructor enforce that every Page Object receives a non-null <code>WebDriver</code>?</b><br>
+      Inside <code>BasePage(WebDriver driver)</code>, validate <code>this.driver = Objects.requireNonNull(driver, "WebDriver cannot be null");</code>. Failing immediately inside the constructor catches setup errors at the exact line of page creation rather than three steps later inside a click method.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why did adding <code>public void LoginPage(WebDriver driver)</code> compile without error, yet leave <code>this.driver</code> as <code>null</code>?</b><br>
+      Putting <code>void</code> before the name turns <code>LoginPage</code> into a standard method rather than a constructor, so <code>new LoginPage()</code> actually calls the compiler's implicit no-arg constructor instead. Remove <code>void</code> so the constructor signature reads <code>public LoginPage(WebDriver driver)</code>.</li>
+
+      <li><b>Why does <code>class CheckoutPage extends BasePage</code> fail to compile with 'constructor BasePage in class BasePage cannot be applied to given types'?</b><br>
+      <code>BasePage</code> defines an explicit parameterized constructor <code>BasePage(WebDriver driver)</code>, so it no longer has a zero-arg constructor. Because <code>CheckoutPage</code> omitted an explicit <code>super(driver)</code> call, Java inserted <code>super()</code> implicitly and failed to find a no-arg constructor on <code>BasePage</code>. Declare <code>public CheckoutPage(WebDriver driver) { super(driver); }</code> to fix it.</li>
+
+      <li><b>Why does a private-constructor Singleton break under multi-threaded parallel TestNG startup if written naively?</b><br>
+      A lazy Singleton checking <code>if (instance == null) instance = new ConfigReader();</code> without synchronization allows two TestNG threads starting concurrently to both see <code>null</code> and construct two separate instances. Fix this using double-checked locking with <code>volatile</code>, eager static initialization, or the Bill Pugh static inner holder class.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why should constructors avoid launching browsers, navigating URLs, or calling overridable methods?</b><br>
+      Heavy side effects or throwing exceptions inside constructors creates partially constructed objects and couples instantiation to network timing. Moreover, calling an overridable method inside a parent constructor runs the subclass override before the subclass's own fields are initialized. Keep constructors lightweight: validate and assign fields only.</li>
+
+      <li><b>Between eager initialization, synchronized <code>getInstance()</code>, and Bill Pugh static holder, which Singleton implementation is cleanest in Java?</b><br>
+      The Bill Pugh static inner holder (<code>private static class Holder { static final ConfigReader INSTANCE = new ConfigReader(); }</code>) or a Java <code>enum</code> Singleton provides guaranteed lazy loading and JVM-enforced thread safety during class initialization without synchronization lock overhead on every <code>getInstance()</code> call.</li>
+
+      <li><b>Why is constructor injection preferred over setter injection for passing <code>WebDriver</code> into Page Objects?</b><br>
+      Constructor injection makes the <code>driver</code> dependency mandatory at compile time and allows marking the field <code>private final WebDriver driver;</code>. Setter injection allows callers to forget calling <code>setDriver()</code> and permits reassigning the driver midway through a test.</li>
+
+      <li><b>Does a constructor have a return type?</b><br>
+      No; not even <code>void</code>.</li>
+
+      <li><b>When does the compiler generate a default no-arg constructor?</b><br>
+      Only when the class declares zero constructors explicitly.</li>
+
+      <li><b>Which statement must be first inside a constructor: <code>this()</code> or <code>super()</code>?</b><br>
+      Whichever is used must be line 1; both cannot appear in the same constructor.</li>
+
+      <li><b>Are constructors inherited by subclasses?</b><br>
+      No, subclasses invoke parent constructors via <code>super(...)</code>.</li>
+
+      <li><b>How do you block external instantiation with <code>new</code>?</b><br>
+      Declare the constructor <code>private</code>.</li>
+
+      <li><b>Why should <code>WebDriver</code> NOT be a global Singleton?</b><br>
+      Parallel test threads would overwrite and share one browser session.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-constructors-chaining-singleton.html"><span class="tag Java">Java</span>&larr; Back to J4.2 Concept Page</a></p>
+    <p><a href="interview-j4-1-qa.html">&larr; J4.1 Q&amp;A</a> &middot; <a href="interview-j4-3-qa.html">J4.3 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

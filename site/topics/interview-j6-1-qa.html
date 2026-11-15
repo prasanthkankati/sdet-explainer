@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J6.1 Exception Hierarchy (Checked vs Unchecked vs Error)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-exception-hierarchy.html">&larr; Back to Concept Page: J6.1 Exception Hierarchy (Checked vs Unchecked vs Error)</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J6.1 Question Bank: Exception Hierarchy (Checked vs Unchecked vs Error) (19 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What is the root class of Java's exception hierarchy?</b><br>
+      <code>java.lang.Throwable</code> is the sole root class. Its two immediate children are <code>java.lang.Error</code> and <code>java.lang.Exception</code>.</li>
+
+      <li><b>How do checked exceptions differ from unchecked exceptions?</b><br>
+      Checked exceptions descend directly from <code>Exception</code> (excluding <code>RuntimeException</code>) and must be caught or declared in a method's <code>throws</code> clause for the code to compile. Unchecked exceptions descend from <code>RuntimeException</code> or <code>Error</code> and do not require compile-time declaration.</li>
+
+      <li><b>Does <code>catch (Exception e)</code> catch a failing TestNG assertion?</b><br>
+      No. TestNG <code>Assert</code> methods throw <code>java.lang.AssertionError</code>, which extends <code>Error</code>, a sibling of <code>Exception</code> under <code>Throwable</code>.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>What steps does the JVM perform when a <code>throw</code> statement executes?</b><br>
+      The JVM instantiates the exception object (populating its stack trace array by walking the active thread's call stack frames), halts the rest of the current block, and scans outward along the call stack for the first compatible <code>catch</code> parameter.</li>
+
+      <li><b>Why is <code>InterruptedException</code> checked while <code>NullPointerException</code> is unchecked?</b><br>
+      <code>InterruptedException</code> represents a legitimate coordination signal between threads that callers are expected to recover from or restore the interrupt flag for. <code>NullPointerException</code> indicates a programming defect that can arise at almost any dereference, so checking it at compile time would make code unusable.</li>
+
+      <li><b>How are Selenium WebDriver exceptions modeled in this hierarchy?</b><br>
+      <code>org.openqa.selenium.WebDriverException</code> extends <code>java.lang.RuntimeException</code>. Specific classes including <code>NoSuchElementException</code>, <code>TimeoutException</code>, <code>StaleElementReferenceException</code>, and <code>ElementClickInterceptedException</code> all inherit from <code>WebDriverException</code> and are therefore unchecked.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>Your config helper uses <code>Properties.load(InputStream)</code> which throws checked <code>IOException</code>. How should a Page Object call it?</b><br>
+      Handle <code>IOException</code> inside the config loader itself, log the missing file path, and rethrow a descriptive unchecked framework exception (for example, a custom <code>FrameworkConfigException extends RuntimeException</code>) so Page Objects stay uncluttered.</li>
+
+      <li><b>During parallel runs on <code>https://qkart-qa-web.labs.crio.do/</code>, a test crashes with <code>OutOfMemoryError</code>. Should you catch it inside <code>@AfterMethod</code>?</b><br>
+      No. Once heap space is exhausted, cleanup code inside the same JVM cannot run reliably. Instead, fail fast, inspect heap dumps or unclosed browser streams/POI workbooks, and lower thread concurrency or raise <code>-Xmx</code>.</li>
+
+      <li><b>Why does <code>FluentWait.ignoring(NoSuchElementException.class)</code> work cleanly without catching assertions?</b><br>
+      Because <code>ignoring(...)</code> filters by exact runtime class membership against the list of transient exceptions (<code>NoSuchElementException</code>, <code>StaleElementReferenceException</code>), while letting unrelated errors or assertions abort waiting immediately.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does a Selenium click wrapper throw <code>NullPointerException</code> on line 1 instead of <code>NoSuchElementException</code>?</b><br>
+      Either the <code>WebDriver</code> field itself is <code>null</code> (never initialized in <code>@BeforeMethod</code> or broken in <code>ThreadLocal</code>) or <code>PageFactory.initElements</code> was skipped for that Page Object before calling an <code>@FindBy</code> element.</li>
+
+      <li><b>A compiler error says 'unreported exception InterruptedException; must be caught or declared to be thrown'. How do you fix it properly?</b><br>
+      Do not slap an empty <code>catch (InterruptedException e) {}</code> on it. Catch <code>InterruptedException</code>, call <code>Thread.currentThread().interrupt()</code> to preserve the thread's interrupt status, and throw an unchecked exception or exit cleanly — better yet, replace sleeps with explicit <code>WebDriverWait</code>.</li>
+
+      <li><b>Why does calling <code>driver.findElement(...)</code> after navigating away from <code>https://www.selenium.dev/</code> raise <code>StaleElementReferenceException</code> instead of <code>NoSuchElementException</code>?</b><br>
+      A previously found <code>WebElement</code> handle points to an old DOM node ID in the browser; when the DOM refreshes or detaches that node, acting on the stale reference raises <code>StaleElementReferenceException</code> rather than saying the locator failed.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q19)</h2>
+    <ol start="13">
+      <li><b>Why did Java framework authors shift away from checked exceptions toward unchecked exceptions for APIs like Selenium and Spring?</b><br>
+      Forced checked exceptions either clutter intermediate layers with brittle <code>throws</code> clauses or tempt developers into empty <code>catch</code> blocks that swallow errors. Unchecked domain exceptions preserve clean signatures while letting centralized handlers report failures.</li>
+
+      <li><b>When should an SDET still declare a checked exception rather than an unchecked one?</b><br>
+      When writing a low-level utility where callers can genuinely take an immediate fallback action — for example parsing an optional override file before falling back to defaults.</li>
+
+      <li><b>Where in a test framework should general <code>Exception</code> catching actually live?</b><br>
+      At the framework boundary — inside TestNG <code>ITestListener.onTestFailure</code> or an Allure/Extent reporting wrapper — never inside low-level Page Object helpers where swallowing errors corrupts subsequent test steps.</li>
+
+      <li><b>What sits at the top of Java's exception tree?</b><br>
+      <code>java.lang.Throwable</code>, splitting into <code>Error</code> and <code>Exception</code>.</li>
+
+      <li><b>What makes an exception checked?</b><br>
+      It extends <code>Exception</code> without extending <code>RuntimeException</code>, so <code>javac</code> forces handling or <code>throws</code>.</li>
+
+      <li><b>Are Selenium exceptions checked or unchecked?</b><br>
+      Unchecked: <code>WebDriverException</code> extends <code>RuntimeException</code>.</li>
+
+      <li><b>Does <code>catch (Exception e)</code> catch <code>AssertionError</code>?</b><br>
+      No; <code>AssertionError</code> extends <code>Error</code>, not <code>Exception</code>.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-exception-hierarchy.html"><span class="tag Java">Java</span>&larr; Back to J6.1 Concept Page</a></p>
+    <p><a href="interview-j5-6-qa.html">&larr; J5.6 Q&amp;A</a> &middot; <a href="interview-j6-2-qa.html">J6.2 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

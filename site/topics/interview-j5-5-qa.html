@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J5.5 Sorting (Comparable vs Comparator) &amp; Fail-Fast Iterators</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-sorting-comparable-comparator-iterators.html">&larr; Back to Concept Page: J5.5 Sorting (Comparable vs Comparator) &amp; Fail-Fast Iterators</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J5.5 Question Bank: Sorting (Comparable vs Comparator) &amp; Fail-Fast Iterators (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Compare <code>Comparable</code> and <code>Comparator</code> in Java.</b><br>
+      <code>Comparable&lt;T&gt;</code> lives in <code>java.lang</code>, is implemented inside the target class itself via <code>compareTo(T o)</code>, and defines the single natural order of that class (used by <code>Collections.sort(list)</code>). <code>Comparator&lt;T&gt;</code> lives in <code>java.util</code>, is defined externally via <code>compare(T o1, T o2)</code> or lambdas, and lets you define unlimited independent sort strategies (sort by price, sort by rating, sort by date) without modifying the domain class.</li>
+
+      <li><b>What is the difference between a Fail-Fast iterator and a Fail-Safe iterator?</b><br>
+      A Fail-Fast iterator (used by <code>ArrayList</code>, <code>HashSet</code>, and <code>HashMap</code>) detects structural changes made outside the iterator during traversal and immediately throws <code>ConcurrentModificationException</code>. A Fail-Safe iterator (used by <code>CopyOnWriteArrayList</code> and <code>ConcurrentHashMap</code>) iterates safely without throwing that exception because it operates over a cloned snapshot or weakly consistent concurrent buckets.</li>
+
+      <li><b>What return values must <code>compareTo(o)</code> and <code>compare(o1, o2)</code> follow?</b><br>
+      Both methods return a negative integer if the first object is ordered before the second, <code>0</code> if both are equal in sort rank, and a positive integer if the first object comes after the second. Always delegate to wrapper helpers like <code>Integer.compare(x, y)</code> and <code>Double.compare(x, y)</code> instead of manual subtraction to prevent overflow bugs.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How does an <code>ArrayList</code> iterator detect modification and throw <code>ConcurrentModificationException</code>?</b><br>
+      <code>ArrayList</code> maintains a counter field <code>modCount</code> incremented on every structural edit (<code>add</code>, <code>remove</code>, <code>clear</code>). When <code>list.iterator()</code> creates an iterator (including implicitly in every <code>for-each</code> loop), the iterator snapshots <code>expectedModCount = modCount</code>. Calling <code>list.remove()</code> directly updates <code>modCount</code> without updating <code>expectedModCount</code>, so the next call to <code>iterator.next()</code> detects the mismatch and immediately throws <code>ConcurrentModificationException</code>—even on a single thread!</li>
+
+      <li><b>Why does calling <code>iterator.remove()</code> succeed without throwing <code>ConcurrentModificationException</code>?</b><br>
+      When you call <code>it.remove()</code> on the iterator itself, the iterator deletes the last returned element from the underlying list AND synchronizes <code>expectedModCount = modCount</code> internally. Note that you must call <code>it.next()</code> before calling <code>it.remove()</code>, otherwise it throws <code>IllegalStateException</code>.</li>
+
+      <li><b>How does <code>CopyOnWriteArrayList</code> avoid <code>ConcurrentModificationException</code> internally?</b><br>
+      Every write operation (<code>add</code>, <code>set</code>, <code>remove</code>) acquires a lock, copies the entire internal array into a fresh modified array, and atomically swaps the backing array reference. Any active iterator holds the immutable snapshot reference from when the loop started, so reads never lock and never throw <code>ConcurrentModificationException</code>—at the expense of copying the array on writes.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>How do you write a Selenium UI test verifying that a product table sorted properly by Price Low-to-High?</b><br>
+      Scrape all price cells from the UI into <code>List&lt;Double&gt; actual = elements.stream().map(e -&gt; Double.parseDouble(e.getText().replaceAll("[^0-9.]", ""))).toList();</code>. Build a mutable copy <code>List&lt;Double&gt; expected = new ArrayList&lt;&gt;(actual); Collections.sort(expected);</code>, and assert <code>Assert.assertEquals(actual, expected)</code>. Copying first guarantees you never compare a sorted list against itself.</li>
+
+      <li><b>In a multi-column sort requirement (sort products by category ascending, then price descending, with nulls last), how does Java 8 <code>Comparator</code> write this cleanly?</b><br>
+      Chain <code>Comparator.comparing(Item::category, Comparator.nullsLast(String::compareToIgnoreCase)).thenComparing(Comparator.comparingDouble(Item::price).reversed())</code>. This reads cleanly and guards against missing price or category fields without throwing <code>NullPointerException</code>.</li>
+
+      <li><b>How do you safely strip blank entries from a scraped <code>List&lt;String&gt;</code> in one line in Java 8+?</b><br>
+      Call <code>list.removeIf(s -&gt; s == null || s.isBlank());</code>. Internally <code>ArrayList.removeIf()</code> shifts matching items in a single linear O(n) pass using a bitset and increments <code>modCount</code> once, running faster and cleaner than manual iterator loops.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why did a single-threaded <code>for (WebElement el : rows) { if (el.getText().isEmpty()) rows.remove(el); }</code> throw <code>ConcurrentModificationException</code>?</b><br>
+      The exception name misleads newcomers into thinking multiple threads are required. Removing an element directly from <code>rows</code> inside an enhanced <code>for-each</code> loop violates the hidden <code>Iterator</code>'s <code>modCount</code> invariant on the very same thread. Replace the loop with <code>rows.removeIf(el -&gt; el.getText().isEmpty())</code> or an explicit <code>Iterator</code>.</li>
+
+      <li><b>Why did <code>Collections.sort(actualPrices)</code> pass an assertion comparing <code>actualPrices</code> to itself even when the UI table was completely unsorted?</b><br>
+      <code>Collections.sort(list)</code> mutates the list <b>in place</b> and returns <code>void</code>. Writing <code>List&lt;Double&gt; sorted = actualPrices; Collections.sort(sorted);</code> creates an alias pointing to the identical Heap list, so both variables point to the sorted list afterward! Always allocate <code>new ArrayList&lt;&gt;(actualPrices)</code> before sorting.</li>
+
+      <li><b>Why did <code>return o1.price - o2.price</code> cast to <code>int</code> inside a <code>Comparator</code> put <code>$10.90</code> equal to <code>$10.20</code>?</b><br>
+      Truncating <code>10.90 - 10.20 = 0.70</code> to <code>int</code> evaluates to <code>0</code>, falsely reporting two unequal prices as equal! Always use <code>Double.compare(o1.price, o2.price)</code> instead of subtracting.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why did Java design standard collections like <code>ArrayList</code> and <code>HashMap</code> with Fail-Fast iterators rather than making all iterators Fail-Safe?</b><br>
+      Cloning an entire array or map on every loop would create massive memory overhead and hide subtle concurrency bugs where iterations operate on stale data. Fail-Fast checks cost a single integer comparison per step and catch structural modification defects immediately during testing.</li>
+
+      <li><b>When building a custom framework entity (like <code>TestCaseResult</code>), when should it implement <code>Comparable</code> vs relying on <code>Comparator</code>?</b><br>
+      Implement <code>Comparable</code> only when the type has one unmistakable, universal natural order (like alphabetical <code>String</code> or chronological <code>LocalDate</code>). When items can legitimately sort by timestamp, duration, status, or module name depending on the report view, expose named <code>Comparator</code> constants instead.</li>
+
+      <li><b>When should you choose <code>CopyOnWriteArrayList</code> over <code>ArrayList</code>?</b><br>
+      Choose <code>CopyOnWriteArrayList</code> strictly for small collections that are read constantly across parallel threads and mutated rarely—for instance, registering custom test execution listeners at startup and notifying them concurrently during tests.</li>
+
+      <li><b>Which method does <code>Comparable</code> define vs <code>Comparator</code>?</b><br>
+      <code>Comparable</code> defines <code>compareTo(T o)</code>; <code>Comparator</code> defines <code>compare(T o1, T o2)</code>.</li>
+
+      <li><b>What exception does a Fail-Fast iterator throw when a list is modified mid-loop?</b><br>
+      <code>ConcurrentModificationException</code>.</li>
+
+      <li><b>Name two safe ways to remove items from an <code>ArrayList</code> while iterating.</b><br>
+      <code>iterator.remove()</code> or <code>list.removeIf(predicate)</code>.</li>
+
+      <li><b>Which collections have Fail-Safe iterators?</b><br>
+      <code>CopyOnWriteArrayList</code> and <code>ConcurrentHashMap</code>.</li>
+
+      <li><b>Does <code>Collections.sort(list)</code> return a new list?</b><br>
+      No; it sorts the target list in place and returns <code>void</code>.</li>
+
+      <li><b>Why should numeric comparators use <code>Integer.compare()</code> instead of <code>a - b</code>?</b><br>
+      To avoid integer overflow bugs and decimal truncation.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-sorting-comparable-comparator-iterators.html"><span class="tag Java">Java</span>&larr; Back to J5.5 Concept Page</a></p>
+    <p><a href="interview-j5-4-qa.html">&larr; J5.4 Q&amp;A</a> &middot; <a href="interview-j5-6-qa.html">J5.6 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

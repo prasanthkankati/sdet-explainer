@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J5.6 Java 8+ Lambdas, Functional Interfaces, Streams &amp; Optional</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-lambdas-streams-optional.html">&larr; Back to Concept Page: J5.6 Java 8+ Lambdas, Functional Interfaces, Streams &amp; Optional</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J5.6 Question Bank: Java 8+ Lambdas, Functional Interfaces, Streams &amp; Optional (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Name the 4 primary Functional Interfaces in <code>java.util.function</code> and their single abstract methods.</b><br>
+      1) <code>Predicate&lt;T&gt;</code> declares <code>boolean test(T t)</code> for conditional filtering. 2) <code>Function&lt;T, R&gt;</code> declares <code>R apply(T t)</code> for transforming input T into output R. 3) <code>Consumer&lt;T&gt;</code> declares <code>void accept(T t)</code> for side-effect actions returning nothing. 4) <code>Supplier&lt;T&gt;</code> declares <code>T get()</code> for lazy value creation with zero inputs.</li>
+
+      <li><b>What is the difference between Intermediate and Terminal operations in Java Streams?</b><br>
+      Intermediate operations (<code>filter</code>, <code>map</code>, <code>flatMap</code>, <code>distinct</code>, <code>sorted</code>, <code>limit</code>) are strictly lazy: they return another <code>Stream</code> and execute zero elements until a Terminal operation arrives. Terminal operations (<code>collect</code>, <code>toList</code>, <code>forEach</code>, <code>findFirst</code>, <code>anyMatch</code>, <code>count</code>) execute the pipeline, produce a final result or side effect, and close the stream.</li>
+
+      <li><b>What is <code>Optional&lt;T&gt;</code> and where should it be used (and avoided)?</b><br>
+      <code>Optional&lt;T&gt;</code> is an immutable wrapper introduced in Java 8 to represent a method return value that legitimately might be absent, forcing callers to handle missing values explicitly instead of hitting unexpected <code>NullPointerException</code>. Use <code>Optional</code> as a <b>method return type</b> (including search helpers and <code>findFirst()</code>); avoid using <code>Optional</code> for method parameters or POJO entity fields because it is not <code>Serializable</code>.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Explain why a Stream pipeline processes elements vertically (element by element) rather than horizontally across full intermediate passes.</b><br>
+      Because Intermediate operations are lazy, calling <code>stream.filter(...).map(...).findFirst()</code> pulls element 1 through <code>filter</code> and <code>map</code> immediately. The moment <code>findFirst()</code> finds its first valid match, the pipeline short-circuits and never inspects element 2 through element 1,000, saving huge work compared to building intermediate lists.</li>
+
+      <li><b>Contrast <code>map()</code> and <code>flatMap()</code> on a Stream with an automation example.</b><br>
+      <code>map()</code> applies a 1-to-1 function converting each input item into one output item—for example, transforming <code>Stream&lt;WebElement&gt;</code> rows into <code>Stream&lt;String&gt;</code> row titles. <code>flatMap()</code> maps each input element into a Stream of zero, one, or multiple items and merges all nested streams into a single flat stream—for example, flattening <code>List&lt;Order&gt;</code> where each order holds <code>List&lt;LineItem&gt;</code> into one flat stream of all <code>LineItem</code> names.</li>
+
+      <li><b>Explain the critical difference between <code>optional.orElse(x)</code> and <code>optional.orElseGet(() -&gt; x)</code>.</b><br>
+      <code>orElse(x)</code> is an ordinary method call whose argument expression <code>x</code> is evaluated <b>unconditionally before calling <code>orElse()</code></b>, even when the <code>Optional</code> already contains a value. <code>orElseGet(Supplier)</code> invokes the supplied lambda lazily <b>only if the <code>Optional</code> is empty</b>. If the fallback creates a new Page Object, queries a DB, or launches a driver, always use <code>orElseGet()</code>.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>How does <code>WebDriverWait</code> use Functional Interfaces and Lambdas?</b><br>
+      <code>WebDriverWait.until(Function&lt;? super WebDriver, V&gt;)</code> accepts a <code>Function</code> taking the active <code>WebDriver</code> and returning either a truthy <code>Boolean</code> or a non-null object (for example, a located <code>WebElement</code>). Writing <code>wait.until(d -&gt; d.findElement(status).getText().contains("Shipped"))</code> supplies that <code>Function</code> concisely in one line.</li>
+
+      <li><b>In a Selenium WebTable test, how do you locate and click the 'Delete' button inside the row matching user email <code>qa@qkart.test</code> using Streams?</b><br>
+      Stream over table rows: <code>driver.findElements(By.cssSelector("table tbody tr")).stream().filter(r -&gt; r.getText().contains("qa@qkart.test")).findFirst().orElseThrow().findElement(By.cssSelector(".delete-btn")).click();</code>. This eliminates manual loop boilerplate and throws an immediate failure if the expected row is missing.</li>
+
+      <li><b>How do you collect a stream of <code>WebElement</code> product IDs and prices into a <code>Map&lt;String, Double&gt;</code>?</b><br>
+      Use <code>elements.stream().collect(Collectors.toMap(el -&gt; el.getAttribute("data-id"), el -&gt; parsePrice(el), (first, dup) -&gt; first))</code>. Including the third merge-function parameter prevents <code>IllegalStateException: Duplicate key</code> if two rendered cards accidentally share an ID.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does accessing a local loop counter <code>int index = 0;</code> inside a stream <code>forEach</code> fail with 'local variables referenced from a lambda expression must be final or effectively final'?</b><br>
+      Because lambdas may execute lazily or on separate threads (for example, parallel streams), Java copies local Stack variables into the lambda rather than capturing mutable Stack slots directly. Reassigning <code>index++</code> inside the lambda would create inconsistent state across threads, so the compiler forbids mutating captured locals. Replace mutable external accumulators with <code>map</code>, <code>reduce</code>, or <code>IntStream.range(0, list.size())</code>.</li>
+
+      <li><b>Why did calling <code>Stream&lt;WebElement&gt; s = list.stream(); s.count(); s.toList();</code> throw <code>IllegalStateException</code>?</b><br>
+      Streams are single-use traversal pipelines rather than reusable in-memory collections. Once a terminal operation executes, the stream closes permanently. Recreate <code>list.stream()</code> from the source list whenever a second pass is needed.</li>
+
+      <li><b>Why did <code>Collectors.toList()</code> allow <code>.add()</code> while Java 16+ <code>stream.toList()</code> threw <code>UnsupportedOperationException</code>?</b><br>
+      <code>Collectors.toList()</code> typically returns a mutable <code>ArrayList</code> (though mutability is unspecified), whereas Java 16's concise <code>stream.toList()</code> always returns an <b>unmodifiable list</b> (which also permits <code>null</code> elements, unlike <code>List.of()</code>). When a mutable list is needed, use <code>Collectors.toCollection(ArrayList::new)</code>.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why should parallel Selenium UI operations NEVER use <code>elements.parallelStream()</code>?</b><br>
+      <code>WebDriver</code> executes browser commands sequentially over a single browser session; firing concurrent <code>click()</code> or <code>getText()</code> calls from the shared <code>ForkJoinPool.commonPool()</code> thread pool causes race conditions, wrong window contexts, and interleaved HTTP timeouts. Reserve <code>parallelStream()</code> strictly for stateless CPU-bound computations on pure in-memory data.</li>
+
+      <li><b>When is a simple <code>for-each</code> loop preferable to a Java Stream?</b><br>
+      When debugging line-by-line breakpoints inside a complex multi-step Selenium flow, throwing checked exceptions cleanly, or needing an early multi-variable state break, a plain <code>for-each</code> loop is easier to inspect and read than convoluted nested streams.</li>
+
+      <li><b>Why should you avoid calling <code>Optional.of(nullableValue)</code> unless null is truly an illegal bug?</b><br>
+      <code>Optional.of(null)</code> immediately throws <code>NullPointerException</code>—defeating the safety goal if a value might legitimately be missing. Use <code>Optional.ofNullable(value)</code> whenever <code>null</code> is an expected input.</li>
+
+      <li><b>Name the 4 core Functional Interfaces in <code>java.util.function</code>.</b><br>
+      <code>Predicate&lt;T&gt;</code>, <code>Function&lt;T, R&gt;</code>, <code>Consumer&lt;T&gt;</code>, and <code>Supplier&lt;T&gt;</code>.</li>
+
+      <li><b>What does 'effectively final' mean for lambdas?</b><br>
+      A local variable whose value is never reassigned after initialization.</li>
+
+      <li><b>Difference between <code>map()</code> and <code>flatMap()</code>?</b><br>
+      <code>map()</code> transforms 1-to-1; <code>flatMap()</code> flattens nested streams 1-to-N into one stream.</li>
+
+      <li><b>Can a <code>Stream</code> be reused after a terminal operation?</b><br>
+      No; doing so throws <code>IllegalStateException</code>.</li>
+
+      <li><b>Difference between <code>Optional.orElse()</code> and <code>Optional.orElseGet()</code>?</b><br>
+      <code>orElse()</code> always evaluates eagerly; <code>orElseGet()</code> invokes its <code>Supplier</code> lazily only if empty.</li>
+
+      <li><b>Why avoid <code>parallelStream()</code> on <code>List&lt;WebElement&gt;</code>?</b><br>
+      A single <code>WebDriver</code> session is not thread-safe for concurrent commands.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-lambdas-streams-optional.html"><span class="tag Java">Java</span>&larr; Back to J5.6 Concept Page</a></p>
+    <p><a href="interview-j5-5-qa.html">&larr; J5.5 Q&amp;A</a> &middot; <a href="interview-j6-1-qa.html">J6.1 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J1.2 JVM Architecture &amp; Class Loader Subsystem</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-jvm-architecture.html">&larr; Back to Concept Page: J1.2 JVM Architecture &amp; Class Loader Subsystem</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J1.2 Question Bank: JVM Architecture &amp; Class Loader Subsystem (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What are the four main subsystems of the JVM architecture?</b><br>
+      The four subsystems are the Class Loader Subsystem, the Runtime Data Areas, the Execution Engine, and the Java Native Interface (JNI). The Class Loader reads and validates bytecode, Runtime Data Areas store objects and execution state, the Execution Engine runs instructions and collects garbage, and JNI communicates with native OS libraries. Every TestNG test runs across all four subsystems simultaneously.</li>
+
+      <li><b>Which three ClassLoaders ship with a standard JVM?</b><br>
+      The JVM uses the Bootstrap ClassLoader, Platform ClassLoader, and Application ClassLoader in top-to-bottom hierarchy. Bootstrap loads core JDK classes including <code>java.lang.String</code>, Platform loads extended platform modules, and Application loads your test code and third-party JARs like <code>selenium-java</code>. Calling <code>String.class.getClassLoader()</code> returns <code>null</code> because Bootstrap is native C/C++ code.</li>
+
+      <li><b>Which JVM Runtime Data Areas are shared across threads versus created per thread?</b><br>
+      The Heap and Metaspace are shared across every thread inside a single JVM process. By contrast, each thread gets its own isolated JVM Stack, Program Counter (PC) Register, and Native Method Stack. This separation explains why local variables inside a test method are automatically thread-safe while shared <code>static</code> Heap objects cause race conditions in parallel Selenium runs.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>What happens during the three sub-phases of Linking: Verify, Prepare, and Resolve?</b><br>
+      Verify checks bytecode structural integrity, stack bounds, and type safety to prevent memory corruption. Prepare allocates memory for <code>static</code> fields and assigns their default zeroed values (<code>0</code>, <code>false</code>, or <code>null</code>) without running initializers. Resolve replaces symbolic class and method names in the runtime constant pool with direct memory pointers.</li>
+
+      <li><b>How does the Parent Delegation Model protect Java security?</b><br>
+      When the Application ClassLoader receives a request to load <code>java.lang.String</code>, it delegates upward to Platform, which delegates upward to Bootstrap before trying the local classpath. Bootstrap immediately resolves the authentic JDK <code>String</code> class, ignoring any spoofed <code>java.lang.String</code> placed on the application classpath. This guarantees core Java APIs cannot be replaced.</li>
+
+      <li><b>What is the difference between the Prepare phase and the Initialization phase for <code>static</code> fields?</b><br>
+      During Prepare, the JVM allocates space for <code>static int timeout = 10;</code> and sets <code>timeout</code> to its default <code>0</code>. During Initialization, the JVM executes the actual assignment to set <code>timeout = 10</code> and runs any <code>static { }</code> blocks in source order. Note that <code>static final</code> compile-time constants are inlined directly into the constant pool and do not wait for Initialization.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>A Selenium test uses JDBC to validate database rows and throws <code>ClassNotFoundException: com.mysql.cj.jdbc.Driver</code>. Why did compilation succeed?</b><br>
+      <code>Class.forName("com.mysql.cj.jdbc.Driver")</code> passes the class name as a <code>String</code> literal, so <code>javac</code> cannot verify at compile time whether that class exists on the classpath. At runtime, the Application ClassLoader searches the classpath JARs, fails to find the driver JAR, and throws the checked <code>ClassNotFoundException</code>. Adding the MySQL driver dependency to <code>pom.xml</code> resolves it.</li>
+
+      <li><b>How does parallel TestNG execution map to the JVM's Runtime Data Areas?</b><br>
+      When TestNG runs 4 test methods concurrently with <code>parallel="methods" thread-count="4"</code>, the JVM maintains 4 separate JVM Stacks and 4 PC Registers—one per worker thread. All 4 threads share the single Heap and Metaspace. Local variables like <code>By</code> locators inside each method stay isolated on their own Stack, whereas a single shared <code>static WebDriver</code> on the Heap causes threads to collide on the same browser.</li>
+
+      <li><b>Where does Selenium's <code>ChromeDriver</code> class get loaded compared to <code>java.lang.Object</code>?</b><br>
+      <code>java.lang.Object</code> resides in the JDK's <code>java.base</code> module and is loaded by the native Bootstrap ClassLoader. <code>org.openqa.selenium.chrome.ChromeDriver</code> resides inside the <code>selenium-chrome-driver.jar</code> on the Maven test classpath, so the Application ClassLoader loads it after Bootstrap and Platform delegate back down.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does a class throw <code>ExceptionInInitializerError</code> on the first test and <code>NoClassDefFoundError</code> on every test after?</b><br>
+      When a <code>static { }</code> initializer throws an uncaught runtime exception (for example, failing to load <code>config.properties</code>), the JVM aborts initialization with <code>ExceptionInInitializerError</code> and marks that class as erroneous in Metaspace. Any subsequent test referencing that same class cannot initialize it again and immediately fails with <code>NoClassDefFoundError</code>. Fixing the underlying <code>static</code> block exception cures both errors.</li>
+
+      <li><b>What causes <code>NoClassDefFoundError: org/openqa/selenium/WebDriver</code> in a packaged Selenium project?</b><br>
+      The project compiled cleanly because the Selenium JAR was present on the compile classpath, but the JAR is absent on the runtime classpath (for example, declaring <code>&lt;scope&gt;provided&lt;/scope&gt;</code> in <code>pom.xml</code> or omitting dependency JARs from a fat JAR). At runtime, the Application ClassLoader attempts to resolve <code>WebDriver</code> and throws <code>NoClassDefFoundError</code>. Ensuring runtime scope or bundling dependencies via Maven Shade fixes the issue.</li>
+
+      <li><b>What causes <code>java.lang.VerifyError</code> when launching tests?</b><br>
+      <code>VerifyError</code> occurs during the Linking Verify phase when loaded bytecode violates JVM type rules, most commonly caused by two incompatible versions of a library JAR (Guava or ASM, for instance) on the classpath. Inspecting the build with <code>mvn dependency:tree</code> reveals the duplicate transitive dependency so the older version can be excluded.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why does the JVM load classes lazily instead of loading the entire classpath at startup?</b><br>
+      Enterprise test suites often carry dozens of third-party JARs containing tens of thousands of classes, only a fraction of which run during a given test execution. Lazy loading loads only the classes actively touched by the execution path, keeping startup latency low and Metaspace usage minimal.</li>
+
+      <li><b>Why do test frameworks like TestNG and Maven Surefire sometimes create custom ClassLoaders?</b><br>
+      Isolated ClassLoaders allow build plugins and test runners to load specific plugin dependencies without colliding with versions used by the application under test. By maintaining separate classloader namespaces, two versions of the same library can coexist cleanly inside one JVM process.</li>
+
+      <li><b>Why did Java design the Parent Delegation Model to search upward first instead of loading from the local application classpath first?</b><br>
+      Searching upward first guarantees that core runtime classes including <code>java.lang.Object</code>, <code>String</code>, and <code>SecurityManager</code> always resolve to the single canonical JDK definition. If application JARs loaded first, a misconfigured or malicious dependency JAR could redefine core language types and break type compatibility across the entire JVM.</li>
+
+      <li><b>What are the 3 built-in JVM ClassLoaders?</b><br>
+      Bootstrap, Platform, and Application ClassLoader.</li>
+
+      <li><b>What are the 3 phases of Class Loading?</b><br>
+      Loading, Linking (Verify, Prepare, Resolve), and Initialization.</li>
+
+      <li><b>Which Runtime Data Areas are shared by all threads?</b><br>
+      Heap and Metaspace.</li>
+
+      <li><b>Which Runtime Data Areas are created per thread?</b><br>
+      JVM Stack, PC Register, and Native Method Stack.</li>
+
+      <li><b>What is the difference between <code>ClassNotFoundException</code> and <code>NoClassDefFoundError</code>?</b><br>
+      <code>ClassNotFoundException</code> is a checked exception on dynamic string loading; <code>NoClassDefFoundError</code> is an unchecked <code>Error</code> when a compiled dependency is missing or failed static init at runtime.</li>
+
+      <li><b>Which ClassLoader loads Selenium WebDriver classes?</b><br>
+      The Application ClassLoader.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-jvm-architecture.html"><span class="tag Java">Java</span>&larr; Back to J1.2 Concept Page</a></p>
+    <p><a href="interview-j1-1-qa.html">&larr; J1.1 Q&amp;A</a> &middot; <a href="interview-j1-3-qa.html">J1.3 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

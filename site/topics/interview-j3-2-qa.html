@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J3.2 String vs StringBuilder vs StringBuffer</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-string-stringbuilder-stringbuffer.html">&larr; Back to Concept Page: J3.2 String vs StringBuilder vs StringBuffer</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J3.2 Question Bank: String vs StringBuilder vs StringBuffer (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Compare <code>String</code>, <code>StringBuilder</code>, and <code>StringBuffer</code> in one concise overview.</b><br>
+      <code>String</code> is immutable and stored in the String Constant Pool or Heap, making every edit allocate a new object. <code>StringBuilder</code> is mutable and unsynchronized, giving the fastest performance for single-threaded loops. <code>StringBuffer</code> is also mutable, with <code>synchronized</code> methods that guarantee thread-safety at a slight locking cost.</li>
+
+      <li><b>When should you choose <code>StringBuilder</code> instead of <code>String</code>?</b><br>
+      Choose <code>StringBuilder</code> whenever text is assembled iteratively across a loop, conditional branch sequence, or dynamic query/XPath generator. For fixed constants or a single <code>"Hello " + name</code> expression outside loops, plain <code>String</code> stays cleaner and equally fast because the compiler optimizes single-expression concatenation automatically.</li>
+
+      <li><b>Why did Java 5 introduce <code>StringBuilder</code> when <code>StringBuffer</code> already existed?</b><br>
+      In real Java programs, over 99% of string-building buffers live strictly as local variables inside one method and are never shared between threads. Paying synchronization lock acquisition and release cost on every single <code>append()</code> call in <code>StringBuffer</code> wasted CPU cycles, so Java 5 added <code>StringBuilder</code> as a drop-in unsynchronized replacement.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Why does <code>String res = ""; for (int i=0; i&lt;1000; i++) res += i;</code> harm Heap performance?</b><br>
+      Because <code>String</code> is immutable, each <code>res += i</code> iteration allocates a new internal concatenation buffer, copies all existing characters from <code>res</code> plus the new digits, produces a brand-new Heap <code>String</code>, and abandons the previous <code>String</code> as garbage. Over 1,000 iterations, this generates roughly 1,000 dead Heap strings and copies characters quadratically. Using a single <code>StringBuilder</code> performs all appends in one array.</li>
+
+      <li><b>How does <code>StringBuilder</code> grow its capacity when appended text exceeds initial capacity?</b><br>
+      An empty <code>new StringBuilder()</code> allocates an initial backing array of <code>16</code> characters (<code>new StringBuilder("abc")</code> allocates <code>3 + 16 = 19</code>). When an <code>append()</code> exceeds capacity, <code>StringBuilder</code> computes a new capacity of <code>(oldCapacity * 2) + 2</code> (or exact required length if larger) and copies contents via <code>Arrays.copyOf()</code>. Passing an estimated capacity like <code>new StringBuilder(512)</code> avoids intermediate array copies altogether.</li>
+
+      <li><b>Does <code>sb.toString()</code> share the backing array with <code>StringBuilder</code>?</b><br>
+      No; calling <code>sb.toString()</code> allocates a fresh immutable <code>String</code> with a copy of the active characters (from index <code>0</code> to <code>sb.length()</code>). Subsequent <code>sb.append()</code> mutations on the <code>StringBuilder</code> never affect the previously returned <code>String</code>.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>In a Selenium WebTable test, how should you collect and compare text from 500 table rows?</b><br>
+      Create a local <code>StringBuilder</code> inside the extraction method, loop through row elements calling <code>sb.append(row.getText()).append('|')</code>, and return <code>sb.toString()</code>. Keeping the <code>StringBuilder</code> local ensures every TestNG parallel thread gets its own isolated buffer on its own Stack frame without needing <code>StringBuffer</code>.</li>
+
+      <li><b>When building a shared multi-threaded custom logger buffer accessed concurrently by 4 TestNG threads, which mutable class avoids garbled text?</b><br>
+      If multiple threads genuinely append to one shared mutable buffer instance, choose <code>StringBuffer</code> (or a thread-safe queue/logger like SLF4J/Log4j2) so concurrent <code>append()</code> calls serialize cleanly without corrupting character indices. However, using <code>ThreadLocal&lt;StringBuilder&gt;</code> or Log4j2 appenders scales better under heavy concurrency.</li>
+
+      <li><b>How do you check whether a UI string is a palindrome during an SDET coding interview?</b><br>
+      Normalize case and characters first, then pass the string into <code>new StringBuilder(cleaned).reverse().toString().equals(cleaned)</code>, or scan inward with two index pointers (<code>left</code> and <code>right</code>) for zero extra Heap allocation.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why did <code>new StringBuilder("OK").equals(new StringBuilder("OK"))</code> return <code>false</code> in a unit test?</b><br>
+      Neither <code>StringBuilder</code> nor <code>StringBuffer</code> overrides <code>Object.equals()</code> or <code>hashCode()</code>, so <code>equals()</code> falls back to reference identity (<code>==</code>). Always convert both buffers via <code>.toString()</code> or compare via Java 11 <code>sb1.compareTo(sb2) == 0</code>.</li>
+
+      <li><b>Why did a shared <code>static StringBuilder reportBuffer</code> throw <code>ArrayIndexOutOfBoundsException</code> during parallel TestNG runs?</b><br>
+      <code>StringBuilder</code> provides zero thread synchronization; when two worker threads append concurrently, one thread reads an outdated internal <code>count</code> field while another expands the buffer, causing index corruption or out-of-bounds failures. Make the buffer local to each method or replace it with a thread-safe structure.</li>
+
+      <li><b>What happens if you pass <code>null</code> directly into <code>new StringBuilder((String) null)</code> vs <code>sb.append((String) null)</code>?</b><br>
+      Passing <code>null</code> into the <code>new StringBuilder(String)</code> constructor throws <code>NullPointerException</code> immediately because it calls <code>str.length()</code>. By contrast, calling <code>sb.append((String) null)</code> safely appends the literal four characters <code>"null"</code> without throwing.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why does modern Java (Java 11+) use <code>StringJoiner</code> or <code>String.join(", ", list)</code> instead of manual <code>StringBuilder</code> loops for comma-separated text?</b><br>
+      Manual loops building delimited lists require clumsy trailing-comma checks (<code>if (i &gt; 0) sb.append(", ")</code>). <code>String.join(", ", list)</code> and <code>Collectors.joining(", ")</code> handle delimiters cleanly in one readable call using <code>StringJoiner</code> internally.</li>
+
+      <li><b>Why should public method signatures return <code>String</code> rather than <code>StringBuilder</code>?</b><br>
+      Returning a mutable <code>StringBuilder</code> exposes an internal buffer that callers could accidentally mutate downstream, violating encapsulation. Convert to an immutable <code>String</code> via <code>toString()</code> at the method boundary.</li>
+
+      <li><b>When is <code>StringBuffer</code> legitimately preferred over <code>StringBuilder</code> today?</b><br>
+      Only when maintaining legacy APIs expecting a <code>StringBuffer</code> parameter (including older <code>java.util.regex.Matcher</code> methods prior to Java 9) or sharing a single mutable text accumulator directly across threads without external locking.</li>
+
+      <li><b>Which class is fastest for single-threaded string concatenation in loops?</b><br>
+      <code>StringBuilder</code>.</li>
+
+      <li><b>What makes <code>StringBuffer</code> thread-safe?</b><br>
+      Its mutation methods are declared <code>synchronized</code>.</li>
+
+      <li><b>What is the default initial capacity of <code>new StringBuilder()</code>?</b><br>
+      <code>16</code> characters.</li>
+
+      <li><b>How does <code>StringBuilder.equals()</code> compare two instances?</b><br>
+      By reference identity (<code>==</code>), because it does not override <code>Object.equals()</code>.</li>
+
+      <li><b>What happens when calling <code>new StringBuilder((String) null)</code>?</b><br>
+      Throws <code>NullPointerException</code>.</li>
+
+      <li><b>What does <code>sb.append((String) null)</code> append?</b><br>
+      The four characters <code>"null"</code>.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-string-stringbuilder-stringbuffer.html"><span class="tag Java">Java</span>&larr; Back to J3.2 Concept Page</a></p>
+    <p><a href="interview-j3-1-qa.html">&larr; J3.1 Q&amp;A</a> &middot; <a href="interview-j3-3-qa.html">J3.3 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J2.1 Program Structure &amp; main() Method Decoded</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-program-structure-main.html">&larr; Back to Concept Page: J2.1 Program Structure &amp; main() Method Decoded</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J2.1 Question Bank: Program Structure &amp; main() Method Decoded (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Why must <code>main()</code> be declared <code>public</code> and <code>static</code>?</b><br>
+      <code>public</code> exposes the method to the external JVM launcher outside the class's package. <code>static</code> allows the JVM to invoke <code>main()</code> directly on the class without first creating an object via a constructor, avoiding ambiguity if a class only has parameterized constructors. Removing either keyword compiles with <code>javac</code>, but fails when launching with <code>java</code>.</li>
+
+      <li><b>Why is the return type of <code>main()</code> strictly <code>void</code>?</b><br>
+      Unlike C or C++ where <code>main()</code> returns an integer exit code to the operating system shell, the JVM manages thread termination and daemon cleanup after <code>main()</code> finishes. Because no caller inside Java receives a return value from <code>main()</code>, the specification enforces <code>void</code>. To pass a non-zero exit code to a CI shell, call <code>System.exit(code)</code> explicitly.</li>
+
+      <li><b>Can a single <code>.java</code> source file contain more than one class?</b><br>
+      Yes, a single <code>.java</code> file can contain multiple top-level classes, provided at most one of them is declared <code>public</code>. When one class is <code>public</code>, the file name must match that public class name identically. Each class inside the file compiles into its own separate <code>.class</code> bytecode file.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Break down every word in <code>System.out.println("Pass")</code>.</b><br>
+      <code>System</code> is a <code>final</code> utility class inside <code>java.lang</code> that cannot be instantiated because its constructor is private. <code>out</code> is a <code>public static final PrintStream</code> reference field initialized when the JVM boots standard I/O streams. <code>println("Pass")</code> is an instance method on that <code>PrintStream</code> object that writes the text followed by a line separator.</li>
+
+      <li><b>Can you overload <code>main()</code> in a Java class, and which version runs at startup?</b><br>
+      Yes, you can declare additional methods named <code>main</code> with different parameter lists, including <code>public static void main(int x)</code> or <code>main(String a, String b)</code>. When the JVM launches the class, it always searches strictly for <code>public static void main(String[] args)</code> (or <code>String... args</code>) as the entry point. Overloaded variants only run if called explicitly from code.</li>
+
+      <li><b>How do <code>package</code> and <code>import</code> declarations affect compiled bytecode?</b><br>
+      Neither <code>package</code> nor <code>import</code> copies external code into the compiled <code>.class</code> file. <code>import</code> is purely a compile-time convenience so <code>javac</code> expands <code>WebDriver</code> into its fully qualified binary name <code>org/openqa/selenium/WebDriver</code> inside the bytecode constant pool. The <code>package</code> statement embeds that prefix directly into the class's binary identity.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>Why do TestNG and JUnit test classes run in Maven without a <code>main()</code> method?</b><br>
+      Maven invokes TestNG's or JUnit's own runner entry point, which already owns a <code>main()</code> method inside the test framework JAR. The runner uses Java reflection to scan your compiled test classes, instantiate them, and execute methods annotated with <code>@BeforeMethod</code>, <code>@Test</code>, and <code>@AfterMethod</code>. Adding <code>main()</code> inside every test class is unnecessary boilerplate.</li>
+
+      <li><b>How do command-line arguments passed via <code>java Runner staging headless</code> arrive inside <code>args</code>?</b><br>
+      The JVM splits whitespace-separated tokens following the class name and passes them as a zero-indexed <code>String[]</code> array into <code>main</code>. In that launch command, <code>args[0]</code> equals <code>"staging"</code>, <code>args[1]</code> equals <code>"headless"</code>, and <code>args.length</code> equals <code>2</code>. If no arguments are passed, <code>args</code> is a valid empty array of length <code>0</code>, never <code>null</code>.</li>
+
+      <li><b>When a Selenium utility uses <code>java.sql.Date</code> and <code>java.util.Date</code> in the same class, how do imports work?</b><br>
+      If both classes share the simple name <code>Date</code>, importing both with single-type imports causes a compile-time ambiguity error. Import the more common one normally (for example, <code>import java.util.Date;</code>) and reference the second one by its fully qualified name <code>java.sql.Date</code> inline.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does running <code>java LoginTest</code> fail with 'Main method not found in class LoginTest, please define the main method as: public static void main(String[] args)'?</b><br>
+      This message appears when the class lacks the exact <code>public static void main(String[] args)</code> signature—either <code>static</code> was forgotten, <code>public</code> was omitted, the return type is non-<code>void</code>, or the class is a TestNG test meant to run through TestNG/Maven instead of standalone <code>java</code>. Verify the exact signature or execute the class via <code>mvn test</code>.</li>
+
+      <li><b>What happens if <code>public static void main(String[] args)</code> accesses <code>args[0]</code> when no arguments were passed?</b><br>
+      Because <code>args</code> is allocated as a zero-length array <code>new String[0]</code>, indexing <code>args[0]</code> immediately throws <code>java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0</code>. Always guard index access with <code>if (args.length &gt; 0)</code> or prefer Maven <code>-D</code> system properties via <code>System.getProperty()</code>.</li>
+
+      <li><b>Why does <code>javac</code> report 'class Foo is public, should be declared in a file named Foo.java'?</b><br>
+      Java enforces that any top-level <code>public</code> class resides in a source file whose exact name (including capitalization) matches the class name. Renaming either the class or the <code>.java</code> file fixes the compilation failure immediately.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why does Java auto-import <code>java.lang</code> and the current package while requiring explicit imports for everything else?</b><br>
+      Classes inside <code>java.lang</code> (<code>String</code>, <code>Object</code>, <code>System</code>, wrapper classes, and core exceptions) appear in practically every Java file, so explicit imports for them would bloat every file. Requiring explicit imports for external packages like <code>org.openqa.selenium</code> makes external dependencies clear to maintainers and prevents accidental name collisions.</li>
+
+      <li><b>Why does Java discourage wildcard imports like <code>import org.openqa.selenium.*;</code> in production test frameworks?</b><br>
+      Wildcard imports hide which exact classes a file depends on and can break compilation abruptly if a newer library version introduces a class with a conflicting simple name. Explicit single-class imports keep dependencies transparent and compile cleanly across upgrades.</li>
+
+      <li><b>In a Java automation framework, why is passing configuration via <code>-Denv=staging</code> (<code>System.getProperty</code>) preferred over <code>main(String[] args)</code>?</b><br>
+      Maven Surefire and TestNG control the JVM entry point themselves, so test classes do not receive custom CLI strings through <code>args</code>. JVM system properties set via <code>-Dkey=value</code> are readable anywhere inside <code>@BeforeSuite</code>, DriverFactory, or config readers via <code>System.getProperty("env")</code>.</li>
+
+      <li><b>What is the exact declaration order at the top of a <code>.java</code> file?</b><br>
+      <code>package</code> first, <code>import</code> second, class declaration third.</li>
+
+      <li><b>Which package is imported automatically into every Java class?</b><br>
+      <code>java.lang</code>.</li>
+
+      <li><b>What is <code>System.out</code>?</b><br>
+      A <code>public static final PrintStream</code> field on <code>java.lang.System</code>.</li>
+
+      <li><b>What is the value of <code>args</code> in <code>main()</code> if no CLI arguments are provided?</b><br>
+      An empty <code>String[0]</code> array (never <code>null</code>).</li>
+
+      <li><b>Can <code>main()</code> be overloaded?</b><br>
+      Yes, though the JVM only executes <code>public static void main(String[] args)</code> at startup.</li>
+
+      <li><b>Do TestNG <code>@Test</code> classes need a <code>main()</code> method?</b><br>
+      No, TestNG invokes annotated methods via reflection.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-program-structure-main.html"><span class="tag Java">Java</span>&larr; Back to J2.1 Concept Page</a></p>
+    <p><a href="interview-j1-4-qa.html">&larr; J1.4 Q&amp;A</a> &middot; <a href="interview-j2-2-qa.html">J2.2 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

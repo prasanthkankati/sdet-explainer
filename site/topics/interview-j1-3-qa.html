@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J1.3 Stack vs Heap Memory &amp; Pass-by-Value</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-stack-vs-heap.html">&larr; Back to Concept Page: J1.3 Stack vs Heap Memory &amp; Pass-by-Value</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J1.3 Question Bank: Stack vs Heap Memory &amp; Pass-by-Value (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What is the difference between Stack memory and Heap memory in Java?</b><br>
+      Stack memory is allocated per thread in LIFO order to hold active method frames, local primitive values, and object references. Heap memory is shared across all threads and holds the actual objects created with <code>new</code> along with their instance fields and arrays. Stack memory is reclaimed instantly when a method returns, while Heap memory is reclaimed asynchronously by the Garbage Collector.</li>
+
+      <li><b>Why is Java considered strictly Pass-by-Value?</b><br>
+      When a method is invoked, the JVM copies the contents of each caller variable into the new Stack frame's parameter slots. For primitives, that value is the number or boolean; for objects, that value is the Heap memory address. Because the called method only holds a copy of the address, reassigning the parameter variable (<code>cfg = new PageConfig()</code>) never changes which object the caller's variable points to.</li>
+
+      <li><b>Where do instance variables live versus local variables?</b><br>
+      Local variables declared inside a method or constructor always live inside that method's Stack Frame (holding either the primitive value or the object reference). Instance variables belong to an object, so they always live inside that object's memory block on the Heap for the entire life of the object.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How can a helper method modify a caller's object if Java is Pass-by-Value?</b><br>
+      Although the reference parameter is a copy of the caller's Stack slot, both variables now hold the identical Heap address. Calling a setter or mutating a field through the dot operator (<code>cfg.timeoutSeconds = 30</code>) follows that shared Heap address and modifies the single Heap object that the caller also points to. Reassigning the parameter itself breaks the link only for the callee's frame.</li>
+
+      <li><b>What are the three components inside a single JVM Stack Frame?</b><br>
+      Each Stack Frame contains a Local Variable Array for parameters and local variables, an Operand Stack where bytecode instructions push and pop operands during arithmetic or method invocation, and Frame Data holding the return address and reference to the class's constant pool. When an exception occurs, the JVM reads active Stack Frames to build the printed stack trace.</li>
+
+      <li><b>What happens to objects created inside a method once that method returns?</b><br>
+      When a method returns, its Stack Frame is popped and all local reference variables inside that frame vanish. Any Heap object created inside the method that was not returned or saved to a longer-lived field becomes unreachable. During the next Garbage Collection cycle, the JVM reclaims that unreachable Heap memory.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>In a Selenium framework, <code>BaseTest</code> passes <code>driver</code> into <code>new LoginPage(driver)</code>, and <code>LoginPage</code> later calls <code>driver = null;</code> in a teardown bug. Why is <code>BaseTest.driver</code> not null?</b><br>
+      Passing <code>driver</code> into the <code>LoginPage</code> constructor copied the Heap address of the <code>ChromeDriver</code> object into the constructor parameter and then into <code>LoginPage.driver</code>. Setting <code>LoginPage</code>'s field to <code>null</code> only zeroes out <code>LoginPage</code>'s reference copy. The <code>driver</code> reference inside <code>BaseTest</code> still holds the original Heap address.</li>
+
+      <li><b>Why can two parallel threads run the exact same Page Object method simultaneously without corrupting local variables?</b><br>
+      Each TestNG thread owns an independent JVM Stack. Even when two threads invoke <code>loginPage.enterCredentials(user, pass)</code> on the same bytecode at the same millisecond, Thread 1 creates its frame with its own <code>user</code> and <code>pass</code> slots on Stack 1 while Thread 2 creates a separate frame on Stack 2. Only shared instance or static fields on the Heap risk thread interference.</li>
+
+      <li><b>Why does a <code>swap(WebElement a, WebElement b)</code> method fail to swap the two caller variables?</b><br>
+      Inside <code>swap</code>, swapping parameters <code>a</code> and <code>b</code> only exchanges the two copied Heap addresses inside <code>swap</code>'s Stack Frame. The moment <code>swap</code> returns, its Stack Frame is popped and the caller's original <code>a</code> and <code>b</code> variables retain their original Heap addresses.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>How do you diagnose and fix a <code>StackOverflowError</code> in an automation test?</b><br>
+      A <code>StackOverflowError</code> stack trace shows the same two or three method names repeating hundreds of times until the thread stack fills up. Common automation triggers include a method calling itself without a base exit condition, mutual recursion between Page Object constructors (Page A creates Page B which creates Page A), or a circular <code>toString()</code> implementation on an API POJO. Adding a termination guard or breaking the constructor cycle eliminates the error.</li>
+
+      <li><b>What causes <code>OutOfMemoryError: Java heap space</code> during a long Selenium regression run?</b><br>
+      This error happens when live references hold onto large Heap objects across hundreds of tests so the Garbage Collector cannot free enough memory. Frequent culprits in test frameworks include storing full-page screenshot byte arrays in a static report list, leaking unclosed <code>XSSFWorkbook</code> Excel objects, or retaining finished <code>WebDriver</code> objects inside a non-cleaned collection. Releasing references after each test and increasing <code>-Xmx</code> prevents Heap exhaustion.</li>
+
+      <li><b>How do you adjust Stack size or Heap size for a Maven TestNG run?</b><br>
+      Stack size per thread is configured via the JVM flag <code>-Xss</code> (for example, <code>-Xss512k</code>), and initial/maximum Heap sizes are configured via <code>-Xms</code> and <code>-Xmx</code> (for example, <code>-Xms512m -Xmx2g</code>). In Maven Surefire, pass these flags inside the <code>&lt;argLine&gt;</code> configuration element so forked test JVMs inherit the expanded memory.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why does Java keep Stack memory separate per thread instead of using a single global Stack?</b><br>
+      Isolating one Stack per thread eliminates the need for thread locking when pushing frames, reading local variables, or evaluating method expressions. Every thread executes method calls at full speed without waiting for other threads, which directly enables scalable multi-threaded execution.</li>
+
+      <li><b>Why should Selenium Page Objects avoid storing mutable test state inside Heap fields when running parallel tests?</b><br>
+      If a single Page Object instance or static utility class holds mutable instance fields on the shared Heap, concurrent threads overwrite each other's values. Keeping temporary data as local method variables on each thread's Stack guarantees isolation without locking.</li>
+
+      <li><b>Why did Java keep Pass-by-Value semantics for all parameters rather than adding C#-style <code>ref</code> or C++ pass-by-pointer-reference parameters?</b><br>
+      Strict Pass-by-Value keeps method call behavior predictable because callers know a called method can never silently swap out which object a local Stack variable points to. When multiple values must be returned from a Page Object helper, returning a clean immutable DTO or record makes data flow explicit.</li>
+
+      <li><b>Where are objects created with <code>new</code> stored?</b><br>
+      On the Heap.</li>
+
+      <li><b>Where are local primitive variables and method parameters stored?</b><br>
+      On the thread's JVM Stack inside the active Stack Frame.</li>
+
+      <li><b>Is Java Pass-by-Value or Pass-by-Reference?</b><br>
+      Strictly Pass-by-Value (references are copied as address values).</li>
+
+      <li><b>Which memory error occurs on infinite recursion?</b><br>
+      <code>StackOverflowError</code>.</li>
+
+      <li><b>Which JVM flags control minimum and maximum Heap size?</b><br>
+      <code>-Xms</code> (initial) and <code>-Xmx</code> (maximum).</li>
+
+      <li><b>Which JVM flag controls per-thread Stack size?</b><br>
+      <code>-Xss</code>.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-stack-vs-heap.html"><span class="tag Java">Java</span>&larr; Back to J1.3 Concept Page</a></p>
+    <p><a href="interview-j1-2-qa.html">&larr; J1.2 Q&amp;A</a> &middot; <a href="interview-j1-4-qa.html">J1.4 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

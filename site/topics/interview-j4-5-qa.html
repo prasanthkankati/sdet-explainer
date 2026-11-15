@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J4.5 Inheritance (IS-A) vs Composition (HAS-A)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-inheritance-vs-composition.html">&larr; Back to Concept Page: J4.5 Inheritance (IS-A) vs Composition (HAS-A)</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J4.5 Question Bank: Inheritance (IS-A) vs Composition (HAS-A) (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What are the types of inheritance supported for classes in Java?</b><br>
+      Java supports Single inheritance (<code>B extends A</code>), Multilevel inheritance (<code>C extends B</code> where <code>B extends A</code>), and Hierarchical inheritance (both <code>B</code> and <code>C</code> extend <code>A</code>). Multiple inheritance of classes (<code>C extends A, B</code>) and hybrid combinations involving multiple parent classes are forbidden at compile time.</li>
+
+      <li><b>What is the difference between IS-A (Inheritance) and HAS-A (Composition)?</b><br>
+      IS-A expresses specialization using <code>extends</code>—for example, <code>ChromeDriver</code> IS-A <code>RemoteWebDriver</code>. HAS-A expresses ownership or delegation through instance fields—for example, <code>LoginPage</code> HAS-A <code>WebDriver</code> and <code>HeaderComponent</code>. Inheritance links classes statically at compile time, whereas Composition lets classes assemble modular pieces flexibly.</li>
+
+      <li><b>What is the implicit root parent class of every Java class?</b><br>
+      Every class that does not explicitly write <code>extends SomeParent</code> implicitly extends <code>java.lang.Object</code>. Because of this single root hierarchy, every Java object supports <code>toString()</code>, <code>equals()</code>, <code>hashCode()</code>, and <code>getClass()</code>.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Explain the Diamond Problem and why Java forbids multiple class inheritance.</b><br>
+      Suppose classes <code>B</code> and <code>C</code> both extend <code>A</code> and override <code>A.connect()</code> differently, and class <code>D</code> tried to extend both <code>B</code> and <code>C</code>. When <code>D</code> invokes <code>connect()</code> without overriding it, the compiler cannot decide whether to run <code>B.connect()</code> or <code>C.connect()</code>, and duplicate state fields from <code>A</code> create memory ambiguity. Forbidding multiple class inheritance eliminates this ambiguity at the language level.</li>
+
+      <li><b>How does Java resolve the Diamond Problem when a class implements two interfaces that share the same Java 8 <code>default</code> method signature?</b><br>
+      Because interfaces carry no mutable instance state fields, Java allows implementing multiple interfaces (<code>implements InterfaceA, InterfaceB</code>). If both interfaces supply a <code>default</code> method with the identical signature, compilation fails unless the implementing class overrides that method explicitly—choosing one parent default via <code>InterfaceA.super.methodName()</code> or writing a fresh implementation.</li>
+
+      <li><b>Does a child object inherit the parent's <code>private</code> fields in memory?</b><br>
+      When a child object is created on the Heap, space is allocated for ALL instance fields declared in both the parent and child classes, including the parent's <code>private</code> fields. However, Java access rules forbid the child class from referencing those <code>private</code> fields by name directly—the child interacts with them strictly through the parent's <code>protected</code> or <code>public</code> constructors and methods.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>In a Selenium framework for <code>https://qkart-qa-web.labs.crio.do/</code>, how should you share the top search/cart header across HomePage, CheckoutPage, and ProfilePage?</b><br>
+      Use Composition (the Page Component pattern): build a dedicated <code>HeaderComponent</code> class encapsulating the search bar, login button, and cart badge, and store a <code>private final HeaderComponent header</code> inside each Page Object that renders that header. Avoid putting header locators on <code>BasePage</code>, because pages like a standalone <code>CheckoutFrame</code> or <code>ErrorPage</code> might not render a header at all.</li>
+
+      <li><b>Why is <code>class CheckoutTest extends LoginTest</code> an anti-pattern in TestNG frameworks?</b><br>
+      Extending one concrete test class from another couples test setup, annotations, and state across unrelated suites, breaking atomic test independence and preventing safe parallel test execution. Both <code>CheckoutTest</code> and <code>LoginTest</code> should extend a minimal <code>BaseTest</code> (or use TestNG listeners/composition) and seed login state via cookies or APIs.</li>
+
+      <li><b>How does Selenium itself combine Inheritance and Interfaces in <code>ChromeDriver</code>?</b><br>
+      <code>ChromeDriver</code> extends <code>ChromiumDriver</code> which extends <code>RemoteWebDriver</code> (IS-A class inheritance sharing W3C command execution code), while <code>RemoteWebDriver</code> implements multiple capability interfaces (<code>WebDriver</code>, <code>TakesScreenshot</code>, <code>JavascriptExecutor</code>) and composes a <code>CommandExecutor</code> (HAS-A).</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does a massive <code>BaseTest</code> god-class slow down and break CI maintenance?</b><br>
+      When <code>BaseTest</code> contains Excel helpers, API clients, UI login steps, DB clients, and 15 <code>@BeforeMethod</code> checks, every test suite loads unnecessary state and a minor refactor to one helper triggers recompilation and regression risks across hundreds of unrelated tests. Decompose utilities into small composable classes injected only where needed.</li>
+
+      <li><b>Why does <code>class PageA extends BasePage, RetryHelper</code> fail to compile?</b><br>
+      Java permits at most one class after <code>extends</code>. Convert shared helper contracts into interfaces or compose a <code>private final RetryHelper retryHelper;</code> instance field inside <code>PageA</code>.</li>
+
+      <li><b>Why did a parent class variable inside a child test return <code>null</code> when both classes declared <code>WebDriver driver;</code>?</b><br>
+      Declaring a field with the same name in a subclass does NOT override the parent's field; it <b>hides (shadows)</b> it as a second distinct Heap slot. Methods defined in the parent still read the parent slot while child methods read the uninitialized child slot. Remove the duplicate field declaration in the subclass.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why does Effective Java advise 'Favor composition over inheritance'?</b><br>
+      Inheritance exposes parent implementation details to subclasses and locks the design permanently at compile time; changing a non-private parent method can break child overrides unexpectedly. Composition interacts strictly through stable public contracts and lets you swap implementations (for example, swapping a mock config reader or headless vs grid driver strategy) cleanly.</li>
+
+      <li><b>When IS inheritance genuinely the right choice in a test automation framework?</b><br>
+      Use inheritance strictly when a genuine IS-A relationship holds and the base class is explicitly designed for extension—for example, <code>BasePage</code> holding shared <code>WebDriverWait</code> click/type wrappers for Page Objects, or <code>BaseTest</code> holding standardized TestNG <code>@BeforeMethod</code>/<code>@AfterMethod</code> driver lifecycle setup.</li>
+
+      <li><b>Why should classes not designed for subclassing be marked <code>final</code> or avoid <code>protected</code> hooks?</b><br>
+      Keeping classes non-inheritable by default prevents external tests from extending utility or concrete Page Object classes in unintended ways that violate internal invariants.</li>
+
+      <li><b>How many classes can one Java class extend directly?</b><br>
+      At most 1 class.</li>
+
+      <li><b>How many interfaces can one Java class implement?</b><br>
+      Unlimited (separated by commas).</li>
+
+      <li><b>What is the root superclass of every Java class?</b><br>
+      <code>java.lang.Object</code>.</li>
+
+      <li><b>Why does Java forbid multiple class inheritance?</b><br>
+      To eliminate the Diamond Problem ambiguity over inherited implementations and state.</li>
+
+      <li><b>Which design relationship does Composition represent?</b><br>
+      HAS-A (holding helper objects as fields).</li>
+
+      <li><b>How should shared UI widgets like Headers and Footers be modeled in Selenium?</b><br>
+      Via Composition using Page Component classes rather than bloating <code>BasePage</code>.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-inheritance-vs-composition.html"><span class="tag Java">Java</span>&larr; Back to J4.5 Concept Page</a></p>
+    <p><a href="interview-j4-4-qa.html">&larr; J4.4 Q&amp;A</a> &middot; <a href="interview-j4-6-qa.html">J4.6 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

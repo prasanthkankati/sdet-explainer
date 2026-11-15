@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J2.6 Methods, Parameters, Return Types &amp; Varargs</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-methods-parameters-varargs.html">&larr; Back to Concept Page: J2.6 Methods, Parameters, Return Types &amp; Varargs</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J2.6 Question Bank: Methods, Parameters, Return Types &amp; Varargs (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Which parts of a method declaration belong to its official Java method signature?</b><br>
+      Strictly two parts belong to the method signature: the method name and the ordered list of parameter types. Access modifiers (<code>public</code>/<code>private</code>), <code>static</code>, return type (<code>void</code> vs <code>int</code>), parameter variable names, and <code>throws</code> clauses are NOT part of the signature. Therefore two methods in the same class cannot share the same name and parameter types even if they return different types.</li>
+
+      <li><b>What is the difference between a parameter and an argument?</b><br>
+      A parameter (formal parameter) is the typed placeholder variable declared in the method definition, for example <code>String username</code> in <code>enterUsername(String username)</code>. An argument (actual parameter) is the concrete expression supplied at the call site, for example <code>"qkart_user1"</code>. Arguments are evaluated first, then copied into parameters on the new Stack Frame.</li>
+
+      <li><b>What are the two strict syntax rules for varargs in Java?</b><br>
+      First, a method may declare at most one varargs parameter—having two like <code>log(String... a, int... b)</code> is a compile error. Second, the varargs parameter must always be the final parameter in the parameter list. Internally, the compiler transforms <code>Type... name</code> into a standard <code>Type[] name</code> array.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How does Selenium's <code>WebElement.sendKeys(CharSequence... keysToSend)</code> accept both a <code>String</code> and <code>Keys.ENTER</code> in one call?</b><br>
+      Both <code>java.lang.String</code> and Selenium's <code>org.openqa.selenium.Keys</code> enum implement the standard Java interface <code>java.lang.CharSequence</code>. Because <code>sendKeys</code> declares a <code>CharSequence...</code> varargs parameter, calling <code>box.sendKeys("watch", Keys.ENTER)</code> causes the compiler to pack both arguments into a <code>CharSequence[]</code> array automatically. Inside <code>sendKeys</code>, Selenium reads the array elements sequentially.</li>
+
+      <li><b>How does overload resolution behave when both an exact fixed-parameter method and a varargs method match?</b><br>
+      Java resolves method overloads using three priority levels: exact match without boxing or varargs wins first, boxing/unboxing matches win second, and varargs matches win last as a fallback. If a class defines both <code>click(By)</code> and <code>click(By...)</code>, calling <code>click(loginBtn)</code> always binds to the fixed 1-argument method to avoid unnecessary array allocation.</li>
+
+      <li><b>What happens if a varargs method is invoked with zero trailing arguments, for instance <code>logStep("AUTH")</code>?</b><br>
+      The compiler silently constructs and passes a zero-length array (<code>new String[0]</code>), never <code>null</code>. That guarantees iterating over <code>for (String s : messages)</code> inside the method runs zero times safely without throwing a <code>NullPointerException</code>.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>When designing a Selenium framework, should Page Object methods be <code>static</code> or instance methods?</b><br>
+      Page Object action methods must be instance methods because each Page Object encapsulates an instance <code>WebDriver</code> field for the active browser thread. Making Page Object methods <code>static</code> forces shared static driver state, which causes parallel TestNG threads to hijack each other's browser windows. Reserve <code>static</code> purely for stateless helpers like <code>WaitUtils.waitVisible(driver, locator)</code> or <code>StringUtils</code>.</li>
+
+      <li><b>How does fluent method chaining improve Selenium Page Object tests?</b><br>
+      When an action keeps the user on the same page, returning <code>this</code> lets tests chain <code>loginPage.enterUser("u").enterPassword("p")</code>. When an action navigates elsewhere, returning <code>new InventoryPage(driver)</code> enforces valid page transitions directly in the test's compile-time type chain.</li>
+
+      <li><b>How does <code>JavascriptExecutor.executeScript(String script, Object... args)</code> use varargs?</b><br>
+      The first mandatory parameter holds the JavaScript snippet string, and the trailing <code>Object... args</code> parameter passes zero or more Selenium <code>WebElement</code> or primitive arguments into JavaScript's <code>arguments[0]</code>, <code>arguments[1]</code> array. Without varargs, callers would have to construct a boilerplate <code>new Object[]{el}</code> array on every JS call.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does calling <code>log(null)</code> on a varargs method like <code>void log(String... items)</code> produce a compiler warning and a runtime <code>NullPointerException</code>?</b><br>
+      When a single literal <code>null</code> is passed to <code>String... items</code>, the compiler assumes you passed a <code>null</code> reference for the entire <code>String[]</code> array itself rather than a 1-element array containing <code>null</code>. Inside the method, accessing <code>items.length</code> or looping over <code>items</code> immediately throws <code>NullPointerException</code>. Pass <code>new String[]{null}</code> if a single null element is actually intended.</li>
+
+      <li><b>Why does a method fail compilation with 'missing return statement' even though an <code>if</code> block returns a value?</b><br>
+      The compiler verifies statically that every conceivable execution branch returns a compatible value or throws an exception. If a <code>return</code> only appears inside an <code>if</code> block without an unconditional fallback <code>return</code> or <code>else</code> return, compilation fails immediately.</li>
+
+      <li><b>Why does <code>Assert.assertEquals(actual, expected)</code> behave unexpectedly if you swap argument order?</b><br>
+      Java binds arguments strictly by position, not parameter name. In TestNG <code>Assert.assertEquals(actual, expected)</code>, passing expected first causes failure reports to swap 'expected [actual] but found [expected]', misleading engineers debugging CI failures.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why did Java exclude the return type from the method signature?</b><br>
+      Callers in Java are allowed to ignore a method's return value (for instance, calling <code>list.remove(item);</code> without assigning the returned <code>boolean</code>). If two methods differed only by return type, the compiler could never tell which overload a standalone statement call intended to invoke.</li>
+
+      <li><b>When should a utility method accept <code>Collection&lt;T&gt;</code> instead of <code>T...</code> varargs?</b><br>
+      Use varargs when callers normally type 1 to 4 inline arguments directly at the call site, because callers avoid creating a list manually. Accept <code>List&lt;T&gt;</code> or <code>Collection&lt;T&gt;</code> when callers already hold dynamic results like <code>driver.findElements(By)</code>, avoiding heap array copies and ambiguous overloads.</li>
+
+      <li><b>Why should methods stay small with 3 or fewer parameters in automation frameworks?</b><br>
+      Methods accepting 6 or 7 positional <code>String</code> parameters make call sites unreadable and prone to swapping arguments of the same type (like first name and email). Encapsulating multi-field inputs inside a clean POJO or Builder object makes test intent self-documenting.</li>
+
+      <li><b>What makes up a Java method signature?</b><br>
+      Method name plus parameter types and their order.</li>
+
+      <li><b>Is the return type part of the method signature?</b><br>
+      No.</li>
+
+      <li><b>Where must a varargs parameter be placed?</b><br>
+      Strictly as the last parameter in the parameter list.</li>
+
+      <li><b>How does the Java compiler treat <code>String... args</code> internally?</b><br>
+      As a standard <code>String[] args</code> array.</li>
+
+      <li><b>What does a varargs parameter receive when zero optional arguments are passed?</b><br>
+      An empty array of length <code>0</code> (never <code>null</code>).</li>
+
+      <li><b>Can a <code>static</code> method access <code>this</code> or instance fields directly?</b><br>
+      No, because <code>static</code> methods execute on the class without an object instance.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-methods-parameters-varargs.html"><span class="tag Java">Java</span>&larr; Back to J2.6 Concept Page</a></p>
+    <p><a href="interview-j2-5-qa.html">&larr; J2.5 Q&amp;A</a> &middot; <a href="interview-j3-1-qa.html">J3.1 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

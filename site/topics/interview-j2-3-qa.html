@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J2.3 Wrapper Classes, Autoboxing &amp; Integer Cache (-128 to 127)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-wrapper-autoboxing-cache.html">&larr; Back to Concept Page: J2.3 Wrapper Classes, Autoboxing &amp; Integer Cache (-128 to 127)</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J2.3 Question Bank: Wrapper Classes, Autoboxing &amp; Integer Cache (-128 to 127) (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Why do wrapper classes exist in Java when primitives already exist?</b><br>
+      Java Collections (<code>List</code>, <code>Set</code>, <code>Map</code>) and Generics store only object references descending from <code>Object</code> and reject raw primitives like <code>int</code> or <code>boolean</code>. Wrapper classes bridge that gap by encapsulating a primitive inside an immutable object, adding utility parsing methods like <code>Integer.parseInt()</code>, and allowing <code>null</code> to represent missing JSON or database values.</li>
+
+      <li><b>List all 8 primitive types and their exact wrapper class names.</b><br>
+      <code>byte -&gt; Byte</code>, <code>short -&gt; Short</code>, <code>int -&gt; Integer</code>, <code>long -&gt; Long</code>, <code>float -&gt; Float</code>, <code>double -&gt; Double</code>, <code>char -&gt; Character</code>, and <code>boolean -&gt; Boolean</code>. Notice that <code>Integer</code> and <code>Character</code> spell out full words, while the other 6 simply capitalize the primitive name.</li>
+
+      <li><b>Are wrapper classes mutable or immutable?</b><br>
+      All 8 wrapper classes in <code>java.lang</code> are <code>final</code> classes with <code>private final</code> value fields, making every wrapper instance strictly immutable. Assigning <code>x = x + 1;</code> on an <code>Integer</code> unboxes <code>x</code>, adds <code>1</code>, and assigns a brand-new <code>Integer</code> reference rather than mutating the original object.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Explain why <code>Integer a = 100, b = 100; a == b</code> is <code>true</code> while <code>Integer c = 200, d = 200; c == d</code> is <code>false</code>.</b><br>
+      Autoboxing translates assignments into <code>Integer.valueOf()</code>, which checks an internal <code>IntegerCache</code> array initialized for integers between <code>-128</code> and <code>127</code> inclusive. Because <code>100</code> falls inside the cached range, both <code>a</code> and <code>b</code> receive the exact same Heap address, making <code>==</code> true. Because <code>200</code> exceeds <code>127</code>, each call allocates a separate Heap object, making <code>==</code> compare distinct addresses and return <code>false</code>.</li>
+
+      <li><b>Which other wrapper classes besides <code>Integer</code> cache values?</b><br>
+      <code>Byte</code> caches all 256 possible byte values (<code>-128</code> to <code>127</code>). <code>Short</code> and <code>Long</code> cache <code>-128</code> to <code>127</code>, <code>Character</code> caches <code>0</code> to <code>127</code> (ASCII range), and <code>Boolean</code> exposes just two constant instances (<code>Boolean.TRUE</code> and <code>Boolean.FALSE</code>). Floating-point wrappers <code>Float</code> and <code>Double</code> never cache values.</li>
+
+      <li><b>What happens at bytecode level during <code>Integer x = 5; int y = x + 2;</code>?</b><br>
+      The compiler rewrites <code>Integer x = 5;</code> into <code>Integer x = Integer.valueOf(5);</code> (autoboxing). On the next line, <code>javac</code> rewrites <code>x + 2</code> into <code>x.intValue() + 2</code> (unboxing) because arithmetic operators only execute on primitive values.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>Why can comparing two TestNG <code>Integer</code> assertion parameters with <code>==</code> pass locally and fail on real data?</b><br>
+      During local smoke testing with small item counts (like <code>1</code>, <code>5</code>, or <code>25</code>), both expected and actual <code>Integer</code> objects point to the identical <code>IntegerCache</code> instance, so <code>==</code> returns <code>true</code> accidentally. Once staging data returns order counts of <code>150</code> or <code>500</code>, <code>valueOf()</code> allocates distinct Heap objects and <code>==</code> breaks. Always use <code>Assert.assertEquals(actual, expected)</code> or <code>.equals()</code>.</li>
+
+      <li><b>In a Selenium test verifying cart badge count on <code>https://qkart-qa-web.labs.crio.do/</code>, should you call <code>Integer.parseInt()</code> or <code>Integer.valueOf()</code>?</b><br>
+      Call <code>Integer.parseInt(badge.getText().trim())</code> when comparing against a primitive <code>int</code> because <code>parseInt()</code> returns a raw primitive <code>int</code> without allocating a wrapper object. Reserve <code>Integer.valueOf()</code> for cases where an <code>Integer</code> object is explicitly required, including inserting into a <code>List&lt;Integer&gt;</code>.</li>
+
+      <li><b>How do API deserialization POJOs benefit from using <code>Integer</code> and <code>Boolean</code> instead of <code>int</code> and <code>boolean</code>?</b><br>
+      In REST API response payloads mapped with Jackson, an omitted or explicit <code>null</code> field becomes <code>0</code> or <code>false</code> on primitive fields, hiding whether the API sent <code>0</code> intentionally or omitted the field entirely. Wrapper fields preserve <code>null</code> distinctly so assertions can catch missing JSON properties.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does <code>Boolean flag = null; if (flag) { ... }</code> compile cleanly and crash at runtime?</b><br>
+      <code>if (flag)</code> compiles because Java inserts automatic unboxing to <code>flag.booleanValue()</code>. At runtime, calling <code>.booleanValue()</code> on a <code>null</code> reference immediately throws <code>java.lang.NullPointerException</code>. Always guard nullable wrapper fields with <code>Boolean.TRUE.equals(flag)</code>.</li>
+
+      <li><b>What causes <code>NumberFormatException: For input string: ""</code> when reading text from a Selenium <code>WebElement</code>?</b><br>
+      The element was rendered in the DOM without visible text (for instance, while loading asynchronously or hidden via CSS), causing <code>element.getText()</code> to return an empty string <code>""</code>. Wait for non-empty text via <code>WebDriverWait</code> before invoking <code>Integer.parseInt()</code>.</li>
+
+      <li><b>Why did <code>new Integer(5)</code> trigger a deprecation warning starting in Java 9?</b><br>
+      <code>new Integer(5)</code> forces a fresh Heap allocation on every call, bypassing <code>IntegerCache</code> completely, and was marked deprecated for removal in Java 9 (and for-removal in Java 16). Replace it with <code>Integer.valueOf(5)</code> or direct autoboxing.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why did the Java team introduce <code>IntegerCache</code> for <code>-128</code> to <code>127</code> rather than caching all integers?</b><br>
+      Integers like loop counters, HTTP status buckets, array offsets, and small IDs cluster heavily between <code>-128</code> and <code>127</code>, so pre-allocating 256 immutable instances eliminates massive object churn at negligible RAM cost. Caching billions of arbitrary integers would waste gigabytes of Heap before any application code even ran. The upper bound can be tuned via <code>-XX:AutoBoxCacheMax=&lt;size&gt;</code> when needed.</li>
+
+      <li><b>When writing a high-frequency math helper or TestNG loop, why should you prefer primitive types over wrapper classes?</b><br>
+      Primitives avoid object header overhead (12–16 bytes per object), stay in CPU registers or Stack slots, and avoid GC pressure from repeated unboxing and re-boxing. Use primitives for calculations and reserve wrappers strictly for generic collections and nullable fields.</li>
+
+      <li><b>Why did Java design all 8 wrapper classes to be <code>final</code> and immutable?</b><br>
+      Because wrapper instances are cached inside pools like <code>IntegerCache</code> and commonly used as <code>HashMap</code> keys, mutating an existing wrapper's value would corrupt hash buckets and cached references across unrelated threads. Immutability guarantees safe sharing without defensive copying.</li>
+
+      <li><b>What is the range of Java's default <code>IntegerCache</code>?</b><br>
+      <code>-128</code> to <code>127</code> inclusive.</li>
+
+      <li><b>What is the return type of <code>Integer.parseInt("50")</code> vs <code>Integer.valueOf("50")</code>?</b><br>
+      <code>parseInt</code> returns primitive <code>int</code>; <code>valueOf</code> returns an <code>Integer</code> wrapper object.</li>
+
+      <li><b>What happens if you unbox a <code>null</code> wrapper object?</b><br>
+      Throws <code>NullPointerException</code> at runtime.</li>
+
+      <li><b>Why do Collections require <code>List&lt;Integer&gt;</code> instead of <code>List&lt;int&gt;</code>?</b><br>
+      Java Generics support only reference types descending from <code>Object</code>, never primitive types.</li>
+
+      <li><b>How should two <code>Integer</code> wrapper variables always be compared for numerical equality?</b><br>
+      With <code>.equals()</code> (or <code>Objects.equals(a, b)</code>), never <code>==</code>.</li>
+
+      <li><b>Why was <code>new Integer(n)</code> deprecated?</b><br>
+      It forces Heap allocation on every call instead of reusing <code>IntegerCache</code> via <code>Integer.valueOf(n)</code>.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-wrapper-autoboxing-cache.html"><span class="tag Java">Java</span>&larr; Back to J2.3 Concept Page</a></p>
+    <p><a href="interview-j2-2-qa.html">&larr; J2.2 Q&amp;A</a> &middot; <a href="interview-j2-4-qa.html">J2.4 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

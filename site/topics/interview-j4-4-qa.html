@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J4.4 Core Keywords: static, final, this, super &amp; instanceof</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-keywords-static-final-this-super.html">&larr; Back to Concept Page: J4.4 Core Keywords: static, final, this, super &amp; instanceof</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J4.4 Question Bank: Core Keywords: static, final, this, super &amp; instanceof (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Explain the exact difference between <code>final</code>, <code>finally</code>, and <code>finalize()</code>.</b><br>
+      <code>final</code> is an access/immutability keyword that prevents variable reassignment, method overriding, or subclassing. <code>finally</code> is a control-flow block paired with <code>try</code>/<code>catch</code> that always runs cleanup code including closing a file or quitting a driver. <code>finalize()</code> was a protected method on <code>Object</code> invoked unpredictably before Garbage Collection, now deprecated for removal in favor of <code>try-with-resources</code>.</li>
+
+      <li><b>What are all the contexts where the <code>static</code> keyword can be used in Java?</b><br>
+      <code>static</code> applies in five places: static variables (shared class state), static methods (callable without an instance), static initializer blocks (executed once at class initialization), static nested classes (which hold no hidden reference to the enclosing outer instance), and static imports (<code>import static org.testng.Assert.assertEquals;</code>). Top-level classes cannot be <code>static</code>.</li>
+
+      <li><b>What does <code>final</code> restrict on a variable versus a method versus a class?</b><br>
+      A <code>final</code> variable can be assigned at most once (making primitives constants and preventing reference variables from pointing to a different Heap object). A <code>final</code> method cannot be overridden by subclasses, preserving critical invariants. A <code>final</code> class (for example, <code>String</code> or <code>System</code>) cannot be extended at all.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Does declaring <code>final List&lt;String&gt; items = new ArrayList&lt;&gt;();</code> prevent calling <code>items.add("shoe")</code>?</b><br>
+      No. Marking a reference variable <code>final</code> only prevents pointing the variable <code>items</code> at a different list object (<code>items = new ArrayList&lt;&gt;();</code> fails compilation). The Heap <code>ArrayList</code> object itself remains fully mutable unless constructed via an unmodifiable collection like <code>List.of()</code>.</li>
+
+      <li><b>Why can a <code>static</code> method never override an instance method, or access instance fields directly?</b><br>
+      An instance method requires an active Heap object reference (<code>this</code>) to determine runtime polymorphism and read instance field memory. A <code>static</code> method runs on the class without any object on the Stack, so there is no <code>this</code> pointer. If a subclass declares a <code>static</code> method with the same signature as a parent's <code>static</code> method, that is <b>method hiding</b> resolved at compile time by reference type, not overriding.</li>
+
+      <li><b>How does Java 16+ pattern matching for <code>instanceof</code> simplify capability checks?</b><br>
+      Classic Java required checking <code>if (driver instanceof JavascriptExecutor)</code> followed by a manual cast <code>JavascriptExecutor js = (JavascriptExecutor) driver;</code>. Pattern matching combines both steps into <code>if (driver instanceof JavascriptExecutor js)</code>, binding the strongly typed variable <code>js</code> cleanly in scope only when the check succeeds.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>Why does declaring <code>public static WebDriver driver;</code> in <code>BaseTest</code> pass sequential local runs and fail in parallel CI execution?</b><br>
+      When running 1 thread sequentially, only one browser runs at a time, so a single shared <code>static</code> slot appears to work. When TestNG runs 4 classes in parallel inside one JVM, all 4 threads read and overwrite that single <code>static</code> field simultaneously, causing one test to click elements in another test's browser or hit <code>NoSuchSessionException</code> when another thread quits it. Replacing it with <code>ThreadLocal&lt;WebDriver&gt;</code> isolates one driver per thread.</li>
+
+      <li><b>Where are <code>static</code> initializer blocks useful vs harmful in an automation framework?</b><br>
+      Static blocks work well for loading immutable environment constants once on startup if errors are handled cleanly. Avoid launching browsers, opening database connections, or calling external APIs inside <code>static {}</code> blocks because any failure throws <code>ExceptionInInitializerError</code> and permanently bricks the class for the rest of the JVM run.</li>
+
+      <li><b>Why does Selenium's <code>Assert</code> use <code>import static org.testng.Assert.*;</code> cleanly in test classes?</b><br>
+      TestNG assertion helpers like <code>assertEquals</code> and <code>assertTrue</code> are stateless <code>public static</code> methods. Static imports let tests write concise assertions directly without repeating <code>Assert.</code> on every verification line.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does compilation fail with 'non-static variable driver cannot be referenced from a static context' inside a utility method?</b><br>
+      You attempted to read an instance field (owned by individual objects) directly inside a <code>static</code> method (which runs without an object). Fix this either by passing <code>WebDriver driver</code> as a parameter into the <code>static</code> method or by making the helper an instance method on <code>BasePage</code>.</li>
+
+      <li><b>Why did a subclass method named <code>takeScreenshot()</code> silently call the parent version instead of overriding when both were declared <code>static</code>?</b><br>
+      <code>static</code> methods do not participate in runtime polymorphism; they are resolved statically at compile time using the declared class type of the variable. Remove <code>static</code> if polymorphic overriding per subclass is required.</li>
+
+      <li><b>What happens if <code>driver instanceof TakesScreenshot</code> evaluates on a <code>null</code> driver?</b><br>
+      The <code>instanceof</code> operator is null-safe by specification: <code>null instanceof AnyType</code> always evaluates cleanly to <code>false</code> without throwing <code>NullPointerException</code>.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why are utility classes like <code>java.lang.Math</code> or custom <code>WaitUtils</code> marked <code>public final class</code> with a <code>private</code> constructor and <code>static</code> methods?</b><br>
+      Stateless utilities hold no instance state, so creating Heap objects via <code>new</code> wastes memory, and subclassing them makes no architectural sense. Making the class <code>final</code> and its constructor <code>private</code> communicates clearly that callers should invoke methods statically.</li>
+
+      <li><b>Why should Page Objects mark injected dependencies and locators <code>private final</code>?</b><br>
+      Marking <code>private final WebDriver driver;</code> and <code>private final By loginBtn;</code> guarantees that once the Page Object constructor finishes, neither the driver reference nor the locators can ever be accidentally reassigned or nulled out mid-test.</li>
+
+      <li><b>Why is calling <code>this.wait</code> or <code>super.wait</code> explicitly inside subclass overrides helpful for maintenance?</b><br>
+      Even when no local variable shadows a field, qualifying parent calls with <code>super.</code> explicitly communicates to maintainers that behavior builds upon the base class implementation rather than calling a local helper.</li>
+
+      <li><b>Can a <code>static</code> method access non-static instance variables directly?</b><br>
+      No; there is no <code>this</code> object instance in a static context.</li>
+
+      <li><b>What happens when a <code>final</code> class like <code>String</code> is subclassed?</b><br>
+      Compilation fails.</li>
+
+      <li><b>Does a <code>final</code> list prevent calling <code>list.add(...)</code>?</b><br>
+      No; <code>final</code> prevents reassigning the reference variable, not mutating the Heap object.</li>
+
+      <li><b>What does <code>null instanceof WebDriver</code> evaluate to?</b><br>
+      <code>false</code> (never throws <code>NullPointerException</code>).</li>
+
+      <li><b>Difference between <code>final</code>, <code>finally</code>, and <code>finalize()</code>?</b><br>
+      <code>final</code> restricts modification/inheritance, <code>finally</code> runs guaranteed cleanup after <code>try</code>, and <code>finalize()</code> is the deprecated pre-GC hook.</li>
+
+      <li><b>Why does <code>static WebDriver</code> break parallel TestNG tests?</b><br>
+      All threads overwrite the same shared static variable instead of owning independent drivers.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-keywords-static-final-this-super.html"><span class="tag Java">Java</span>&larr; Back to J4.4 Concept Page</a></p>
+    <p><a href="interview-j4-3-qa.html">&larr; J4.3 Q&amp;A</a> &middot; <a href="interview-j4-5-qa.html">J4.5 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

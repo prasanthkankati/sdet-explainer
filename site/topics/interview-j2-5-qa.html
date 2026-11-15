@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J2.5 Arrays (1D &amp; 2D Object[][])</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-arrays-1d-2d-dataprovider.html">&larr; Back to Concept Page: J2.5 Arrays (1D &amp; 2D Object[][])</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J2.5 Question Bank: Arrays (1D &amp; 2D Object[][]) (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Why are arrays fixed in size once created in Java?</b><br>
+      The JVM allocates an array as a single contiguous memory block on the Heap so index lookup <code>arr[i]</code> executes in constant $O(1)$ time by computing <code>baseAddress + i * slotSize</code>. Growing a contiguous block in place is impossible if adjacent memory is occupied by other objects. When dynamic resizing is needed, use <code>ArrayList</code>, which allocates a larger array and copies elements over automatically.</li>
+
+      <li><b>Contrast <code>.length</code>, <code>.length()</code>, and <code>.size()</code>.</b><br>
+      <code>arr.length</code> is a final field on every Java array returning its fixed slot count. <code>str.length()</code> is a method on <code>String</code> returning the count of UTF-16 code units. <code>collection.size()</code> is a method declared by <code>Collection</code> and <code>Map</code> implementations returning the current element count.</li>
+
+      <li><b>Why does TestNG <code>@DataProvider</code> return <code>Object[][]</code> instead of <code>String[][]</code>?</b><br>
+      Because <code>java.lang.Object</code> is the root superclass of every class and autoboxed wrapper in Java, an <code>Object[][]</code> matrix lets a single test row carry mixed types simultaneously—for instance, a <code>String</code> username, an <code>int</code> timeout, and a <code>boolean</code> expected validity flag. Using <code>String[][]</code> would force tedious manual parsing of integers and booleans inside every <code>@Test</code>.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>What happens in memory when you write <code>String[] tabs = new String[3];</code>?</b><br>
+      The JVM allocates an array object on the Heap large enough for 3 reference slots and initializes all 3 slots to <code>null</code>, because no <code>String</code> objects have been assigned yet. The variable <code>tabs</code> on the Stack holds the reference to that array object. Attempting <code>tabs[0].length()</code> before assigning a string throws <code>NullPointerException</code>.</li>
+
+      <li><b>Why does <code>Arrays.asList(arr)</code> throw <code>UnsupportedOperationException</code> on <code>.add()</code>, while <code>List.of(arr)</code> throws it on <code>.set()</code> too?</b><br>
+      <code>Arrays.asList(arr)</code> creates a thin fixed-size wrapper directly backed by the array, so calling <code>list.set(0, val)</code> mutates the original array, whereas adding or removing elements is forbidden. By contrast, Java 9+ <code>List.of(...)</code> returns a completely unmodifiable list rejecting <code>.add()</code>, <code>.remove()</code>, <code>.set()</code>, and <code>null</code> elements. If a resizable list is required, wrap it in <code>new ArrayList&lt;&gt;(Arrays.asList(arr))</code>.</li>
+
+      <li><b>How do <code>Arrays.equals(a, b)</code> and <code>a.equals(b)</code> differ on two arrays?</b><br>
+      Java arrays do not override <code>Object.equals()</code>, so <code>a.equals(b)</code> behaves identically to <code>a == b</code> and returns <code>false</code> for two distinct array objects even if their contents match. Calling <code>Arrays.equals(a, b)</code> compares lengths and pairs of elements in order (use <code>Arrays.deepEquals(a, b)</code> for 2D arrays).</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>How do you convert a comma-separated test-data cell from Excel into a trimmed <code>List&lt;String&gt;</code>?</b><br>
+      Call <code>String[] parts = rawCell.split(",");</code> to split into a fixed array, then stream or wrap it into a mutable list via <code>new ArrayList&lt;&gt;(Arrays.asList(parts))</code>. If each part needs trimming, <code>Arrays.stream(parts).map(String::trim).collect(Collectors.toList())</code> produces a clean mutable list cleanly.</li>
+
+      <li><b>In a Selenium test, how do you verify an array of expected menu labels matches UI menu elements?</b><br>
+      Extract UI texts into a <code>List&lt;String&gt;</code> using streams or a loop, and compare against <code>Arrays.asList("Home", "Orders", "Checkout")</code> via <code>Assert.assertEquals(actualList, expectedList)</code>. Comparing lists directly avoids manual index loops and yields clear diff messages on TestNG failure.</li>
+
+      <li><b>Why can an <code>Object[]</code> array hold an integer <code>42</code> alongside a <code>String</code>?</b><br>
+      When <code>42</code> is placed into an <code>Object[]</code> literal, the Java compiler autoboxes primitive <code>42</code> into an <code>Integer</code> object via <code>Integer.valueOf(42)</code>. Because <code>Integer</code> inherits from <code>Object</code>, it fits cleanly into the <code>Object[]</code> slot.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>What causes <code>TestNGException: Data Provider method ... returned a null value</code> or <code>MethodMatcherException</code>?</b><br>
+      Returning an uninitialized <code>Object[][]</code> reference causes a null DataProvider failure, while having rows whose column count does not match the <code>@Test</code> method's parameter count and types throws <code>MethodMatcherException</code>. Verify that every row inside the <code>Object[][]</code> matrix matches the exact parameter count and type sequence declared on the <code>@Test</code> signature.</li>
+
+      <li><b>Why does <code>int[] ids = {1, 2}; ids[2] = 3;</code> throw <code>ArrayIndexOutOfBoundsException</code>?</b><br>
+      Valid indices for a 2-element array are strictly <code>0</code> and <code>1</code>. Writing to index <code>2</code> goes past the fixed Heap allocation boundary, so the JVM performs bounds checking on every access and throws <code>ArrayIndexOutOfBoundsException</code> immediately instead of corrupting adjacent memory.</li>
+
+      <li><b>Why did <code>Arrays.asList(new int[]{1, 2, 3}).size()</code> return <code>1</code> instead of <code>3</code>?</b><br>
+      Generics do not support primitive types, so <code>Arrays.asList</code> treats the entire <code>int[]</code> array as a single <code>Object</code> element, producing a <code>List&lt;int[]&gt;</code> of size 1. Use a boxed <code>Integer[]</code> array or <code>Arrays.stream(primitiveArr).boxed().toList()</code> instead.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why should Page Objects return <code>List&lt;String&gt;</code> instead of raw <code>String[]</code> arrays?</b><br>
+      <code>List&lt;String&gt;</code> integrates seamlessly with Java Streams, TestNG assertions, and immutability helpers without exposing mutable fixed-length array slots. Returning <code>List.copyOf(...)</code> or <code>Collections.unmodifiableList(...)</code> also prevents callers from mutating internal Page Object state.</li>
+
+      <li><b>When is a primitive array like <code>byte[]</code> strictly better than <code>List&lt;Byte&gt;</code>?</b><br>
+      When handling binary files, screenshots via <code>OutputType.BYTES</code>, or image buffers, <code>List&lt;Byte&gt;</code> wraps every single byte in a 16-byte Heap <code>Byte</code> object—inflating memory usage more than 16x. A contiguous <code>byte[]</code> array stores raw bytes directly with zero wrapper overhead.</li>
+
+      <li><b>Why does TestNG support <code>Iterator&lt;Object[]&gt;</code> as an alternative return type to <code>Object[][]</code> in <code>@DataProvider</code>?</b><br>
+      When reading 5,000 test rows from a large Excel or CSV file, returning <code>Object[][]</code> loads every single row into Heap memory upfront before the first test begins. Returning a lazy <code>Iterator&lt;Object[]&gt;</code> streams one test row at a time into the test runner and keeps memory usage flat.</li>
+
+      <li><b>Can a Java array resize after creation?</b><br>
+      No; use <code>ArrayList</code> when dynamic sizing is required.</li>
+
+      <li><b>What syntax gets the number of elements in an array?</b><br>
+      <code>arr.length</code> (a field, without parentheses).</li>
+
+      <li><b>What does <code>System.out.println(arr)</code> print for a <code>String[]</code>?</b><br>
+      Its internal class tag and hex hash code (e.g., <code>[Ljava.lang.String;@...</code>); use <code>Arrays.toString(arr)</code> instead.</li>
+
+      <li><b>Which exception is thrown for an invalid array index?</b><br>
+      <code>ArrayIndexOutOfBoundsException</code>.</li>
+
+      <li><b>Why can you not call <code>.add()</code> on the list returned by <code>Arrays.asList()</code>?</b><br>
+      It returns a fixed-size list backed directly by the original array, throwing <code>UnsupportedOperationException</code> on structural modifications.</li>
+
+      <li><b>Which Java data structure feeds TestNG <code>@DataProvider</code>?</b><br>
+      A 2D array <code>Object[][]</code> (or <code>Iterator&lt;Object[]&gt;</code>).</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-arrays-1d-2d-dataprovider.html"><span class="tag Java">Java</span>&larr; Back to J2.5 Concept Page</a></p>
+    <p><a href="interview-j2-4-qa.html">&larr; J2.4 Q&amp;A</a> &middot; <a href="interview-j2-6-qa.html">J2.6 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

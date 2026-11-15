@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J6.3 File I/O: Properties, JSON (Jackson) &amp;amp; Excel (Apache POI)</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-file-io-properties-json-poi.html">&larr; Back to Concept Page: J6.3 File I/O: Properties, JSON (Jackson) &amp;amp; Excel (Apache POI)</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J6.3 Question Bank: File I/O: Properties, JSON (Jackson) &amp;amp; Excel (Apache POI) (19 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Why use <code>Properties</code> instead of a static Java constants class for URLs and browsers?</b><br>
+      Changing a static constant requires editing source code and recompiling the project, whereas <code>.properties</code> files and CLI <code>-D</code> overrides let Jenkins or testers switch from local Chrome to staging headless runs without recompiling.</li>
+
+      <li><b>What is the difference between <code>HSSFWorkbook</code> and <code>XSSFWorkbook</code> in Apache POI?</b><br>
+      <code>HSSFWorkbook</code> reads legacy binary <code>.xls</code> spreadsheets (Office 97–2003), while <code>XSSFWorkbook</code> reads modern ZIP-XML <code>.xlsx</code> files. Calling <code>WorkbookFactory.create(stream)</code> handles both automatically.</li>
+
+      <li><b>Why prefer <code>Path.of(...)</code> over concatenating strings with <code>/</code> or <code>\\</code>?</b><br>
+      <code>Path.of("src", "test", "resources", "qkart.json")</code> lets Java insert the host OS file separator automatically on both Windows developer laptops and Linux CI containers.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How does Jackson know the element type inside <code>List&lt;User&gt;</code> when type erasure removes <code>User</code> at runtime?</b><br>
+      Passing an anonymous subclass <code>new TypeReference&lt;List&lt;User&gt;&gt;() {}</code> retains the parameterized superclass metadata in bytecode, which Jackson reads via reflection.</li>
+
+      <li><b>How does <code>DataFormatter.formatCellValue(cell)</code> prevent type mismatch crashes in Excel readers?</b><br>
+      Instead of forcing a single cell type getter like <code>getStringCellValue()</code> or <code>getNumericCellValue()</code>, <code>DataFormatter</code> inspects the cell type and formatting mask and converts numbers, dates, booleans, or formulas cleanly to a Java <code>String</code>.</li>
+
+      <li><b>What happens when you load a file from <code>src/test/resources</code> via <code>getClass().getClassLoader().getResourceAsStream("config.properties")</code>?</b><br>
+      Maven/Gradle copies <code>src/test/resources</code> onto the runtime classpath, so loading via the classloader works even when the project runs from a packaged test JAR where direct filesystem paths differ.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>How do you pass nested order payloads (address object + array of product SKUs) into a Selenium end-to-end test?</b><br>
+      Store them in JSON instead of Excel. Modeling nested arrays and objects cleanly in flat Excel columns turns messy quickly, whereas Jackson deserializes nested JSON into typed Java records or POJOs cleanly.</li>
+
+      <li><b>Your Maven command passes <code>mvn test -Durl=https://www.selenium.dev/</code>, yet tests still hit QKart from <code>config.properties</code>. Why?</b><br>
+      Your config loader checked <code>props.getProperty("url")</code> without checking <code>System.getProperty("url")</code> first; system properties passed with <code>-D</code> must always take precedence over file defaults.</li>
+
+      <li><b>How does a reader avoid failing on trailing blank rows formatted in Excel?</b><br>
+      Either check for empty row values (`row == null` or every cell blank) before adding to the result list, or iterate using <code>sheet.getLastRowNum()</code> while skipping rows where the first key cell is empty.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Apache POI throws <code>IllegalStateException: Cannot get a STRING value from a NUMERIC cell</code> when reading test zip codes. What is the fix?</b><br>
+      Replace <code>cell.getStringCellValue()</code> with <code>formatter.formatCellValue(cell)</code> or call <code>DataFormatter</code> across every column uniformly.</li>
+
+      <li><b>Jackson throws <code>UnrecognizedPropertyException</code> after adding a new <code>notes</code> column to a JSON test fixture. How can the POJO stay resilient?</b><br>
+      Either add the matching field to your POJO, annotate the class with <code>@JsonIgnoreProperties(ignoreUnknown = true)</code>, or configure <code>DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES</code> to <code>false</code> on the <code>ObjectMapper</code>.</li>
+
+      <li><b>Why does <code>getResourceAsStream("config.properties")</code> return <code>null</code>?</b><br>
+      Either the file sits outside <code>src/test/resources</code> (so Maven did not copy it to <code>target/test-classes</code>) or a leading slash mismatch happened between <code>Class.getResourceAsStream</code> (relative to package without leading slash) and <code>ClassLoader.getResourceAsStream</code> (always from classpath root without leading slash).</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q19)</h2>
+    <ol start="13">
+      <li><b>When should a QA team pick JSON over Excel for Selenium test data?</b><br>
+      Pick JSON when engineers own the data, tests need nested objects/arrays, and clean Git line-by-line code reviews matter. Pick Excel when non-technical analysts author flat tables in spreadsheets.</li>
+
+      <li><b>Should <code>ObjectMapper</code> be created per test or stored as a static singleton?</b><br>
+      Store a single configured <code>ObjectMapper</code> constant. Once configured at startup, it is thread-safe and caches bean serializers/deserializers for fast execution across parallel threads.</li>
+
+      <li><b>Why avoid storing sensitive production passwords directly inside committed <code>.properties</code> or JSON files?</b><br>
+      Credentials committed to Git leak into history permanently. Inject secrets via CI environment variables (<code>System.getenv()</code>) or Maven <code>-D</code> arguments overriding placeholder properties.</li>
+
+      <li><b>How should CLI flags override config files?</b><br>
+      Check <code>System.getProperty(key)</code> first and fall back to the loaded <code>Properties</code> object.</li>
+
+      <li><b>What fixes POI numeric-vs-string crashes on Excel cells?</b><br>
+      Use <code>DataFormatter.formatCellValue(cell)</code> alongside <code>CREATE_NULL_AS_BLANK</code>.</li>
+
+      <li><b>How does Jackson deserialize a <code>List&lt;User&gt;</code>?</b><br>
+      Pass <code>new TypeReference&lt;List&lt;User&gt;&gt;() {}</code> to <code>ObjectMapper.readValue()</code>.</li>
+
+      <li><b>Should <code>ObjectMapper</code> be shared across threads?</b><br>
+      Yes; once configured, a single static instance is thread-safe and faster.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-file-io-properties-json-poi.html"><span class="tag Java">Java</span>&larr; Back to J6.3 Concept Page</a></p>
+    <p><a href="interview-j6-2-qa.html">&larr; J6.2 Q&amp;A</a> &middot; <a href="interview-j6-4-qa.html">J6.4 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

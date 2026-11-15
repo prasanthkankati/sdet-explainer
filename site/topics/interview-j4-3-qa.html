@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J4.3 Access Modifiers &amp; Encapsulation</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-access-modifiers-encapsulation.html">&larr; Back to Concept Page: J4.3 Access Modifiers &amp; Encapsulation</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J4.3 Question Bank: Access Modifiers &amp; Encapsulation (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>List Java's four access modifiers in order from most restrictive to least restrictive.</b><br>
+      From tightest to widest visibility: <code>private</code> (same class only), package-private / default (same class and same package), <code>protected</code> (same package plus subclasses in external packages), and <code>public</code> (accessible everywhere). Choosing the narrowest visibility that compiles keeps coupling minimal.</li>
+
+      <li><b>What is Encapsulation in Java and why does it matter in test automation?</b><br>
+      Encapsulation wraps state (fields) and behavior (methods) inside a single class while restricting direct external access to internal representation via <code>private</code> fields. In Selenium Page Objects, hiding <code>private final By</code> locators ensures test classes call public business methods like <code>addProductToCart()</code> rather than directly referencing fragile CSS/XPath selectors. When UI markup changes, only the Page Object changes.</li>
+
+      <li><b>Can a top-level Java class be marked <code>private</code> or <code>protected</code>?</b><br>
+      No. Top-level classes and interfaces can only be <code>public</code> or package-private (no modifier). Only nested member classes, fields, constructors, and methods support <code>private</code> and <code>protected</code>.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How does <code>protected</code> behave across packages when a subclass holds a reference to a parent object?</b><br>
+      Inside a subclass in package B extending parent class <code>BasePage</code> in package A, the subclass can access <code>protected</code> members inherited on <code>this</code> or on another instance of the subclass itself. However, the subclass in package B cannot create a raw <code>new BasePage()</code> parent reference and access its <code>protected</code> members directly—cross-package <code>protected</code> access works strictly through inheritance.</li>
+
+      <li><b>Are sub-packages like <code>com.qkart.tests.login</code> considered part of <code>com.qkart.tests</code> for default/package-private access?</b><br>
+      No. In Java, packages have a flat visibility boundary regardless of folder nesting. <code>com.qkart.tests</code> and <code>com.qkart.tests.login</code> are treated as completely separate packages with zero package-private sharing between them.</li>
+
+      <li><b>Does encapsulation still allow mutating an object's internal state if a getter returns a mutable <code>List</code>?</b><br>
+      Returning a raw reference to a mutable private <code>List</code> or array breaks encapsulation because external callers can invoke <code>page.getItems().clear()</code> and mutate internal state silently. Return an unmodifiable copy using <code>List.copyOf(items)</code> or <code>Collections.unmodifiableList(items)</code> to protect internal state.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>In an enterprise Selenium framework, which modifier should be used for <code>BasePage.driver</code>, <code>By</code> locators, and <code>PageObject</code> action methods?</b><br>
+      Declare <code>By</code> locators as <code>private final</code> inside each specific Page Object so neither tests nor other pages depend on them. Declare shared wait/click helpers and <code>driver</code> on <code>BasePage</code> as <code>protected</code> so child Page Objects across packages reuse them while <code>@Test</code> classes cannot call raw Selenium primitives. Mark business workflow methods like <code>checkout()</code> as <code>public</code>.</li>
+
+      <li><b>How does Encapsulation protect test data POJOs used in API testing?</b><br>
+      Marking fields <code>private</code> inside an API request POJO lets setter or builder methods validate constraints—including rejecting negative quantities or malformed emails—before serializing JSON to the API endpoint.</li>
+
+      <li><b>Why does TestNG require <code>@Test</code> methods and constructors to be <code>public</code> (or package-visible in matching packages) in typical CI suites?</b><br>
+      TestNG scans classes from outside your test package using reflection, and <code>@Test</code> methods represent entry points invoked by the external runner. Keeping <code>@Test</code> methods <code>public</code> guarantees TestNG discovers and runs them reliably.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why did moving <code>WaitHelper</code> from package <code>pages</code> into <code>utils</code> break compilation on package-private helper methods?</b><br>
+      Methods written without an access modifier default to package-private visibility, so relocating callers into a separate package immediately cuts off visibility with 'method is not public in WaitHelper; cannot be accessed from outside package'. Explicitly add <code>public</code> for cross-package utilities.</li>
+
+      <li><b>Why does overriding a parent method with narrower visibility like changing <code>public void click()</code> to <code>protected void click()</code> fail compilation?</b><br>
+      Java enforces Liskov Substitution rules on overridden methods: any caller holding a parent reference expects <code>public</code> access, so narrowing visibility on a child override breaks polymorphic calls and triggers 'attempting to assign weaker access privileges'. You may widen visibility (for example, <code>protected</code> to <code>public</code>), never narrow it.</li>
+
+      <li><b>Why can two instances of the exact same class read each other's <code>private</code> fields?</b><br>
+      In Java, <code>private</code> restricts visibility at the <b>class boundary</b>, not the individual object boundary. Inside <code>equals(Object o)</code> on <code>User</code>, casting to <code>User other</code> allows reading <code>other.id</code> directly even though <code>id</code> is <code>private</code>.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why should automated framework engineers start every new field or helper as <code>private</code> and widen only when needed?</b><br>
+      Minimizing surface area prevents external classes from accidentally coupling to internal fields or helper details. Once a member is made <code>public</code>, refactoring or removing it requires auditing the entire codebase; keeping helpers <code>private</code> or package-private preserves refactoring freedom.</li>
+
+      <li><b>When building a fluent Page Object API, why should low-level methods like <code>waitForElement(By)</code> be <code>protected</code> rather than <code>public</code>?</b><br>
+      Exposing low-level wait or click primitives publicly invites test authors to pass raw <code>By</code> locators inside <code>@Test</code> classes, eroding Page Object Model boundaries. Making those primitives <code>protected</code> in <code>BasePage</code> keeps them strictly inside the Page Object hierarchy.</li>
+
+      <li><b>Why do modern Java 16+ <code>record</code> classes make fields <code>private final</code> automatically?</b><br>
+      Records model immutable data carriers (like API response DTOs or test configuration pairs) where encapsulation forbids post-construction field tampering. Generating <code>private final</code> fields alongside read-only accessors enforces immutability with zero boilerplate.</li>
+
+      <li><b>What are Java's 4 access levels?</b><br>
+      <code>private</code>, default (package-private), <code>protected</code>, and <code>public</code>.</li>
+
+      <li><b>Which keyword applies package-private visibility?</b><br>
+      No keyword at all (omitting any access modifier).</li>
+
+      <li><b>Can an overridden method have narrower visibility than the parent method?</b><br>
+      No; it can only keep the same visibility or widen it.</li>
+
+      <li><b>What visibility modifier should Page Object <code>By</code> locators use?</b><br>
+      <code>private final</code>.</li>
+
+      <li><b>What access modifiers are legal on a top-level class?</b><br>
+      <code>public</code> or package-private only.</li>
+
+      <li><b>What is the difference between package-private and <code>protected</code>?</b><br>
+      <code>protected</code> additionally grants access to subclasses residing in different packages.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-access-modifiers-encapsulation.html"><span class="tag Java">Java</span>&larr; Back to J4.3 Concept Page</a></p>
+    <p><a href="interview-j4-2-qa.html">&larr; J4.2 Q&amp;A</a> &middot; <a href="interview-j4-4-qa.html">J4.4 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

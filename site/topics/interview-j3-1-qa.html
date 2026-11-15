@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J3.1 String Immutability &amp; String Constant Pool</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-string-immutability-pool.html">&larr; Back to Concept Page: J3.1 String Immutability &amp; String Constant Pool</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J3.1 Question Bank: String Immutability &amp; String Constant Pool (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>What does it mean that <code>String</code> is immutable in Java?</b><br>
+      Once a <code>String</code> instance is created on the Heap or inside the String Constant Pool, its character content can never change. Any transformation method like <code>toLowerCase()</code>, <code>substring()</code>, or <code>replace()</code> leaves the original <code>String</code> untouched and constructs a brand-new <code>String</code> object. The class itself is also marked <code>final</code> so subclasses cannot override methods to expose mutable state.</li>
+
+      <li><b>List the 4 main reasons Java made <code>String</code> immutable.</b><br>
+      First, <b>String Constant Pool sharing</b>: multiple references safely point to one shared literal without one variable corrupting another. Second, <b>Thread Safety</b>: immutable strings require zero synchronization across parallel threads. Third, <b>HashMap caching</b>: <code>String</code> computes and caches its <code>hashCode</code> once, making <code>Map&lt;String, V&gt;</code> lookups fast and preventing key bucket corruption. Fourth, <b>Security</b>: database URLs, file paths, and class names cannot mutate after security validation.</li>
+
+      <li><b>Where does the String Constant Pool live in modern Java (Java 8 through Java 21)?</b><br>
+      Prior to Java 7, the String Constant Pool lived inside PermGen, which frequently caused <code>OutOfMemoryError: PermGen space</code>. Starting in Java 7 and continuing through Java 21, the String Constant Pool resides inside the main <b>Heap</b> memory so unused dynamically interned strings can be reclaimed by the Garbage Collector.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How many objects are created by <code>String s = new String("QKart");</code>?</b><br>
+      Assuming <code>"QKart"</code> has not yet been loaded into the String Constant Pool, this single line creates <b>two</b> objects: one pooled literal object inside the String Constant Pool when the class loads, plus one distinct non-pooled <code>String</code> object on the Heap referenced by <code>s</code>. If <code>"QKart"</code> already existed in the pool from an earlier literal, only <b>one</b> new Heap object is created.</li>
+
+      <li><b>How does Java 9+ Compact Strings reduce <code>String</code> memory usage?</b><br>
+      In Java 8, every <code>String</code> stored characters in a <code>char[]</code> using 2 bytes per character even for plain ASCII text. Starting in Java 9, <code>String</code> stores a <code>byte[] value</code> alongside a 1-byte <code>coder</code> flag (<code>LATIN1</code> or <code>UTF16</code>), cutting memory consumption roughly in half for standard ASCII HTML text, locators, and JSON payloads.</li>
+
+      <li><b>Why does <code>"a" + "b" == "ab"</code> evaluate to <code>true</code> while <code>String x = "a"; x + "b" == "ab"</code> evaluates to <code>false</code>?</b><br>
+      In the first case, both operands are compile-time string constants, so <code>javac</code> folds them during compilation directly into the single literal <code>"ab"</code> in the String Constant Pool. In the second case, <code>x</code> is a variable resolved at runtime, so the JVM builds a new <code>String</code> on the Heap using <code>invokedynamic</code> (<code>StringConcatFactory</code>), returning a different address than the pooled <code>"ab"</code>.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>In a Selenium test on <code>https://qkart-qa-web.labs.crio.do/</code>, why does <code>driver.getTitle() == "QKart"</code> fail even when the printed title is <code>QKart</code>?</b><br>
+      <code>driver.getTitle()</code> returns a dynamically deserialized <code>String</code> from the HTTP W3C JSON response allocated on the Heap, whereas <code>"QKart"</code> resides in the String Constant Pool. Using <code>==</code> compares their different memory addresses and evaluates to <code>false</code>. Always use <code>driver.getTitle().equals("QKart")</code> or TestNG <code>Assert.assertEquals(driver.getTitle(), "QKart")</code>.</li>
+
+      <li><b>Why is <code>String</code> ideal as the key type in <code>Map&lt;String, String&gt;</code> test-data loaders?</b><br>
+      Because <code>String</code> is immutable, its characters never change after insertion into a <code>HashMap</code>, guaranteeing its bucket hash stays valid forever. Additionally, <code>String</code> caches its computed <code>hashCode</code> inside an internal field after the first calculation, making repeated config lookups like <code>config.get("base.url")</code> extremely fast.</li>
+
+      <li><b>What happens if a Page Object writes <code>text.trim();</code> without reassigning the result?</b><br>
+      <code>trim()</code> returns a newly allocated trimmed <code>String</code> while leaving the original <code>text</code> variable pointing to the untrimmed characters. In test assertions, write <code>text = text.trim();</code> or chain directly inside the assertion.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does <code>if (actualError.equals("Invalid Password"))</code> throw <code>NullPointerException</code> when no error appears?</b><br>
+      When an optional UI element text variable is <code>null</code>, calling <code>.equals()</code> on it attempts to dereference <code>null</code>. Inverting the comparison to <code>"Invalid Password".equals(actualError)</code> (or using <code>Objects.equals(actualError, "Invalid Password")</code>) avoids NPE completely and cleanly returns <code>false</code>.</li>
+
+      <li><b>Why should automated security or login helpers avoid calling <code>.intern()</code> blindly on millions of dynamic API response strings?</b><br>
+      Each interned string is registered inside the fixed-bucket internal String Pool table. Interning huge volumes of unique UUIDs, timestamps, or random payload strings inflates the String Table hash buckets and degrades lookup speed across the JVM. Reserve <code>intern()</code> strictly for small sets of repeated domain identifiers.</li>
+
+      <li><b>Why does storing database passwords in a <code>String</code> field raise security scanner flags?</b><br>
+      Because <code>String</code> is immutable, you cannot overwrite its characters with zeroes after authentication finishes; the plaintext password lingers on the Heap until GC runs and reclaims it, exposing credentials in heap dumps. Use <code>char[]</code> or clearable secret buffers when handling sensitive tokens.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>Why did Java mark the <code>String</code> class itself as <code>final</code> rather than only making its internal fields <code>private final</code>?</b><br>
+      If subclasses could extend <code>String</code>, a caller accepting a <code>String</code> could receive a mutable subclass overriding <code>equals()</code> or <code>hashCode()</code> to return changing values over time. Marking the class <code>final</code> locks down inheritance and guarantees immutability for every <code>String</code> reference anywhere in the JVM.</li>
+
+      <li><b>Why did Java move from <code>char[]</code> to <code>byte[]</code> in Java 9 <code>String</code> internals?</b><br>
+      Heap profiling of enterprise JVM workloads showed <code>String</code> objects routinely consumed 25%–40% of total Heap memory, with the vast majority holding single-byte ASCII/Latin-1 text. Switching to compact <code>byte[]</code> storage reduced GC frequency and Heap footprint transparently without breaking any public <code>String</code> API.</li>
+
+      <li><b>Why did Java choose a String Constant Pool on the Heap rather than interning every runtime string automatically?</b><br>
+      Automatically interning every short-lived runtime string (like loop fragments or HTTP response bodies) would add expensive hash-table synchronization overhead on every string creation. Limiting automatic pooling to compile-time literals and explicit <code>intern()</code> calls keeps normal runtime string allocation fast while sharing repeated literals efficiently.</li>
+
+      <li><b>Where are String literals stored?</b><br>
+      In the String Constant Pool on the Heap.</li>
+
+      <li><b>What does <code>==</code> check on two <code>String</code> variables?</b><br>
+      Whether both variables hold the exact same Heap memory address.</li>
+
+      <li><b>What does <code>.equals()</code> check on two <code>String</code> variables?</b><br>
+      Whether both strings contain the exact same sequence of characters.</li>
+
+      <li><b>How many objects can <code>new String("abc")</code> create if <code>"abc"</code> is not yet pooled?</b><br>
+      2 objects (1 in the String Constant Pool and 1 on the regular Heap).</li>
+
+      <li><b>What does <code>str.intern()</code> do?</b><br>
+      Returns the canonical reference from the String Constant Pool.</li>
+
+      <li><b>Why is <code>String</code> marked <code>final</code>?</b><br>
+      To prevent subclassing from breaking immutability, security, and <code>HashMap</code> key consistency.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-string-immutability-pool.html"><span class="tag Java">Java</span>&larr; Back to J3.1 Concept Page</a></p>
+    <p><a href="interview-j2-6-qa.html">&larr; J2.6 Q&amp;A</a> &middot; <a href="interview-j3-2-qa.html">J3.2 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

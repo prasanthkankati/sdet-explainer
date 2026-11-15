@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J4.7 Abstraction: Abstract Class vs Interface</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-abstraction-abstract-interface.html">&larr; Back to Concept Page: J4.7 Abstraction: Abstract Class vs Interface</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J4.7 Question Bank: Abstraction: Abstract Class vs Interface (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Compare an <code>abstract class</code> and an <code>interface</code> across 5 core dimensions.</b><br>
+      First, a class can extend strictly one <code>abstract class</code>, whereas it can implement multiple interfaces. Second, an <code>abstract class</code> holds instance state fields and constructors, whereas an <code>interface</code> holds only <code>public static final</code> constants and zero constructors. Third, abstract classes allow <code>protected</code> and <code>private</code> state, whereas interface abstract methods are strictly <code>public</code>. Fourth, both cannot be instantiated directly with <code>new</code>. Fifth, both support concrete helper methods via standard methods or Java 8 <code>default</code> methods.</li>
+
+      <li><b>Can an <code>abstract class</code> have zero abstract methods, or have a constructor?</b><br>
+      Yes to both. Marking a class <code>abstract</code> with zero abstract methods prevents callers from instantiating the incomplete base class directly via <code>new BasePage(driver)</code> while allowing concrete subclasses to inherit shared code. Its constructor still exists specifically to initialize those shared fields when subclasses invoke <code>super(driver)</code>.</li>
+
+      <li><b>What are Functional Interfaces and Marker Interfaces in Java?</b><br>
+      A Functional Interface has strictly one abstract method (SAM)—for example, <code>Runnable</code>, <code>Predicate&lt;T&gt;</code>, or <code>ExpectedCondition&lt;T&gt;</code>—allowing callers to pass concise lambdas (<code>driver -&gt; driver.getTitle().contains("QKart")</code>). A Marker Interface contains zero methods and marks classes with capability metadata checked at runtime via <code>instanceof</code>, including <code>Serializable</code> and <code>Cloneable</code>.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>Why did Java 8 introduce <code>default</code> and <code>static</code> methods inside interfaces?</b><br>
+      Before Java 8, adding a single new method to a widely implemented interface like <code>java.util.List</code> broke every third-party implementation class immediately at compile time. Adding <code>default</code> concrete methods (like <code>Collection.stream()</code> and <code>List.sort()</code>) allowed the JDK to upgrade standard interfaces cleanly without breaking legacy implementations. Interface <code>static</code> methods provide factory helpers directly on the contract (like <code>Comparator.comparing()</code>).</li>
+
+      <li><b>What happens if an interface declares <code>int TIMEOUT = 10;</code> without any modifiers?</b><br>
+      Every field inside a Java interface is implicitly treated by the compiler as <code>public static final int TIMEOUT = 10;</code>, regardless of whether you write those modifiers explicitly. Implementing classes cannot modify that constant field.</li>
+
+      <li><b>In Selenium, explain the exact abstraction hierarchy connecting <code>SearchContext</code>, <code>WebDriver</code>, <code>RemoteWebDriver</code>, and <code>ChromeDriver</code>.</b><br>
+      <code>SearchContext</code> is the top-level interface declaring <code>findElement</code> and <code>findElements</code>. <code>WebDriver</code> is a child interface extending <code>SearchContext</code> and adding browser navigation and window contracts (and <code>WebElement</code> also extends <code>SearchContext</code>). <code>RemoteWebDriver</code> is a concrete class implementing <code>WebDriver</code> plus <code>TakesScreenshot</code> and <code>JavascriptExecutor</code>, and <code>ChromeDriver</code> extends <code>ChromiumDriver</code> which extends <code>RemoteWebDriver</code>.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>Why is <code>org.openqa.selenium.By</code> designed as an <code>abstract class</code> instead of an <code>interface</code>?</b><br>
+      <code>By</code> encapsulates shared locator factory methods (<code>By.id()</code>, <code>By.xpath()</code>, <code>By.cssSelector()</code>) alongside shared helper logic like <code>findElement(SearchContext context)</code> and concrete <code>equals()</code>/<code>hashCode()</code>/<code>toString()</code> implementations that interfaces cannot override from <code>Object</code>. Every locator subclass extends <code>By</code> and implements <code>findElements(SearchContext)</code>.</li>
+
+      <li><b>How does TestNG's <code>ITestListener</code> interface leverage Java 8 <code>default</code> methods?</b><br>
+      Because <code>ITestListener</code> provides empty <code>default</code> implementations for lifecycle hooks like <code>onTestStart</code>, <code>onTestSuccess</code>, and <code>onTestFailure</code>, your custom listener class only needs to override <code>onTestFailure</code> to attach failure screenshots without writing empty boilerplate overrides for seven unused hooks.</li>
+
+      <li><b>When designing a custom Page Object framework, should <code>BasePage</code> be an <code>abstract class</code> or an <code>interface</code>?</b><br>
+      Make <code>BasePage</code> an <code>abstract class</code> because every Page Object shares protected instance state (<code>protected final WebDriver driver;</code> and <code>protected final WebDriverWait wait;</code>) initialized once via a constructor, which an interface cannot store.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why does implementing <code>PageLoadCheck</code> fail with 'attempting to assign weaker access privileges; was public' when writing <code>boolean isLoaded()</code>?</b><br>
+      In an interface, <code>boolean isLoaded();</code> is implicitly <code>public</code> even without writing the word <code>public</code>. In the implementing class, omitting <code>public</code> assigns narrower package-private visibility, violating Java's override visibility rule. Always prefix implemented interface methods with <code>public</code>.</li>
+
+      <li><b>Why did adding a helper method inside an interface annotated with <code>@FunctionalInterface</code> break compilation?</b><br>
+      If the added helper is an abstract method, the interface now has two abstract methods and ceases to be a Functional Interface. Making the helper either a <code>default</code> method or a <code>static</code> method leaves strictly one abstract method and compiles cleanly.</li>
+
+      <li><b>Why can you write <code>new WebDriverWait(driver, Duration.ofSeconds(10)).until(d -&gt; d.getTitle().equals("QKart"));</code> without writing an anonymous class?</b><br>
+      <code>Wait.until(Function&lt;? super T, V&gt;)</code> expects the <code>java.util.function.Function</code> Functional Interface. Because <code>Function</code> has only one abstract method (<code>apply(T)</code>), Java automatically compiles the lambda expression into an instance implementing that single method.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>When creating a brand-new abstraction for a test framework (for instance, a <code>DriverProvider</code> or <code>SecretStore</code>), should you start with an <code>interface</code> or an <code>abstract class</code>?</b><br>
+      Start with an <code>interface</code> when defining pure behavioral capabilities because classes can implement multiple interfaces without consuming their single inheritance slot (for instance, implementing both local Docker and BrowserStack cloud providers). Reserve <code>abstract class</code> for tight IS-A families sharing mutable protected fields or constructor initialization logic.</li>
+
+      <li><b>Why do modern Java architectures reject empty Marker Interfaces for new code in favor of Annotations?</b><br>
+      Marker interfaces like <code>Serializable</code> cannot accept configuration parameters and lock classes at compile time. Custom Java Annotations (including TestNG <code>@Test(retryAnalyzer = ...)</code> or JUnit <code>@Tag("smoke")</code>) attach structured key-value metadata cleanly to classes, methods, or fields without polluting type hierarchies.</li>
+
+      <li><b>Why are interfaces prohibited from overriding <code>Object</code> methods like <code>equals()</code>, <code>hashCode()</code>, or <code>toString()</code> as <code>default</code> methods?</b><br>
+      Every class implementing an interface already inherits concrete implementations of <code>equals</code>, <code>hashCode</code>, and <code>toString</code> from <code>java.lang.Object</code>, and superclass methods always win over interface default methods. Allowing interface defaults for <code>Object</code> methods would create useless dead code that could never run polymorphically.</li>
+
+      <li><b>Can an <code>interface</code> have instance fields or constructors?</b><br>
+      No; interface fields are implicitly <code>public static final</code> constants and interfaces have no constructors.</li>
+
+      <li><b>Can an <code>abstract class</code> have a constructor?</b><br>
+      Yes, executed by subclasses via <code>super()</code>.</li>
+
+      <li><b>What is a Functional Interface?</b><br>
+      An interface with exactly one abstract method (enabling Lambda expressions).</li>
+
+      <li><b>What is a Marker Interface?</b><br>
+      An empty interface with zero methods (for example, <code>Serializable</code> or <code>Cloneable</code>).</li>
+
+      <li><b>What type are <code>WebDriver</code>, <code>WebElement</code>, and <code>SearchContext</code> in Selenium?</b><br>
+      Interfaces (whereas <code>By</code> is an <code>abstract class</code>).</li>
+
+      <li><b>What methods did Java 8 allow inside interfaces?</b><br>
+      Concrete <code>default</code> and <code>static</code> methods.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-abstraction-abstract-interface.html"><span class="tag Java">Java</span>&larr; Back to J4.7 Concept Page</a></p>
+    <p><a href="interview-j4-6-qa.html">&larr; J4.6 Q&amp;A</a> &middot; <a href="interview-j5-1-qa.html">J5.1 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>

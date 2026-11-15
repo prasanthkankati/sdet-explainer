@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Interview Q&amp;A: J5.3 Set: HashSet vs LinkedHashSet vs TreeSet</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="java-set-hashset-linkedhashset-treeset.html">&larr; Back to Concept Page: J5.3 Set: HashSet vs LinkedHashSet vs TreeSet</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>J5.3 Question Bank: Set: HashSet vs LinkedHashSet vs TreeSet (21 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions, Classification &amp; Theory (Q1&ndash;Q3)</h2>
+    <ol>
+      <li><b>Compare <code>HashSet</code>, <code>LinkedHashSet</code>, and <code>TreeSet</code> across ordering, performance, and null handling.</b><br>
+      <code>HashSet</code> provides O(1) average operations, stores one <code>null</code>, and makes zero ordering guarantees. <code>LinkedHashSet</code> also achieves O(1) average speed and allows one <code>null</code> while preserving exact insertion order using a linked list. <code>TreeSet</code> maintains sorted order in O(log n) time, forbids <code>null</code> completely, and compares elements via <code>Comparable</code> or <code>Comparator</code>.</li>
+
+      <li><b>Why does <code>Set</code> have no <code>get(int index)</code> method like <code>List</code>?</b><br>
+      A <code>Set</code> represents a mathematical collection of unique values rather than a positional sequence—<code>HashSet</code> places elements by hash bucket rather than numeric index, and <code>TreeSet</code> rebalances elements dynamically. To access elements by ordinal position, convert via <code>new ArrayList&lt;&gt;(set)</code> or iterate with <code>Iterator</code> / streams.</li>
+
+      <li><b>Which <code>Set</code> implementation does Selenium's <code>driver.getWindowHandles()</code> return?</b><br>
+      WebDriver specifies the return type as <code>Set&lt;String&gt;</code>, and Selenium's Java client deserializes window handles into a <code>LinkedHashSet&lt;String&gt;</code>, preserving the chronological order in which windows/tabs were returned by the browser driver.</li>
+    </ol></section>
+  <section><h2>Tier 2: How It Works &amp; Internal Mechanics (Q4&ndash;Q6)</h2>
+    <ol start="4">
+      <li><b>How does <code>HashSet</code> work internally without duplicating hashing logic?</b><br>
+      Inside <code>java.util.HashSet</code>, the constructor creates an internal <code>private transient HashMap&lt;E, Object&gt; map</code> alongside a single constant <code>private static final Object PRESENT = new Object()</code>. Calling <code>set.add(e)</code> simply executes <code>return map.put(e, PRESENT) == null;</code>. Because <code>HashMap</code> enforces unique keys, <code>HashSet</code> inherits uniqueness and O(1) hashing directly from <code>HashMap</code>.</li>
+
+      <li><b>How does <code>TreeSet</code> determine whether two elements are duplicates?</b><br>
+      Unlike <code>HashSet</code> which relies on <code>hashCode()</code> and <code>equals()</code>, <code>TreeSet</code> determines equality strictly via <code>compareTo(e) == 0</code> (or <code>comparator.compare(e1, e2) == 0</code>). If a custom <code>Comparator</code> returns <code>0</code> for two distinct objects (for example, comparing two products solely by identical price), <code>TreeSet</code> treats the second product as a duplicate and rejects it.</li>
+
+      <li><b>What does <code>set.add(x)</code> return when <code>x</code> is already present inside the set?</b><br>
+      <code>add(x)</code> leaves the existing element inside the set untouched and returns boolean <code>false</code> rather than throwing an exception or replacing the existing element. This makes <code>if (!seenIds.add(id))</code> a concise one-line duplicate detector.</li>
+    </ol></section>
+  <section><h2>Tier 3: Real-World SDET &amp; Selenium Scenarios (Q7&ndash;Q9)</h2>
+    <ol start="7">
+      <li><b>How do you reliably switch to a newly opened browser tab in Selenium using <code>Set&lt;String&gt;</code>?</b><br>
+      Capture <code>String parent = driver.getWindowHandle();</code> before clicking the external link, wait until <code>ExpectedConditions.numberOfWindowsToBe(2)</code> succeeds, then loop over <code>for (String handle : driver.getWindowHandles())</code> and call <code>if (!handle.equals(parent)) { driver.switchTo().window(handle); break; }</code>. Do not rely on converting to a list and assuming index 1 is always newest across all browser versions when multiple tabs exist.</li>
+
+      <li><b>In an API test checking 500 returned order IDs for uniqueness, how do you detect and report the exact duplicate IDs?</b><br>
+      Iterate the list with a <code>HashSet&lt;String&gt; seen = new HashSet&lt;&gt;();</code> and collect any item where <code>!seen.add(id)</code> into a <code>List&lt;String&gt; duplicates</code>. That detects every duplicate in a single O(n) pass and logs exact offending IDs in the TestNG assertion message.</li>
+
+      <li><b>When scraping a web table of tags that must be unique AND sorted alphabetically for UI comparison, which collection avoids an extra sort step?</b><br>
+      Collect scraped strings directly into <code>Set&lt;String&gt; actual = new TreeSet&lt;&gt;(String.CASE_INSENSITIVE_ORDER);</code>, which simultaneously removes duplicates and maintains exact alphabetical ordering.</li>
+    </ol></section>
+  <section><h2>Tier 4: Troubleshooting, Exceptions &amp; Failure Modes (Q10&ndash;Q12)</h2>
+    <ol start="10">
+      <li><b>Why did adding two identical <code>UserPOJO("qa@test.com")</code> instances into a <code>HashSet</code> produce a set size of 2 instead of 1?</b><br>
+      <code>UserPOJO</code> did not override <code>hashCode()</code> and <code>equals()</code>, so it inherited <code>Object</code>'s default identity-based implementations where every <code>new</code> object has a unique memory hash. Overriding both <code>equals()</code> and <code>hashCode()</code> based on the <code>email</code> field ensures duplicate POJOs collapse cleanly to size 1.</li>
+
+      <li><b>Why did adding a custom <code>Product</code> class into a <code>new TreeSet&lt;&gt;()</code> throw <code>ClassCastException: class Product cannot be cast to class java.lang.Comparable</code>?</b><br>
+      A no-argument <code>TreeSet</code> casts inserted elements to <code>Comparable</code> to position them inside the Red-Black Tree. Either make <code>Product implements Comparable&lt;Product&gt;</code> or pass an explicit comparator to the constructor: <code>new TreeSet&lt;&gt;(Comparator.comparing(Product::getName))</code>.</li>
+
+      <li><b>Why did inserting a single <code>null</code> into a <code>TreeSet</code> throw <code>NullPointerException</code>?</b><br>
+      In Java 7+, even inserting <code>null</code> as the very first element into a <code>TreeSet</code> invokes <code>compare(null, null)</code> immediately to validate the comparator and throws <code>NullPointerException</code>. Use <code>HashSet</code> or <code>LinkedHashSet</code> when <code>null</code> values are valid.</li>
+    </ol></section>
+  <section><h2>Tier 5: Design Choices &amp; Rapid-Fire Recall (Q13&ndash;Q21)</h2>
+    <ol start="13">
+      <li><b>When writing a utility that checks whether a target tag exists in a collection of 10,000 items, why convert a <code>List</code> to a <code>HashSet</code> before looping?</b><br>
+      Calling <code>list.contains(x)</code> scans linearly in O(n) time—meaning checking 10,000 targets against a 10,000-element list executes ~100 million comparisons (O(n^2)). Converting to a <code>HashSet</code> once reduces every <code>contains()</code> lookup to O(1) average time.</li>
+
+      <li><b>Why should custom objects stored inside a <code>HashSet</code> or <code>TreeSet</code> be immutable with respect to their equality/comparison fields?</b><br>
+      Mutating a field after insertion breaks the structural invariant of the hash bucket or Red-Black Tree position, rendering the element unreachable for lookup or removal.</li>
+
+      <li><b>When choosing between <code>Set.copyOf(list)</code> and <code>new LinkedHashSet&lt;&gt;(list)</code>, what trade-off applies?</b><br>
+      <code>Set.copyOf()</code> produces a compact unmodifiable <code>Set</code> rejecting <code>null</code> and arbitrary mutations, though it does NOT guarantee preserving list insertion order. If insertion order matters during assertions, wrap with <code>Collections.unmodifiableSet(new LinkedHashSet&lt;&gt;(list))</code>.</li>
+
+      <li><b>What data structure backs <code>HashSet</code> internally?</b><br>
+      A <code>HashMap&lt;E, Object&gt;</code> with a shared dummy <code>PRESENT</code> value.</li>
+
+      <li><b>Which <code>Set</code> preserves insertion order?</b><br>
+      <code>LinkedHashSet</code>.</li>
+
+      <li><b>Which <code>Set</code> maintains sorted order and what backs it?</b><br>
+      <code>TreeSet</code>, backed by a Red-Black Tree (<code>TreeMap</code>).</li>
+
+      <li><b>Which <code>Set</code> throws <code>NullPointerException</code> if you add <code>null</code>?</b><br>
+      <code>TreeSet</code>.</li>
+
+      <li><b>What does <code>set.add(item)</code> return if <code>item</code> is already in the set?</b><br>
+      <code>false</code>.</li>
+
+      <li><b>What type does Selenium's <code>driver.getWindowHandles()</code> return?</b><br>
+      <code>Set&lt;String&gt;</code> (backed by <code>LinkedHashSet</code>).</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="java-set-hashset-linkedhashset-treeset.html"><span class="tag Java">Java</span>&larr; Back to J5.3 Concept Page</a></p>
+    <p><a href="interview-j5-2-qa.html">&larr; J5.2 Q&amp;A</a> &middot; <a href="interview-j5-4-qa.html">J5.4 Q&amp;A &rarr;</a></p></section>
+</article>
+</div>
+<footer>SDET Explainer</footer>
+<script src="../app.js"></script>
+</body>
+</html>
