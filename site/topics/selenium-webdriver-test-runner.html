@@ -31,7 +31,7 @@
       <li>TestNG (@BeforeMethod, @Test, @AfterMethod) and JUnit 5 (@BeforeEach, @Test, @AfterEach) manage browser startup and teardown automatically.</li>
       <li>Initializing a fresh WebDriver instance before each test method and quitting it afterward ensures strict test isolation.</li>
       <li>Hard assertions (Assert.assertEquals) abort the test method immediately on failure, whereas SoftAssert collects multiple failures before reporting.</li>
-      <li>Never store a shared static WebDriver field across parallel tests; use instance fields per test or ThreadLocal<WebDriver>.</li>
+      <li>Never store a shared static WebDriver field across parallel tests; use instance fields per test or ThreadLocal&lt;WebDriver&gt;.</li>
       <li>Maven Surefire Plugin executes TestNG (testng.xml) and JUnit 5 test classes from the command line via mvn test.</li>
     </ol>
   </section>
@@ -145,7 +145,7 @@ public class WebFormTest { // Declares TestNG test class
 
     <h3>Real situations</h3>
     <p><b>Why is declaring public static WebDriver driver dangerous when running tests in parallel?</b><br>
-    A static field is shared by all threads in the JVM. When two parallel threads overwrite the same static driver variable, commands from both tests interleave in one browser window and cause race conditions. Use ThreadLocal<WebDriver> instead.</p>
+    A static field is shared by all threads in the JVM. When two parallel threads overwrite the same static driver variable, commands from both tests interleave in one browser window and cause race conditions. Use ThreadLocal&lt;WebDriver&gt; instead.</p>
 
     <p><b>Why should you add alwaysRun = true to @BeforeMethod and @AfterMethod in TestNG?</b><br>
     When filtering tests by TestNG groups (such as groups = {"smoke"}), TestNG skips lifecycle hooks that do not belong to that group unless alwaysRun = true is specified. Without it, driverremains null and throws NullPointerException.</p>
@@ -181,7 +181,7 @@ public class WebFormTest { // Declares TestNG test class
       <li><b>Which JUnit 5 annotation runs after each test method?</b> @AfterEach runs after every @Test method.</li>
       <li><b>Why use alwaysRun = true on @AfterMethod?</b> Guarantees driver.quit() runs even when filtering by TestNG groups.</li>
       <li><b>What must be called at the end of a SoftAssert test?</b> softAssert.assertAll() must be called to throw collected failures.</li>
-      <li><b>How do you isolate WebDriver across parallel threads?</b> Store the WebDriver instance inside a ThreadLocal<WebDriver> container.</li>
+      <li><b>How do you isolate WebDriver across parallel threads?</b> Store the WebDriver instance inside a ThreadLocal&lt;WebDriver&gt; container.</li>
     </ol>
   </section>
 

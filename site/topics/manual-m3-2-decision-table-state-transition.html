@@ -23,12 +23,12 @@
 
   <section><h2>2. Core Terms &amp; Formulas Defined First</h2>
     <ul>
-      <li><b>1. Decision Table Formula ($2^n$ Rule):</b> If a business feature has $n$ boolean (True/False) conditions, the total number of possible rule combinations (columns) in a full Decision Table is <b>$2^n$</b> (e.g., 3 conditions = $2^3 = 8$ test rules; 4 conditions = $2^4 = 16$ test rules).</li>
+      <li><b>1. Decision Table Formula ($2^n$ Rule):</b> If a business feature has $n$ boolean (True/False) conditions, the total number of possible rule combinations (columns) in a full Decision Table is <b>$2^n$</b> (e.g., 3 conditions = 2<sup>3</sup> = 8 test rules; 4 conditions = 2<sup>4</sup> = 16 test rules).</li>
       <li><b>2. The 4 Elements of a State Transition Machine:</b>
         <ol>
           <li><b>State (Circle):</b> The current condition/mode of the object (e.g., `NEW_ORDER`, `PAID`, `SHIPPED`, `CANCELLED`).</li>
           <li><b>Event / Trigger (Arrow Input):</b> The action that initiates a change (e.g., `Click Pay`, `Click Cancel`).</li>
-          <li><b>Guard Condition:</b> A prerequisite boolean rule required for the event to succeed (e.g., `[Balance >= OrderTotal]`).</li>
+          <li><b>Guard Condition:</b> A prerequisite boolean rule required for the event to succeed (e.g., `[Balance &gt;= OrderTotal]`).</li>
           <li><b>Action / Output:</b> The side effect produced during transition (e.g., `Send Invoice Email` and move to `PAID`).</li>
         </ol>
       </li>
@@ -42,7 +42,7 @@
 
   <section><h2>3. Technique 1: Decision Table Testing (Cause-Effect Table)</h2>
     <p><b>Definition:</b> A structured tabular Black-Box technique that lists all <b>Conditions (Inputs/Causes)</b> in the top rows and all <b>Actions (Outputs/Effects)</b> in the bottom rows, where every vertical column (`Rule 1 .. Rule 2^n`) becomes <b>1 Test Case</b>.</p>
-    <p><b>Real Example:</b> E-Commerce Shipping Fee Rules (`n = 3` Boolean Conditions &rarr; $2^3 = 8$ Rules; collapsed where "Don't Care `-`" applies):</p>
+    <p><b>Real Example:</b> E-Commerce Shipping Fee Rules (`n = 3` Boolean Conditions &rarr; 2<sup>3</sup> = 8 Rules; collapsed where "Don't Care `-`" applies):</p>
     <table>
       <tr><th>Conditions / Actions</th><th>Rule 1</th><th>Rule 2</th><th>Rule 3</th><th>Rule 4</th><th>Rule 5</th><th>Rule 6</th><th>Rule 7</th><th>Rule 8</th></tr>
       <tr><td><b>C1: Prime Member?</b></td><td>T</td><td>T</td><td>T</td><td>T</td><td>F</td><td>F</td><td>F</td><td>F</td></tr>
@@ -52,7 +52,7 @@
       <tr><td><b>A2: Extra 10% Off?</b></td><td><b>YES</b></td><td>NO</td><td>NO</td><td>NO</td><td><b>YES</b></td><td>NO</td><td>NO</td><td>NO</td></tr>
     </table>
     <ul>
-      <li><b>Collapsed Decision Table:</b> Notice in Rules 3 &amp; 4 that if `C1 (Prime) = T` and `C2 (Cart >= $500) = F`, the user gets Free Shipping with NO extra 10% off regardless of `C3`. When a condition does not affect the outcome, we mark it `-` (<b>Don't Care</b>) to collapse redundant test cases.</li>
+      <li><b>Collapsed Decision Table:</b> Notice in Rules 3 &amp; 4 that if `C1 (Prime) = T` and `C2 (Cart &gt;= $500) = F`, the user gets Free Shipping with NO extra 10% off regardless of `C3`. When a condition does not affect the outcome, we mark it `-` (<b>Don't Care</b>) to collapse redundant test cases.</li>
       <li><b>In what exact cases we use Decision Tables:</b> Insurance premium calculators, credit card approval matrices, tax/discount engines, and role-based access control (RBAC) permissions.</li>
     </ul></section>
 
@@ -114,8 +114,8 @@ public class BonusCalculator {
     }
 }
 // If we run ONLY 1 test: calculateBonus(50000, true):
-// -> Statements 1, 2, and 3 ALL execute = 100% Statement Coverage!
-// -> But the 'false' branch of the if-statement was NEVER tested = only 50% Branch Coverage!</code></pre>
+// -&gt; Statements 1, 2, and 3 ALL execute = 100% Statement Coverage!
+// -&gt; But the 'false' branch of the if-statement was NEVER tested = only 50% Branch Coverage!</code></pre>
     <p><b>Interview Answer:</b> <i>"Decision Table testing handles complex combinations of multiple conditions using the $2^n$ rule. State Transition testing validates systems where past history and state changes matter (testing both valid transitions and invalid transitions like paying for a cancelled order). In White-Box testing, 100% Branch Coverage guarantees 100% Statement Coverage, whereas 100% Statement Coverage does not guarantee 100% Branch Coverage."</i></p></section>
 
   <section><h2>6. Side-by-Side Comparison Across All Test Design Techniques</h2>
@@ -137,9 +137,9 @@ public class BonusCalculator {
 
   <section><h2>8. Self-Check</h2>
     <ol>
-      <li>If a loan approval rule depends on <b>4 boolean conditions</b>, how many columns exist in an uncollapsed Decision Table? <i>($2^4 = 16$ rules.)</i></li>
+      <li>If a loan approval rule depends on <b>4 boolean conditions</b>, how many columns exist in an uncollapsed Decision Table? <i>(2<sup>4</sup> = 16 rules.)</i></li>
       <li>In an e-commerce order lifecycle (`CREATED &rarr; PAID &rarr; SHIPPED &rarr; DELIVERED`), testing whether a user or API call can move an order directly from `CREATED` to `DELIVERED` without paying is an example of which technique? <i>(Negative / Invalid State Transition Testing.)</i></li>
-      <li>Does 100% Statement Coverage guarantee 100% Branch Coverage? <i>(No â€” an `if` statement without an `else` achieves 100% Statement Coverage with just the `true` path, leaving the `false` branch untested.)</i></li>
+      <li>Does 100% Statement Coverage guarantee 100% Branch Coverage? <i>(No — an `if` statement without an `else` achieves 100% Statement Coverage with just the `true` path, leaving the `false` branch untested.)</i></li>
     </ol></section>
 
   <section><h2>9. Q&amp;A</h2>

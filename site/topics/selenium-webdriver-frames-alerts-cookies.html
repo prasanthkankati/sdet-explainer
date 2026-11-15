@@ -13,7 +13,7 @@
   <h1>5.2 Frames, Alerts & Cookies</h1>
   <div class="se-lead">Switching across iframes (frame, parentFrame, defaultContent), handling JS dialogs (Alert, Confirm, Prompt), and managing browser cookies.</div>
 
-  <p>Web applications frequently embed isolated HTML documents inside <iframe> tags, trigger native JavaScript dialogs (alert, confirm, prompt), and store session state in HTTP cookies. Selenium provides driver.switchTo().frame() for iframe traversal, driver.switchTo().alert() for modal dialogs, and driver.manage(). cookies APIs for state manipulation.</p>
+  <p>Web applications frequently embed isolated HTML documents inside &lt;iframe&gt; tags, trigger native JavaScript dialogs (alert, confirm, prompt), and store session state in HTTP cookies. Selenium provides driver.switchTo().frame() for iframe traversal, driver.switchTo().alert() for modal dialogs, and driver.manage() cookie APIs for state manipulation.</p>
 
   <section id="before-you-start">
     <h2>Before you start</h2>
@@ -28,7 +28,7 @@
   <section id="key-points">
     <h2>Key points</h2>
     <ol>
-      <li>Selenium cannot find elements inside an <iframe> unless you first switch context via driver.switchTo().frame(WebElement | nameOrId | index).</li>
+      <li>Selenium cannot find elements inside an &lt;iframe&gt; unless you first switch context via driver.switchTo().frame(WebElement | nameOrId | index).</li>
       <li>driver.switchTo().parentFrame() moves up one level to the immediate parent frame, whereas driver.switchTo().defaultContent() exits all nested frames back to the top-level document.</li>
       <li>The Alert interface handles JavaScript alert(), confirm(), and prompt() via accept(), dismiss(), getText(), and sendKeys(String).</li>
       <li>If a JavaScript alert is open and you call any normal WebDriver command (like findElement) without handling the alert, Selenium throws UnhandledAlertException.</li>
@@ -54,7 +54,7 @@
   <section id="how-it-works">
     <h2>How it works</h2>
     <ol>
-      <li>For iframes: Locate the <iframe> WebElement, call driver.switchTo().frame(iframeElement), interact with inner elements, and call driver.switchTo().defaultContent() when done.</li>
+      <li>For iframes: Locate the &lt;iframe&gt; WebElement, call driver.switchTo().frame(iframeElement), interact with inner elements, and call driver.switchTo().defaultContent() when done.</li>
       <li>For alerts: Wait for ExpectedConditions.alertIsPresent(), call Alert alert = driver.switchTo().alert(), read alert.getText(), and call alert.accept() or alert.dismiss().</li>
       <li>For cookies: Navigate to the application domain first, construct a new Cookie("key", "value"), and call driver.manage().addCookie(cookie).</li>
     </ol>
@@ -93,7 +93,7 @@ public class FramesAlertsCookiesExample { // Declares class
   <section id="common-mistakes">
     <h2>Common mistakes</h2>
     <ol>
-      <li>Trying to click an element inside an <iframe> without calling driver.switchTo().frame() first, which always throws NoSuchElementException.</li>
+      <li>Trying to click an element inside an &lt;iframe&gt; without calling driver.switchTo().frame() first, which always throws NoSuchElementException.</li>
       <li>Staying trapped inside an iframe after interacting with it and failing to locate top-level navigation elements; fix by calling driver.switchTo().defaultContent().</li>
       <li>Calling driver.manage().addCookie() before calling driver.get() on the target domain, which throws InvalidCookieDomainException because the browser is still on data:, or about:blank.</li>
     </ol>
@@ -119,17 +119,17 @@ public class FramesAlertsCookiesExample { // Declares class
     
     <h3>Basics</h3>
     <p><b>What are the three overloaded ways to switch into an iframe in Selenium?</b><br>
-    driver.switchTo().frame() is overloaded to accept: (1) a WebElement representing the <iframe> tag, (2) a String matching the iframe's name or id attribute, or (3) a zero-based int index of the iframe on the page.</p>
+    driver.switchTo().frame() is overloaded to accept: (1) a WebElement representing the &lt;iframe&gt; tag, (2) a String matching the iframe's name or id attribute, or (3) a zero-based int index of the iframe on the page.</p>
 
     <p><b>What is the difference between switchTo().parentFrame() and switchTo().defaultContent()?</b><br>
-    If you are inside a nested iframe (Frame A -> Frame B), parentFrame() moves one level up from Frame B to Frame A. defaultContent() exits all frames completely and returns directly to the main top-level page.</p>
+    If you are inside a nested iframe (Frame A -&gt; Frame B), parentFrame() moves one level up from Frame B to Frame A. defaultContent() exits all frames completely and returns directly to the main top-level page.</p>
 
     <p><b>What are the four methods available on the Selenium Alert interface?</b><br>
     The four methods are accept() (clicks OK), dismiss() (clicks Cancel), getText() (reads the dialog message), and sendKeys(String) (types text into a JavaScript prompt() input box).</p>
 
     <h3>How it works</h3>
-    <p><b>Why can't driver.findElement() see elements inside an <iframe> automatically?</b><br>
-    An <iframe> hosts a separate HTML document with its own independent DOM tree and browsing context. The W3C WebDriver specification scopes all element lookups strictly to the currently active browsing context.</p>
+    <p><b>Why can't driver.findElement() see elements inside an &lt;iframe&gt; automatically?</b><br>
+    An &lt;iframe&gt; hosts a separate HTML document with its own independent DOM tree and browsing context. The W3C WebDriver specification scopes all element lookups strictly to the currently active browsing context.</p>
 
     <p><b>How do you wait for an asynchronous JavaScript alert to appear before interacting with it?</b><br>
     Use Alert alert = new WebDriverWait(driver, Duration.ofSeconds(10)).until(ExpectedConditions.alertIsPresent()). It polls until the alert opens and returns the switched Alert object directly.</p>
@@ -152,7 +152,7 @@ public class FramesAlertsCookiesExample { // Declares class
     An unexpected native JavaScript alert() or confirm() dialog popped up on screen, blocking the browser thread, and the test tried to execute another command like findElement() without accepting or dismissing the alert first.</p>
 
     <p><b>Why does switchTo().frame(int index) make tests brittle in production?</b><br>
-    Third-party analytics scripts and ad networks dynamically inject hidden tracking <iframe> tags into the page, shifting frame indices (0, 1, 2) unpredictably. Always switch using a located WebElement or explicit name/id.</p>
+    Third-party analytics scripts and ad networks dynamically inject hidden tracking &lt;iframe&gt; tags into the page, shifting frame indices (0, 1, 2) unpredictably. Always switch using a located WebElement or explicit name/id.</p>
 
     <p><b>Why did driver.findElement(By.id("header")) fail right after completing work inside an iframe?</b><br>
     The driver context was still focused inside the iframe. Call driver.switchTo().defaultContent() before searching for elements in the main page.</p>

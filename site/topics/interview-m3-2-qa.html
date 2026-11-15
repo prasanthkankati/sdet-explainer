@@ -16,84 +16,84 @@
   <section><h2>Tier 1: Core Definitions &amp; Formulas (Q1&ndash;Q10)</h2>
     <ol>
       <li><b>Q1: What is Decision Table Testing and when do we use it?</b><br>
-        <b>A:</b> Decision Table Testing (Cause-Effect Table) is a Black-Box technique used when system behavior depends on **logical combinations of multiple input conditions**. Each column represents one unique rule combination and maps to one test case.</li>
+        <b>A:</b> Decision Table Testing (Cause-Effect Table) is a Black-Box technique used when system behavior depends on <b>logical combinations of multiple input conditions</b>. Each column represents one unique rule combination and maps to one test case.</li>
       <li><b>Q2: What is the formula to calculate the number of rules (columns) in a Decision Table?</b><br>
-        <b>A:</b> For $n$ boolean (True/False) conditions, the total number of combinations is **$2^n$**. If Condition 1 has 3 values, Condition 2 has 2 values, and Condition 3 has 2 values, the formula is the product of choices: $3 \times 2 \times 2 = 12$ rules.</li>
+        <b>A:</b> For $n$ boolean (True/False) conditions, the total number of combinations is <b>$2^n$</b>. If Condition 1 has 3 values, Condition 2 has 2 values, and Condition 3 has 2 values, the formula is the product of choices: $3 \times 2 \times 2 = 12$ rules.</li>
       <li><b>Q3: What does a hyphen (`-`) or `N/A` mean in a Collapsed Decision Table?</b><br>
-        <b>A:</b> `-` means **"Don't Care"** (the value of that condition does not affect the outcome—e.g., if `AccountLocked == True`, whether `PasswordValid` is True or False does not matter). `N/A` means the combination is **logically impossible/mutually exclusive**.</li>
+        <b>A:</b> `-` means <b>"Don't Care"</b> (the value of that condition does not affect the outcome—e.g., if `AccountLocked == True`, whether `PasswordValid` is True or False does not matter). `N/A` means the combination is <b>logically impossible/mutually exclusive</b>.</li>
       <li><b>Q4: What is State Transition Testing and when do we use it?</b><br>
-        <b>A:</b> State Transition Testing is a Black-Box technique used when a system has finite states and its output depends on both the **current event/input AND its previous state history** (e.g., order status lifecycles, ATM PIN lockout, multi-step wizard flows).</li>
+        <b>A:</b> State Transition Testing is a Black-Box technique used when a system has finite states and its output depends on both the <b>current event/input AND its previous state history</b> (e.g., order status lifecycles, ATM PIN lockout, multi-step wizard flows).</li>
       <li><b>Q5: What are the 4 components of a State Transition Diagram?</b><br>
-        <b>A:</b> (1) **States** (nodes the system can be in), (2) **Events/Triggers** (inputs causing a transition), (3) **Guard Conditions** (boolean rules allowing/blocking the transition), and (4) **Actions/Outputs** (results produced during the transition).</li>
+        <b>A:</b> (1) <b>States</b> (nodes the system can be in), (2) <b>Events/Triggers</b> (inputs causing a transition), (3) <b>Guard Conditions</b> (boolean rules allowing/blocking the transition), and (4) <b>Actions/Outputs</b> (results produced during the transition).</li>
       <li><b>Q6: What is the difference between a State Diagram and a State Transition Table?</b><br>
-        <b>A:</b> A **State Diagram** visually shows **valid transitions** between states (used for positive testing). A **State Transition Table** lists every state against every possible event in a grid, exposing **invalid/null transitions** (used for negative state testing).</li>
+        <b>A:</b> A <b>State Diagram</b> visually shows <b>valid transitions</b> between states (used for positive testing). A <b>State Transition Table</b> lists every state against every possible event in a grid, exposing <b>invalid/null transitions</b> (used for negative state testing).</li>
       <li><b>Q7: What is Use Case Testing and what are its 3 flow types?</b><br>
-        <b>A:</b> Use Case Testing derives end-to-end test scenarios from Actor &harr; System interactions: (1) **Basic / Main Success Flow** (happy path), (2) **Alternative Flows** (valid optional branches), and (3) **Exception / Error Flows** (system failures or invalid user actions).</li>
+        <b>A:</b> Use Case Testing derives end-to-end test scenarios from Actor &harr; System interactions: (1) <b>Basic / Main Success Flow</b> (happy path), (2) <b>Alternative Flows</b> (valid optional branches), and (3) <b>Exception / Error Flows</b> (system failures or invalid user actions).</li>
       <li><b>Q8: What is Error Guessing and Fault Attack Testing?</b><br>
-        <b>A:</b> An **Experience-Based** technique where the tester uses domain knowledge of historical defects to intentionally feed error-prone inputs (`null`, `0`, empty spaces, SQL injection quotes, rapid double-clicks, back-button navigation).</li>
+        <b>A:</b> An <b>Experience-Based</b> technique where the tester uses domain knowledge of historical defects to intentionally feed error-prone inputs (`null`, `0`, empty spaces, SQL injection quotes, rapid double-clicks, back-button navigation).</li>
       <li><b>Q9: What are the 2 primary White-Box (Structure-Based) coverage metrics?</b><br>
-        <b>A:</b> (1) **Statement Coverage** (percentage of executable lines of code run at least once), and (2) **Branch / Decision Coverage** (percentage of `true` and `false` outcomes of every `if/else/switch/loop` executed).</li>
+        <b>A:</b> (1) <b>Statement Coverage</b> (percentage of executable lines of code run at least once), and (2) <b>Branch / Decision Coverage</b> (percentage of `true` and `false` outcomes of every `if/else/switch/loop` executed).</li>
       <li><b>Q10: What is Cyclomatic Complexity in White-Box testing?</b><br>
-        <b>A:</b> A metric ($V(G) = E - N + 2P$, or simply `1 + number of decision points [if, while, for, case, &&, ||]`) that equals the **minimum number of independent test paths** required to achieve 100% Basis Path / Branch Coverage of a method.</li>
+        <b>A:</b> A metric ($V(G) = E - N + 2P$, or simply `1 + number of decision points [if, while, for, case, &&, ||]`) that equals the <b>minimum number of independent test paths</b> required to achieve 100% Basis Path / Branch Coverage of a method.</li>
     </ol></section>
 
   <section><h2>Tier 2: Why / Why Not &amp; Deep Comparisons (Q11&ndash;Q18)</h2>
     <ol start="11">
       <li><b>Q11: Why does 100% Branch Coverage always guarantee 100% Statement Coverage, while 100% Statement Coverage does NOT guarantee 100% Branch Coverage?</b><br>
-        <b>A:</b> Consider `if (x > 0) { count++; } return count;`. A single test with `x = 5` executes every line of code (**100% Statement Coverage**), but it never tests what happens when `x <= 0` (the invisible `false` branch, so **Branch Coverage is only 50%**). Conversely, executing every branch (`true` and `false`) forces every reachable statement inside those branches to execute.</li>
+        <b>A:</b> Consider `if (x &gt; 0) { count++; } return count;`. A single test with `x = 5` executes every line of code (<b>100% Statement Coverage</b>), but it never tests what happens when `x &lt;= 0` (the invisible `false` branch, so <b>Branch Coverage is only 50%</b>). Conversely, executing every branch (`true` and `false`) forces every reachable statement inside those branches to execute.</li>
       <li><b>Q12: Why do we need a State Transition Table in addition to a State Transition Diagram?</b><br>
-        <b>A:</b> Diagrams only draw arrows for *allowed* transitions (e.g., `PAID -> SHIPPED`). They omit disallowed transitions (e.g., what happens if someone sends a `SHIP` API request while the order is still in `CART` or `CANCELLED` state?). A State Table crosses every State $\times$ every Event, forcing QA to test every invalid cell.</li>
+        <b>A:</b> Diagrams only draw arrows for *allowed* transitions (e.g., `PAID -&gt; SHIPPED`). They omit disallowed transitions (e.g., what happens if someone sends a `SHIP` API request while the order is still in `CART` or `CANCELLED` state?). A State Table crosses every State &times; every Event, forcing QA to test every invalid cell.</li>
       <li><b>Q13: What is 0-Switch (1-Step) vs 1-Switch (2-Step) Coverage in State Transition Testing?</b><br>
-        <b>A:</b> **0-Switch Coverage** tests every single individual valid transition arrow (`State A -> State B`) in isolation. **1-Switch Coverage** tests every valid pair of two consecutive transitions (`State A -> State B -> State C`) to catch bugs that only occur when passing through sequences of states.</li>
+        <b>A:</b> <b>0-Switch Coverage</b> tests every single individual valid transition arrow (`State A -&gt; State B`) in isolation. <b>1-Switch Coverage</b> tests every valid pair of two consecutive transitions (`State A -&gt; State B -&gt; State C`) to catch bugs that only occur when passing through sequences of states.</li>
       <li><b>Q14: When a Decision Table has 10 conditions ($2^{10} = 1,024$ rules), how do you reduce the test cases without missing critical defects?</b><br>
-        <b>A:</b> Use **Decision Table Collapsing** (merging "Don't Care `-`" columns and removing impossible `N/A` combinations) or **Pairwise (All-Pairs) Testing**, which guarantees every pair of condition values is tested together in ~15–20 test cases.</li>
+        <b>A:</b> Use <b>Decision Table Collapsing</b> (merging "Don't Care `-`" columns and removing impossible `N/A` combinations) or <b>Pairwise (All-Pairs) Testing</b>, which guarantees every pair of condition values is tested together in ~15–20 test cases.</li>
       <li><b>Q15: What is the difference between Condition Coverage and Decision (Branch) Coverage in White-Box testing?</b><br>
-        <b>A:</b> In `if (A || B)`: **Decision Coverage** only requires the whole `if` to evaluate to `true` once (e.g., `A=T, B=F`) and `false` once (`A=F, B=F`). **Condition Coverage** requires each individual boolean sub-expression (`A` and `B`) to evaluate to both `true` and `false` at least once. **MC/DC (Modified Condition/Decision Coverage)** requires each condition to independently affect the decision outcome.</li>
+        <b>A:</b> In `if (A || B)`: <b>Decision Coverage</b> only requires the whole `if` to evaluate to `true` once (e.g., `A=T, B=F`) and `false` once (`A=F, B=F`). <b>Condition Coverage</b> requires each individual boolean sub-expression (`A` and `B`) to evaluate to both `true` and `false` at least once. <b>MC/DC (Modified Condition/Decision Coverage)</b> requires each condition to independently affect the decision outcome.</li>
       <li><b>Q16: Why is Error Guessing always used as a supplement to formal techniques (EP, BVA, Decision Tables) and never as a replacement?</b><br>
         <b>A:</b> Because Error Guessing is unsystematic and depends entirely on the individual tester's memory and experience; without EP/BVA/Decision Tables first, you have zero mathematical proof of requirement coverage.</li>
       <li><b>Q17: How does Decision Table Testing help during STLC Phase 1 (Requirement Analysis)?</b><br>
-        <b>A:</b> Building a $2^n$ table immediately exposes **missing requirements and contradictions** in the SRS! For example, the Product Owner specifies what happens when `(VIP=True, Domestic=True)` and `(VIP=False, Domestic=False)`, completely forgetting to define the rule for `(VIP=True, Domestic=False)`.</li>
+        <b>A:</b> Building a $2^n$ table immediately exposes <b>missing requirements and contradictions</b> in the SRS! For example, the Product Owner specifies what happens when `(VIP=True, Domestic=True)` and `(VIP=False, Domestic=False)`, completely forgetting to define the rule for `(VIP=True, Domestic=False)`.</li>
       <li><b>Q18: What is Checklist-Based Testing vs Exploratory Testing?</b><br>
-        <b>A:</b> **Checklist-Based Testing** uses a pre-built list of high-level verification items derived from past failures/standards (e.g., UI &amp; API security checklist), whereas **Exploratory Testing** dynamically invents new hypotheses and tests in real time during a time-boxed session.</li>
+        <b>A:</b> <b>Checklist-Based Testing</b> uses a pre-built list of high-level verification items derived from past failures/standards (e.g., UI &amp; API security checklist), whereas <b>Exploratory Testing</b> dynamically invents new hypotheses and tests in real time during a time-boxed session.</li>
     </ol></section>
 
   <section><h2>Tier 3: Real-World Tricky &amp; Calculation Scenarios (Q19&ndash;Q25)</h2>
     <ol start="19">
       <li><b>Q19: Scenario: Calculate the Cyclomatic Complexity and minimum test cases for this Java method:
-        `if (a > 0) { if (b > 0) { x = 1; } else { x = 2; } } else { x = 3; }`</b><br>
-        <b>A:</b> There are **2 decision points** (`if (a > 0)` and `if (b > 0)`). Formula: $V(G) = \text{Decisions} + 1 = 2 + 1 = \mathbf{3}$. Therefore, a minimum of **3 test cases** (`[a=1, b=1]`, `[a=1, b=-1]`, `[a=-1, b=0]`) achieves 100% Branch Coverage.</li>
-      <li><b>Q20: Scenario: An airline booking flow has states: `SEARCH -> SEAT_SELECTED -> PAYMENT_PENDING -> TICKETED -> CANCELLED`. A user opens two browser tabs at `PAYMENT_PENDING`, cancels the booking in Tab 1 (`CANCELLED`), and clicks "Pay" in Tab 2. The system charges their card and moves the cancelled booking to `TICKETED`. What kind of bug is this?</b><br>
-        <b>A:</b> An **Invalid State Transition / Race Condition Defect**—the backend API failed to enforce the State Guard Condition (`if (order.getState() != PAYMENT_PENDING) throw InvalidStateException`) before processing payment.</li>
-      <li><b>Q21: Scenario: A credit card application has 3 conditions: `Salary >= $50k (T/F)`, `CreditScore >= 700 (T/F)`, `ExistingCustomer (T/F)`. However, if `CreditScore < 700`, the bank ALWAYS rejects the application regardless of Salary or ExistingCustomer status. How many rules are in the Full Table vs the Collapsed Table?</b><br>
-        <b>A:</b> **Full Table:** $2^3 = \mathbf{8}$ rules. **Collapsed Table:** The 4 rules where `CreditScore >= 700` is `False` collapse into **1 single rule** (`Salary: -, CreditScore: F, Existing: - => REJECT`), reducing the table from 8 rules to **`4 + 1 = 5` rules**!</li>
+        `if (a &gt; 0) { if (b &gt; 0) { x = 1; } else { x = 2; } } else { x = 3; }`</b><br>
+        <b>A:</b> There are <b>2 decision points</b> (`if (a &gt; 0)` and `if (b &gt; 0)`). Formula: <code>V(G) = Decisions + 1 = 2 + 1 = <b>3</b></code>. Therefore, a minimum of <b>3 test cases</b> (`[a=1, b=1]`, `[a=1, b=-1]`, `[a=-1, b=0]`) achieves 100% Branch Coverage.</li>
+      <li><b>Q20: Scenario: An airline booking flow has states: `SEARCH -&gt; SEAT_SELECTED -&gt; PAYMENT_PENDING -&gt; TICKETED -&gt; CANCELLED`. A user opens two browser tabs at `PAYMENT_PENDING`, cancels the booking in Tab 1 (`CANCELLED`), and clicks "Pay" in Tab 2. The system charges their card and moves the cancelled booking to `TICKETED`. What kind of bug is this?</b><br>
+        <b>A:</b> An <b>Invalid State Transition / Race Condition Defect</b>—the backend API failed to enforce the State Guard Condition (`if (order.getState() != PAYMENT_PENDING) throw InvalidStateException`) before processing payment.</li>
+      <li><b>Q21: Scenario: A credit card application has 3 conditions: `Salary &gt;= $50k (T/F)`, `CreditScore &gt;= 700 (T/F)`, `ExistingCustomer (T/F)`. However, if `CreditScore &lt; 700`, the bank ALWAYS rejects the application regardless of Salary or ExistingCustomer status. How many rules are in the Full Table vs the Collapsed Table?</b><br>
+        <b>A:</b> <b>Full Table:</b> 2<sup>3</sup> = <b>8</b> rules. <b>Collapsed Table:</b> The 4 rules where `CreditScore &gt;= 700` is `False` collapse into <b>1 single rule</b> (`Salary: -, CreditScore: F, Existing: - =&gt; REJECT`), reducing the table from 8 rules to <b>`4 + 1 = 5` rules</b>!</li>
       <li><b>Q22: Scenario: In a Java microservice, JaCoCo reports 92% Statement Coverage and 85% Branch Coverage, yet a `NullPointerException` crashes production on `user.getAddress().getCity()`. Why didn't high code coverage prevent this?</b><br>
-        <b>A:</b> Code coverage only measures what percentage of *existing written code* was executed by tests—it cannot detect **missing null-check branches** that the developer forgot to write (`if (user.getAddress() != null)`), nor does it test data permutations unless negative `null` inputs are passed.</li>
-      <li><b>Q23: Scenario: You are testing a Wizard form (`Step 1: Personal Info -> Step 2: Employment -> Step 3: Upload Docs -> Step 4: Review & Submit`). What State Transition tests must you execute beyond clicking `Next -> Next -> Next -> Submit`?</b><br>
+        <b>A:</b> Code coverage only measures what percentage of *existing written code* was executed by tests—it cannot detect <b>missing null-check branches</b> that the developer forgot to write (`if (user.getAddress() != null)`), nor does it test data permutations unless negative `null` inputs are passed.</li>
+      <li><b>Q23: Scenario: You are testing a Wizard form (`Step 1: Personal Info -&gt; Step 2: Employment -&gt; Step 3: Upload Docs -&gt; Step 4: Review & Submit`). What State Transition tests must you execute beyond clicking `Next -&gt; Next -&gt; Next -&gt; Submit`?</b><br>
         <b>A:</b> (1) Clicking `Back` from Step 3 to Step 2 and verifying entered data is preserved, (2) Directly typing `/wizard/step-4` in the URL while still on Step 1 (forced URL state-jumping), (3) Refreshing (`F5`) on Step 3, and (4) Session timeout on Step 3 followed by re-login.</li>
       <li><b>Q24: Scenario: A requirement states: "Users can apply a Promo Code OR Loyalty Points, but never both in the same order." Which technique best models this rule?</b><br>
-        <b>A:</b> **Decision Table Testing** with 2 conditions (`PromoCodeApplied [T/F]`, `LoyaltyPointsApplied [T/F]`) = $2^2 = 4$ rules, explicitly verifying that `Rule 1 (T, T)` triggers a mutual-exclusion error message.</li>
+        <b>A:</b> <b>Decision Table Testing</b> with 2 conditions (`PromoCodeApplied [T/F]`, `LoyaltyPointsApplied [T/F]`) = 2<sup>2</sup> = 4 rules, explicitly verifying that `Rule 1 (T, T)` triggers a mutual-exclusion error message.</li>
       <li><b>Q25: Scenario: How do you combine EP, BVA, Decision Tables, and State Transition on a single "ATM Cash Withdrawal" feature?</b><br>
-        <b>A:</b> (1) **State Transition:** Card Inserted &rarr; PIN Entered (1st, 2nd, 3rd wrong attempt lockout) &rarr; Authenticated. (2) **Decision Table:** `[Account Active? T/F] x [Balance >= Amount? T/F] x [ATM Has Cash? T/F]`. (3) **EP &amp; BVA:** Withdrawal amount field (`min = $10, max = $1,000`, step `$10` &rarr; test `$0, $9, $10, $11, $990, $1000, $1010`).</li>
+        <b>A:</b> (1) <b>State Transition:</b> Card Inserted &rarr; PIN Entered (1st, 2nd, 3rd wrong attempt lockout) &rarr; Authenticated. (2) <b>Decision Table:</b> `[Account Active? T/F] x [Balance &gt;= Amount? T/F] x [ATM Has Cash? T/F]`. (3) <b>EP &amp; BVA:</b> Withdrawal amount field (`min = $10, max = $1,000`, step `$10` &rarr; test `$0, $9, $10, $11, $990, $1000, $1010`).</li>
     </ol></section>
 
   <section><h2>Tier 4: SDET, Automation (Selenium / TestNG / JaCoCo) Application (Q26&ndash;Q30)</h2>
     <ol start="26">
       <li><b>Q26: How do you translate a Decision Table directly into a TestNG automated test?</b><br>
-        <b>A:</b> Each column (Rule) of the Decision Table becomes **1 row in a TestNG `@DataProvider` array** (`new Object[][] { {true, true, true, true, true}, {true, true, false, true, false}, ... }`), passed into a single `@Test(dataProvider = "shippingRules")` method.</li>
+        <b>A:</b> Each column (Rule) of the Decision Table becomes <b>1 row in a TestNG `@DataProvider` array</b> (`new Object[][] { {true, true, true, true, true}, {true, true, false, true, false}, ... }`), passed into a single `@Test(dataProvider = "shippingRules")` method.</li>
       <li><b>Q27: How do you enforce White-Box Statement and Branch coverage automatically in a Maven CI/CD pipeline?</b><br>
-        <b>A:</b> Add the **`jacoco-maven-plugin`** to `pom.xml` with a `check` goal rule (`<counter>BRANCH</counter><value>COVEREDRATIO</value><minimum>0.80</minimum>`). If a developer's PR drops branch coverage below 80%, `mvn verify` fails the build automatically.</li>
+        <b>A:</b> Add the <b>`jacoco-maven-plugin`</b> to `pom.xml` with a `check` goal rule (`&lt;counter&gt;BRANCH&lt;/counter&gt;&lt;value&gt;COVEREDRATIO&lt;/value&gt;&lt;minimum&gt;0.80&lt;/minimum&gt;`). If a developer's PR drops branch coverage below 80%, `mvn verify` fails the build automatically.</li>
       <li><b>Q28: How do you test Invalid State Transitions faster than clicking through a browser in Selenium?</b><br>
-        <b>A:</b> Use **RestAssured API tests** to create an order in state `CREATED`, cancel it (`POST /orders/{id}/cancel`), and immediately send `POST /orders/{id}/ship` or `POST /orders/{id}/pay`, asserting that the backend returns `409 Conflict` or `400 Bad Request`.</li>
+        <b>A:</b> Use <b>RestAssured API tests</b> to create an order in state `CREATED`, cancel it (`POST /orders/{id}/cancel`), and immediately send `POST /orders/{id}/ship` or `POST /orders/{id}/pay`, asserting that the backend returns `409 Conflict` or `400 Bad Request`.</li>
       <li><b>Q29: In Selenium UI automation, how do Use Case tests map to your framework structure?</b><br>
-        <b>A:</b> Each end-to-end Use Case maps to an end-to-end `@Test` method that chains multiple **Page Objects** (`LoginPage -> ProductSearchPage -> CartPage -> CheckoutPage -> OrderConfirmationPage`).</li>
+        <b>A:</b> Each end-to-end Use Case maps to an end-to-end `@Test` method that chains multiple <b>Page Objects</b> (`LoginPage -&gt; ProductSearchPage -&gt; CartPage -&gt; CheckoutPage -&gt; OrderConfirmationPage`).</li>
       <li><b>Q30: What is Mutation Testing (e.g., PITest in Java) and how does it go beyond JaCoCo Branch Coverage?</b><br>
-        <b>A:</b> A developer can get 100% JaCoCo coverage by running code *without writing a single `Assert` statement*! **PITest (Mutation Testing)** automatically modifies bytecode in memory (changing `+` to `-` or `>=` to `>`) and re-runs tests—if your tests still pass when the code is mutated, your assertions are weak ("escaped mutant").</li>
+        <b>A:</b> A developer can get 100% JaCoCo coverage by running code *without writing a single `Assert` statement*! <b>PITest (Mutation Testing)</b> automatically modifies bytecode in memory (changing `+` to `-` or `&gt;=` to `&gt;`) and re-runs tests—if your tests still pass when the code is mutated, your assertions are weak ("escaped mutant").</li>
     </ol></section>
 
   <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q31&ndash;Q35)</h2>
     <ol start="31">
       <li><b>Q31: How many rules are in a full Decision Table with 5 boolean conditions?</b><br>
-        <b>A:</b> $2^5 = \mathbf{32}$ rules.</li>
+        <b>A:</b> 2<sup>5</sup> = <b>32</b> rules.</li>
       <li><b>Q32: Is Cause-Effect Graphing related to Decision Table Testing?</b><br>
         <b>A:</b> <b>Yes</b>—a Cause-Effect Graph is visually converted into a Decision Table.</li>
       <li><b>Q33: Does 100% Statement Coverage guarantee 100% Branch Coverage?</b><br>

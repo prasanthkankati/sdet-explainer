@@ -22,13 +22,13 @@
       <li><b>Q3: What is the exact difference between Load Testing and Stress Testing?</b><br>
         <b>A:</b> <b>Load Testing</b> stays *within* or *up to* the designed peak threshold (e.g., testing 5,000 users when the SLA is 5,000 users) to verify response times and throughput. <b>Stress Testing</b> intentionally exceeds the threshold (10,000 &rarr; 25,000 users) until the system breaks, to discover the breaking point and verify graceful degradation and auto-recovery.</li>
       <li><b>Q4: What is Endurance (Soak) Testing and what specific bugs does it catch?</b><br>
-        <b>A:</b> Endurance Testing applies a steady moderate load continuously for 12 to 72 hours. It catches bugs that never appear in a 15-minute load test: **Java Heap memory leaks (`OutOfMemoryError`)**, unclosed database connections exhausting the connection pool, thread leaks, and log files filling up disk space.</li>
+        <b>A:</b> Endurance Testing applies a steady moderate load continuously for 12 to 72 hours. It catches bugs that never appear in a 15-minute load test: <b>Java Heap memory leaks (`OutOfMemoryError`)</b>, unclosed database connections exhausting the connection pool, thread leaks, and log files filling up disk space.</li>
       <li><b>Q5: What is Spike Testing? Give a real-world example.</b><br>
         <b>A:</b> Spike Testing suddenly increases concurrent users from baseline to an extreme peak in seconds and drops them back down (e.g., an e-commerce Flash Sale going live at 12:00:00 PM or concert ticket booking opening), testing whether cloud auto-scaling and request queues survive the shock.</li>
       <li><b>Q6: What is Volume Testing (Flood Testing)?</b><br>
         <b>A:</b> Volume Testing evaluates system performance when the underlying database or file storage contains a huge volume of data (e.g., querying a `transactions` table seeded with 200 million rows), exposing missing SQL indexes and full-table scan locks.</li>
       <li><b>Q7: What is Compatibility Testing and what are its 2 version-based sub-types?</b><br>
-        <b>A:</b> Compatibility Testing verifies the software works across different browsers (Chrome, Firefox, Safari, Edge), operating systems, devices, and screen resolutions. Its 2 version sub-types are **Backward Compatibility** (working with older client/DB versions) and **Forward Compatibility** (working with upcoming OS/browser versions).</li>
+        <b>A:</b> Compatibility Testing verifies the software works across different browsers (Chrome, Firefox, Safari, Edge), operating systems, devices, and screen resolutions. Its 2 version sub-types are <b>Backward Compatibility</b> (working with older client/DB versions) and <b>Forward Compatibility</b> (working with upcoming OS/browser versions).</li>
       <li><b>Q8: What is the difference between Internationalization (`I18n`) and Localization (`L10n`)?</b><br>
         <b>A:</b> <b>Internationalization (`I18n`)</b> is engineering the software architecture so it can adapt to any language/region without code changes (externalizing strings into resource bundles, supporting UTF-8). <b>Localization (`L10n`)</b> is translating and testing the app for one specific locale (e.g., German `de-DE`, `€` currency, `DD.MM.YYYY` dates).</li>
       <li><b>Q9: What is Usability Testing vs Accessibility (`a11y`) Testing?</b><br>
@@ -42,7 +42,7 @@
       <li><b>Q11: Why do we measure `p95` and `p99` response times in Performance Testing instead of just the "Average" response time?</b><br>
         <b>A:</b> Averages hide severe outliers! If 90 requests take `50ms` and 10 requests take `9,500ms` (nearly 10 seconds), the average is `995ms`—which looks acceptable, even though 10% of your customers experienced a 10-second freeze. `p95` and `p99` guarantee that 95% or 99% of all users get fast responses.</li>
       <li><b>Q12: Why shouldn't you use Selenium WebDriver browsers to generate 10,000 concurrent users for Load Testing?</b><br>
-        <b>A:</b> Each real headless Chrome browser instance consumes ~300MB–500MB of RAM and heavy CPU; spinning up 10,000 browsers requires massive cloud infrastructure and measures client rendering overhead rather than server capacity. Protocol-level tools (**JMeter, k6, Gatling**) simulate 10,000 concurrent HTTP/WebSocket users from a single machine.</li>
+        <b>A:</b> Each real headless Chrome browser instance consumes ~300MB–500MB of RAM and heavy CPU; spinning up 10,000 browsers requires massive cloud infrastructure and measures client rendering overhead rather than server capacity. Protocol-level tools (<b>JMeter, k6, Gatling</b>) simulate 10,000 concurrent HTTP/WebSocket users from a single machine.</li>
       <li><b>Q13: What is the difference between Authentication (`HTTP 401`) and Authorization (`HTTP 403`) in Security Testing?</b><br>
         <b>A:</b> <b>Authentication (`401 Unauthorized`)</b> verifies *identity* ("Who are you?" via login credentials/JWT). <b>Authorization (`403 Forbidden`)</b> verifies *permissions* ("Are you allowed to access this resource?" — e.g., a logged-in regular user trying to call `DELETE /api/admin/users/5`).</li>
       <li><b>Q14: What is IDOR (Insecure Direct Object Reference) and how do QA/SDETs test for it?</b><br>
@@ -54,31 +54,31 @@
       <li><b>Q17: Why is Compatibility Testing split into a Browser/Device Coverage Matrix instead of testing every browser version ever made?</b><br>
         <b>A:</b> Due to Principle #2 (Exhaustive testing is impossible). QA analyzes production Google Analytics / telemetry to select the top browser + OS combinations covering 95%+ of real customer traffic (e.g., latest 2 versions of Chrome, Safari iOS, Edge, and Firefox).</li>
       <li><b>Q18: What is Chaos Engineering (e.g., Netflix Chaos Monkey) and how does it relate to Non-Functional Testing?</b><br>
-        <b>A:</b> Chaos Engineering is automated **Reliability &amp; Resiliency Testing** in staging/production where pods, Availability Zones, or network links are intentionally injected with latency or killed to prove the distributed system survives infrastructure failures without customer downtime.</li>
+        <b>A:</b> Chaos Engineering is automated <b>Reliability &amp; Resiliency Testing</b> in staging/production where pods, Availability Zones, or network links are intentionally injected with latency or killed to prove the distributed system survives infrastructure failures without customer downtime.</li>
     </ol></section>
 
   <section><h2>Tier 3: Real-World Tricky &amp; Edge-Case Scenarios (Q19&ndash;Q25)</h2>
     <ol start="19">
       <li><b>Q19: Scenario: Your application passes a 1-hour Load Test with 5,000 concurrent users at `200ms` response time. In production, the server crashes every 3 days with `java.lang.OutOfMemoryError: Java heap space` under only 800 users. Why did the Load Test miss it, and which test catches it?</b><br>
-        <b>A:</b> A 1-hour Load Test is too short to fill up an 8GB JVM Heap when a small memory leak leaks only 5MB per minute. An **Endurance (Soak) Test** running for 24–48 hours with heap profiling alerts (`jmap` / Prometheus memory graphs) catches the gradual memory leak.</li>
+        <b>A:</b> A 1-hour Load Test is too short to fill up an 8GB JVM Heap when a small memory leak leaks only 5MB per minute. An <b>Endurance (Soak) Test</b> running for 24–48 hours with heap profiling alerts (`jmap` / Prometheus memory graphs) catches the gradual memory leak.</li>
       <li><b>Q20: Scenario: A government university portal works fine all year, but crashes every year at exactly 10:00 AM on Exam Results Day when 200,000 students refresh the page within 30 seconds. Which specific performance test was skipped?</b><br>
-        <b>A:</b> **Spike Testing** (testing an instantaneous 0 &rarr; 200,000 vertical jump in concurrent requests, CDN caching of static assets, and waiting-room queue throttling).</li>
+        <b>A:</b> <b>Spike Testing</b> (testing an instantaneous 0 &rarr; 200,000 vertical jump in concurrent requests, CDN caching of static assets, and waiting-room queue throttling).</li>
       <li><b>Q21: Scenario: A checkout page works perfectly in Chrome and Edge, but in Safari on iPhone, clicking the "Select Delivery Date" calendar picker does nothing. What kind of bug is this and how do you automate catching it?</b><br>
-        <b>A:</b> A **Cross-Browser / WebKit Compatibility defect** (often caused by Safari's stricter date parsing `new Date("2026-11-13")` vs `"13/11/2026"` or WebKit CSS differences). Catch it by running Playwright (`webkit` project) or Selenium Grid + BrowserStack iOS Safari in CI/CD.</li>
+        <b>A:</b> A <b>Cross-Browser / WebKit Compatibility defect</b> (often caused by Safari's stricter date parsing `new Date("2026-11-13")` vs `"13/11/2026"` or WebKit CSS differences). Catch it by running Playwright (`webkit` project) or Selenium Grid + BrowserStack iOS Safari in CI/CD.</li>
       <li><b>Q22: Scenario: When you switch the app language from English to Arabic (`ar-SA`), the text translates properly, but the Back arrow icon and navigation menu stay on the left instead of mirroring to the right. What type of defect is this?</b><br>
-        <b>A:</b> A **Localization (`L10n`) Right-to-Left (`dir="rtl"`) layout defect**. Arabic and Hebrew require mirroring UI directional icons and flex/grid alignment (`dir="rtl"`), not just translating text strings.</li>
+        <b>A:</b> A <b>Localization (`L10n`) Right-to-Left (`dir="rtl"`) layout defect</b>. Arabic and Hebrew require mirroring UI directional icons and flex/grid alignment (`dir="rtl"`), not just translating text strings.</li>
       <li><b>Q23: Scenario: When you type `test' OR '1'='1` into the Search box, the page returns a raw `java.sql.SQLException: syntax error near '1'` stack trace on screen. Name the 2 security vulnerabilities exposed here.</b><br>
-        <b>A:</b> (1) **SQL Injection (SQLi)** vulnerability (user input is concatenated directly into SQL instead of using `PreparedStatement`), and (2) **Sensitive Information Exposure / Verbose Error Handling** (leaking internal database/Java stack traces to the client instead of a generic error message).</li>
+        <b>A:</b> (1) <b>SQL Injection (SQLi)</b> vulnerability (user input is concatenated directly into SQL instead of using `PreparedStatement`), and (2) <b>Sensitive Information Exposure / Verbose Error Handling</b> (leaking internal database/Java stack traces to the client instead of a generic error message).</li>
       <li><b>Q24: Scenario: During a Stress Test, when load hits 18,000 users, the payment service crashes. When you stop the test and send just 1 single user request 10 minutes later, the server still returns `503 Service Unavailable`. What failed here?</b><br>
-        <b>A:</b> **Recoverability / Auto-Recovery failed** (e.g., deadlocked database transactions or hung worker threads never released their locks after the stress spike ended). Stress testing specifically checks whether the system self-heals after the traffic drops.</li>
+        <b>A:</b> <b>Recoverability / Auto-Recovery failed</b> (e.g., deadlocked database transactions or hung worker threads never released their locks after the stress spike ended). Stress testing specifically checks whether the system self-heals after the traffic drops.</li>
       <li><b>Q25: Scenario: A visually impaired user navigating your web app using only the `Tab` key gets stuck inside a promotional popup modal and cannot `Tab` to the "Close (X)" button or press `Escape`. Which non-functional test fails here?</b><br>
-        <b>A:</b> **Accessibility (`a11y`) Testing** (specifically WCAG 2.1 Keyboard Accessibility / Focus Trap compliance).</li>
+        <b>A:</b> <b>Accessibility (`a11y`) Testing</b> (specifically WCAG 2.1 Keyboard Accessibility / Focus Trap compliance).</li>
     </ol></section>
 
   <section><h2>Tier 4: SDET, Automation (Playwright / Selenium / JMeter / k6) Application (Q26&ndash;Q30)</h2>
     <ol start="26">
       <li><b>Q26: How do you automate Accessibility (`a11y`) testing inside a Selenium Java or Playwright TypeScript framework?</b><br>
-        <b>A:</b> Integrate Deque's **Axe-Core** library (`com.deque.html.axecore:selenium` in Java or `@axe-core/playwright` in TS). After navigating to any page, call `new AxeBuilder(driver).analyze()` and assert `results.getViolations().isEmpty()` to catch WCAG violations automatically in CI/CD.</li>
+        <b>A:</b> Integrate Deque's <b>Axe-Core</b> library (`com.deque.html.axecore:selenium` in Java or `@axe-core/playwright` in TS). After navigating to any page, call `new AxeBuilder(driver).analyze()` and assert `results.getViolations().isEmpty()` to catch WCAG violations automatically in CI/CD.</li>
       <li><b>Q27: How do you assert API response time SLAs inside RestAssured?</b><br>
         <b>A:</b> Use RestAssured's Hamcrest matcher: `given().when().get("/api/products").then().statusCode(200).time(lessThan(500L), TimeUnit.MILLISECONDS);`.</li>
       <li><b>Q28: How can you use Chrome DevTools Protocol (CDP) in Selenium 4 to simulate a slow 3G mobile network (Network Compatibility Testing)?</b><br>
@@ -86,7 +86,7 @@
       <li><b>Q29: How do you automate Cross-Browser &amp; Cross-Viewport Compatibility testing in Playwright?</b><br>
         <b>A:</b> Define multiple `projects` in `playwright.config.ts` (`Desktop Chrome`, `Desktop Firefox`, `Desktop Safari/WebKit`, `Mobile Chrome Pixel 7`, `Mobile Safari iPhone 15`) so a single test file runs across all 5 browser/device engines in parallel.</li>
       <li><b>Q30: How do you integrate k6 or JMeter performance tests into a Jenkins CI/CD pipeline so a slow build automatically fails the pipeline?</b><br>
-        <b>A:</b> Configure pass/fail **Thresholds** directly in the script (e.g., in k6: `thresholds: { http_req_duration: ['p(95)<500'], http_req_failed: ['rate<0.01'] }`). If `p95` exceeds `500ms`, the CLI exits with a non-zero exit code, automatically failing the Jenkins stage.</li>
+        <b>A:</b> Configure pass/fail <b>Thresholds</b> directly in the script (e.g., in k6: `thresholds: { http_req_duration: ['p(95)&lt;500'], http_req_failed: ['rate&lt;0.01'] }`). If `p95` exceeds `500ms`, the CLI exits with a non-zero exit code, automatically failing the Jenkins stage.</li>
     </ol></section>
 
   <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q31&ndash;Q35)</h2>

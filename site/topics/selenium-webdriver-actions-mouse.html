@@ -147,7 +147,7 @@ public class MouseActionsExample { // Declares class
     <p><b>Why does dragAndDrop(source, target) sometimes fail on HTML5 draggable elements, and how do you fix it?</b><br>
     Some HTML5 drag-and-drop libraries require a small initial pointer movement or pause after mousedown to register the drag start. Chain clickAndHold(src).pause(Duration.ofMillis(200)).moveByOffset(5, 5).moveToElement(tgt).release().perform().</p>
 
-    <p><b>How do you click at a specific pixel offset from the center of a <canvas> element?</b><br>
+    <p><b>How do you click at a specific pixel offset from the center of a &lt;canvas&gt; element?</b><br>
     Call new Actions(driver).moveToElement(canvas, offsetX, offsetY).click().perform(). Note that in W3C Selenium 4, offsets in moveToElement(el, x, y) are calculated from the center of the element, not the top-left corner.</p>
 
     <h3>Troubleshooting</h3>

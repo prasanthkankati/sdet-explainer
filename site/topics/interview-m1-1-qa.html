@@ -80,16 +80,16 @@
       <b>"Yes—I will perform Static Testing (Verification)."</b> I will review the Swagger contract for missing HTTP error codes (`400`, `401`, `403`, `422`), boundary rules (negative or zero payment amounts, currency decimals), idempotency keys for duplicate clicks, and lint the OpenAPI schema.</li>
 
       <li><b>[Scenario &mdash; Verification Passes, Validation Fails] Give a real production example where Verification passed 100% but Validation failed.</b><br>
-      A healthcare requirement spec mistakenly stated: <i>"Allow birth year between 1950 and current year."</i> Developers coded `year >= 1950`, unit tests and QA checks against the spec passed (**Verification passed**). When released, patients born in 1945 (age 80+) could not book appointments (**Validation failed** because the spec itself violated real-world user needs).</li>
+      A healthcare requirement spec mistakenly stated: <i>"Allow birth year between 1950 and current year."</i> Developers coded `year &gt;= 1950`, unit tests and QA checks against the spec passed (<b>Verification passed</b>). When released, patients born in 1945 (age 80+) could not book appointments (<b>Validation failed</b> because the spec itself violated real-world user needs).</li>
 
       <li><b>[Scenario &mdash; Validation Passes, Verification Fails] Can Validation pass while Verification fails? Give an example.</b><br>
-      <b>Yes.</b> Suppose a developer builds a working search filter that customers love in UAT (**Validation passes**), but the developer hardcoded database credentials in the Java class, skipped logging standards, and ignored the agreed API contract in the SRS (**Verification fails** during code/architecture inspection).</li>
+      <b>Yes.</b> Suppose a developer builds a working search filter that customers love in UAT (<b>Validation passes</b>), but the developer hardcoded database credentials in the Java class, skipped logging standards, and ignored the agreed API contract in the SRS (<b>Verification fails</b> during code/architecture inspection).</li>
 
       <li><b>[Scenario &mdash; The Green Selenium Build That Lost Money] Your Selenium checkout script ran in Jenkins, clicked "Pay Now", and passed green. In production, customers were charged $0.00 because the button rendered "Pay $0.00". Was this a Static or Dynamic failure, and verification or validation?</b><br>
-      The test was **Dynamic Testing**, and it suffered a **Validation failure** disguised as a technical pass. The script only checked DOM element clickability (`elementToBeClickable`), failing to validate the business rule that the displayed charge amount and backend order total must match the non-zero cart price.</li>
+      The test was <b>Dynamic Testing</b>, and it suffered a <b>Validation failure</b> disguised as a technical pass. The script only checked DOM element clickability (`elementToBeClickable`), failing to validate the business rule that the displayed charge amount and backend order total must match the non-zero cart price.</li>
 
       <li><b>[Scenario &mdash; The Vague Requirement Trap] A Jira story says: "The search results must load fast." You run a dynamic JMeter test and measure 2.2 seconds, which the Product Owner rejects saying it must be under 500ms. Where did the failure actually happen?</b><br>
-      It happened during **Static Testing (Requirement Verification)** in Sprint Refinement. Words like *"fast"*, *"user-friendly"*, or *"secure"* are untestable. QA must reject vague requirements statically before coding starts and enforce measurable Acceptance Criteria (e.g., `p95 response time < 500ms at 200 RPS`).</li>
+      It happened during <b>Static Testing (Requirement Verification)</b> in Sprint Refinement. Words like *"fast"*, *"user-friendly"*, or *"secure"* are untestable. QA must reject vague requirements statically before coding starts and enforce measurable Acceptance Criteria (e.g., `p95 response time &lt; 500ms at 200 RPS`).</li>
 
       <li><b>[Scenario &mdash; Missing Requirement in Spec] During Dynamic System Testing, you notice clicking the browser Back button after logout re-displays the user's bank balance from cache. The SRS document says nothing about browser Back button behavior. Is this a bug?</b><br>
       <b>Yes—it is a Validation / Security defect.</b> Even if the SRS omitted it (so strict Verification against the written text wouldn't flag it), Dynamic Validation evaluates fitness and security for real-world usage. You log the defect and also update the SRS/security checklist.</li>
@@ -104,9 +104,9 @@
   <section><h2>Tier 4: SDET, Automation (Selenium/Playwright) &amp; CI/CD Context (Q27&ndash;Q31)</h2>
     <ol start="27">
       <li><b>Is Test Automation only Dynamic Testing, or does Automation exist in Static Testing too?</b><br>
-      Automation exists in **both**:<br>
-      &bull; **Static Automation:** SonarQube, Checkstyle, SpotBugs, ESLint, OpenAPI linters, and Git pre-commit hooks scanning code/specs without running the app.<br>
-      &bull; **Dynamic Automation:** JUnit, TestNG, RestAssured, Selenium WebDriver, and Playwright executing the live application.</li>
+      Automation exists in <b>both</b>:<br>
+      &bull; <b>Static Automation:</b> SonarQube, Checkstyle, SpotBugs, ESLint, OpenAPI linters, and Git pre-commit hooks scanning code/specs without running the app.<br>
+      &bull; <b>Dynamic Automation:</b> JUnit, TestNG, RestAssured, Selenium WebDriver, and Playwright executing the live application.</li>
 
       <li><b>When reviewing a teammate's Selenium Java Pull Request (Static Testing), what top 6 flaws do you check for?</b><br>
       1. Hardcoded `Thread.sleep()` instead of `WebDriverWait`.<br>
@@ -120,7 +120,7 @@
       <b>Stage 1: Compile &amp; Static Analysis (SonarQube / Linters)</b> (~30 seconds) &rarr; <b>Stage 2: Dynamic Unit Tests</b> (~1 min) &rarr; <b>Stage 3: Deploy &amp; Dynamic API Tests</b> (~3 mins) &rarr; <b>Stage 4: Dynamic Selenium/Playwright UI Tests</b> (~10 mins). We run Static checks first ("Fail Fast") so we never waste 15 minutes spinning up browsers for code that has a static syntax or null-pointer defect.</li>
 
       <li><b>How do you verify a Requirement Traceability Matrix (RTM) statically before Dynamic Execution starts?</b><br>
-      Cross-check every Requirement ID in the SRS/Jira Epic against your Test Case IDs and automated `@Test` methods to ensure **zero orphan requirements** (requirements with 0 test cases) and **full negative/boundary coverage**.</li>
+      Cross-check every Requirement ID in the SRS/Jira Epic against your Test Case IDs and automated `@Test` methods to ensure <b>zero orphan requirements</b> (requirements with 0 test cases) and <b>full negative/boundary coverage</b>.</li>
 
       <li><b>In Playwright (TypeScript), how does the TypeScript compiler (`tsc --noEmit`) act as Static Verification for your test suite?</b><br>
       Before a browser ever launches, `tsc` statically verifies that all Page Object method calls, test data interfaces, and `Promise` return types match—catching typos and missing parameters at compile time rather than failing mid-test after 40 seconds of browser navigation.</li>
@@ -129,10 +129,10 @@
   <section><h2>Tier 5: Rapid-Fire Curveballs &amp; True/False Traps (Q32&ndash;Q35)</h2>
     <ol start="32">
       <li><b>True or False: "Unit Testing is Static Testing because developers do it in the IDE before QA gets the build."</b><br>
-      <b>False.</b> Unit testing executes compiled code (`@Test` methods) with inputs and asserts runtime outputs—so it is **Dynamic Testing**, regardless of who runs it.</li>
+      <b>False.</b> Unit testing executes compiled code (`@Test` methods) with inputs and asserts runtime outputs—so it is <b>Dynamic Testing</b>, regardless of who runs it.</li>
 
       <li><b>True or False: "Executing a SQL query against a live QA database to check if an order row was inserted is Static Testing."</b><br>
-      <b>False.</b> Querying a live database after an application action is **Dynamic Database Validation**. Reviewing the `.sql` migration script file before running it is **Static Verification**.</li>
+      <b>False.</b> Querying a live database after an application action is <b>Dynamic Database Validation</b>. Reviewing the `.sql` migration script file before running it is <b>Static Verification</b>.</li>
 
       <li><b>Can Static Testing be performed on already-deployed Production software?</b><br>
       Yes—reviewing production architecture diagrams, auditing production IAM security policies/configs, or running static log/code audits can happen at any time without executing user transactions.</li>

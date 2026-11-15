@@ -28,8 +28,8 @@
   <section id="key-points">
     <h2>Key points</h2>
     <ol>
-      <li>WebDriverWait extends FluentWait<WebDriver> with a default polling interval of 500 milliseconds and automatically ignores NoSuchElementException.</li>
-      <li>wait.until(ExpectedConditions.visibilityOfElementLocated(By)) waits until the element exists in the DOM AND is visibly rendered with width and height > 0.</li>
+      <li>WebDriverWait extends FluentWait&lt;WebDriver&gt; with a default polling interval of 500 milliseconds and automatically ignores NoSuchElementException.</li>
+      <li>wait.until(ExpectedConditions.visibilityOfElementLocated(By)) waits until the element exists in the DOM AND is visibly rendered with width and height &gt; 0.</li>
       <li>wait.until(ExpectedConditions.elementToBeClickable(By)) waits until the element is both visible AND enabled.</li>
       <li>wait.until(ExpectedConditions.invisibilityOfElementLocated(By)) waits for loading spinners or modal backdrops to disappear or be removed from the DOM.</li>
       <li>If the condition is not satisfied within the configured Duration, wait.until() throws org.openqa.selenium.TimeoutException.</li>
@@ -44,7 +44,7 @@
       </thead>
       <tbody>
         <tr><td><b>presenceOfElementLocated(By)</b></td><td>Yes</td><td>No (can be hidden)</td><td>No</td><td>WebElement</td></tr>
-        <tr><td><b>visibilityOfElementLocated(By)</b></td><td>Yes</td><td>Yes (width/height > 0)</td><td>No</td><td>WebElement</td></tr>
+        <tr><td><b>visibilityOfElementLocated(By)</b></td><td>Yes</td><td>Yes (width/height &gt; 0)</td><td>No</td><td>WebElement</td></tr>
         <tr><td><b>elementToBeClickable(By)</b></td><td>Yes</td><td>Yes</td><td>Yes (!disabled)</td><td>WebElement</td></tr>
         <tr><td><b>invisibilityOfElementLocated(By)</b></td><td>Passes if absent or hidden</td><td>Waits for hidden</td><td>N/A</td><td>Boolean</td></tr>
         <tr><td><b>textToBePresentInElementLocated(By, text)</b></td><td>Yes</td><td>Yes</td><td>No</td><td>Boolean</td></tr>
@@ -56,7 +56,7 @@
     <h2>How it works</h2>
     <ol>
       <li>Instantiate WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10)).</li>
-      <li>Call wait.until(...) passing an ExpectedCondition or a lambda function (d -> ...).</li>
+      <li>Call wait.until(...) passing an ExpectedCondition or a lambda function (d -&gt; ...).</li>
       <li>Every 500ms (default), WebDriverWait evaluates the condition against the browser while ignoring NoSuchElementException.</li>
       <li>As soon as the condition returns a non-null object or Boolean.TRUE, wait.until() returns that value immediately; if 10 seconds elapse, it throws TimeoutException.</li>
     </ol>
@@ -136,7 +136,7 @@ public class ExplicitWaitExample { // Declares class
     wait.until() throws an org.openqa.selenium.TimeoutException, and its getCause() contains the last NoSuchElementException thrown during the final poll.</p>
 
     <p><b>How do you write a custom Explicit Wait in Selenium 4 using a Java lambda expression instead of ExpectedConditions?</b><br>
-    wait.until() accepts any Function<WebDriver, T>. For example, wait.until(d -> d.findElement(By.id("status")).getText().equals("READY")) polls until the lambda returns true.</p>
+    wait.until() accepts any Function&lt;WebDriver, T&gt;. For example, wait.until(d -&gt; d.findElement(By.id("status")).getText().equals("READY")) polls until the lambda returns true.</p>
 
     <h3>Real situations</h3>
     <p><b>How do you wait for a loading spinner to appear and then disappear before clicking a button?</b><br>

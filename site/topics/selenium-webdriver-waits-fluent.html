@@ -11,9 +11,9 @@
 <article>
   <span class="tag Selenium">Selenium</span>
   <h1>6.3 FluentWait Configuration</h1>
-  <div class="se-lead">Customizing polling intervals, ignored exception lists, failure messages, and generic wait targets with FluentWait<T>.</div>
+  <div class="se-lead">Customizing polling intervals, ignored exception lists, failure messages, and generic wait targets with FluentWait&lt;T&gt;.</div>
 
-  <p>FluentWait<T> is the generic superclass of WebDriverWait that implements the Wait<T> interface using a fluent builder pattern. It lets you configure the maximum timeout, custom polling frequency (pollingEvery), multiple ignored exception types (such as NoSuchElementException and StaleElementReferenceException), and custom diagnostic timeout messages.</p>
+  <p>FluentWait&lt;T&gt; is the generic superclass of WebDriverWait that implements the Wait&lt;T&gt; interface using a fluent builder pattern. It lets you configure the maximum timeout, custom polling frequency (pollingEvery), multiple ignored exception types (such as NoSuchElementException and StaleElementReferenceException), and custom diagnostic timeout messages.</p>
 
   <section id="before-you-start">
     <h2>Before you start</h2>
@@ -28,11 +28,11 @@
   <section id="key-points">
     <h2>Key points</h2>
     <ol>
-      <li>WebDriverWait is simply a pre-configured subclass of FluentWait<WebDriver> bound to WebDriver with a 500ms polling interval.</li>
-      <li>FluentWait<T> is generic and can poll any input object T (such as WebDriver, WebElement, or even a java.io.File for download checks).</li>
-      <li>Key builder methods are withTimeout(Duration), pollingEvery(Duration), ignoring(Class<? extends Throwable>), and withMessage(String).</li>
-      <li>Unlike WebDriverWait, a raw new FluentWait<>(driver) does NOT ignore NoSuchElementException by default unless you explicitly call .ignoring(NoSuchElementException.class).</li>
-      <li>Calling wait.until(Function<T, V>) polls until the function returns a non-null value (or Boolean.TRUE) without throwing an unignored exception.</li>
+      <li>WebDriverWait is simply a pre-configured subclass of FluentWait&lt;WebDriver&gt; bound to WebDriver with a 500ms polling interval.</li>
+      <li>FluentWait&lt;T&gt; is generic and can poll any input object T (such as WebDriver, WebElement, or even a java.io.File for download checks).</li>
+      <li>Key builder methods are withTimeout(Duration), pollingEvery(Duration), ignoring(Class&lt;? extends Throwable&gt;), and withMessage(String).</li>
+      <li>Unlike WebDriverWait, a raw new FluentWait&lt;&gt;(driver) does NOT ignore NoSuchElementException by default unless you explicitly call .ignoring(NoSuchElementException.class).</li>
+      <li>Calling wait.until(Function&lt;T, V&gt;) polls until the function returns a non-null value (or Boolean.TRUE) without throwing an unignored exception.</li>
     </ol>
   </section>
 
@@ -40,13 +40,13 @@
     <h2>Comparison table</h2>
     <table>
       <thead>
-        <tr><th>Feature</th><th>WebDriverWait</th><th>FluentWait<T></th><th>Customization Method</th></tr>
+        <tr><th>Feature</th><th>WebDriverWait</th><th>FluentWait&lt;T&gt;</th><th>Customization Method</th></tr>
       </thead>
       <tbody>
-        <tr><td><b>Target Type</b></td><td>Fixed to WebDriver</td><td>Generic <T> (WebDriver, WebElement, File)</td><td>new FluentWait<T>(input)</td></tr>
+        <tr><td><b>Target Type</b></td><td>Fixed to WebDriver</td><td>Generic &lt;T&gt; (WebDriver, WebElement, File)</td><td>new FluentWait&lt;T&gt;(input)</td></tr>
         <tr><td><b>Default Polling</b></td><td>500ms</td><td>500ms (customizable)</td><td>.pollingEvery(Duration.ofMillis(200))</td></tr>
         <tr><td><b>Default Ignored Exception</b></td><td>NotFoundException (NoSuchElementException)</td><td>None by default (must declare)</td><td>.ignoring(NoSuchElementException.class)</td></tr>
-        <tr><td><b>Class Hierarchy</b></td><td>extends FluentWait<WebDriver></td><td>implements Wait<T></td><td>wait.until(Function<T, V>)</td></tr>
+        <tr><td><b>Class Hierarchy</b></td><td>extends FluentWait&lt;WebDriver&gt;</td><td>implements Wait&lt;T&gt;</td><td>wait.until(Function&lt;T, V&gt;)</td></tr>
       </tbody>
     </table>
   </section>
@@ -54,10 +54,10 @@
   <section id="how-it-works">
     <h2>How it works</h2>
     <ol>
-      <li>Instantiate Wait<WebDriver> wait = new FluentWait<>(driver) and chain .withTimeout(Duration.ofSeconds(15)).</li>
+      <li>Instantiate Wait&lt;WebDriver&gt; wait = new FluentWait&lt;&gt;(driver) and chain .withTimeout(Duration.ofSeconds(15)).</li>
       <li>Chain .pollingEvery(Duration.ofMillis(250)) to set how often the condition is checked.</li>
       <li>Chain .ignoring(NoSuchElementException.class).ignoring(StaleElementReferenceException.class) to suppress transient DOM exceptions during polling.</li>
-      <li>Chain .withMessage("Custom timeout diagnostic") and call wait.until(d -> ...) with your lambda condition.</li>
+      <li>Chain .withMessage("Custom timeout diagnostic") and call wait.until(d -&gt; ...) with your lambda condition.</li>
     </ol>
     <p>Configuring FluentWait with custom polling and exception handling:</p>
 <pre><code>package dev.selenium.waits; // Declares package
@@ -79,14 +79,14 @@ public class FluentWaitExample { // Declares class
             driver.get("https://www.selenium.dev/selenium/web/dynamic.html"); // Loads dynamic test page
             driver.findElement(By.id("adder")).click(); // Triggers async element addition
 
-            Wait<WebDriver> wait = new FluentWait<>(driver) // Initializes FluentWait on driver
+            Wait&lt;WebDriver&gt; wait = new FluentWait&lt;&gt;(driver) // Initializes FluentWait on driver
                 .withTimeout(Duration.ofSeconds(10)) // Sets maximum timeout of 10 seconds
                 .pollingEvery(Duration.ofMillis(200)) // Polls DOM every 200 milliseconds
                 .ignoring(NoSuchElementException.class) // Ignores missing element during polling
                 .ignoring(StaleElementReferenceException.class) // Ignores transient stale DOM references
                 .withMessage("Box #box0 did not appear within 10s"); // Sets custom error message on timeout
 
-            WebElement box = wait.until(d -> d.findElement(By.id("box0"))); // Evaluates lambda every 200ms
+            WebElement box = wait.until(d -&gt; d.findElement(By.id("box0"))); // Evaluates lambda every 200ms
             System.out.println("Found box: " + box.getTagName()); // Prints tag name once resolved
         } finally { // Teardown block
             driver.quit(); // Closes browser
@@ -98,7 +98,7 @@ public class FluentWaitExample { // Declares class
   <section id="common-mistakes">
     <h2>Common mistakes</h2>
     <ol>
-      <li>Creating new FluentWait<>(driver) and forgetting to chain .ignoring(NoSuchElementException.class), which causes wait.until() to abort immediately on the very first poll if the element is not in the DOM.</li>
+      <li>Creating new FluentWait&lt;&gt;(driver) and forgetting to chain .ignoring(NoSuchElementException.class), which causes wait.until() to abort immediately on the very first poll if the element is not in the DOM.</li>
       <li>Setting pollingEvery(Duration.ofMillis(10)) against a remote Selenium Grid, flooding the network with 100 HTTP requests per second; keep remote polling between 250ms and 1000ms.</li>
       <li>Ignoring Throwable.class or Exception.class broadly, which masks fatal errors like NoSuchSessionException or InvalidSelectorException until the full timeout expires.</li>
     </ol>
@@ -111,7 +111,7 @@ public class FluentWaitExample { // Declares class
         <tr><th>Term</th><th>Meaning</th></tr>
       </thead>
       <tbody>
-        <tr><td><b>FluentWait<T></b></td><td>Generic implementation of the Wait<T> interface allowing fluent configuration of timeout, polling interval, and ignored exceptions.</td></tr>
+        <tr><td><b>FluentWait&lt;T&gt;</b></td><td>Generic implementation of the Wait&lt;T&gt; interface allowing fluent configuration of timeout, polling interval, and ignored exceptions.</td></tr>
         <tr><td><b>pollingEvery(Duration)</b></td><td>FluentWait method that defines the sleep interval between consecutive evaluations of the wait condition.</td></tr>
         <tr><td><b>ignoring(Class)</b></td><td>FluentWait method that registers an exception class to be caught and suppressed during condition polling.</td></tr>
         <tr><td><b>StaleElementReferenceException</b></td><td>Exception thrown when a previously located WebElement is detached from or recreated in the DOM.</td></tr>
@@ -124,27 +124,27 @@ public class FluentWaitExample { // Declares class
     
     <h3>Basics</h3>
     <p><b>What is the relationship between WebDriverWait and FluentWait in Selenium?</b><br>
-    WebDriverWait is a direct subclass of FluentWait<WebDriver> (public class WebDriverWait extends FluentWait<WebDriver>). WebDriverWait simply pre-configures the timeout, sets a 500ms polling interval, and ignores NotFoundException out of the box.</p>
+    WebDriverWait is a direct subclass of FluentWait&lt;WebDriver&gt; (public class WebDriverWait extends FluentWait&lt;WebDriver&gt;). WebDriverWait simply pre-configures the timeout, sets a 500ms polling interval, and ignores NotFoundException out of the box.</p>
 
     <p><b>Can you customize pollingEvery() and ignoring() directly on a WebDriverWait instance?</b><br>
-    Yes! Because WebDriverWait inherits all methods from FluentWait<WebDriver>, you can write new WebDriverWait(driver, Duration.ofSeconds(10)).pollingEvery(Duration.ofMillis(200)).ignoring(StaleElementReferenceException.class).</p>
+    Yes! Because WebDriverWait inherits all methods from FluentWait&lt;WebDriver&gt;, you can write new WebDriverWait(driver, Duration.ofSeconds(10)).pollingEvery(Duration.ofMillis(200)).ignoring(StaleElementReferenceException.class).</p>
 
-    <p><b>What is a major difference between instantiating new FluentWait<>(driver) vs new WebDriverWait(driver, duration)?</b><br>
-    new WebDriverWait() automatically ignores NoSuchElementException (via NotFoundException), whereas new FluentWait<>(driver) ignores zero exceptions by default until you call .ignoring(NoSuchElementException.class).</p>
+    <p><b>What is a major difference between instantiating new FluentWait&lt;&gt;(driver) vs new WebDriverWait(driver, duration)?</b><br>
+    new WebDriverWait() automatically ignores NoSuchElementException (via NotFoundException), whereas new FluentWait&lt;&gt;(driver) ignores zero exceptions by default until you call .ignoring(NoSuchElementException.class).</p>
 
     <h3>How it works</h3>
-    <p><b>What criteria does FluentWait.until(Function<T, V>) use to decide that a condition is satisfied?</b><br>
+    <p><b>What criteria does FluentWait.until(Function&lt;T, V&gt;) use to decide that a condition is satisfied?</b><br>
     until() considers the condition satisfied as soon as the Function returns either (a) a non-null Object (when the return type is not Boolean) or (b) Boolean.TRUE (when the return type is Boolean), without throwing an exception.</p>
 
     <p><b>What happens if the lambda inside FluentWait.until() throws an exception that is NOT in the .ignoring() list?</b><br>
     FluentWait does not wait for the timeout; it immediately re-throws that unignored exception and aborts the wait loop.</p>
 
-    <p><b>Why is FluentWait<T> parameterized with a generic type <T> instead of hardcoded to WebDriver?</b><br>
-    Parameterizing <T> allows FluentWait to poll any object, such as new FluentWait<File>(downloadedFile) to poll file.exists() && file.length() > 0 without needing a WebDriver reference.</p>
+    <p><b>Why is FluentWait&lt;T&gt; parameterized with a generic type &lt;T&gt; instead of hardcoded to WebDriver?</b><br>
+    Parameterizing &lt;T&gt; allows FluentWait to poll any object, such as new FluentWait&lt;File&gt;(downloadedFile) to poll file.exists() && file.length() &gt; 0 without needing a WebDriver reference.</p>
 
     <h3>Real situations</h3>
     <p><b>How do you use FluentWait to wait for a file download to complete on disk?</b><br>
-    Create File file = new File(downloadPath); and run new FluentWait<>(file).withTimeout(Duration.ofSeconds(30)).pollingEvery(Duration.ofSeconds(1)).until(f -> f.exists() && f.length() > 0).</p>
+    Create File file = new File(downloadPath); and run new FluentWait&lt;&gt;(file).withTimeout(Duration.ofSeconds(30)).pollingEvery(Duration.ofSeconds(1)).until(f -&gt; f.exists() && f.length() &gt; 0).</p>
 
     <p><b>When should you increase pollingEvery() to 2 or 3 seconds instead of the default 500ms?</b><br>
     When waiting for a slow backend batch job or report generation that takes 30 to 60 seconds, polling every 2–3 seconds reduces unnecessary HTTP traffic to the Selenium Grid node.</p>
@@ -154,20 +154,20 @@ public class FluentWaitExample { // Declares class
 
     <h3>Troubleshooting</h3>
     <p><b>Why did my FluentWait fail immediately at 0ms with NoSuchElementException instead of waiting 10 seconds?</b><br>
-    You instantiated new FluentWait<>(driver) without calling .ignoring(NoSuchElementException.class). Add .ignoring(NoSuchElementException.class) so missing elements trigger a retry poll.</p>
+    You instantiated new FluentWait&lt;&gt;(driver) without calling .ignoring(NoSuchElementException.class). Add .ignoring(NoSuchElementException.class) so missing elements trigger a retry poll.</p>
 
     <p><b>Why did FluentWait hang for 30 seconds on a typo in an XPath expression?</b><br>
     The engineer called .ignoring(WebDriverException.class) or .ignoring(Exception.class), which swallowed InvalidSelectorException on every poll until the 30-second timeout expired. Only ignore specific transient exceptions.</p>
 
     <p><b>How do you make TimeoutException logs easier to debug in CI reports?</b><br>
-    Always chain .withMessage(() -> "Failed waiting for order status on URL: " + driver.getCurrentUrl()) so the exact failure context is printed in the stack trace.</p>
+    Always chain .withMessage(() -&gt; "Failed waiting for order status on URL: " + driver.getCurrentUrl()) so the exact failure context is printed in the stack trace.</p>
 
     <h3>Design choices</h3>
-    <p><b>Should you use FluentWait<WebDriver> or WebDriverWait for standard UI waits?</b><br>
-    Use WebDriverWait for 95% of UI waits because it is concise and already ignores NoSuchElementException. Use FluentWait<T> when polling non-WebDriver objects (like File or API clients) or custom polling profiles.</p>
+    <p><b>Should you use FluentWait&lt;WebDriver&gt; or WebDriverWait for standard UI waits?</b><br>
+    Use WebDriverWait for 95% of UI waits because it is concise and already ignores NoSuchElementException. Use FluentWait&lt;T&gt; when polling non-WebDriver objects (like File or API clients) or custom polling profiles.</p>
 
-    <p><b>Why does withMessage(Supplier<String>) accept a Supplier lambda in addition to a plain String?</b><br>
-    Passing a Supplier<String> lambda (such as () -> "Current text was: " + el.getText()) defers string evaluation until a timeout actually occurs, avoiding unnecessary string concatenation on passing waits.</p>
+    <p><b>Why does withMessage(Supplier&lt;String&gt;) accept a Supplier lambda in addition to a plain String?</b><br>
+    Passing a Supplier&lt;String&gt; lambda (such as () -&gt; "Current text was: " + el.getText()) defers string evaluation until a timeout actually occurs, avoiding unnecessary string concatenation on passing waits.</p>
 
     <p><b>How do you ignore multiple exceptions cleanly in FluentWait?</b><br>
     Either chain multiple .ignoring(Ex1.class).ignoring(Ex2.class) calls or pass a collection to .ignoreAll(List.of(NoSuchElementException.class, StaleElementReferenceException.class)).</p>
@@ -176,11 +176,11 @@ public class FluentWaitExample { // Declares class
   <section id="quick-answers">
     <h2>Quick answers</h2>
     <ol>
-      <li><b>Which interface does FluentWait implement?</b> org.openqa.selenium.support.ui.Wait<T>.</li>
+      <li><b>Which interface does FluentWait implement?</b> org.openqa.selenium.support.ui.Wait&lt;T&gt;.</li>
       <li><b>Does raw FluentWait ignore NoSuchElementException by default?</b> No, you must explicitly chain .ignoring(NoSuchElementException.class).</li>
       <li><b>Which method sets the check frequency in FluentWait?</b> .pollingEvery(Duration).</li>
-      <li><b>Which method adds a custom diagnostic message on timeout?</b> .withMessage(String or Supplier<String>).</li>
-      <li><b>Can FluentWait poll a java.io.File object?</b> Yes, FluentWait<T> is generic and can poll any object type T.</li>
+      <li><b>Which method adds a custom diagnostic message on timeout?</b> .withMessage(String or Supplier&lt;String&gt;).</li>
+      <li><b>Can FluentWait poll a java.io.File object?</b> Yes, FluentWait&lt;T&gt; is generic and can poll any object type T.</li>
     </ol>
   </section>
 

@@ -79,8 +79,8 @@ public class BiDiFeaturesExample { // Declares class
         options.enableBiDi(); // Enables W3C WebDriver BiDi WebSocket
 
         WebDriver driver = new ChromeDriver(options); // Starts BiDi-enabled Chrome session
-        List<ConsoleLogEntry> consoleLogs = new CopyOnWriteArrayList<>(); // Thread-safe list for console logs
-        List<JavascriptLogEntry> jsExceptions = new CopyOnWriteArrayList<>(); // Thread-safe list for JS errors
+        List&lt;ConsoleLogEntry&gt; consoleLogs = new CopyOnWriteArrayList&lt;&gt;(); // Thread-safe list for console logs
+        List&lt;JavascriptLogEntry&gt; jsExceptions = new CopyOnWriteArrayList&lt;&gt;(); // Thread-safe list for JS errors
 
         try (LogInspector logInspector = new LogInspector(driver)) { // Opens auto-closeable LogInspector
             logInspector.onConsoleEntry(consoleLogs::add); // Subscribes to all console.* entries
@@ -128,10 +128,10 @@ public class BiDiFeaturesExample { // Declares class
     
     <h3>Basics</h3>
     <p><b>How do you capture browser console.log and console.error messages in Selenium 4?</b><br>
-    Enable BiDi with options.enableBiDi(), instantiate new LogInspector(driver), and register a callback via logInspector.onConsoleEntry(entry -> System.out.println(entry.getText())).</p>
+    Enable BiDi with options.enableBiDi(), instantiate new LogInspector(driver), and register a callback via logInspector.onConsoleEntry(entry -&gt; System.out.println(entry.getText())).</p>
 
     <p><b>How do you detect uncaught JavaScript exceptions thrown by the web application during a Selenium test?</b><br>
-    Use LogInspector.onJavaScriptException(entry -> ...). Whenever the page throws an uncaught TypeError or ReferenceError in the browser console, the callback receives a JavascriptLogEntry with the message and stack trace.</p>
+    Use LogInspector.onJavaScriptException(entry -&gt; ...). Whenever the page throws an uncaught TypeError or ReferenceError in the browser console, the callback receives a JavascriptLogEntry with the message and stack trace.</p>
 
     <p><b>How do you handle an HTTP Basic Authentication dialog in Selenium 4?</b><br>
     Cast driver to HasAuthentication and register credentials before navigating: ((HasAuthentication) driver).register(UsernameAndPassword.of("admin", "secret")); driver.get("https://...");.</p>
@@ -141,14 +141,14 @@ public class BiDiFeaturesExample { // Declares class
     BiDi WebSocket callbacks execute asynchronously on a background listener thread while your @Test method runs on the main test thread. CopyOnWriteArrayList prevents ConcurrentModificationException when iterating or asserting on the list.</p>
 
     <p><b>How do you wait deterministically for a single BiDi console log or network event in a test?</b><br>
-    Create a CompletableFuture<ConsoleLogEntry> future = new CompletableFuture<>(); pass future::complete to logInspector.onConsoleEntry(future::complete), trigger the click, and call ConsoleLogEntry entry = future.get(5, TimeUnit.SECONDS).</p>
+    Create a CompletableFuture&lt;ConsoleLogEntry&gt; future = new CompletableFuture&lt;&gt;(); pass future::complete to logInspector.onConsoleEntry(future::complete), trigger the click, and call ConsoleLogEntry entry = future.get(5, TimeUnit.SECONDS).</p>
 
     <p><b>How do you restrict HasAuthentication credentials so they are only sent to a specific domain?</b><br>
-    Use the overloaded register(Predicate<URI>, Supplier<Credentials>) method, such as ((HasAuthentication) driver).register(uri -> uri.getHost().contains("staging.example.com"), UsernameAndPassword.of("user", "pass")).</p>
+    Use the overloaded register(Predicate&lt;URI&gt;, Supplier&lt;Credentials&gt;) method, such as ((HasAuthentication) driver).register(uri -&gt; uri.getHost().contains("staging.example.com"), UsernameAndPassword.of("user", "pass")).</p>
 
     <h3>Real situations</h3>
     <p><b>How can a QA team automatically fail any UI test if the application logs a HTTP 500 response in the background?</b><br>
-    Register a BiDi Network.onResponseCompleted listener in @BeforeMethod that records any response where response.getStatus() >= 500, and assert in @AfterMethod that the error list is empty.</p>
+    Register a BiDi Network.onResponseCompleted listener in @BeforeMethod that records any response where response.getStatus() &gt;= 500, and assert in @AfterMethod that the error list is empty.</p>
 
     <p><b>Why is LogInspector preferred over the legacy driver.manage().logs().get(LogType.BROWSER) API?</b><br>
     The legacy LogType.BROWSER API was never part of the W3C standard, did not work in Firefox, and required polling. BiDi LogInspector is an official W3C standard that streams logs in real time across Chrome, Firefox, and Edge.</p>
@@ -158,7 +158,7 @@ public class BiDiFeaturesExample { // Declares class
 
     <h3>Troubleshooting</h3>
     <p><b>Why was my consoleLogs list still empty immediately after clicking the button that calls console.log()?</b><br>
-    WebSocket frames arrive asynchronously a few milliseconds after the click command returns. Wrap your assertion in new WebDriverWait(driver, Duration.ofSeconds(5)).until(d -> !consoleLogs.isEmpty()).</p>
+    WebSocket frames arrive asynchronously a few milliseconds after the click command returns. Wrap your assertion in new WebDriverWait(driver, Duration.ofSeconds(5)).until(d -&gt; !consoleLogs.isEmpty()).</p>
 
     <p><b>Why did LogInspector throw BiDiException when running on Firefox or Chrome?</b><br>
     You forgot to call options.enableBiDi() on FirefoxOptions or ChromeOptions before instantiating the driver.</p>

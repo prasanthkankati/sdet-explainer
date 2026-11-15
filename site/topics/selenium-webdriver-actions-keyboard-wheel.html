@@ -140,7 +140,7 @@ public class KeyboardWheelActionsExample { // Declares class
     <p><b>What happens if you call keyDown(Keys.SHIFT) in a test and forget to call keyUp(Keys.SHIFT)?</b><br>
     The virtual keyboard state inside the browser session keeps the Shift key depressed for all subsequent commands in that session, causing later sendKeys() calls to type in uppercase and clicks to behave as Shift+Clicks.</p>
 
-    <p><b>How do you scroll inside a specific scrollable <div> or data grid instead of scrolling the main window?</b><br>
+    <p><b>How do you scroll inside a specific scrollable &lt;div&gt; or data grid instead of scrolling the main window?</b><br>
     Create a ScrollOrigin anchored to that container: WheelInput.ScrollOrigin origin = WheelInput.ScrollOrigin.fromElement(scrollableDiv); and call new Actions(driver).scrollFromOrigin(origin, 0, 400).perform().</p>
 
     <p><b>How do you write a cross-platform Select-All (Ctrl+A / Cmd+A) keyboard shortcut in Selenium Java?</b><br>
@@ -168,7 +168,7 @@ public class KeyboardWheelActionsExample { // Declares class
 
     <h3>Design choices</h3>
     <p><b>When should you use WebElement.sendKeys(Keys.chord(Keys.CONTROL, "a")) versus Actions.keyDown(Keys.CONTROL)?</b><br>
-    Use Keys.chord() when sending a quick shortcut directly to a single <input> element. Use Actions.keyDown() when combining keyboard modifiers with mouse clicks (such as Shift+Click or Ctrl+Click across multiple elements).</p>
+    Use Keys.chord() when sending a quick shortcut directly to a single &lt;input&gt; element. Use Actions.keyDown() when combining keyboard modifiers with mouse clicks (such as Shift+Click or Ctrl+Click across multiple elements).</p>
 
     <p><b>Why did W3C WebDriver add a dedicated WheelInput device in Selenium 4.2?</b><br>
     Previously, engineers had to fall back to raw JavascriptExecutor scripts for scrolling. Adding WheelInput standardized hardware-accurate touchpad and mouse-wheel scrolling across Chromium, Firefox, and Safari.</p>
@@ -183,7 +183,7 @@ public class KeyboardWheelActionsExample { // Declares class
       <li><b>Which keys work with keyDown() and keyUp()?</b> Modifier keys only: SHIFT, CONTROL, ALT, COMMAND/META.</li>
       <li><b>How do you scroll down 400px natively in Selenium 4?</b> new Actions(driver).scrollByAmount(0, 400).perform().</li>
       <li><b>How do you scroll until an element is in view?</b> new Actions(driver).scrollToElement(element).perform().</li>
-      <li><b>How do you scroll inside a specific overflow <div>?</b> Use actions.scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(div), 0, 300).perform().</li>
+      <li><b>How do you scroll inside a specific overflow &lt;div&gt;?</b> Use actions.scrollFromOrigin(WheelInput.ScrollOrigin.fromElement(div), 0, 300).perform().</li>
       <li><b>How do you release all stuck modifier keys?</b> Call ((Interactive) driver).resetInputState().</li>
     </ol>
   </section>

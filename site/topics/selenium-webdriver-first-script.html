@@ -152,7 +152,7 @@ public class FirstScriptExample { // Declares test class
     Once driver.quit() executes, the session ID is destroyed and the driver server process is terminated. Any subsequent call on that same WebDriver reference has no active session to communicate with and throws NoSuchSessionException.</p>
 
     <p><b>Why did driver.findElement() throw NoSuchElementException even though the element is visible on the screen?</b><br>
-    The script likely executed findElement() a few milliseconds before an asynchronous AJAX call finished inserting the element into the DOM, or the element resides inside an <iframe>. Add an explicit wait or switch into the frame first.</p>
+    The script likely executed findElement() a few milliseconds before an asynchronous AJAX call finished inserting the element into the DOM, or the element resides inside an &lt;iframe&gt;. Add an explicit wait or switch into the frame first.</p>
 
     <p><b>What happens if driver.close() is called when only one browser tab is open?</b><br>
     The single browser window closes, but the background chromedriver binary process remains running in memory until driver.quit() is called.</p>

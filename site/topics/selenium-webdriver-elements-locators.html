@@ -31,7 +31,7 @@
       <li>The 8 traditional By strategies are id, name, className, tagName, linkText, partialLinkText, cssSelector, and xpath.</li>
       <li>Under the W3C WebDriver specification, By.id, By.name, and By.className are internally converted into CSS selector queries before transmission.</li>
       <li>driver.findElement(By) returns the first matching WebElement or throws NoSuchElementException if zero matches exist.</li>
-      <li>driver.findElements(By) returns a List<WebElement> of all matching elements, or an empty list (size 0) if none match, never throwing NoSuchElementException.</li>
+      <li>driver.findElements(By) returns a List&lt;WebElement&gt; of all matching elements, or an empty list (size 0) if none match, never throwing NoSuchElementException.</li>
       <li>Passing compound class names with spaces (such as By.className("btn btn-primary")) throws InvalidSelectorException; use By.cssSelector(".btn.btn-primary") instead.</li>
     </ol>
   </section>
@@ -47,8 +47,8 @@
         <tr><td><b>Name</b></td><td>By.name("my-text")</td><td>css selector: *[name='my-text']</td><td>Form input controls with stable name attributes.</td></tr>
         <tr><td><b>Class Name</b></td><td>By.className("form-control")</td><td>css selector: .form-control</td><td>Single class token matching (cannot contain spaces).</td></tr>
         <tr><td><b>Tag Name</b></td><td>By.tagName("a")</td><td>css selector: a</td><td>Fetching collections of links, rows (tr), or headings.</td></tr>
-        <tr><td><b>Link Text</b></td><td>By.linkText("Selenium")</td><td>link text (exact visible <a> text)</td><td>Anchor <a> elements with known exact text.</td></tr>
-        <tr><td><b>Partial Link Text</b></td><td>By.partialLinkText("Doc")</td><td>partial link text (substring match)</td><td>Anchor <a> elements with dynamic prefix/suffix text.</td></tr>
+        <tr><td><b>Link Text</b></td><td>By.linkText("Selenium")</td><td>link text (exact visible &lt;a&gt; text)</td><td>Anchor &lt;a&gt; elements with known exact text.</td></tr>
+        <tr><td><b>Partial Link Text</b></td><td>By.partialLinkText("Doc")</td><td>partial link text (substring match)</td><td>Anchor &lt;a&gt; elements with dynamic prefix/suffix text.</td></tr>
         <tr><td><b>CSS Selector</b></td><td>By.cssSelector("input[type='text']")</td><td>css selector (native)</td><td>High-speed attribute, hierarchy, prefix (^=), suffix ($=), and substring (*=) matching.</td></tr>
         <tr><td><b>XPath</b></td><td>By.xpath("//button[text()='Submit']")</td><td>xpath (native)</td><td>Text matching on non-link elements and upward DOM traversal (parent/ancestor).</td></tr>
       </tbody>
@@ -60,7 +60,7 @@
     <ol>
       <li>Follow the LOC methodology: List candidate attributes in DevTools, Optimize the selector for stability, and Check uniqueness (1 of 1 match).</li>
       <li>Construct a By object using one of the eight static factory methods on org.openqa.selenium.By.</li>
-      <li>Pass the By object to driver.findElement(By) to retrieve a single WebElement or driver.findElements(By) to retrieve a List<WebElement>.</li>
+      <li>Pass the By object to driver.findElement(By) to retrieve a single WebElement or driver.findElements(By) to retrieve a List&lt;WebElement&gt;.</li>
       <li>The browser driver evaluates the selector against the live DOM and returns the unique element reference ID.</li>
     </ol>
     <p>Demonstrating traditional locators and findElement vs findElements:</p>
@@ -81,7 +81,7 @@ public class LocatorsExample { // Declares class
             WebElement byName = driver.findElement(By.name("my-password")); // 2. Finds password input by name
             WebElement byCss = driver.findElement(By.cssSelector("button[type='submit']")); // 3. Finds button by CSS
             WebElement byXpath = driver.findElement(By.xpath("//a[normalize-space()='Return to index']")); // 4. Finds link by XPath
-            List<WebElement> inputs = driver.findElements(By.tagName("input")); // 5. Finds all input tags as a List
+            List&lt;WebElement&gt; inputs = driver.findElements(By.tagName("input")); // 5. Finds all input tags as a List
             System.out.println("Total inputs found: " + inputs.size()); // Prints count of matching inputs
         } finally { // Teardown block
             driver.quit(); // Closes browser cleanly
@@ -122,7 +122,7 @@ public class LocatorsExample { // Declares class
     The eight strategies on the By class are By.id(), By.name(), By.className(), By.tagName(), By.linkText(), By.partialLinkText(), By.cssSelector(), and By.xpath().</p>
 
     <p><b>What is the difference between driver.findElement() and driver.findElements()?</b><br>
-    findElement() returns the first matching WebElement or throws NoSuchElementException if none is found. findElements() returns a List<WebElement> containing all matches, or an empty list (size 0) if no element matches, without throwing an exception.</p>
+    findElement() returns the first matching WebElement or throws NoSuchElementException if none is found. findElements() returns a List&lt;WebElement&gt; containing all matches, or an empty list (size 0) if no element matches, without throwing an exception.</p>
 
     <p><b>What does the LOC methodology stand for when creating locators?</b><br>
     LOC stands for List candidates (inspecting available DOM attributes), Optimize selector (choosing the shortest, most stable attribute like id or data-testid), and Check uniqueness (verifying the selector matches 1 of 1 in browser DevTools).</p>
@@ -142,7 +142,7 @@ public class LocatorsExample { // Declares class
     Use XPath when you need to locate an element by its exact visible text on non-anchor tags (such as //button[normalize-space()='Add to cart']) or when traversing upward in the DOM to a parent or ancestor node (such as //input[@id='email']/ancestor::div[@class='form-group']).</p>
 
     <p><b>How do you verify that an error banner is NOT present on the page without throwing an exception?</b><br>
-    Call List<WebElement> banners = driver.findElements(By.id("error-banner")) and assert Assert.assertTrue(banners.isEmpty()). Because findElements() returns an empty list on zero matches, no exception is thrown.</p>
+    Call List&lt;WebElement&gt; banners = driver.findElements(By.id("error-banner")) and assert Assert.assertTrue(banners.isEmpty()). Because findElements() returns an empty list on zero matches, no exception is thrown.</p>
 
     <p><b>How do you scope an element search inside a specific parent container or table row?</b><br>
     First locate the parent WebElement (such as WebElement row = driver.findElement(By.id("row-1"))), and then call row.findElement(By.cssSelector(".delete-btn")) on that WebElement instead of on driver.</p>
@@ -162,7 +162,7 @@ public class LocatorsExample { // Declares class
     Prioritize unique static IDs (By.id) and dedicated test attributes (data-testid / data-qa via By.cssSelector) first, followed by By.name, semantic By.cssSelector, and finally relative By.xpath when text or upward traversal is required.</p>
 
     <p><b>Why are absolute XPaths (/html/body/div[3]/div[2]/button) banned in production automation?</b><br>
-    Any minor UI layout change—such as wrapping a banner in a new <div>—shifts the hierarchy and breaks every absolute XPath on the page. Relative selectors anchored to semantic attributes survive layout refactoring.</p>
+    Any minor UI layout change—such as wrapping a banner in a new &lt;div&gt;—shifts the hierarchy and breaks every absolute XPath on the page. Relative selectors anchored to semantic attributes survive layout refactoring.</p>
 
     <p><b>Why should locators be stored as By fields rather than WebElement fields when not using PageFactory?</b><br>
     Storing By objects keeps Page Objects lightweight and resolves the fresh WebElement from the DOM at the exact moment an action method is called, reducing StaleElementReferenceException.</p>
@@ -172,7 +172,7 @@ public class LocatorsExample { // Declares class
     <h2>Quick answers</h2>
     <ol>
       <li><b>How many traditional locator strategies exist on By?</b> Eight: id, name, className, tagName, linkText, partialLinkText, cssSelector, and xpath.</li>
-      <li><b>What does findElements() return when nothing matches?</b> An empty List<WebElement> (size 0), never throwing NoSuchElementException.</li>
+      <li><b>What does findElements() return when nothing matches?</b> An empty List&lt;WebElement&gt; (size 0), never throwing NoSuchElementException.</li>
       <li><b>How do you match multiple classes in CSS?</b> Chain them with dots: By.cssSelector(".btn.btn-primary").</li>
       <li><b>How do you scope an XPath search inside a parent WebElement?</b> Start the XPath with a dot: parent.findElement(By.xpath(".//span")).</li>
       <li><b>Which CSS operator matches a prefix?</b> The ^= operator (e.g., input[id^='prefix_']).</li>

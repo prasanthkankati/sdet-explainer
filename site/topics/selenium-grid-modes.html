@@ -46,7 +46,7 @@
         <tr><td><b>Router</b></td><td>Single entry point (port 4444) receiving all client requests.</td><td>Forwards new session requests to Queue; routes active session commands via Session Map.</td></tr>
         <tr><td><b>New Session Queue</b></td><td>Holds incoming POST /session requests in FIFO/priority order.</td><td>Polled by Distributor until a matching Node slot opens.</td></tr>
         <tr><td><b>Distributor</b></td><td>Tracks all registered Nodes and their available browser slots.</td><td>Assigns queued session requests to a matching Node and records in Session Map.</td></tr>
-        <tr><td><b>Session Map</b></td><td>Key-value store mapping SessionId -> Node URI.</td><td>Allows Router to forward commands directly to the hosting Node.</td></tr>
+        <tr><td><b>Session Map</b></td><td>Key-value store mapping SessionId -&gt; Node URI.</td><td>Allows Router to forward commands directly to the hosting Node.</td></tr>
         <tr><td><b>Event Bus</b></td><td>ZeroMQ message broker for internal component communication.</td><td>Avoids slow HTTP polling between Hub and Nodes.</td></tr>
         <tr><td><b>Node</b></td><td>Host machine or Docker container where browsers actually run.</td><td>Registers capabilities with Distributor and executes browser sessions.</td></tr>
       </tbody>
@@ -58,7 +58,7 @@
     <ol>
       <li>The Java test calls new RemoteWebDriver(new URL("http://grid:4444"), chromeOptions), sending a POST /session request to the Grid Router.</li>
       <li>Because the request has no SessionId yet, the Router places it into the New Session Queue.</li>
-      <li>The Distributor pulls the request from the Queue, finds a registered Node with an available Chrome slot, starts the session on that Node, and writes the SessionId -> Node URI mapping into the Session Map.</li>
+      <li>The Distributor pulls the request from the Queue, finds a registered Node with an available Chrome slot, starts the session on that Node, and writes the SessionId -&gt; Node URI mapping into the Session Map.</li>
       <li>For all subsequent commands (get, findElement, click), the Router looks up the SessionId in the Session Map and forwards the request directly to that Node.</li>
     </ol>
     <p>CLI commands to launch Selenium Grid 4 and Java RemoteWebDriver connection:</p>
@@ -96,7 +96,7 @@ public class GridExecutionExample { // Declares class
   <section id="common-mistakes">
     <h2>Common mistakes</h2>
     <ol>
-      <li>Running parallel TestNG tests against Selenium Grid while sharing a single non-thread-safe WebDriver variable across threads; fix by isolating each thread's RemoteWebDriver in ThreadLocal<WebDriver>.</li>
+      <li>Running parallel TestNG tests against Selenium Grid while sharing a single non-thread-safe WebDriver variable across threads; fix by isolating each thread's RemoteWebDriver in ThreadLocal&lt;WebDriver&gt;.</li>
       <li>Omitting driver.quit() when a test fails, which leaves the Grid Node slot occupied until the 300-second session timeout expires, starving queued tests.</li>
       <li>Setting TestNG thread-count=50 when the Selenium Grid only has 5 total browser slots, causing tests at the back of the New Session Queue to time out if execution takes longer than --session-request-timeout.</li>
     </ol>

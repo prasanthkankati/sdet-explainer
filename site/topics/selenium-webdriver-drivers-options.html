@@ -75,7 +75,7 @@ public class BrowserOptionsExample { // Declares class
         options.addArguments("--headless=new"); // Enables modern Chromium headless mode
         options.addArguments("--window-size=1920,1080"); // Sets fixed desktop viewport resolution
 
-        Map<String, Object> prefs = new HashMap<>(); // Creates preferences map
+        Map&lt;String, Object&gt; prefs = new HashMap&lt;&gt;(); // Creates preferences map
         prefs.put("download.prompt_for_download", false); // Disables save-as dialog prompt
         options.setExperimentalOption("prefs", prefs); // Attaches custom user prefs to ChromeOptions
 
@@ -135,7 +135,7 @@ public class BrowserOptionsExample { // Declares class
     Selenium packages standard W3C settings at the top level of the capabilities JSON and nests Chromium-specific arguments, extensions, and prefs inside the vendor-prefixed goog:chromeOptions object.</p>
 
     <p><b>How do you configure Chrome to automatically download files to a custom directory without showing a Save dialog?</b><br>
-    Create a Map<String, Object> with "download.default_directory" set to your absolute folder path and "download.prompt_for_download" set to false, then pass it via options.setExperimentalOption("prefs", prefs).</p>
+    Create a Map&lt;String, Object&gt; with "download.default_directory" set to your absolute folder path and "download.prompt_for_download" set to false, then pass it via options.setExperimentalOption("prefs", prefs).</p>
 
     <h3>Real situations</h3>
     <p><b>Why do tests that pass locally in headed Chrome often fail with ElementNotInteractableException in CI headless mode?</b><br>

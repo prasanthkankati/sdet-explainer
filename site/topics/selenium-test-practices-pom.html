@@ -176,8 +176,8 @@ public class LoginPage { // Models the Login page as a reusable Java class
     <p><b>Why should @Test classes never import org.openqa.selenium.By or org.openqa.selenium.WebElement?</b><br>
     Enforcing an architectural rule (e.g., via ArchUnit) that @Test classes cannot import By or WebElement guarantees 100% of DOM selectors remain encapsulated inside Page Objects.</p>
 
-    <p><b>What is Selenium's LoadableComponent<T> pattern?</b><br>
-    LoadableComponent<T> is a support base class that standardizes two methods on every Page Object: load() (navigates to the page) and isLoaded() (asserts that key page elements are ready), called via new LoginPage(driver).get().</p>
+    <p><b>What is Selenium's LoadableComponent&lt;T&gt; pattern?</b><br>
+    LoadableComponent&lt;T&gt; is a support base class that standardizes two methods on every Page Object: load() (navigates to the page) and isLoaded() (asserts that key page elements are ready), called via new LoginPage(driver).get().</p>
   </section>
 
   <section id="quick-answers">

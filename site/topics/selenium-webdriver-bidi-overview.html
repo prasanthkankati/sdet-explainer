@@ -28,7 +28,7 @@
   <section id="key-points">
     <h2>Key points</h2>
     <ol>
-      <li>Classic WebDriver uses unidirectional HTTP (Client -> Driver -> Browser), requiring polling to detect browser changes.</li>
+      <li>Classic WebDriver uses unidirectional HTTP (Client -&gt; Driver -&gt; Browser), requiring polling to detect browser changes.</li>
       <li>WebDriver BiDi uses a full-duplex WebSocket connection, allowing the browser to push real-time events (logs, network traffic, crashes) to Java immediately.</li>
       <li>To enable WebDriver BiDi in Selenium 4, call options.enableBiDi() (or options.setCapability("webSocketUrl", true)) before creating the driver.</li>
       <li>Unlike Chrome DevTools Protocol (CDP), which is proprietary to Chromium and changes with every Chrome version, WebDriver BiDi is a stable, vendor-neutral W3C standard supported by Firefox, Chrome, and Edge.</li>

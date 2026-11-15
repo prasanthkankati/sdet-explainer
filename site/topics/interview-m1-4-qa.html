@@ -25,95 +25,95 @@
       7. Absence-of-errors is a fallacy.</li>
 
       <li><b>Explain Principle #1 ("Testing shows the presence of defects, not their absence"). Why is it important when talking to management?</b><br>
-      Testing proves that defects exist when a test fails, but passing tests can never prove that zero defects exist in the software. It sets realistic expectations with management so QA signs off based on **verified risk coverage**, never a false promise of "100% bug-free software".</li>
+      Testing proves that defects exist when a test fails, but passing tests can never prove that zero defects exist in the software. It sets realistic expectations with management so QA signs off based on <b>verified risk coverage</b>, never a false promise of "100% bug-free software".</li>
 
       <li><b>Explain Principle #2 ("Exhaustive testing is impossible"). What techniques do we use because of this principle?</b><br>
-      Testing every possible input and precondition combination is mathematically impossible. Because of this principle, QA engineers use **Black-Box test reduction techniques**—**Equivalence Partitioning (EP)**, **Boundary Value Analysis (BVA)**, **Decision Tables**, and **Risk-Based Testing**—to get maximum defect detection from a finite number of tests.</li>
+      Testing every possible input and precondition combination is mathematically impossible. Because of this principle, QA engineers use <b>Black-Box test reduction techniques</b>—<b>Equivalence Partitioning (EP)</b>, <b>Boundary Value Analysis (BVA)</b>, <b>Decision Tables</b>, and <b>Risk-Based Testing</b>—to get maximum defect detection from a finite number of tests.</li>
 
       <li><b>Explain Principle #3 ("Early testing saves time and money"). When is the earliest moment testing can begin?</b><br>
-      Testing begins the moment the first requirement draft or User Story is written (**Phase 1: Requirement Analysis**). Catching a requirement defect before coding starts costs **1x**, compared to **10x** in QA execution and **100x** in production.</li>
+      Testing begins the moment the first requirement draft or User Story is written (<b>Phase 1: Requirement Analysis</b>). Catching a requirement defect before coding starts costs <b>1x</b>, compared to <b>10x</b> in QA execution and <b>100x</b> in production.</li>
 
       <li><b>Explain Principle #4 ("Defects cluster together"). What mathematical law is this based on?</b><br>
-      It is based on the **Pareto Principle (80/20 Rule)**: roughly **80% of defects are found in 20% of the application's modules**—typically modules with high cyclomatic complexity, frequent code churn, third-party integrations, or legacy code.</li>
+      It is based on the <b>Pareto Principle (80/20 Rule)</b>: roughly <b>80% of defects are found in 20% of the application's modules</b>—typically modules with high cyclomatic complexity, frequent code churn, third-party integrations, or legacy code.</li>
 
       <li><b>Explain Principle #5 ("Pesticide Paradox") and who coined the term.</b><br>
-      Coined by Boris Beizer (1990): just as insects develop resistance when farmers spray the same pesticide repeatedly, **running the exact same test cases with the same test data over and over stops finding new bugs** once those specific paths have been fixed.</li>
+      Coined by Boris Beizer (1990): just as insects develop resistance when farmers spray the same pesticide repeatedly, <b>running the exact same test cases with the same test data over and over stops finding new bugs</b> once those specific paths have been fixed.</li>
 
       <li><b>How do you overcome the Pesticide Paradox in manual and automated testing?</b><br>
       1. Regularly review and add new test cases for newly discovered edge cases and production patterns.<br>
       2. Use dynamic/randomized test data instead of static hardcoded values.<br>
-      3. Supplement scripted regression with fresh **Exploratory Testing** sessions.</li>
+      3. Supplement scripted regression with fresh <b>Exploratory Testing</b> sessions.</li>
 
       <li><b>Explain Principle #6 ("Testing is context-dependent") with two contrasting industry examples.</b><br>
       You do not test a hospital infusion pump the same way you test a restaurant menu website. The medical device requires formal inspections, 100% branch/boundary coverage, hardware-in-the-loop simulation, and FDA compliance; the restaurant website needs fast cross-browser UI and mobile responsiveness checks.</li>
 
       <li><b>Explain Principle #7 ("Absence-of-errors is a fallacy"). How does it connect to Verification vs Validation?</b><br>
-      Even if software has **zero technical code bugs** (100% verified against the spec), it is still a total failure if it is unusable or **does not solve the user's business need** (fails Validation).</li>
+      Even if software has <b>zero technical code bugs</b> (100% verified against the spec), it is still a total failure if it is unusable or <b>does not solve the user's business need</b> (fails Validation).</li>
 
       <li><b>What is Shift-Left Testing, and which of the 7 Testing Principles is its foundation?</b><br>
-      Shift-Left Testing is the practice of moving quality and testing activities earlier ("to the left") in the SDLC—testing requirements, design, unit/API layers, and Pull Requests before full UI builds are deployed. Its direct foundation is **Principle #3: Early testing saves time and money**.</li>
+      Shift-Left Testing is the practice of moving quality and testing activities earlier ("to the left") in the SDLC—testing requirements, design, unit/API layers, and Pull Requests before full UI builds are deployed. Its direct foundation is <b>Principle #3: Early testing saves time and money</b>.</li>
     </ol></section>
 
   <section><h2>Tier 2: Why / Why Not &amp; Deep Comparisons (Q11&ndash;Q18)</h2>
     <ol start="11">
       <li><b>If Principle #5 says old tests stop finding new bugs (Pesticide Paradox), why don't we delete our old Selenium Regression tests every sprint?</b><br>
-      Because automated regression tests serve a **different purpose** than hunting new feature bugs: they act as a **safety net to ensure new code changes didn't break old working paths**. We keep core regression tests to guard existing paths, *while adding* new test scenarios and dynamic data to beat the Pesticide Paradox.</li>
+      Because automated regression tests serve a <b>different purpose</b> than hunting new feature bugs: they act as a <b>safety net to ensure new code changes didn't break old working paths</b>. We keep core regression tests to guard existing paths, *while adding* new test scenarios and dynamic data to beat the Pesticide Paradox.</li>
 
       <li><b>What is the difference between "Defect Clustering" (Principle #4) and the "Pesticide Paradox" (Principle #5)?</b><br>
-      **Defect Clustering** tells you **WHERE** bugs hide (80% of bugs sit in 20% of complex modules). **Pesticide Paradox** tells you **HOW** your test suite ages over time (repeating the same tests on the same paths stops uncovering new bugs).</li>
+      <b>Defect Clustering</b> tells you <b>WHERE</b> bugs hide (80% of bugs sit in 20% of complex modules). <b>Pesticide Paradox</b> tells you <b>HOW</b> your test suite ages over time (repeating the same tests on the same paths stops uncovering new bugs).</li>
 
       <li><b>What is the difference between Shift-Left Testing and Shift-Right Testing?</b><br>
-      **Shift-Left** moves testing *earlier before production* (Requirement reviews, SonarQube, Unit/API tests, PR smoke gates) to prevent defects. **Shift-Right** extends testing *into live production* after deployment (Canary releases, Feature Flags, Synthetic Monitoring, Real User Monitoring [RUM], Chaos Engineering) to validate real-world scale and resilience.</li>
+      <b>Shift-Left</b> moves testing *earlier before production* (Requirement reviews, SonarQube, Unit/API tests, PR smoke gates) to prevent defects. <b>Shift-Right</b> extends testing *into live production* after deployment (Canary releases, Feature Flags, Synthetic Monitoring, Real User Monitoring [RUM], Chaos Engineering) to validate real-world scale and resilience.</li>
 
       <li><b>Why can't AI or 100 parallel Selenium nodes make "Exhaustive Testing" possible today?</b><br>
-      Because combinatorial explosion is exponential ($O(k^n)$), not linear. A form with 20 dropdowns/inputs still has trillions of combinations—even 1,000 parallel cloud browsers cannot brute-force exponential state spaces, nor should they when **BVA, EP, and Pairwise (All-Pairs) testing** catch 98%+ of defects in a fraction of a percent of the runs.</li>
+      Because combinatorial explosion is exponential ($O(k^n)$), not linear. A form with 20 dropdowns/inputs still has trillions of combinations—even 1,000 parallel cloud browsers cannot brute-force exponential state spaces, nor should they when <b>BVA, EP, and Pairwise (All-Pairs) testing</b> catch 98%+ of defects in a fraction of a percent of the runs.</li>
 
       <li><b>How do Principle #1 ("Presence, not absence") and Principle #7 ("Absence-of-errors fallacy") differ?</b><br>
-      **Principle #1** says: *"Even if all tests pass, hidden technical bugs can still exist."* **Principle #7** says: *"Even if zero technical bugs exist, the product still fails if it doesn't meet the user's real business need."*</li>
+      <b>Principle #1</b> says: *"Even if all tests pass, hidden technical bugs can still exist."* <b>Principle #7</b> says: *"Even if zero technical bugs exist, the product still fails if it doesn't meet the user's real business need."*</li>
 
       <li><b>Why does Defect Clustering happen in the same 20% of modules even after developers fix the bugs found in Sprint 1?</b><br>
       Because high-complexity modules (like pricing/checkout/permissions) have dense conditional branches, shared state, and frequent requirement changes in every sprint. Fixing Sprint 1 bugs often introduces side-effect regressions in the same complex class in Sprint 2.</li>
 
       <li><b>What is "Pairwise (All-Pairs) Testing", and which Testing Principle does it solve?</b><br>
-      Pairwise testing is a combinatorial technique based on research showing most multi-parameter bugs are triggered by the interaction of **at most 2 parameters**. It solves **Principle #2 (Exhaustive testing is impossible)** by testing every unique *pair* of input values in ~20 test cases instead of testing all 10,000 full combinations.</li>
+      Pairwise testing is a combinatorial technique based on research showing most multi-parameter bugs are triggered by the interaction of <b>at most 2 parameters</b>. It solves <b>Principle #2 (Exhaustive testing is impossible)</b> by testing every unique *pair* of input values in ~20 test cases instead of testing all 10,000 full combinations.</li>
 
       <li><b>Does Shift-Left Testing mean QA has to write all the Unit Tests?</b><br>
-      **No.** Developers write Unit Tests (`JUnit`/`TestNG`), while QA/SDETs collaborate on defining edge-case unit scenarios, review PRs, write early **API Contract / Integration tests**, and wire automated smoke checks into the PR pipeline.</li>
+      <b>No.</b> Developers write Unit Tests (`JUnit`/`TestNG`), while QA/SDETs collaborate on defining edge-case unit scenarios, review PRs, write early <b>API Contract / Integration tests</b>, and wire automated smoke checks into the PR pipeline.</li>
     </ol></section>
 
   <section><h2>Tier 3: Real-World Tricky &amp; Edge-Case Scenarios (Q19&ndash;Q26)</h2>
     <ol start="19">
       <li><b>[Scenario &mdash; Management Wants to Cut Manual QA Because Automation Passed 100%] Your 400 Selenium tests have passed 100% for the last 5 sprints. Management says: "Automation is catching everything; let's stop manual exploratory testing." How do you answer using the 7 Principles?</b><br>
-      I cite **Principle #5 (Pesticide Paradox)** and **Principle #1 (Presence, not absence)**: a 100% pass rate on a static 400-test regression suite only proves that old scripted paths didn't break; it does *not* test new UX flows, unscripted edge cases, or visual regressions. Automated regression frees QA time *so that* we can perform high-value **Exploratory Testing** and write new tests for fresh features.</li>
+      I cite <b>Principle #5 (Pesticide Paradox)</b> and <b>Principle #1 (Presence, not absence)</b>: a 100% pass rate on a static 400-test regression suite only proves that old scripted paths didn't break; it does *not* test new UX flows, unscripted edge cases, or visual regressions. Automated regression frees QA time *so that* we can perform high-value <b>Exploratory Testing</b> and write new tests for fresh features.</li>
 
       <li><b>[Scenario &mdash; Testing 10 Dropdowns With 10 Options Each] An insurance quote page has 10 dropdowns, each with 10 options ($10^{10} = 10\text{ billion}$ combinations). The PM asks for "100% test coverage of all combinations." How do you respond?</b><br>
-      I explain **Principle #2 (Exhaustive testing is impossible)**: 10 billion combinations at 1 second per test would take **317 years**. Instead, I propose **Equivalence Partitioning + Pairwise (All-Pairs) Testing** + testing the top 20 high-volume business combinations (Principle #4), reducing 10 billion cases to ~100 high-yield automated data-driven tests.</li>
+      I explain <b>Principle #2 (Exhaustive testing is impossible)</b>: 10 billion combinations at 1 second per test would take <b>317 years</b>. Instead, I propose <b>Equivalence Partitioning + Pairwise (All-Pairs) Testing</b> + testing the top 20 high-volume business combinations (Principle #4), reducing 10 billion cases to ~100 high-yield automated data-driven tests.</li>
 
       <li><b>[Scenario &mdash; Production Bug Escapes After 100% Green Regression] A bug escapes to production. In the post-mortem, the Engineering Manager asks: "Why did QA sign off if there was still a bug?" How do you respond professionally?</b><br>
-      Without being defensive, I reference **Principle #1** (testing reduces risk and proves presence of defects along tested paths, never mathematical absence across all possible states), then immediately focus on constructive **Root Cause Analysis**: why wasn't this scenario in our RTM/test suite, and how do we add an automated test for it today so it never escapes again?</li>
+      Without being defensive, I reference <b>Principle #1</b> (testing reduces risk and proves presence of defects along tested paths, never mathematical absence across all possible states), then immediately focus on constructive <b>Root Cause Analysis</b>: why wasn't this scenario in our RTM/test suite, and how do we add an automated test for it today so it never escapes again?</li>
 
       <li><b>[Scenario &mdash; Only 4 Hours to Test a Release] A critical hotfix build lands and you have only 4 hours before release. Your full regression suite has 800 manual + automated cases. Which Principle guides your selection?</b><br>
-      **Principle #4 (Defect Clustering / 80-20 Rule)**: I analyze the Git diff / changed modules, combine that with our historical defect-dense hotspot modules (the 20% of modules that generate 80% of bugs), and run our automated Smoke Suite + targeted regression on those exact high-risk areas.</li>
+      <b>Principle #4 (Defect Clustering / 80-20 Rule)</b>: I analyze the Git diff / changed modules, combine that with our historical defect-dense hotspot modules (the 20% of modules that generate 80% of bugs), and run our automated Smoke Suite + targeted regression on those exact high-risk areas.</li>
 
       <li><b>[Scenario &mdash; Hardcoded `"testuser@example.com"` Hides a Production Bug] Your Selenium registration test always uses `"John Doe"` and passes for 6 months. In production, a user named `"O'Connor"` (with an apostrophe) crashes the SQL query. Which Principle failed here?</b><br>
-      **Principle #5 (Pesticide Paradox)**: reusing identical static test data (`"John Doe"`) sprint after sprint blinded the test suite to special characters, Unicode, and SQL-escaping bugs. Rotating test data pools (`O'Connor`, `José`, `Max-Length-String`) prevents this.</li>
+      <b>Principle #5 (Pesticide Paradox)</b>: reusing identical static test data (`"John Doe"`) sprint after sprint blinded the test suite to special characters, Unicode, and SQL-escaping bugs. Rotating test data pools (`O'Connor`, `José`, `Max-Length-String`) prevents this.</li>
 
       <li><b>[Scenario &mdash; Applying Banking QA Rules to an Internal Hackathon App] A newly hired QA Lead from a bank blocks an internal beta tool release because there is no 50-page formal Inspection report. Which Principle are they violating?</b><br>
-      **Principle #6 (Testing is context-dependent)**: applying heavyweight banking compliance processes to a low-risk internal beta tool wastes engineering velocity without matching the actual business risk.</li>
+      <b>Principle #6 (Testing is context-dependent)</b>: applying heavyweight banking compliance processes to a low-risk internal beta tool wastes engineering velocity without matching the actual business risk.</li>
 
       <li><b>[Scenario &mdash; Feature Built to Spec That Customers Hate] Your team builds a 5-step 2FA CAPTCHA flow for viewing a public product catalog because the security spec asked for it. Zero bugs are found in QA, but 90% of users abandon the site on Day 1. Which Principle explains this?</b><br>
-      **Principle #7 (Absence-of-errors is a fallacy)**: a technically bug-free feature that destroys user experience and business conversion is still a failed product. QA should flag extreme usability friction during Phase 1 Requirement Review.</li>
+      <b>Principle #7 (Absence-of-errors is a fallacy)</b>: a technically bug-free feature that destroys user experience and business conversion is still a failed product. QA should flag extreme usability friction during Phase 1 Requirement Review.</li>
 
       <li><b>[Scenario &mdash; Where to Invest New Automation Effort] You have bandwidth to automate 20 new test cases this sprint: Module A (Static User Profile Settings, 1 bug in the last year) vs Module B (Multi-Currency Cart Promotion Engine, 35 bugs in the last year). Why choose Module B?</b><br>
-      **Principle #4 (Defects cluster together)**: Module B is a proven defect cluster where code changes frequently cause regressions, giving 35x higher automation ROI than Module A.</li>
+      <b>Principle #4 (Defects cluster together)</b>: Module B is a proven defect cluster where code changes frequently cause regressions, giving 35x higher automation ROI than Module A.</li>
     </ol></section>
 
   <section><h2>Tier 4: SDET, Automation &amp; CI/CD Application (Q27&ndash;Q31)</h2>
     <ol start="27">
       <li><b>How do you implement "Shift-Left" practically in a Java + Selenium + RestAssured Maven repository?</b><br>
-      1. Add **Checkstyle / SpotBugs / SonarQube** Maven plugins to fail the build on static code bugs during `mvn compile`.<br>
-      2. Run **RestAssured API contract tests** against local/Docker services before the frontend UI is merged.<br>
-      3. Configure a **GitHub Actions / Jenkins PR pipeline** that runs headless Selenium Smoke tests (`ChromeOptions --headless=new`) on every Pull Request before code can merge into `main`.</li>
+      1. Add <b>Checkstyle / SpotBugs / SonarQube</b> Maven plugins to fail the build on static code bugs during `mvn compile`.<br>
+      2. Run <b>RestAssured API contract tests</b> against local/Docker services before the frontend UI is merged.<br>
+      3. Configure a <b>GitHub Actions / Jenkins PR pipeline</b> that runs headless Selenium Smoke tests (`ChromeOptions --headless=new`) on every Pull Request before code can merge into `main`.</li>
 
       <li><b>How do you use `java-faker` (or DataFaker) in Selenium/TestNG to combat the Pesticide Paradox?</b><br>
       Instead of hardcoding `sendKeys("test123")` in every run, use `Faker` to generate realistic, varied names, emails with `+` tags, international characters, and boundary-length strings on each test execution (while logging the generated seed/values in ExtentReports for reproducibility).</li>
@@ -122,16 +122,16 @@
       By querying Jira defects by `Component` and checking `git log --stat` for files with the highest churn rate, an SDET can identify the exact 20% hotspot classes/pages and tag their corresponding TestNG groups (`@Test(groups = "hotspot-regression")`) to run on every single commit.</li>
 
       <li><b>In Playwright or Selenium, what is "Synthetic Monitoring" in Shift-Right Testing?</b><br>
-      Scheduling a lightweight, read-only subset of your Playwright/Selenium scripts to run every 5 minutes against the **live Production URL** (e.g., searching a product, opening product details, verifying checkout page loads without submitting payment) and alerting PagerDuty/Slack if production breaks before real customers report it.</li>
+      Scheduling a lightweight, read-only subset of your Playwright/Selenium scripts to run every 5 minutes against the <b>live Production URL</b> (e.g., searching a product, opening product details, verifying checkout page loads without submitting payment) and alerting PagerDuty/Slack if production breaks before real customers report it.</li>
 
       <li><b>Why does Principle #2 ("Exhaustive testing is impossible") mean you should push validation down the Test Pyramid (to Unit &amp; API layers)?</b><br>
-      If a business rule has 25 boundary/combinatorial permutations, testing all 25 through a slow Selenium browser takes 15 minutes; testing 23 of those permutations in a **Unit or RestAssured API test** takes **0.5 seconds**, leaving only 2 end-to-end UI happy/negative paths for Selenium.</li>
+      If a business rule has 25 boundary/combinatorial permutations, testing all 25 through a slow Selenium browser takes 15 minutes; testing 23 of those permutations in a <b>Unit or RestAssured API test</b> takes <b>0.5 seconds</b>, leaving only 2 end-to-end UI happy/negative paths for Selenium.</li>
     </ol></section>
 
   <section><h2>Tier 5: Rapid-Fire Curveballs &amp; True/False Traps (Q32&ndash;Q35)</h2>
     <ol start="32">
       <li><b>True or False: "If we achieve 100% Statement and Branch Code Coverage in JUnit, Principle #1 no longer applies and the code is guaranteed bug-free."</b><br>
-      <b>False.</b> 100% code coverage only proves every line of *existing* code ran at least once—it cannot detect **missing requirements** (code that was never written), data-specific edge cases, or concurrency/timing bugs.</li>
+      <b>False.</b> 100% code coverage only proves every line of *existing* code ran at least once—it cannot detect <b>missing requirements</b> (code that was never written), data-specific edge cases, or concurrency/timing bugs.</li>
 
       <li><b>Which of the 7 Principles is also known as the "80/20 Rule"?</b><br>
       <b>Principle #4: Defects cluster together (Pareto Principle).</b></li>

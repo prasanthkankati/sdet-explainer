@@ -14,21 +14,21 @@
   <h1>2.1 Levels of Testing: Unit, Integration, System &amp; UAT</h1>
 
   <section><h2>1. The Base: What is a "Test Level" and Why Do We Need Levels?</h2>
-    <p class="def">A Test Level is a specific stage of dynamic software testing defined by the size and scope of the software under testâ€”progressing from a single isolated method/class (Unit), to connected modules/APIs (Integration), to the complete end-to-end application (System), and finally to real business user sign-off (UAT).</p>
+    <p class="def">A Test Level is a specific stage of dynamic software testing defined by the size and scope of the software under test—progressing from a single isolated method/class (Unit), to connected modules/APIs (Integration), to the complete end-to-end application (System), and finally to real business user sign-off (UAT).</p>
     <p><b>The Problem It Solves:</b> Imagine an e-commerce app with 500 Java classes, 40 REST APIs, a database, and a web UI. If you wait until the entire app is assembled and only test through the browser UI, when a checkout button fails you have no idea whether the bug is inside a 3-line tax formula, a broken JSON field between two services, a database timeout, or a browser JavaScript error. Testing in <b>4 progressive levels</b> catches each bug at the smallest, fastest, and cheapest layer where it originates.</p></section>
 
   <section><h2>2. Core Terms &amp; Their Properties Defined First (Stubs, Drivers, Contracts &amp; Environments)</h2>
     <p>Before walking through the 4 Test Levels, you must know the exact meaning and properties of the <b>4 building blocks</b> used during level-by-level testing:</p>
     <ul>
-      <li><b>1. Module / Component (Unit):</b> The smallest independently testable piece of source codeâ€”such as a single Java method (<code>calculateTax()</code>), a Java class (<code>CartService</code>), or a UI component.</li>
-      <li><b>2. Stub (Top-Down Dummy Called Module):</b> When a high-level parent module (e.g., <code>CheckoutController</code>) is ready to be tested, but the lower-level child module it calls (e.g., <code>PaymentGatewayService</code>) is not built yet, developers replace the missing child with a <b>Stub</b>â€”a lightweight dummy object hardcoded to return a canned response (e.g., <code>return "PAYMENT_SUCCESS"</code>).
+      <li><b>1. Module / Component (Unit):</b> The smallest independently testable piece of source code—such as a single Java method (<code>calculateTax()</code>), a Java class (<code>CartService</code>), or a UI component.</li>
+      <li><b>2. Stub (Top-Down Dummy Called Module):</b> When a high-level parent module (e.g., <code>CheckoutController</code>) is ready to be tested, but the lower-level child module it calls (e.g., <code>PaymentGatewayService</code>) is not built yet, developers replace the missing child with a <b>Stub</b>—a lightweight dummy object hardcoded to return a canned response (e.g., <code>return "PAYMENT_SUCCESS"</code>).
         <ul>
-          <li><b>Properties of a Stub:</b> (a) Used in <b>Top-Down Integration</b>, (b) Replaces a <b>called (lower-level) child module</b>, (c) Passiveâ€”it waits to be called and returns static dummy data.</li>
+          <li><b>Properties of a Stub:</b> (a) Used in <b>Top-Down Integration</b>, (b) Replaces a <b>called (lower-level) child module</b>, (c) Passive—it waits to be called and returns static dummy data.</li>
         </ul>
       </li>
       <li><b>3. Driver (Bottom-Up Dummy Caller Module):</b> When a low-level child module (e.g., <code>TaxCalculationDao</code>) is ready, but the top-level UI/Controller that calls it is not built yet, a <b>Driver</b> is a small test harness/main program written to invoke the child module, pass test parameters, and print/assert its return value.
         <ul>
-          <li><b>Properties of a Driver:</b> (a) Used in <b>Bottom-Up Integration</b>, (b) Replaces a <b>calling (higher-level) parent module</b>, (c) Activeâ€”it initiates the call into the module under test (e.g., a TestNG/JUnit test runner or RestAssured script).</li>
+          <li><b>Properties of a Driver:</b> (a) Used in <b>Bottom-Up Integration</b>, (b) Replaces a <b>calling (higher-level) parent module</b>, (c) Active—it initiates the call into the module under test (e.g., a TestNG/JUnit test runner or RestAssured script).</li>
         </ul>
       </li>
       <li><b>4. Test Automation Pyramid (Mike Cohn's Cost vs Speed Law):</b> The architectural rule governing how many automated tests belong at each level:
@@ -111,14 +111,14 @@
 
   <section><h2>4. Each Test Level &amp; Sub-Type Explained in Order</h2>
 
-    <p><b>â‘  Level 1: Unit Testing (Component Testing)</b></p>
+    <p><b>① Level 1: Unit Testing (Component Testing)</b></p>
     <ul>
       <li><b>Definition:</b> Testing the smallest testable unit of code (a single method or class) in isolation from databases, networks, or external APIs by using mocks/stubs (`Mockito`).</li>
-      <li><b>Technique:</b> <b>White-Box Testing</b>â€”the developer inspects internal `if/else` branches, loops, and exception paths.</li>
+      <li><b>Technique:</b> <b>White-Box Testing</b>—the developer inspects internal `if/else` branches, loops, and exception paths.</li>
       <li><b>In what exact cases we perform it:</b> Every time a developer writes or modifies a class (`CartCalculator.java`) before opening a Git Pull Request.</li>
     </ul>
 
-    <p><b>â‘¡ Level 2: Integration Testing (And All 4 Sub-Types)</b></p>
+    <p><b>② Level 2: Integration Testing (And All 4 Sub-Types)</b></p>
     <ul>
       <li><b>Definition:</b> Testing the interfaces, data contracts, JSON serialization, and error propagation when two or more tested units/services are combined (e.g., `OrderService` calling `PaymentService` and writing to `PostgreSQL`).</li>
       <li><b>The 4 Sub-Types of Integration Testing Explained in Order:</b>
@@ -135,14 +135,14 @@
       </li>
     </ul>
 
-    <p><b>â‘¢ Level 3: System Testing (End-to-End Testing)</b></p>
+    <p><b>③ Level 3: System Testing (End-to-End Testing)</b></p>
     <ul>
       <li><b>Definition:</b> Testing the fully integrated software product as a whole in a production-like QA environment to verify both <b>Functional requirements</b> (UI workflows, validations, edge cases) and <b>Non-Functional requirements</b> (performance, security, compatibility) against the <b>SRS</b>.</li>
-      <li><b>Technique:</b> Primarily <b>Black-Box Testing</b>â€”QA and SDETs test through the real Browser UI (`Selenium WebDriver` / `Playwright`) and public APIs as an end user would.</li>
+      <li><b>Technique:</b> Primarily <b>Black-Box Testing</b>—QA and SDETs test through the real Browser UI (`Selenium WebDriver` / `Playwright`) and public APIs as an end user would.</li>
       <li><b>In what exact cases we perform it:</b> Inside every Sprint once features are deployed to the QA environment and pass the Phase 4 Smoke Gate.</li>
     </ul>
 
-    <p><b>â‘£ Level 4: User Acceptance Testing (UAT &mdash; Alpha vs Beta)</b></p>
+    <p><b>④ Level 4: User Acceptance Testing (UAT &mdash; Alpha vs Beta)</b></p>
     <ul>
       <li><b>Definition:</b> The final validation level performed by the <b>Client, Product Owner, Business Stakeholders, or real End-Users</b> to confirm the software satisfies business goals (<b>BRS</b>) and is ready for commercial go-live.</li>
       <li><b>The 2 Sub-Types of UAT Explained in Order:</b>
@@ -221,11 +221,11 @@ public class TestLevelsDemo {
     public static void main(String[] args) {
         OrderService service = new OrderService(new PaymentGatewayStub());
 
-        // LEVEL 1 â€” UNIT TEST: Test calculateTotalWithTax() in isolation
+        // LEVEL 1 — UNIT TEST: Test calculateTotalWithTax() in isolation
         double unitResult = service.calculateTotalWithTax(100.0, 18.0);
         System.out.println("L1 Unit Test (100 + 18% tax) : " + unitResult);
 
-        // LEVEL 2 â€” TOP-DOWN INTEGRATION TEST: OrderService -> PaymentGatewayStub
+        // LEVEL 2 — TOP-DOWN INTEGRATION TEST: OrderService -&gt; PaymentGatewayStub
         String intResult = service.placeOrder("4111-XXXX", 100.0, 18.0);
         System.out.println("L2 Integration (with Stub)   : " + intResult);
     }
@@ -246,7 +246,7 @@ public void verifyEndToEndOrderPlacement() {
 
   <section><h2>7. Self-Check</h2>
     <ol>
-      <li>In Top-Down Integration, when a lower-level child module is missing, do we write a <b>Stub</b> or a <b>Driver</b>? <i>(A Stub â€” because it replaces the called child module.)</i></li>
+      <li>In Top-Down Integration, when a lower-level child module is missing, do we write a <b>Stub</b> or a <b>Driver</b>? <i>(A Stub — because it replaces the called child module.)</i></li>
       <li>Which level of testing maps directly to <b>HLD (High-Level Design)</b>, and which maps to <b>SRS</b>? <i>(HLD &rarr; Integration Testing; SRS &rarr; System Testing.)</i></li>
       <li>Why should a project have 70% Unit tests, 20% Integration/API tests, and 10% Selenium UI System tests instead of 100% Selenium UI tests? <i>(The Test Automation Pyramid: UI tests are slowest and most brittle; Unit and API tests run in milliseconds and isolate exact root causes.)</i></li>
     </ol></section>

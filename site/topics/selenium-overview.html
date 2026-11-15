@@ -2,119 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Selenium Overview | SDET Explainer</title>
-<link rel="stylesheet" href="../selenium-docs.css">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1.1 Selenium Overview &amp; Components &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
 </head>
-<body class="in-chapter selenium-doc-page">
-
-<!-- Top Navbar (selenium.dev structure in SDET Explainer UI style) -->
-<nav class="se-navbar" aria-label="Selenium Documentation Navigation">
-  <div class="se-navbar-left">
-    <a href="../index.html" class="se-brand" title="Back to SDET Explainer. Home (Alt+H)">SDET Explainer<span class="brand-dot">.</span></a>
-    <span class="se-brand-sub">[Selenium Docs]</span>
-    <ul class="se-navbar-links">
-      <li><a href="selenium-overview.html" class="active">Documentation</a></li>
-      <li><a href="selenium-webdriver-install.html">WebDriver</a></li>
-      <li><a href="#grid">Grid</a></li>
-      <li><a href="#ide">IDE</a></li>
-      <li><a href="../index.html">All Tracks</a></li>
-    </ul>
-  </div>
-  <div class="se-lang-pill" title="Code examples in Java">LANG: JAVA</div>
-</nav>
-
-<!-- 3-Column Documentation Layout: Left Sidebar Tree | Center Article | Right TOC -->
-<div class="se-layout">
-
-  <!-- Left Sidebar Tree -->
-  <aside class="se-sidebar" aria-label="Documentation Sections">
-    <div class="se-sidebar-hdr">Documentation Tree</div>
-    <ul class="se-tree">
-      <li>
-        <span class="se-sec-label">1. Overview</span>
-        <ul>
-          <li><a href="selenium-overview.html" class="active">1.1 Selenium Overview &amp; Components</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">2. WebDriver: Getting Started</span>
-        <ul>
-          <li><a href="selenium-webdriver-install.html" class="planned">2.1 Install Selenium Library</a></li>
-          <li><a href="selenium-webdriver-first-script.html" class="planned">2.2 First Selenium Script</a></li>
-          <li><a href="selenium-webdriver-test-runner.html" class="planned">2.3 Using a Test Runner</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">3. WebDriver: Drivers</span>
-        <ul>
-          <li><a href="selenium-webdriver-drivers-sessions.html" class="planned">3.1 Driver Sessions &amp; Capabilities</a></li>
-          <li><a href="selenium-webdriver-drivers-options.html" class="planned">3.2 Browser Options &amp; Strategy</a></li>
-          <li><a href="selenium-webdriver-remote-driver.html" class="planned">3.3 RemoteWebDriver &amp; Service</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">4. WebDriver: Elements</span>
-        <ul>
-          <li><a href="selenium-webdriver-elements-locators.html" class="planned">4.1 Locators (8 Strategies)</a></li>
-          <li><a href="selenium-webdriver-elements-relative.html" class="planned">4.2 Relative Locators</a></li>
-          <li><a href="selenium-webdriver-elements-info.html" class="planned">4.3 Element Information &amp; State</a></li>
-          <li><a href="selenium-webdriver-elements-interactions.html" class="planned">4.4 Element Interactions</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">5. Browser Interactions</span>
-        <ul>
-          <li><a href="selenium-webdriver-navigation-windows.html" class="planned">5.1 Navigation &amp; Windows</a></li>
-          <li><a href="selenium-webdriver-frames-alerts-cookies.html" class="planned">5.2 Frames, Alerts &amp; Cookies</a></li>
-          <li><a href="selenium-webdriver-screenshots-pdf.html" class="planned">5.3 Screenshots &amp; Print to PDF</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">6. WebDriver: Waits</span>
-        <ul>
-          <li><a href="selenium-webdriver-waits-implicit.html" class="planned">6.1 Implicit Waits</a></li>
-          <li><a href="selenium-webdriver-waits-explicit-fluent.html" class="planned">6.2 Explicit &amp; Fluent Waits</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">7. Actions API &amp; Support</span>
-        <ul>
-          <li><a href="selenium-webdriver-actions-api.html" class="planned">7.1 Actions API (Keyboard/Mouse)</a></li>
-          <li><a href="selenium-webdriver-support-js.html" class="planned">7.2 Select, JS &amp; Shadow DOM</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">8. BiDi &amp; DevTools</span>
-        <ul>
-          <li><a href="selenium-webdriver-bidi-cdp.html" class="planned">8.1 WebDriver BiDi &amp; CDP</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">9. Selenium Manager</span>
-        <ul>
-          <li><a href="selenium-manager.html" class="planned">9.1 Automated Driver &amp; Browser</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">10. Selenium Grid</span>
-        <ul>
-          <li><a href="selenium-grid-architecture.html" class="planned">10.1 Grid 4 Roles &amp; Docker</a></li>
-        </ul>
-      </li>
-      <li>
-        <span class="se-sec-label">11. Test Practices</span>
-        <ul>
-          <li><a href="selenium-test-practices-pom.html" class="planned">11.1 Page Object Model</a></li>
-          <li><a href="selenium-test-practices-guidelines.html" class="planned">11.2 Guidelines &amp; Exceptions</a></li>
-        </ul>
-      </li>
-    </ul>
-  </aside>
-
-  <!-- Center Main Content -->
-  <main class="se-main" role="main">
-    <article>
+<body>
+<div class="wrap">
+<article>
       <span class="tag Selenium">Selenium</span>
       <h1>Selenium Overview</h1>
       <div class="se-lead">Is Selenium for you? See an overview of the different project components.</div>
@@ -328,30 +222,9 @@ public class SeleniumOverviewExample { // Declares the demonstration class
         <a class="qa-chip" href="../index.html">&larr; Back to Home</a>
       </section>
     </article>
-  </main>
-
-  <!-- Right Sidebar TOC ("On this page") -->
-  <aside class="se-toc" aria-label="On this page">
-    <div class="se-toc-title">On this page</div>
-    <ul>
-      <li><a href="#webdriver">WebDriver</a></li>
-      <li><a href="#ide">IDE</a></li>
-      <li><a href="#grid">Grid</a></li>
-      <li><a href="#where-it-fits">Where it fits</a></li>
-      <li><a href="#key-points">Key points</a></li>
-      <li><a href="#comparison-table">Comparison table</a></li>
-      <li><a href="#how-it-works">How it works</a></li>
-      <li><a href="#common-mistakes">Common mistakes</a></li>
-      <li><a href="#terms-to-know">Terms to know</a></li>
-      <li><a href="#interview-questions">Interview questions</a></li>
-      <li><a href="#quick-answers">Quick answers</a></li>
-      <li><a href="#next-topic">Next topic</a></li>
-    </ul>
-  </aside>
-
 </div>
-
-<footer></footer>
+<footer><a href="../index.html">SDET Explainer.</a> &middot; Dark/Light terminal reference</footer>
+<script src="../topics.js"></script>
 <script src="../app.js"></script>
 </body>
 </html>

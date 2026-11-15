@@ -135,12 +135,12 @@ public class ExceptionResilienceExample { // Declares class
 
     <h3>How it works</h3>
     <p><b>What is the class hierarchy of NoSuchElementException in Selenium?</b><br>
-    java.lang.Object -> Throwable -> Exception -> RuntimeException -> WebDriverException -> NotFoundException -> NoSuchElementException.</p>
+    java.lang.Object -&gt; Throwable -&gt; Exception -&gt; RuntimeException -&gt; WebDriverException -&gt; NotFoundException -&gt; NoSuchElementException.</p>
 
     <p><b>How does ExpectedConditions.refreshed() prevent StaleElementReferenceException?</b><br>
     ExpectedConditions.refreshed(condition) wraps an inner condition (such as elementToBeClickable(By)). If the DOM re-renders mid-check and throws StaleElementReferenceException, refreshed() catches it and forces the inner condition to re-find the element on the next poll.</p>
 
-    <p><b>Why should you avoid checking for broken links across a 500-page website by clicking every <a> tag in Selenium?</b><br>
+    <p><b>Why should you avoid checking for broken links across a 500-page website by clicking every &lt;a&gt; tag in Selenium?</b><br>
     Clicking every link in a real browser requires full page rendering, CSS layout, and JS execution, taking hours. Instead, use Selenium findElements(By.tagName("a")) to collect the href URLs and send fast parallel HTTP HEAD/GET requests using Java's HttpClient.</p>
 
     <h3>Real situations</h3>

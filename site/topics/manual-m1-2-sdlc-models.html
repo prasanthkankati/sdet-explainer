@@ -14,12 +14,12 @@
   <h1>1.2 SDLC Models: Waterfall, V-Model, Iterative, Spiral &amp; Agile</h1>
 
   <section><h2>1. The Base: What is SDLC and Why Does It Exist?</h2>
-    <p class="def">The Software Development Life Cycle (SDLC) is the structured engineering framework that defines the exact sequence of phasesâ€”Requirement Gathering, System Design, Coding, Testing, Deployment, and Maintenanceâ€”used to turn a business idea into working production software.</p>
+    <p class="def">The Software Development Life Cycle (SDLC) is the structured engineering framework that defines the exact sequence of phases—Requirement Gathering, System Design, Coding, Testing, Deployment, and Maintenance—used to turn a business idea into working production software.</p>
     <p><b>The Problem It Solves:</b> Without a defined SDLC, developers start writing code before business rules are agreed upon ("Cowboy Coding"), QA receives unstable code drops with zero documentation or test servers, and nobody knows when a feature is ready for customers. SDLC establishes clear phase handoffs, deliverables, and quality gates across the entire engineering team.</p>
     <p><b>Core Document Terminology &amp; Their Properties (Defined First):</b></p>
     <ul>
       <li><b>1. BRS (Business Requirement Specification):</b> High-level document written by the Business Analyst describing <b>WHAT</b> the business/customer needs and <b>WHY</b> (e.g., <i>"Support UPI and Apple Pay checkout to increase conversion by 15%"</i>).</li>
-      <li><b>2. SRS (System Requirement Specification):</b> Detailed technical specification translating the BRS into <b>HOW</b> the system must behaveâ€”exact input fields, validation rules, API error codes, and response times.</li>
+      <li><b>2. SRS (System Requirement Specification):</b> Detailed technical specification translating the BRS into <b>HOW</b> the system must behave—exact input fields, validation rules, API error codes, and response times.</li>
       <li><b>3. Agile User Story &amp; Acceptance Criteria:</b> In Agile projects, giant BRS/SRS documents are replaced by bite-sized <b>User Stories</b> (<i>"As a &lt;role&gt;, I want &lt;feature&gt;, so that &lt;value&gt;"</i>) paired with testable <b>Acceptance Criteria</b> (exact pass/fail rules QA verifies).</li>
       <li><b>4. HLD (High-Level Design) vs LLD (Low-Level Design):</b>
         <ul>
@@ -130,14 +130,14 @@
 
   <section><h2>4. Each SDLC Model Defined &amp; Explained in Order</h2>
 
-    <p><b>â‘  Waterfall Model (Linear Sequential Model)</b></p>
+    <p><b>① Waterfall Model (Linear Sequential Model)</b></p>
     <ul>
       <li><b>Definition:</b> Each phase must <b>100% finish and freeze</b> before the next phase begins (<code>Requirements &rarr; Design &rarr; Coding &rarr; Testing &rarr; Deployment</code>). There is no overlapping or going backward.</li>
       <li><b>How QA works in Waterfall:</b> QA only enters at Phase 4 (after 100% of coding is finished). If a requirement bug was introduced in Month 1, QA discovers it in Month 9 when fixing it requires rewriting the architecture (10x&ndash;100x cost).</li>
       <li><b>In what exact cases we use it:</b> Short, small projects where requirements are 100% clear, fixed, and guaranteed not to change (e.g., migrating a static legacy report).</li>
     </ul>
 
-    <p><b>â‘¡ V-Model (Verification and Validation Model)</b></p>
+    <p><b>② V-Model (Verification and Validation Model)</b></p>
     <ul>
       <li><b>Definition:</b> An extension of Waterfall where <b>every Left-Side Development (Verification) phase is directly paired with a Right-Side Testing (Validation) phase</b>, forming a <b>V-shape</b> with Coding at the bottom vertex.</li>
       <li><b>How QA works in V-Model:</b> QA starts on <b>Day 1</b>. While architects write a design document on the left side, QA simultaneously reviews it (Static Verification) and writes the corresponding test cases for the right side (Dynamic Validation):</li>
@@ -173,19 +173,19 @@
       <li><b>In what exact cases we use it:</b> Safety-critical, regulated systems (medical devices, aviation control, automotive firmware, core banking) where strict traceability and zero defects matter more than mid-project requirement changes.</li>
     </ul>
 
-    <p><b>â‘¢ Iterative &amp; Incremental Model</b></p>
+    <p><b>③ Iterative &amp; Incremental Model</b></p>
     <ul>
       <li><b>Definition:</b> Instead of building the entire application in one giant pass, the system is divided into smaller functional modules built across repeated mini-SDLC cycles (Cycle 1 builds &amp; tests Login; Cycle 2 adds &amp; tests Search + runs Regression on Login; Cycle 3 adds &amp; tests Checkout).</li>
       <li><b>In what exact cases we use it:</b> Large enterprise systems where core requirements are known, so high-priority modules can be delivered early and refined over cycles.</li>
     </ul>
 
-    <p><b>â‘£ Spiral Model (Risk-Driven Model)</b></p>
+    <p><b>④ Spiral Model (Risk-Driven Model)</b></p>
     <ul>
       <li><b>Definition:</b> Combines iterative prototyping with <b>formal risk analysis</b>. Every loop of the spiral passes through <b>4 quadrants</b>: (1) Determine Objectives, (2) <b>Identify &amp; Resolve Risks (Build Prototype)</b>, (3) Develop &amp; Test, (4) Plan Next Iteration with Customer.</li>
       <li><b>In what exact cases we use it:</b> High-budget, high-risk R&amp;D, defense, aerospace, or first-of-a-kind financial trading engines where technical feasibility is uncertain up front.</li>
     </ul>
 
-    <p><b>â‘¤ Agile Model (Scrum / Kanban &mdash; Modern Industry Standard)</b></p>
+    <p><b>⑤ Agile Model (Scrum / Kanban &mdash; Modern Industry Standard)</b></p>
     <ul>
       <li><b>Definition:</b> Breaks the product into small user-centric features (<b>User Stories</b>) delivered in fixed time-boxes called <b>Sprints (typically 2 weeks)</b>. Each sprint is a complete mini-SDLC producing a working, tested, potentially shippable product increment.</li>
       <li><b>How QA &amp; SDET work in Agile:</b> QA is embedded inside the development team from Day 1 of the sprint. Manual testing, API testing, and <b>Selenium/Playwright UI automation happen inside the same sprint</b> ("In-Sprint Automation"), while CI/CD pipelines run automated regression on every code push.</li>

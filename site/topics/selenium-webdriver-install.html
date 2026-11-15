@@ -43,7 +43,7 @@
         <tr><th>Build Tool</th><th>Configuration File</th><th>Dependency Syntax</th><th>Resolution Command</th></tr>
       </thead>
       <tbody>
-        <tr><td><b>Maven</b></td><td>pom.xml</td><td><dependency><groupId>org.seleniumhq.selenium</groupId><artifactId>selenium-java</artifactId><version>4.26.0</version></dependency></td><td>mvn clean test-compile</td></tr>
+        <tr><td><b>Maven</b></td><td>pom.xml</td><td>&lt;dependency&gt;&lt;groupId&gt;org.seleniumhq.selenium&lt;/groupId&gt;&lt;artifactId&gt;selenium-java&lt;/artifactId&gt;&lt;version&gt;4.26.0&lt;/version&gt;&lt;/dependency&gt;</td><td>mvn clean test-compile</td></tr>
         <tr><td><b>Gradle (Groovy)</b></td><td>build.gradle</td><td>implementation 'org.seleniumhq.selenium:selenium-java:4.26.0'</td><td>gradle build</td></tr>
         <tr><td><b>Gradle (Kotlin)</b></td><td>build.gradle.kts</td><td>implementation("org.seleniumhq.selenium:selenium-java:4.26.0")</td><td>gradle build</td></tr>
       </tbody>
@@ -59,24 +59,24 @@
       <li>The IDE indexes the downloaded JARs, making org.openqa.selenium.* packages available for import in Java test classes.</li>
     </ol>
     <p>Maven pom.xml configuration for Selenium 4 and TestNG:</p>
-<pre><code><project xmlns="http://maven.apache.org/POM/4.0.0"> <!-- Root Maven POM element -->
-    <modelVersion>4.0.0</modelVersion> <!-- POM model version required by Maven -->
-    <groupId>dev.selenium.qa</groupId> <!-- Organization package identifier -->
-    <artifactId>selenium-automation-suite</artifactId> <!-- Project module name -->
-    <version>1.0.0</version> <!-- Project build version -->
-    <properties> <!-- Central properties block for versions -->
-        <maven.compiler.source>21</maven.compiler.source> <!-- Sets Java source compatibility to JDK 21 -->
-        <maven.compiler.target>21</maven.compiler.target> <!-- Sets bytecode target to JDK 21 -->
-        <selenium.version>4.26.0</selenium.version> <!-- Centralizes the Selenium 4 version -->
-    </properties> <!-- Ends properties block -->
-    <dependencies> <!-- Starts dependency declarations -->
-        <dependency> <!-- Declares the umbrella Selenium Java library -->
-            <groupId>org.seleniumhq.selenium</groupId> <!-- Official Selenium group ID -->
-            <artifactId>selenium-java</artifactId> <!-- Umbrella artifact including all drivers -->
-            <version>${selenium.version}</version> <!-- Resolves version from properties -->
-        </dependency> <!-- Ends Selenium dependency -->
-    </dependencies> <!-- Ends dependencies block -->
-</project> <!-- Ends Maven POM --></code></pre>
+<pre><code>&lt;project xmlns="http://maven.apache.org/POM/4.0.0"&gt; &lt;!-- Root Maven POM element --&gt;
+    &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt; &lt;!-- POM model version required by Maven --&gt;
+    &lt;groupId&gt;dev.selenium.qa&lt;/groupId&gt; &lt;!-- Organization package identifier --&gt;
+    &lt;artifactId&gt;selenium-automation-suite&lt;/artifactId&gt; &lt;!-- Project module name --&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt; &lt;!-- Project build version --&gt;
+    &lt;properties&gt; &lt;!-- Central properties block for versions --&gt;
+        &lt;maven.compiler.source&gt;21&lt;/maven.compiler.source&gt; &lt;!-- Sets Java source compatibility to JDK 21 --&gt;
+        &lt;maven.compiler.target&gt;21&lt;/maven.compiler.target&gt; &lt;!-- Sets bytecode target to JDK 21 --&gt;
+        &lt;selenium.version&gt;4.26.0&lt;/selenium.version&gt; &lt;!-- Centralizes the Selenium 4 version --&gt;
+    &lt;/properties&gt; &lt;!-- Ends properties block --&gt;
+    &lt;dependencies&gt; &lt;!-- Starts dependency declarations --&gt;
+        &lt;dependency&gt; &lt;!-- Declares the umbrella Selenium Java library --&gt;
+            &lt;groupId&gt;org.seleniumhq.selenium&lt;/groupId&gt; &lt;!-- Official Selenium group ID --&gt;
+            &lt;artifactId&gt;selenium-java&lt;/artifactId&gt; &lt;!-- Umbrella artifact including all drivers --&gt;
+            &lt;version&gt;${selenium.version}&lt;/version&gt; &lt;!-- Resolves version from properties --&gt;
+        &lt;/dependency&gt; &lt;!-- Ends Selenium dependency --&gt;
+    &lt;/dependencies&gt; &lt;!-- Ends dependencies block --&gt;
+&lt;/project&gt; &lt;!-- Ends Maven POM --&gt;</code></pre>
   </section>
 
   <section id="common-mistakes">
@@ -84,7 +84,7 @@
     <ol>
       <li>Declaring both selenium-java and older individual artifacts like selenium-chrome-driver with mismatched versions; fix by declaring only selenium-java.</li>
       <li>Running Selenium 4 on JDK 8; fix by upgrading JAVA_HOME and maven.compiler.release to JDK 11, 17, or 21.</li>
-      <li>Placing selenium-java under <dependencyManagement> without adding it to <dependencies>; fix by placing it directly in the <dependencies> section so JARs are added to the classpath.</li>
+      <li>Placing selenium-java under &lt;dependencyManagement&gt; without adding it to &lt;dependencies&gt;; fix by placing it directly in the &lt;dependencies&gt; section so JARs are added to the classpath.</li>
     </ol>
   </section>
 
@@ -124,21 +124,21 @@
     Maven caches all downloaded JAR artifacts inside the local repository located at ~/.m2/repository/org/seleniumhq/selenium/. Subsequent builds reuse these cached JARs without re-downloading them from Maven Central.</p>
 
     <p><b>How do you centralize the Selenium version across a multi-module Maven framework?</b><br>
-    Define a custom property such as <selenium.version>4.26.0</selenium.version> inside the parent pom.xml <properties> block and reference it via ${selenium.version}. This ensures every submodule upgrades in lockstep by changing a single line.</p>
+    Define a custom property such as &lt;selenium.version&gt;4.26.0&lt;/selenium.version&gt; inside the parent pom.xml &lt;properties&gt; block and reference it via ${selenium.version}. This ensures every submodule upgrades in lockstep by changing a single line.</p>
 
     <h3>Real situations</h3>
     <p><b>Should you set the Maven scope of selenium-java to compile or test?</b><br>
-    If your Page Object classes and driver factory live in src/main/java, keep the default compile scope so main classes can import WebDriver. If all framework and test classes live strictly inside src/test/java, you can use <scope>test</scope>.</p>
+    If your Page Object classes and driver factory live in src/main/java, keep the default compile scope so main classes can import WebDriver. If all framework and test classes live strictly inside src/test/java, you can use &lt;scope&gt;test&lt;/scope&gt;.</p>
 
     <p><b>How do you upgrade Selenium in a CI/CD project without breaking existing tests?</b><br>
-    Update the <selenium.version> property in pom.xml, run mvn dependency:tree to verify no transitive version conflicts exist, and execute the smoke test suite on CI before merging.</p>
+    Update the &lt;selenium.version&gt; property in pom.xml, run mvn dependency:tree to verify no transitive version conflicts exist, and execute the smoke test suite on CI before merging.</p>
 
     <p><b>Why do enterprise teams use a corporate artifact repository like Nexus or Artifactory for selenium-java?</b><br>
     Enterprise CI runners often block direct outbound internet access to Maven Central for security. An internal Nexus or Artifactory server proxies and caches verified selenium-java JARs inside the corporate firewall.</p>
 
     <h3>Troubleshooting</h3>
     <p><b>How do you fix java.lang.NoClassDefFoundError: org/openqa/selenium/WebDriver?</b><br>
-    This error occurs when selenium-java is missing from the runtime classpath or was declared with <scope>test</scope> while being referenced by code in src/main/java. Fix it by removing <scope>test</scope> or running mvn test-compile.</p>
+    This error occurs when selenium-java is missing from the runtime classpath or was declared with &lt;scope&gt;test&lt;/scope&gt; while being referenced by code in src/main/java. Fix it by removing &lt;scope&gt;test&lt;/scope&gt; or running mvn test-compile.</p>
 
     <p><b>How do you diagnose a NoSuchMethodError inside internal Selenium classes after an upgrade?</b><br>
     NoSuchMethodError indicates a dependency version collision where an older transitive selenium-api or Guava JAR overrides the newer version on the classpath. Run mvn dependency:tree -Dverbose to locate the conflicting dependency and exclude the older transitive artifact.</p>

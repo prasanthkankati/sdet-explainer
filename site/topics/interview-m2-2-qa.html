@@ -18,19 +18,19 @@
       <li><b>Q1: What is Functional Testing?</b><br>
         <b>A:</b> Functional Testing is black-box dynamic testing that validates <b>what</b> the software does—verifying every feature, user workflow, API response, and business rule against the SRS/User Stories using valid, invalid, and boundary inputs.</li>
       <li><b>Q2: What is Smoke Testing and why is it also called Build Verification Testing (BVT)?</b><br>
-        <b>A:</b> Smoke Testing is a **wide and shallow** health check executed immediately when a new build is deployed to verify that core end-to-end happy paths work. It is called **BVT** because it decides whether the build is stable enough to be accepted into QA or rejected as a Broken Build.</li>
+        <b>A:</b> Smoke Testing is a <b>wide and shallow</b> health check executed immediately when a new build is deployed to verify that core end-to-end happy paths work. It is called <b>BVT</b> because it decides whether the build is stable enough to be accepted into QA or rejected as a Broken Build.</li>
       <li><b>Q3: What is Sanity Testing?</b><br>
-        <b>A:</b> Sanity Testing is a **narrow and deep** check executed on a specific module or feature after receiving a relatively stable build with minor code changes or bug fixes, verifying that the new logic works rationally before running full regression.</li>
+        <b>A:</b> Sanity Testing is a <b>narrow and deep</b> check executed on a specific module or feature after receiving a relatively stable build with minor code changes or bug fixes, verifying that the new logic works rationally before running full regression.</li>
       <li><b>Q4: What is Retesting (Confirmation Testing)?</b><br>
-        <b>A:</b> Retesting is re-executing a **previously failed test case** with the exact same steps and input data on a new build to confirm that a specific defect reported earlier has been successfully fixed.</li>
+        <b>A:</b> Retesting is re-executing a <b>previously failed test case</b> with the exact same steps and input data on a new build to confirm that a specific defect reported earlier has been successfully fixed.</li>
       <li><b>Q5: What is Regression Testing?</b><br>
-        <b>A:</b> Regression Testing is re-executing **previously passing test cases** after code changes, bug fixes, enhancements, or configuration updates to ensure that existing, unchanged features were not accidentally broken.</li>
+        <b>A:</b> Regression Testing is re-executing <b>previously passing test cases</b> after code changes, bug fixes, enhancements, or configuration updates to ensure that existing, unchanged features were not accidentally broken.</li>
       <li><b>Q6: What are the 3 types of Regression Testing?</b><br>
         <b>A:</b> (1) <b>Unit Regression</b> (testing only the changed code unit), (2) <b>Regional / Partial Regression</b> (testing the changed module plus directly impacted adjacent modules), and (3) <b>Full Regression</b> (testing the entire application end-to-end before a release).</li>
       <li><b>Q7: What is Positive Testing vs Negative Testing?</b><br>
         <b>A:</b> <b>Positive Testing</b> feeds valid inputs to verify the system completes the happy path as expected. <b>Negative Testing</b> feeds invalid, unexpected, or boundary-violating inputs to verify the system handles errors gracefully without crashing or exposing stack traces.</li>
       <li><b>Q8: What is Exploratory Testing and how is it structured?</b><br>
-        <b>A:</b> Exploratory Testing is an experience-based approach where test design and execution happen simultaneously. In professional QA, it is structured using **Session-Based Test Management (SBTM)**: 60–90 minute time-boxed charters targeting a specific module and risk area.</li>
+        <b>A:</b> Exploratory Testing is an experience-based approach where test design and execution happen simultaneously. In professional QA, it is structured using <b>Session-Based Test Management (SBTM)</b>: 60–90 minute time-boxed charters targeting a specific module and risk area.</li>
       <li><b>Q9: What is Ad-Hoc Testing vs Monkey Testing vs Gorilla Testing?</b><br>
         <b>A:</b> <b>Ad-Hoc Testing</b> is informal, unstructured testing without test cases or documentation. <b>Monkey Testing</b> feeds random, rapid, chaotic clicks/inputs with zero domain rules to check if the app crashes. <b>Gorilla Testing</b> repeatedly hammers one single module deeply with every possible input to test its robustness.</li>
       <li><b>Q10: Which testing type is a subset of Acceptance Testing, and which is a subset of Regression Testing?</b><br>
@@ -46,9 +46,9 @@
       <li><b>Q13: Why does Retesting always come BEFORE Regression Testing when a bug-fix build is deployed?</b><br>
         <b>A:</b> Because if the developer's bug fix didn't even work (Retesting fails), running a 2-hour Regression suite to see if that broken fix caused side effects is a complete waste of compute and QA time.</li>
       <li><b>Q14: Why do we automate Smoke and Regression suites first, rather than automating Ad-Hoc or Exploratory tests?</b><br>
-        <b>A:</b> Smoke and Regression tests are **repetitive, predictable, and executed hundreds of times** across sprints (giving massive ROI when automated in Selenium/Playwright), whereas Exploratory and Ad-Hoc tests rely on human intuition, creativity, and changing hypotheses.</li>
+        <b>A:</b> Smoke and Regression tests are <b>repetitive, predictable, and executed hundreds of times</b> across sprints (giving massive ROI when automated in Selenium/Playwright), whereas Exploratory and Ad-Hoc tests rely on human intuition, creativity, and changing hypotheses.</li>
       <li><b>Q15: Why do existing features break when a developer only fixes a 2-line bug in another module (Why does Regression happen)?</b><br>
-        <b>A:</b> Due to **shared dependencies**: shared utility classes, global CSS styles, database foreign-key constraints, shared Redux/session state, or common REST API DTOs. Changing a shared helper for Module A can silently alter behavior in Module B.</li>
+        <b>A:</b> Due to <b>shared dependencies</b>: shared utility classes, global CSS styles, database foreign-key constraints, shared Redux/session state, or common REST API DTOs. Changing a shared helper for Module A can silently alter behavior in Module B.</li>
       <li><b>Q16: How do you perform Impact Analysis to select a Regional Regression suite when time is limited?</b><br>
         <b>A:</b> (1) Inspect the Git PR diff / changed classes and API endpoints, (2) Query the RTM and architecture dependency graph to see which downstream modules call those classes/tables, (3) Select high-priority/business-critical test cases (`P0/P1`) covering those modules, and (4) Include historically bug-prone hotspot modules (Principle #4).</li>
       <li><b>Q17: Why is Negative Testing often where the highest-severity production bugs are found?</b><br>
@@ -60,19 +60,19 @@
   <section><h2>Tier 3: Real-World Tricky &amp; Edge-Case Scenarios (Q19&ndash;Q25)</h2>
     <ol start="19">
       <li><b>Q19: Scenario: Build #25 is deployed at 10:00 AM with 3 bug fixes in the "Forgot Password" flow. Walk through the exact sequence of functional tests you execute from 10:00 AM onward.</b><br>
-        <b>A:</b> (1) **10:00 AM — Smoke Test:** Run the automated Smoke suite (`mvn test -Dgroups=smoke`) to ensure Build #25 boots and core flows work. (2) **10:05 AM — Retesting:** Re-run the exact 3 failed test cases for the 3 fixed "Forgot Password" bugs to confirm they now pass. (3) **10:15 AM — Sanity Testing:** Deeply test adjacent rules in the "Forgot Password / OTP" module (expired link, wrong OTP, resend cooldown). (4) **10:30 AM — Regional Regression:** Run the Authentication &amp; User Profile automated regression suite to ensure Login/Signup/Session didn't break.</li>
+        <b>A:</b> (1) <b>10:00 AM — Smoke Test:</b> Run the automated Smoke suite (`mvn test -Dgroups=smoke`) to ensure Build #25 boots and core flows work. (2) <b>10:05 AM — Retesting:</b> Re-run the exact 3 failed test cases for the 3 fixed "Forgot Password" bugs to confirm they now pass. (3) <b>10:15 AM — Sanity Testing:</b> Deeply test adjacent rules in the "Forgot Password / OTP" module (expired link, wrong OTP, resend cooldown). (4) <b>10:30 AM — Regional Regression:</b> Run the Authentication &amp; User Profile automated regression suite to ensure Login/Signup/Session didn't break.</li>
       <li><b>Q20: Scenario: During Retesting of `BUG-512` ("Apply Coupon fails for $100 cart"), the test passes with `$100`, so you close `BUG-512`. Immediately after, during Sanity testing, you try `$150` and it fails with a different error. Do you reopen `BUG-512` or log a new bug?</b><br>
-        <b>A:</b> Log a **new defect** (linking it to `BUG-512` for context), because the original steps and expected condition of `BUG-512` passed (Retesting succeeded), while Sanity/Regression uncovered a distinct defect on a different condition.</li>
+        <b>A:</b> Log a <b>new defect</b> (linking it to `BUG-512` for context), because the original steps and expected condition of `BUG-512` passed (Retesting succeeded), while Sanity/Regression uncovered a distinct defect on a different condition.</li>
       <li><b>Q21: Scenario: You have 1,200 Regression test cases (manual + automated), and an urgent production hotfix must go live in 45 minutes. Which tests do you run?</b><br>
-        <b>A:</b> Never run all 1,200 tests and delay an urgent hotfix, and never skip testing. Execute: (1) **Retesting** of the exact hotfix bug (5 mins), (2) **Automated Smoke Suite** across critical P0 business flows (5 mins), and (3) **Sanity + Targeted Regional Regression** on the exact module modified by the hotfix (25 mins).</li>
+        <b>A:</b> Never run all 1,200 tests and delay an urgent hotfix, and never skip testing. Execute: (1) <b>Retesting</b> of the exact hotfix bug (5 mins), (2) <b>Automated Smoke Suite</b> across critical P0 business flows (5 mins), and (3) <b>Sanity + Targeted Regional Regression</b> on the exact module modified by the hotfix (25 mins).</li>
       <li><b>Q22: Scenario: Your automated Selenium Smoke Test suite takes 45 minutes to run. What is wrong with this Smoke suite, and how do you fix it?</b><br>
-        <b>A:</b> A Smoke suite taking 45 minutes violates the core definition of Smoke Testing (it has bloated into a mini-Regression suite). Fix it by: (1) trimming it down to 15–20 critical happy-path checks (`< 5 mins`), (2) moving deep negative/edge checks back to the `regression` group, (3) using API login/data setup instead of UI navigation where possible, and (4) running in parallel (`thread-count=4`).</li>
+        <b>A:</b> A Smoke suite taking 45 minutes violates the core definition of Smoke Testing (it has bloated into a mini-Regression suite). Fix it by: (1) trimming it down to 15–20 critical happy-path checks (`&lt; 5 mins`), (2) moving deep negative/edge checks back to the `regression` group, (3) using API login/data setup instead of UI navigation where possible, and (4) running in parallel (`thread-count=4`).</li>
       <li><b>Q23: Scenario: Every feature in the Sprint passed scripted test cases, yet customers report a bug when pressing the browser `Back` button right after clicking "Pay Now". Which testing type was missing in QA?</b><br>
-        <b>A:</b> **Exploratory Testing &amp; Negative State-Transition Testing**—scripted test cases checked standard linear steps, whereas an exploratory charter testing double-clicks, browser Back/Refresh buttons, and network throttling during payment would have caught it.</li>
+        <b>A:</b> <b>Exploratory Testing &amp; Negative State-Transition Testing</b>—scripted test cases checked standard linear steps, whereas an exploratory charter testing double-clicks, browser Back/Refresh buttons, and network throttling during payment would have caught it.</li>
       <li><b>Q24: Scenario: When should a test case be removed or retired from a Regression Test Suite?</b><br>
         <b>A:</b> When: (1) the feature it tests is deprecated/removed from the product, (2) two test cases test the exact same code path (redundant duplication), or (3) a slow UI test is replaced by a faster API-level regression test covering the exact same business rule.</li>
       <li><b>Q25: Scenario: Can Sanity Testing ever be executed BEFORE Smoke Testing?</b><br>
-        <b>A:</b> **No.** Smoke Testing always comes first on any build drop to verify basic build health (server up, DB connected, login working). You cannot run deep Sanity tests on the Checkout module if the app can't even log in!</li>
+        <b>A:</b> <b>No.</b> Smoke Testing always comes first on any build drop to verify basic build health (server up, DB connected, login working). You cannot run deep Sanity tests on the Checkout module if the app can't even log in!</li>
     </ol></section>
 
   <section><h2>Tier 4: SDET, Automation (Selenium / TestNG / CI-CD) Application (Q26&ndash;Q30)</h2>
@@ -80,13 +80,13 @@
       <li><b>Q26: How do you configure `testng.xml` or Maven to maintain Smoke, Sanity, and Regression suites in the same Selenium repository without duplicating test code?</b><br>
         <b>A:</b> Tag `@Test` methods with multiple group names (e.g., `@Test(groups = {"smoke", "regression"})` or `@Test(groups = {"sanity-cart", "regression"})`) and pass `-Dgroups=${SUITE_TYPE}` dynamically from a parameterized Jenkins build job.</li>
       <li><b>Q27: When a developer fixes a bug that slipped into QA or Production, what is the SDET rule for the Regression suite?</b><br>
-        <b>A:</b> Every escaped defect must result in a **new automated regression test** (`@Test(groups="regression", description="BUG-409")`) merged into the suite so that exact bug can never regress silently in future sprints.</li>
+        <b>A:</b> Every escaped defect must result in a <b>new automated regression test</b> (`@Test(groups="regression", description="BUG-409")`) merged into the suite so that exact bug can never regress silently in future sprints.</li>
       <li><b>Q28: How do you stop flaky Selenium tests from blocking the CI/CD Smoke Gate?</b><br>
         <b>A:</b> (1) Replace all `Thread.sleep()` with explicit `WebDriverWait` / `ExpectedConditions`, (2) use stable `id` or `data-testid` locators, (3) isolate test data per thread so parallel tests don't collide, and (4) quarantine any genuinely flaky environment test into a `@Test(groups="quarantine")` bucket until fixed within 24 hours.</li>
       <li><b>Q29: How can Git diff analysis (`Test Impact Analysis`) speed up Regression testing in CI/CD?</b><br>
         <b>A:</b> By mapping packages/microservices to TestNG groups (e.g., changes under `src/main/java/com/app/payment/**` automatically trigger `-Dgroups="smoke,sanity-payment"` on PRs, while the full `regression` suite runs nightly).</li>
       <li><b>Q30: In Playwright, how do you tag tests for Smoke vs Sanity vs Regression?</b><br>
-        <b>A:</b> Use Playwright's `@tag` syntax (`test('verify login', { tag: ['@smoke', '@regression'] }, async ({ page }) => { ... })`) and execute via `npx playwright test --grep @smoke`.</li>
+        <b>A:</b> Use Playwright's `@tag` syntax (`test('verify login', { tag: ['@smoke', '@regression'] }, async ({ page }) =&gt; { ... })`) and execute via `npx playwright test --grep @smoke`.</li>
     </ol></section>
 
   <section><h2>Tier 5: Rapid-Fire Yes/No &amp; 1-Liner Traps (Q31&ndash;Q35)</h2>

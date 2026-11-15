@@ -30,8 +30,8 @@
     <ol>
       <li>element.click() scrolls the element into view, verifies its center point is hit-testable (not covered by an overlay), and dispatches a native click.</li>
       <li>element.sendKeys(CharSequence...) appends keystrokes to an input or textarea without clearing existing text first; always call clear() before sendKeys() when replacing text.</li>
-      <li>element.clear() resets the value of an editable <input> or <textarea> element to an empty string.</li>
-      <li>File uploads are automated by passing the absolute file path directly to <input type="file"> via fileInput.sendKeys(absolutePath), without clicking the browse button.</li>
+      <li>element.clear() resets the value of an editable &lt;input&gt; or &lt;textarea&gt; element to an empty string.</li>
+      <li>File uploads are automated by passing the absolute file path directly to &lt;input type="file"&gt; via fileInput.sendKeys(absolutePath), without clicking the browse button.</li>
       <li>If another element (such as a spinner or sticky header) covers the target element's center point during click(), Selenium throws ElementClickInterceptedException.</li>
     </ol>
   </section>
@@ -44,9 +44,9 @@
       </thead>
       <tbody>
         <tr><td><b>click()</b></td><td>Buttons, links, checkboxes, inputs</td><td>Visible + hit-testable at center point</td><td>ElementClickInterceptedException</td></tr>
-        <tr><td><b>sendKeys(...)</b></td><td>Inputs, textareas, <input type='file'></td><td>Visible + enabled + focusable</td><td>ElementNotInteractableException</td></tr>
+        <tr><td><b>sendKeys(...)</b></td><td>Inputs, textareas, &lt;input type='file'&gt;</td><td>Visible + enabled + focusable</td><td>ElementNotInteractableException</td></tr>
         <tr><td><b>clear()</b></td><td>Editable inputs, textareas, contenteditable</td><td>Visible + enabled + mutable</td><td>InvalidElementStateException</td></tr>
-        <tr><td><b>submit()</b></td><td>Form controls inside a <form></td><td>Enclosing <form> element exists</td><td>NoSuchElementException / UnsupportedOperationException</td></tr>
+        <tr><td><b>submit()</b></td><td>Form controls inside a &lt;form&gt;</td><td>Enclosing &lt;form&gt; element exists</td><td>NoSuchElementException / UnsupportedOperationException</td></tr>
       </tbody>
     </table>
   </section>
@@ -56,7 +56,7 @@
     <ol>
       <li>Locate the target WebElement using driver.findElement(By...).</li>
       <li>For text inputs, call element.clear() followed by element.sendKeys("value") to ensure no default text remains.</li>
-      <li>For file upload inputs (<input type='file'>), resolve the file's absolute path via Path.toAbsolutePath().toString() and pass it to sendKeys().</li>
+      <li>For file upload inputs (&lt;input type='file'&gt;), resolve the file's absolute path via Path.toAbsolutePath().toString() and pass it to sendKeys().</li>
       <li>For buttons, checkboxes, or links, call element.click() to trigger the browser's native click event sequence (mousedown, focus, mouseup, click).</li>
     </ol>
     <p>Clearing, typing, uploading a file, and clicking submit in Java:</p>
@@ -78,7 +78,7 @@ public class ElementInteractionsExample { // Declares class
             textInput.clear(); // Clears any pre-populated text
             textInput.sendKeys("Automation", Keys.TAB); // Types text and presses Tab key
 
-            WebElement fileInput = driver.findElement(By.name("my-file")); // Locates <input type='file'>
+            WebElement fileInput = driver.findElement(By.name("my-file")); // Locates &lt;input type='file'&gt;
             String absPath = Paths.get("pom.xml").toAbsolutePath().toString(); // Resolves absolute path
             fileInput.sendKeys(absPath); // Attaches file directly without opening OS dialog
 
@@ -93,7 +93,7 @@ public class ElementInteractionsExample { // Declares class
   <section id="common-mistakes">
     <h2>Common mistakes</h2>
     <ol>
-      <li>Clicking an <input type='file'> element, which opens the native OS file explorer dialog that Selenium cannot control; fix by calling fileInput.sendKeys(absolutePath) directly without clicking.</li>
+      <li>Clicking an &lt;input type='file'&gt; element, which opens the native OS file explorer dialog that Selenium cannot control; fix by calling fileInput.sendKeys(absolutePath) directly without clicking.</li>
       <li>Calling sendKeys() on a pre-filled input without calling clear() first, which appends text to the existing value; fix by calling clear() before sendKeys().</li>
       <li>Using element.submit() instead of clicking the explicit submit button in modern React/Angular SPAs where click handlers are bound to the button rather than the native form submit event.</li>
     </ol>
@@ -125,7 +125,7 @@ public class ElementInteractionsExample { // Declares class
     sendKeys() appends characters to whatever text is already inside the input field. Always call element.clear() before element.sendKeys() if you want to replace the existing value.</p>
 
     <p><b>How do you upload a file in Selenium without using third-party tools like AutoIt or Robot?</b><br>
-    Locate the <input type='file'> element in the DOM and call fileInput.sendKeys("/absolute/path/to/file.pdf"). Never click the file input button, as that opens the OS-native file picker.</p>
+    Locate the &lt;input type='file'&gt; element in the DOM and call fileInput.sendKeys("/absolute/path/to/file.pdf"). Never click the file input button, as that opens the OS-native file picker.</p>
 
     <h3>How it works</h3>
     <p><b>What internal checks does W3C WebDriver perform when element.click() is called?</b><br>
@@ -141,8 +141,8 @@ public class ElementInteractionsExample { // Declares class
     <p><b>Why does element.clear() sometimes fail to clear a React or Material-UI controlled input field?</b><br>
     Controlled React inputs listen to keyboard input events to update their virtual DOM state; when clear() empties the DOM value property without firing keydown/input events, React restores the old text on the next render. Fix by sending Keys.chord(Keys.CONTROL, "a"), Keys.BACK_SPACE.</p>
 
-    <p><b>How do you upload a file when the <input type='file'> is hidden with CSS display:none behind a custom 'Upload' button?</b><br>
-    Execute JavaScript to make the file input visible (or pass the path directly if the driver allows hidden file inputs), then call fileInput.sendKeys(absolutePath) on the <input type='file'> tag.</p>
+    <p><b>How do you upload a file when the &lt;input type='file'&gt; is hidden with CSS display:none behind a custom 'Upload' button?</b><br>
+    Execute JavaScript to make the file input visible (or pass the path directly if the driver allows hidden file inputs), then call fileInput.sendKeys(absolutePath) on the &lt;input type='file'&gt; tag.</p>
 
     <p><b>How do you safely toggle a checkbox only if it is not already checked?</b><br>
     Check if (!checkbox.isSelected()) { checkbox.click(); }. Calling click() unconditionally would uncheck a checkbox that defaults to checked.</p>
@@ -155,7 +155,7 @@ public class ElementInteractionsExample { // Declares class
     The element is present in the DOM (so findElement succeeded), but it has CSS display:none, visibility:hidden, zero width/height, or is off-screen inside a collapsed accordion. Wait for ExpectedConditions.visibilityOf(element) before typing.</p>
 
     <p><b>What causes InvalidElementStateException when calling clear()?</b><br>
-    You called clear() on an element that is either disabled, read-only (readonly attribute), or not an editable text control (such as a <div> or <button>).</p>
+    You called clear() on an element that is either disabled, read-only (readonly attribute), or not an editable text control (such as a &lt;div&gt; or &lt;button&gt;).</p>
 
     <h3>Design choices</h3>
     <p><b>Why should JavaScript click (executeScript("arguments[0].click()", el)) only be used as a last resort?</b><br>
@@ -172,7 +172,7 @@ public class ElementInteractionsExample { // Declares class
     <h2>Quick answers</h2>
     <ol>
       <li><b>Which method empties an input field?</b> element.clear() resets an editable input or textarea.</li>
-      <li><b>How do you upload a file in Selenium?</b> Call fileInput.sendKeys("/absolute/path/to/file") on the <input type='file'> element.</li>
+      <li><b>How do you upload a file in Selenium?</b> Call fileInput.sendKeys("/absolute/path/to/file") on the &lt;input type='file'&gt; element.</li>
       <li><b>What exception occurs when a spinner covers a button?</b> ElementClickInterceptedException.</li>
       <li><b>What exception occurs when typing into a hidden input?</b> ElementNotInteractableException.</li>
       <li><b>How do you press Enter after typing text?</b> Call element.sendKeys("search term", Keys.ENTER).</li>

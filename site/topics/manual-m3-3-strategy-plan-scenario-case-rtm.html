@@ -14,7 +14,7 @@
   <h1>3.3 Test Strategy vs Test Plan, Test Scenario vs Test Case &amp; RTM</h1>
 
   <section><h2>1. The Base: What Are Test Artifacts and How Do They Connect from Top to Bottom?</h2>
-    <p class="def">Test Artifacts are the formal engineering documents and work products created across the STLCâ€”flowing top-down from an organization-wide Test Strategy, to a project-specific Test Plan, down to high-level Test Scenarios, granular step-by-step Test Cases, and connected via the Requirement Traceability Matrix (RTM).</p>
+    <p class="def">Test Artifacts are the formal engineering documents and work products created across the STLC—flowing top-down from an organization-wide Test Strategy, to a project-specific Test Plan, down to high-level Test Scenarios, granular step-by-step Test Cases, and connected via the Requirement Traceability Matrix (RTM).</p>
     <p><b>The Problem They Solve:</b> Without a clear hierarchy of test documents, every project team reinvents quality standards from scratch, new QA engineers don't know which browsers or environments are in scope, and test execution relies on memory instead of reproducible steps. Organizing artifacts into a <b>4-level top-down hierarchy</b> ensures consistency from the VP of Engineering down to individual `@Test` methods.</p></section>
 
   <section><h2>2. Visual Hierarchy Pipeline: How All 5 QA Artifacts Flow Top-Down</h2>
@@ -143,7 +143,7 @@ import org.testng.annotations.Test;
 // TEST SCENARIO (TS_LOGIN_01): Verify User Login Functionality
 public class LoginScenarioTest extends BaseTest {
 
-    // TEST CASE 1 (TC_LOGIN_001 - Positive) -> Mapped to RTM REQ_101
+    // TEST CASE 1 (TC_LOGIN_001 - Positive) -&gt; Mapped to RTM REQ_101
     @Test(priority = 1, groups = {"smoke", "regression"},
           description = "RTM:REQ_101 | TC_LOGIN_001: Verify login with valid credentials")
     public void verifyValidLogin() {
@@ -152,7 +152,7 @@ public class LoginScenarioTest extends BaseTest {
         Assert.assertEquals(dash.getHeadingText(), "Welcome, QA");
     }
 
-    // TEST CASE 2 (TC_LOGIN_002 - Negative) -> Mapped to RTM REQ_101
+    // TEST CASE 2 (TC_LOGIN_002 - Negative) -&gt; Mapped to RTM REQ_101
     @Test(priority = 2, groups = {"regression"},
           description = "RTM:REQ_101 | TC_LOGIN_002: Verify error banner on invalid password")
     public void verifyInvalidPasswordError() {
@@ -166,8 +166,8 @@ public class LoginScenarioTest extends BaseTest {
   <section><h2>6. Self-Check</h2>
     <ol>
       <li>Which document is static at the organization level, and which is dynamic at the project/release level? <i>(Test Strategy is static/organization-level; Test Plan is dynamic/project-level.)</i></li>
-      <li>What is <b>Suspension Criteria</b> inside a Test Plan? <i>(The threshold condition under which QA temporarily halts all test executionâ€”for example, if the staging environment goes down or >40% of core test cases are blocked by a critical defect.)</i></li>
-      <li>How does <b>Forward Traceability</b> differ from <b>Backward Traceability</b> in an RTM? <i>(Forward maps `Requirement -> Test Case` to ensure 100% of requirements are tested; Backward maps `Test Case -> Requirement` to ensure no extra unrequested features/tests are being built.)</i></li>
+      <li>What is <b>Suspension Criteria</b> inside a Test Plan? <i>(The threshold condition under which QA temporarily halts all test execution—for example, if the staging environment goes down or &gt;40% of core test cases are blocked by a critical defect.)</i></li>
+      <li>How does <b>Forward Traceability</b> differ from <b>Backward Traceability</b> in an RTM? <i>(Forward maps `Requirement -&gt; Test Case` to ensure 100% of requirements are tested; Backward maps `Test Case -&gt; Requirement` to ensure no extra unrequested features/tests are being built.)</i></li>
     </ol></section>
 
   <section><h2>7. Q&amp;A</h2>
