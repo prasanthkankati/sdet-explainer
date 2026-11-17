@@ -4,35 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SDET Explainer — Engineering Syllabus & Interview Question Banks</title>
-<link rel="stylesheet" href="style.css?v=3.8.0">
+<link rel="stylesheet" href="style.css?v=3.9.0">
 </head>
 <body class="home-page">
 <div class="home-wrap">
 
-  <!-- Top Sticky Header -->
+  <!-- Minimal Top Header -->
   <header class="home-header">
     <div class="home-header-inner">
-      <a href="index.html" class="home-brand" id="home-link" title="Home (Alt+H)">
+      <a href="index.html" class="home-brand" id="home-link" title="SDET Explainer (Alt+H)">
         <span class="home-brand-mark">SE</span>
         <span class="home-brand-name">SDET<span class="brand-accent">Explainer</span></span>
-        <span class="ver-pill">v3.8.0</span>
+        <span class="ver-pill">v3.9.0</span>
       </a>
 
-      <div class="home-header-center">
-        <div class="home-progress-box" title="Curriculum Completion Progress">
-          <div class="home-progress-info">
-            <span class="progress-label">CURRICULUM</span>
-            <span class="progress-val" id="spec-total">100 / 129 PUBLISHED</span>
-          </div>
-          <div class="home-progress-bar">
-            <div class="home-progress-fill" id="hero-meter-fill"></div>
-          </div>
-        </div>
-      </div>
-
       <nav class="home-header-actions">
-        <button class="icon-btn" type="button" id="hero-search-btn" title="Search syllabus [/]" aria-label="Search">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <button class="icon-btn search-trigger-btn" type="button" id="hero-search-btn" title="Search syllabus [/]" aria-label="Search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span class="btn-label">Search</span>
           <span class="kbd-badge">/</span>
         </button>
         <button class="icon-btn theme-toggle" type="button" id="hero-theme-btn" title="Toggle theme [Alt+L]" aria-label="Toggle theme">
@@ -43,99 +32,152 @@
     </div>
   </header>
 
-  <!-- Hero Command Deck (Zero Clutter, High Utility, Crisp Category Color) -->
-  <section class="home-hero-deck">
-    <div class="deck-lead">
-      <div class="deck-tagline">ARCHITECTURAL MASTERY &middot; ZERO FLUFF</div>
-      <h1 class="deck-title">Forged for Senior SDET Engineering.</h1>
-      <p class="deck-desc">From hardware silicon memory & JVM bytecode to production multi-threaded Selenium test frameworks and 623+ tier-verified interview Q&As.</p>
-    </div>
+  <!-- Minimalist Hero Section -->
+  <main class="home-main-minimal">
+    <section class="home-hero-minimal">
+      <div class="hero-badge-pill">ENGINEERING COMPENDIUM &middot; SENIOR SDET</div>
+      <h1 class="hero-minimal-title">SDET Explainer<span class="brand-accent">.</span></h1>
+      <p class="hero-minimal-desc">Deep architectural knowledge from physical silicon memory and JVM bytecode to production multi-threaded Selenium frameworks and 623+ tier-verified interview Q&As.</p>
 
-    <!-- 4 High-Access Track Cards -->
-    <div class="deck-track-cards">
-      <a href="#Java" class="deck-card track-java" data-target-track="Java">
-        <div class="deck-card-top">
-          <span class="deck-badge java">JAVA CORE</span>
-          <span class="deck-count">30 Topics</span>
-        </div>
-        <div class="deck-card-title">JVM, Memory & Bytecode</div>
-        <div class="deck-card-desc">Hardware ALU, Stack Frames, Type Erasure, IntegerCache, OOP & Concurrency.</div>
-      </a>
+      <!-- Minimal Quick Search Bar (Launches Command Palette) -->
+      <div class="hero-search-box" id="hero-search-trigger" role="button" tabindex="0" title="Click or press / to search">
+        <svg class="search-box-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span class="search-box-placeholder">Search 129 topics by keyword, class, or method...</span>
+        <kbd class="search-box-kbd">/</kbd>
+      </div>
 
-      <a href="#Selenium" class="deck-card track-sel" data-target-track="Selenium">
-        <div class="deck-card-top">
-          <span class="deck-badge sel">SELENIUM</span>
-          <span class="deck-count">25 Topics</span>
-        </div>
-        <div class="deck-card-title">WebDriver Architecture</div>
-        <div class="deck-card-desc">W3C WebDriver protocol, dynamic synchronization, listeners & POM frameworks.</div>
-      </a>
-
-      <a href="#Manual" class="deck-card track-man" data-target-track="Manual">
-        <div class="deck-card-top">
-          <span class="deck-badge man">MANUAL QA</span>
-          <span class="deck-count">15 Topics</span>
-        </div>
-        <div class="deck-card-title">SDLC, STLC & Test Design</div>
-        <div class="deck-card-desc">V-Model, Agile In-Sprint QA, BVA, Equivalence Partitioning & Defect Triage.</div>
-      </a>
-
-      <a href="#Interview" class="deck-card track-int" data-target-track="Interview">
-        <div class="deck-card-top">
-          <span class="deck-badge int">Q&A BANKS</span>
-          <span class="deck-count">52 Banks</span>
-        </div>
-        <div class="deck-card-title">623+ Interview Q&As</div>
-        <div class="deck-card-desc">Tier 1–5 zero-to-hero practical interview questions connected to every topic.</div>
-      </a>
-    </div>
-
-    <!-- Fast Action Strip: Resume + Random + Live Quick Filter -->
-    <div class="deck-action-bar">
-      <div class="action-btn-group">
-        <a class="deck-action-btn action-resume" id="hero-resume-btn" href="topics/selenium-overview.html" title="Resume your reading session">
+      <!-- Quick Action Buttons -->
+      <div class="hero-quick-actions">
+        <a class="hero-action-btn action-resume" id="hero-resume-btn" href="topics/java-jdk-jre-jvm.html" title="Resume your reading session">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
-          <span class="btn-text">Resume Last Read</span>
+          <span class="btn-text">Start Reading</span>
         </a>
-        <a class="deck-action-btn action-random" id="hero-random-btn" href="topics/selenium-overview.html" title="Jump to a random published chapter">
+        <a class="hero-action-btn action-random" id="hero-random-btn" href="topics/selenium-overview.html" title="Jump to a random published chapter">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-          <span class="btn-text">Random Chapter</span>
+          <span class="btn-text">Random Topic</span>
         </a>
       </div>
+    </section>
 
-      <div class="deck-search-wrap">
-        <svg class="search-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="search" class="deck-search-input" placeholder="Quick filter topics by keyword, method, or class..." autocomplete="off">
+    <!-- Core Syllabus Track Gateways -->
+    <section class="home-tracks-section">
+      <div class="section-label-minimal">SYLLABUS TRACKS</div>
+      <div class="track-cards-grid">
+
+        <a href="topics/java-jdk-jre-jvm.html" class="track-card track-card-java" data-track="Java">
+          <div class="track-card-header">
+            <span class="track-pill java">JAVA CORE</span>
+            <span class="track-count">30 Published</span>
+          </div>
+          <div class="track-card-title">JVM, Memory & Bytecode</div>
+          <div class="track-card-desc">Hardware ALU, Stack Frames, Type Erasure, IntegerCache, OOP & Concurrency.</div>
+          <div class="track-card-foot">
+            <span class="track-enter-link">Open Track &rarr;</span>
+          </div>
+        </a>
+
+        <a href="topics/selenium-overview.html" class="track-card track-card-sel" data-track="Selenium">
+          <div class="track-card-header">
+            <span class="track-pill sel">SELENIUM</span>
+            <span class="track-count">25 Published</span>
+          </div>
+          <div class="track-card-title">WebDriver Architecture</div>
+          <div class="track-card-desc">W3C WebDriver protocol, dynamic synchronization, listeners & POM frameworks.</div>
+          <div class="track-card-foot">
+            <span class="track-enter-link">Open Track &rarr;</span>
+          </div>
+        </a>
+
+        <a href="topics/manual-m1-1-static-dynamic.html" class="track-card track-card-man" data-track="Manual">
+          <div class="track-card-header">
+            <span class="track-pill man">MANUAL QA</span>
+            <span class="track-count">15 Published</span>
+          </div>
+          <div class="track-card-title">SDLC, STLC & Test Design</div>
+          <div class="track-card-desc">V-Model, Agile In-Sprint QA, BVA, Equivalence Partitioning & Defect Triage.</div>
+          <div class="track-card-foot">
+            <span class="track-enter-link">Open Track &rarr;</span>
+          </div>
+        </a>
+
+        <a href="topics/interview-m1-1-qa.html" class="track-card track-card-int" data-track="Interview">
+          <div class="track-card-header">
+            <span class="track-pill int">Q&A BANKS</span>
+            <span class="track-count">52 Banks &middot; 623+ Q&As</span>
+          </div>
+          <div class="track-card-title">Tier 1–5 Interview Banks</div>
+          <div class="track-card-desc">Practical zero-to-hero interview rubrics connected to every architectural topic.</div>
+          <div class="track-card-foot">
+            <span class="track-enter-link">Open Banks &rarr;</span>
+          </div>
+        </a>
+
+        <div class="track-card track-card-ts track-card-planned">
+          <div class="track-card-header">
+            <span class="track-pill ts">TS / JS</span>
+            <span class="track-count">15 Topics &middot; Queued</span>
+          </div>
+          <div class="track-card-title">Execution Context & Async</div>
+          <div class="track-card-desc">Event loop, Closures, Promises, Type annotations & Node.js automation.</div>
+          <div class="track-card-foot">
+            <span class="track-enter-link">In Progress</span>
+          </div>
+        </div>
+
+        <div class="track-card track-card-pw track-card-planned">
+          <div class="track-card-header">
+            <span class="track-pill pw">PLAYWRIGHT</span>
+            <span class="track-count">22 Topics &middot; Queued</span>
+          </div>
+          <div class="track-card-title">CDP & Modern Automation</div>
+          <div class="track-card-desc">BrowserContext isolation, auto-waiting locators, network pipes & tracing.</div>
+          <div class="track-card-foot">
+            <span class="track-enter-link">In Progress</span>
+          </div>
+        </div>
+
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Sticky Track Filter Bar -->
-  <nav class="home-track-nav" aria-label="Syllabus Tracks">
-    <div id="controls" class="home-chips"></div>
-    <div class="home-stats-indicator" id="stats"></div>
-  </nav>
-
-  <!-- Main Topic Grid -->
-  <main class="home-main">
-    <div class="topic-grid" id="grid"></div>
+    <!-- Minimal Stats Summary -->
+    <section class="home-stats-strip">
+      <div class="stat-item">
+        <span class="stat-number">129</span>
+        <span class="stat-label">Total Modules</span>
+      </div>
+      <div class="stat-divider">&middot;</div>
+      <div class="stat-item">
+        <span class="stat-number" id="spec-total">100</span>
+        <span class="stat-label">Published Specs</span>
+      </div>
+      <div class="stat-divider">&middot;</div>
+      <div class="stat-item">
+        <span class="stat-number">623+</span>
+        <span class="stat-label">Tier-Verified Q&As</span>
+      </div>
+      <div class="stat-divider">&middot;</div>
+      <div class="stat-item">
+        <span class="stat-number">0</span>
+        <span class="stat-label">Fluff</span>
+      </div>
+    </section>
   </main>
 
   <!-- Minimal Footer -->
   <footer class="home-footer">
     <div class="footer-left">
       <span class="home-brand-name">SDET Explainer</span>
-      <span class="ver-pill">v3.8.0</span>
+      <span class="ver-pill">v3.9.0</span>
       <span class="footer-sep">&middot;</span>
       <span class="footer-tagline">Engineering-Grade SDET Knowledge Base</span>
     </div>
     <div class="footer-keys">
-      <kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>/</kbd> Search <kbd>Alt+M</kbd> Manual <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+T</kbd> TS <kbd>Alt+P</kbd> Playwright <kbd>Alt+I</kbd> Interview
+      <kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>/</kbd> Search <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+M</kbd> Manual <kbd>Alt+I</kbd> Interview
     </div>
   </footer>
 
 </div>
-<script src="topics.js?v=3.8.0"></script>
-<script src="app.js?v=3.8.0"></script>
+<script src="topics.js?v=3.9.0"></script>
+<script src="app.js?v=3.9.0"></script>
 </body>
 </html>

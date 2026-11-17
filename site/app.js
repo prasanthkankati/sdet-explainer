@@ -4,6 +4,16 @@
   const assetPrefix = inTopicsDir ? "../" : "";
   const currentFile = location.pathname.replace(/\\/g, "/").split("/").pop() || "index.html";
 
+  // Helper: Find first published file per track
+  function firstFileForTrack(tr) {
+    if (typeof TOPICS === "undefined") {
+      return inTopicsDir ? "java-jdk-jre-jvm.html" : "topics/java-jdk-jre-jvm.html";
+    }
+    const found = TOPICS.find(t => t.track === tr && t.file);
+    const prefix = inTopicsDir ? "" : "topics/";
+    return found ? prefix + found.file : (inTopicsDir ? "../index.html" : "index.html");
+  }
+
   // Theme toggle (dark/light), saved in localStorage, defaults to dark, Shortcut: Alt+L
   const root = document.documentElement;
   const saved = localStorage.getItem("theme");
@@ -116,12 +126,6 @@
     };
     const meta = trackMeta[currentTrack] || { badge: currentTrack.toUpperCase(), pill: "SDET DOCS" };
 
-    // Find first published file per track for quick track switching in navbar
-    function firstFileForTrack(tr) {
-      const found = TOPICS.find(t => t.track === tr && t.file);
-      return found ? found.file : `../index.html#${tr}`;
-    }
-
     // 1. Build or normalize Top Navbar (.se-navbar)
     let navbar = document.querySelector(".se-navbar");
     if (!navbar) {
@@ -135,19 +139,20 @@
     navbar.innerHTML = `
       <div class="se-navbar-left">
         <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776; DOCS</button>
-        <a href="../index.html" class="se-brand" title="Back to SDET Explainer. Home (Alt+H)">SDET Explainer<span class="brand-dot">.</span></a>
-        <a href="../index.html#${encodeURIComponent(currentTrack)}" class="se-brand-sub" title="View ${esc(currentTrack)} Track on Home">[${esc(meta.badge)}]</a>
+        <a href="../index.html" class="se-brand" title="SDET Explainer (Alt+H)">SDET Explainer<span class="brand-accent">.</span></a>
         <ul class="se-navbar-links">
           ${navTracks.map(tr => `
             <li><a href="${firstFileForTrack(tr)}" class="${tr === currentTrack ? "active" : ""}">${tr === "TypeScript" ? "TS / JS" : tr}</a></li>
           `).join("")}
-          <li><a href="../index.html">All Tracks</a></li>
         </ul>
       </div>
       <div class="se-navbar-right">
-        <button class="nav-btn" type="button" id="nav-search-btn" title="Search Syllabus (/)">SEARCH [/]</button>
-        <span class="se-lang-pill">${esc(meta.pill)}</span>
-        <button class="theme-toggle nav-theme-toggle" type="button" id="nav-theme-btn" aria-label="Toggle Light/Dark Theme">
+        <button class="icon-btn search-trigger-btn" type="button" id="nav-search-btn" title="Search Syllabus [/]">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span class="btn-label">Search</span>
+          <span class="kbd-badge">/</span>
+        </button>
+        <button class="icon-btn theme-toggle nav-theme-toggle" type="button" id="nav-theme-btn" aria-label="Toggle Light/Dark Theme">
           ${createThemeToggleSvg()}
         </button>
       </div>
@@ -347,7 +352,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.8.0";
+  const SITE_VERSION = "v3.9.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -395,56 +400,19 @@
         return;
       }
 
-      if (targetTrack === "HOME") {
-        if (!inTopicsDir && selectTrackFn) {
-          history.replaceState(null, "", "index.html");
-          const search = document.getElementById("search");
-          if (search) search.value = "";
-          selectTrackFn("All");
-          window.scrollTo(0, 0);
-        } else {
-          location.href = homeHref;
-        }
+      if (targetTrack === "HOME" || targetTrack === "All") {
+        location.href = homeHref;
         return;
       }
 
-      if (!inTopicsDir && selectTrackFn) {
-        history.replaceState(null, "", targetTrack === "All" ? "index.html" : `#${targetTrack}`);
-        selectTrackFn(targetTrack);
-      } else {
-        location.href = targetTrack === "All" ? homeHref : `${homeHref}#${targetTrack}`;
-      }
+      const dest = firstFileForTrack(targetTrack);
+      if (dest) location.href = dest;
     });
   }
 
-  // Homepage Index: dynamic track chips, section grouping, search & filter
+  // Homepage Minimalist Engine: Resume, Random, Search Trigger & Published Stats
   function initIndex() {
-    const grid = document.getElementById("grid");
-    if (!grid) return;
-    const controls = document.getElementById("controls");
-    const search = document.getElementById("search");
-    const stats = document.getElementById("stats");
-    let track = "All";
-
-    const tracksList = typeof TRACKS !== "undefined" ? TRACKS : [
-      { id: "All", label: "All" },
-      { id: "Manual", label: "Manual" },
-      { id: "Java", label: "Java" },
-      { id: "Selenium", label: "Selenium" },
-      { id: "TypeScript", label: "TS / JS" },
-      { id: "Playwright", label: "Playwright" },
-      { id: "Interview", label: "Q&A Banks" }
-    ];
-
-    const hashTrack = (location.hash || "").replace(/^#/, "");
-    if (hashTrack && tracksList.some(t => t.id.toLowerCase() === hashTrack.toLowerCase())) {
-      track = tracksList.find(t => t.id.toLowerCase() === hashTrack.toLowerCase()).id;
-    }
-    if (track !== "All") {
-      document.body.setAttribute("data-track", track);
-    } else {
-      document.body.removeAttribute("data-track");
-    }
+    if (inTopicsDir) return;
 
     // 1. Resume Last Read Chapter
     const resumeBtn = document.getElementById("hero-resume-btn");
@@ -454,172 +422,52 @@
         if (rawLast) {
           const last = JSON.parse(rawLast);
           if (last && last.file) {
-            const shortTitle = (last.title || "").length > 30
-              ? last.title.slice(0, 28).trim() + "…"
-              : (last.title || "Last Topic");
+            const shortTitle = (last.title || "").length > 28
+              ? last.title.slice(0, 26).trim() + "…"
+              : (last.title || "Last Read");
             resumeBtn.href = "topics/" + last.file;
             const textEl = resumeBtn.querySelector(".btn-text");
             if (textEl) textEl.textContent = `Resume: ${shortTitle}`;
-            else resumeBtn.textContent = `↩ Resume: ${shortTitle}`;
             resumeBtn.title = `Resume last read (${last.track || "Topic"}): ${last.title}`;
           }
         }
       } catch (e) {}
     }
 
-    // 2. Random Chapter Button — directly navigates to a random published chapter
+    // 2. Random Chapter Button
     const randomBtn = document.getElementById("hero-random-btn");
     if (randomBtn && typeof TOPICS !== "undefined") {
       const published = TOPICS.filter(t => t.file);
       if (published.length > 0) {
         const randTopic = published[Math.floor(Math.random() * published.length)];
-        randomBtn.href = (inTopicsDir ? "" : "topics/") + randTopic.file;
+        randomBtn.href = "topics/" + randTopic.file;
         const textEl = randomBtn.querySelector(".btn-text");
-        const randTitle = randTopic.title.length > 24 ? randTopic.title.slice(0, 22).trim() + "…" : randTopic.title;
+        const randTitle = randTopic.title.length > 22 ? randTopic.title.slice(0, 20).trim() + "…" : randTopic.title;
         if (textEl) textEl.textContent = `Random: ${randTitle}`;
         randomBtn.title = `Open random published chapter: ${randTopic.title} (${randTopic.track})`;
       }
     }
 
-    // 3. Quick-Access Hero Deck Track Cards
-    const deckCards = document.querySelectorAll(".deck-card[data-target-track]");
-    deckCards.forEach(card => {
-      card.addEventListener("click", e => {
-        const target = card.getAttribute("data-target-track");
-        if (target) {
+    // 3. Hero Search Trigger
+    const searchTrigger = document.getElementById("hero-search-trigger");
+    if (searchTrigger) {
+      searchTrigger.addEventListener("click", () => {
+        if (openCmdFn) openCmdFn("");
+      });
+      searchTrigger.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          history.replaceState(null, "", `#${target}`);
-          if (selectTrackFn) selectTrackFn(target);
-          const scrollTarget = document.querySelector(".home-track-nav") || grid;
-          if (scrollTarget) scrollTarget.scrollIntoView({ behavior: "smooth" });
-        }
-      });
-    });
-
-    // 4. Render Dynamic Track Filter Chips with Topic Counts
-    if (controls) {
-      controls.querySelectorAll(".chip").forEach(c => c.remove());
-      tracksList.forEach(tr => {
-        const b = document.createElement("button");
-        b.className = "chip" + (tr.id === track ? " active" : "");
-        b.dataset.track = tr.id;
-        const shortcutKey = tr.id.charAt(0).toUpperCase();
-        b.title = `Filter ${tr.label} (Alt+${shortcutKey})`;
-
-        const countTotal = typeof TOPICS !== "undefined"
-          ? (tr.id === "All" ? TOPICS.length : TOPICS.filter(t => t.track === tr.id).length)
-          : "";
-
-        b.innerHTML = `<span class="chip-dot"></span><span class="chip-label">${esc(tr.label)}</span>` +
-          (countTotal !== "" ? `<span class="chip-count">${countTotal}</span>` : "");
-
-        b.onclick = () => {
-          history.replaceState(null, "", tr.id === "All" ? "index.html" : `#${tr.id}`);
-          selectTrackFn(tr.id);
-        };
-        controls.appendChild(b);
-      });
-    }
-
-    selectTrackFn = function (newTrack) {
-      const applySwitch = () => {
-        track = newTrack;
-        if (newTrack !== "All") {
-          document.body.setAttribute("data-track", newTrack);
-        } else {
-          document.body.removeAttribute("data-track");
-        }
-        if (controls) {
-          controls.querySelectorAll(".chip").forEach(x => {
-            x.classList.toggle("active", x.dataset.track === track);
-          });
-        }
-        render();
-      };
-      if (document.startViewTransition) {
-        document.startViewTransition(applySwitch);
-      } else {
-        applySwitch();
-      }
-    };
-
-    window.addEventListener("hashchange", () => {
-      const ht = (location.hash || "").replace(/^#/, "");
-      if (!ht) {
-        selectTrackFn("All");
-      } else {
-        const match = tracksList.find(t => t.id.toLowerCase() === ht.toLowerCase());
-        if (match) selectTrackFn(match.id);
-      }
-    });
-
-    function render() {
-      if (typeof TOPICS === "undefined") return;
-      const q = (search ? search.value : "").trim().toLowerCase();
-      const totalDone = TOPICS.filter(t => t.file).length;
-      const specTotal = document.getElementById("spec-total");
-      const meterFill = document.getElementById("hero-meter-fill");
-      if (specTotal) specTotal.textContent = `${totalDone} / ${TOPICS.length} PUBLISHED`;
-      if (meterFill) meterFill.style.width = `${TOPICS.length ? Math.round((totalDone / TOPICS.length) * 100) : 0}%`;
-
-      const list = TOPICS.filter(t => (track === "All" || t.track === track) &&
-        (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
-      const doneCount = list.filter(t => t.file).length;
-      if (stats) stats.textContent = `${list.length} topics (${doneCount} published, ${list.length - doneCount} queued)`;
-
-      if (list.length === 0) {
-        grid.innerHTML = `<div class="empty-state"><p>No topics found matching query "${esc(q)}".</p><button class="empty-reset-btn" id="reset-filter-btn">Clear Filter</button></div>`;
-        const resetBtn = document.getElementById("reset-filter-btn");
-        if (resetBtn) {
-          resetBtn.onclick = () => {
-            if (search) search.value = "";
-            selectTrackFn("All");
-          };
-        }
-        return;
-      }
-
-      const groups = new Map();
-      list.forEach(t => {
-        const sec = t.section || t.track;
-        if (!groups.has(sec)) groups.set(sec, []);
-        groups.get(sec).push(t);
-      });
-
-      let html = "";
-      groups.forEach((items, sec) => {
-        items.sort((a, b) => (a.order || 99) - (b.order || 99));
-        const secDone = items.filter(x => x.file).length;
-        const secTrack = items[0] ? items[0].track : "";
-        html += `<section class="sec-card" data-track="${secTrack}">` +
-          `<div class="sec-card-hdr">` +
-            `<span class="tag ${secTrack}">${secTrack}</span>` +
-            `<span class="sec-card-title">${esc(sec)}</span>` +
-            `<span class="sec-card-cnt">${secDone}/${items.length}</span>` +
-          `</div>` +
-          items.map(t => {
-            if (t.file) {
-              return `<a class="topic-row" href="topics/${t.file}"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill ready">[ready]</span></a>`;
-            } else {
-              return `<div class="topic-row planned"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill queued">[queued]</span></div>`;
-            }
-          }).join("") +
-          `</section>`;
-      });
-      grid.innerHTML = html;
-    }
-
-    if (search) {
-      search.addEventListener("input", render);
-      search.addEventListener("keydown", e => {
-        if (e.key === "Escape") {
-          search.value = "";
-          render();
-          search.blur();
+          if (openCmdFn) openCmdFn("");
         }
       });
     }
-    render();
+
+    // 4. Update Published Count Stat
+    const specTotal = document.getElementById("spec-total");
+    if (specTotal && typeof TOPICS !== "undefined") {
+      const doneCount = TOPICS.filter(t => t.file).length;
+      specTotal.textContent = String(doneCount);
+    }
   }
 
   // Global Command Search Overlay
@@ -745,6 +593,11 @@
           e.preventDefault();
           closeCmd();
         }
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        openCmd("");
         return;
       }
       const tag = (document.activeElement && document.activeElement.tagName) || "";
