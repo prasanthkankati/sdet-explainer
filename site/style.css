@@ -287,6 +287,15 @@ body.home-page .fixed-theme-toggle { display: none !important; }
   line-height: 1;
 }
 .brand-accent { color: #059669; } /* Darker green in logo text */
+.brand-cursor {
+  color: #FFFFFF !important; /* Underscore in white */
+  font-weight: 800;
+  margin-left: 2px;
+  line-height: 1;
+}
+:root[data-theme="light"] .brand-cursor {
+  color: #0F172A !important;
+}
 .home-brand:hover { text-decoration: none; }
 
 /* Keep SE and Dark/light strictly on same horizontal line — Pure SVG, No Border */
