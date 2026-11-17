@@ -1350,28 +1350,118 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
   table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 
-@media (max-width: 1040px) and (min-width: 681px) {
-  .track-cards-grid { grid-template-columns: repeat(2, 1fr); }
+/* ============================================================
+   MOBILE RESPONSIVE — HOMEPAGE & READING PAGES
+   ============================================================ */
+@media (max-width: 767px) {
+  body.home-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #000000 !important;
+  }
+  :root[data-theme="light"] body.home-page {
+    background: #F8FAFC !important;
+  }
+  .home-wrap {
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto !important;
+    padding: 16px 16px 36px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .home-top-bar {
+    height: 38px !important;
+    padding: 0 !important;
+    margin-bottom: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+  .home-brand {
+    gap: 7px;
+  }
+  .home-brand-mark {
+    width: 20px !important;
+    height: 20px !important;
+    font-size: 0.68rem !important;
+  }
+  .home-brand-name {
+    font-size: 1.05rem !important;
+  }
+  .home-top-bar .theme-toggle {
+    width: 20px !important;
+    height: 20px !important;
+  }
+  .home-main-minimal {
+    padding: 0 !important;
+    flex: 1;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: flex-start !important;
+    min-height: 0 !important;
+  }
+  .home-tracks-section {
+    margin: 0 0 32px !important;
+    width: 100% !important;
+  }
+  .tracks-section-top {
+    margin-bottom: 12px !important;
+  }
+  .section-label-minimal {
+    font-size: 0.68rem !important;
+    letter-spacing: 1.5px !important;
+  }
+  .home-track-chips-row {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important; /* Wrap chips elegantly on mobile */
+    gap: 8px !important;
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+  .home-track-chip {
+    height: 34px !important;
+    padding: 0 12px !important;
+    font-size: 0.76rem !important;
+    flex-shrink: 0;
+  }
+  .home-plain-actions {
+    margin-top: 16px !important;
+    margin-bottom: 16px !important;
+    padding: 0 !important;
+    gap: 20px !important;
+  }
+  .action-icon-btn {
+    width: 36px !important;
+    height: 36px !important;
+  }
 }
 
-@media (max-width: 680px) {
-  .track-cards-grid { grid-template-columns: 1fr; }
-  .home-footer { flex-direction: column; align-items: flex-start; gap: 12px; }
-  .footer-left { flex-wrap: wrap; }
-  .home-stats-strip { flex-wrap: wrap; gap: 12px 18px; }
+@media (max-width: 440px) {
+  .home-wrap {
+    padding: 14px 12px 28px !important;
+  }
+  .home-brand-name {
+    font-size: 0.95rem !important;
+  }
+  .home-track-chip {
+    height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 0.72rem !important;
+    gap: 6px !important;
+  }
 }
 
 @media (max-width: 600px) {
-  .home-wrap { padding: 0 0 32px; }
-  .home-header-inner { height: 48px; padding: 0 14px; }
-  .home-brand-name { font-size: 0.95rem; }
-  .home-main-minimal { padding: 24px 14px 20px; }
-  .home-hero-minimal { margin-bottom: 24px; }
-  .hero-minimal-title { font-size: 1.85rem; }
-  .hero-minimal-desc { font-size: 0.92rem; margin-bottom: 18px; }
-  .hero-quick-actions { margin-bottom: 24px; }
-  .footer-keys { display: none; }
-
   .se-navbar { height: 44px; padding: 0 10px; }
   .se-brand { font-size: 0.92rem; padding-left: 0; }
   .se-sidebar, .se-sidebar-backdrop { top: 44px; height: calc(100dvh - 44px); }
