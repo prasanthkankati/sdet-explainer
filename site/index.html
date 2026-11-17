@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SDET Explainer — Engineering Syllabus & Interview Question Banks</title>
-<link rel="stylesheet" href="style.css?v=3.9.0">
+<link rel="stylesheet" href="style.css?v=3.9.1">
 </head>
 <body class="home-page">
 <div class="home-wrap">
@@ -15,7 +15,7 @@
       <a href="index.html" class="home-brand" id="home-link" title="SDET Explainer (Alt+H)">
         <span class="home-brand-mark">SE</span>
         <span class="home-brand-name">SDET<span class="brand-accent">Explainer</span></span>
-        <span class="ver-pill">v3.9.0</span>
+        <span class="ver-pill">v3.9.1</span>
       </a>
 
       <nav class="home-header-actions">
@@ -32,19 +32,14 @@
     </div>
   </header>
 
-  <!-- Minimalist Hero Section -->
+  <!-- Viewport-Fit Minimal Main -->
   <main class="home-main-minimal">
+
+    <!-- Hero Identity -->
     <section class="home-hero-minimal">
       <div class="hero-badge-pill">ENGINEERING COMPENDIUM &middot; SENIOR SDET</div>
       <h1 class="hero-minimal-title">SDET Explainer<span class="brand-accent">.</span></h1>
-      <p class="hero-minimal-desc">Deep architectural knowledge from physical silicon memory and JVM bytecode to production multi-threaded Selenium frameworks and 623+ tier-verified interview Q&As.</p>
-
-      <!-- Minimal Quick Search Bar (Launches Command Palette) -->
-      <div class="hero-search-box" id="hero-search-trigger" role="button" tabindex="0" title="Click or press / to search">
-        <svg class="search-box-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <span class="search-box-placeholder">Search 129 topics by keyword, class, or method...</span>
-        <kbd class="search-box-kbd">/</kbd>
-      </div>
+      <p class="hero-minimal-desc">From physical silicon memory and JVM bytecode to production multi-threaded Selenium frameworks and 623+ tier-verified interview Q&As.</p>
 
       <!-- Quick Action Buttons -->
       <div class="hero-quick-actions">
@@ -59,59 +54,64 @@
       </div>
     </section>
 
-    <!-- Core Syllabus Track Gateways -->
+    <!-- Balanced 3x2 Track Gateways -->
     <section class="home-tracks-section">
       <div class="section-label-minimal">SYLLABUS TRACKS</div>
       <div class="track-cards-grid">
 
+        <!-- Java -->
         <a href="topics/java-jdk-jre-jvm.html" class="track-card track-card-java" data-track="Java">
           <div class="track-card-header">
             <span class="track-pill java">JAVA CORE</span>
-            <span class="track-count">30 Published</span>
+            <span class="track-count">30 Topics</span>
           </div>
           <div class="track-card-title">JVM, Memory & Bytecode</div>
           <div class="track-card-desc">Hardware ALU, Stack Frames, Type Erasure, IntegerCache, OOP & Concurrency.</div>
           <div class="track-card-foot">
-            <span class="track-enter-link">Open Track &rarr;</span>
+            <span class="track-enter-link">Open Track <span class="arrow-glyph">&rarr;</span></span>
           </div>
         </a>
 
+        <!-- Selenium -->
         <a href="topics/selenium-overview.html" class="track-card track-card-sel" data-track="Selenium">
           <div class="track-card-header">
             <span class="track-pill sel">SELENIUM</span>
-            <span class="track-count">25 Published</span>
+            <span class="track-count">25 Topics</span>
           </div>
           <div class="track-card-title">WebDriver Architecture</div>
           <div class="track-card-desc">W3C WebDriver protocol, dynamic synchronization, listeners & POM frameworks.</div>
           <div class="track-card-foot">
-            <span class="track-enter-link">Open Track &rarr;</span>
+            <span class="track-enter-link">Open Track <span class="arrow-glyph">&rarr;</span></span>
           </div>
         </a>
 
+        <!-- Manual QA -->
         <a href="topics/manual-m1-1-static-dynamic.html" class="track-card track-card-man" data-track="Manual">
           <div class="track-card-header">
             <span class="track-pill man">MANUAL QA</span>
-            <span class="track-count">15 Published</span>
+            <span class="track-count">15 Topics</span>
           </div>
           <div class="track-card-title">SDLC, STLC & Test Design</div>
           <div class="track-card-desc">V-Model, Agile In-Sprint QA, BVA, Equivalence Partitioning & Defect Triage.</div>
           <div class="track-card-foot">
-            <span class="track-enter-link">Open Track &rarr;</span>
+            <span class="track-enter-link">Open Track <span class="arrow-glyph">&rarr;</span></span>
           </div>
         </a>
 
+        <!-- Interview Q&A -->
         <a href="topics/interview-m1-1-qa.html" class="track-card track-card-int" data-track="Interview">
           <div class="track-card-header">
             <span class="track-pill int">Q&A BANKS</span>
             <span class="track-count">52 Banks &middot; 623+ Q&As</span>
           </div>
           <div class="track-card-title">Tier 1–5 Interview Banks</div>
-          <div class="track-card-desc">Practical zero-to-hero interview rubrics connected to every architectural topic.</div>
+          <div class="track-card-desc">Practical scenario rubrics & zero-to-hero questions connected to every topic.</div>
           <div class="track-card-foot">
-            <span class="track-enter-link">Open Banks &rarr;</span>
+            <span class="track-enter-link">Open Banks <span class="arrow-glyph">&rarr;</span></span>
           </div>
         </a>
 
+        <!-- TypeScript (Queued) -->
         <div class="track-card track-card-ts track-card-planned">
           <div class="track-card-header">
             <span class="track-pill ts">TS / JS</span>
@@ -124,6 +124,7 @@
           </div>
         </div>
 
+        <!-- Playwright (Queued) -->
         <div class="track-card track-card-pw track-card-planned">
           <div class="track-card-header">
             <span class="track-pill pw">PLAYWRIGHT</span>
@@ -139,7 +140,7 @@
       </div>
     </section>
 
-    <!-- Minimal Stats Summary -->
+    <!-- Compact Minimal Stats Strip -->
     <section class="home-stats-strip">
       <div class="stat-item">
         <span class="stat-number">129</span>
@@ -167,7 +168,7 @@
   <footer class="home-footer">
     <div class="footer-left">
       <span class="home-brand-name">SDET Explainer</span>
-      <span class="ver-pill">v3.9.0</span>
+      <span class="ver-pill">v3.9.1</span>
       <span class="footer-sep">&middot;</span>
       <span class="footer-tagline">Engineering-Grade SDET Knowledge Base</span>
     </div>
@@ -177,7 +178,7 @@
   </footer>
 
 </div>
-<script src="topics.js?v=3.9.0"></script>
-<script src="app.js?v=3.9.0"></script>
+<script src="topics.js?v=3.9.1"></script>
+<script src="app.js?v=3.9.1"></script>
 </body>
 </html>

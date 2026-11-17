@@ -209,6 +209,20 @@
       } else {
         navbar.insertAdjacentElement("afterend", layout);
       }
+
+      // Clean up stray legacy footers on chapter pages and add clean doc footer
+      document.querySelectorAll("body.in-chapter > footer").forEach(f => f.remove());
+      if (!mainEl.querySelector(".se-doc-footer")) {
+        const docFoot = document.createElement("div");
+        docFoot.className = "se-doc-footer";
+        docFoot.innerHTML = `
+          <div class="se-doc-footer-inner">
+            <span>SDET Explainer &middot; Engineering Knowledge Base</span>
+            <a href="../index.html">&larr; Back to Syllabus Hub (Alt+H)</a>
+          </div>
+        `;
+        mainEl.appendChild(docFoot);
+      }
     }
 
     // 3. Populate Left Sidebar Documentation Tree (.se-sidebar) from TOPICS for currentTrack
@@ -352,7 +366,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.9.0";
+  const SITE_VERSION = "v3.9.1";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
