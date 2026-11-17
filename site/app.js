@@ -347,7 +347,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.6.0";
+  const SITE_VERSION = "v3.7.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -362,10 +362,7 @@
 
   function initHeaderAndShortcuts() {
     const homeHref = inTopicsDir ? "../index.html" : "index.html";
-    const footer = document.querySelector("footer");
-    if (footer) {
-      footer.innerHTML = `<a href="${homeHref}" title="Home (Alt+H)" style="font-weight:700">SDET Explainer.</a> <b class="ver-pill">${SITE_VERSION}</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright`;
-    }
+    // Footer on reading pages is dynamically injected by the doc layout builder; home footer is static HTML.
 
     // Smooth page landing & navigation transition
     window.addEventListener("pageshow", () => {
@@ -425,18 +422,17 @@
     const grid = document.getElementById("grid");
     if (!grid) return;
     const controls = document.getElementById("controls");
-    const search = document.getElementById("search");
     const stats = document.getElementById("stats");
     let track = "All";
 
     const tracksList = typeof TRACKS !== "undefined" ? TRACKS : [
       { id: "All", label: "All" },
-      { id: "Manual", label: "Manual Testing" },
+      { id: "Manual", label: "Manual" },
       { id: "Java", label: "Java" },
       { id: "Selenium", label: "Selenium" },
       { id: "TypeScript", label: "TS / JS" },
       { id: "Playwright", label: "Playwright" },
-      { id: "Interview", label: "Interview Q&A" }
+      { id: "Interview", label: "Q&A Banks" }
     ];
 
     const hashTrack = (location.hash || "").replace(/^#/, "");
@@ -449,7 +445,7 @@
       document.body.removeAttribute("data-track");
     }
 
-    // 1. Left Hero CTA Box: Resume Last Read Doc Link
+    // Resume Last Read
     const resumeBtn = document.getElementById("hero-resume-btn");
     if (resumeBtn) {
       try {
@@ -457,18 +453,18 @@
         if (rawLast) {
           const last = JSON.parse(rawLast);
           if (last && last.file) {
-            const shortTitle = (last.title || "").length > 28
-              ? last.title.slice(0, 26).trim() + "…"
+            const shortTitle = (last.title || "").length > 32
+              ? last.title.slice(0, 30).trim() + "…"
               : (last.title || "Last Doc");
             resumeBtn.href = "topics/" + last.file;
-            resumeBtn.innerHTML = `RESUME: ${esc(shortTitle)} &rarr;`;
+            resumeBtn.textContent = `↩ Resume: ${shortTitle}`;
             resumeBtn.title = `Resume last read (${last.track || "Doc"}): ${last.title}`;
           }
         }
       } catch (e) {}
     }
 
-    // 2. Right Hero CTA Box: Suggest Random Track
+    // Random Track
     const randomBtn = document.getElementById("hero-random-btn");
     const candidateTracks = tracksList.filter(t => t.id !== "All");
     let suggestedTrackId = "Manual";
@@ -478,8 +474,8 @@
       suggestedTrackId = chosen.id;
       if (randomBtn) {
         randomBtn.href = `#${chosen.id}`;
-        randomBtn.innerHTML = `RANDOM TRACK: ${esc(chosen.id.toUpperCase())} &rarr;`;
-        randomBtn.title = `Switch to suggested random track: ${chosen.label}`;
+        randomBtn.textContent = `⚡ ${chosen.label}`;
+        randomBtn.title = `Open ${chosen.label} track`;
       }
     }
     pickRandomTrack(track);
@@ -498,18 +494,6 @@
       };
     }
 
-    // Interactive Hero KPI Q&A Banks Button
-    const kpiInterviewBtn = document.getElementById("kpi-interview-btn");
-    if (kpiInterviewBtn) {
-      kpiInterviewBtn.onclick = e => {
-        e.preventDefault();
-        history.replaceState(null, "", "#Interview");
-        if (selectTrackFn) selectTrackFn("Interview");
-        const target = document.getElementById("controls") || document.getElementById("grid");
-        if (target) target.scrollIntoView({ behavior: "smooth" });
-      };
-    }
-
     controls.querySelectorAll(".chip").forEach(c => c.remove());
     tracksList.forEach(tr => {
       const b = document.createElement("button");
@@ -517,9 +501,7 @@
       b.dataset.track = tr.id;
       const shortcutKey = tr.id.charAt(0).toUpperCase();
       b.title = `Shortcut: Alt+${shortcutKey}`;
-      const countDone = tr.id === "All" ? TOPICS.filter(t => t.file).length : TOPICS.filter(t => t.track === tr.id && t.file).length;
-      const countTotal = tr.id === "All" ? TOPICS.length : TOPICS.filter(t => t.track === tr.id).length;
-      b.textContent = countTotal > 0 ? `${tr.label} (${countDone}/${countTotal})` : tr.label;
+      b.textContent = tr.label;
       b.onclick = () => {
         history.replaceState(null, "", tr.id === "All" ? "index.html" : `#${tr.id}`);
         selectTrackFn(tr.id);

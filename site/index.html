@@ -4,74 +4,46 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SDET Explainer.</title>
-<link rel="stylesheet" href="style.css?v=3.6.0">
+<link rel="stylesheet" href="style.css?v=3.7.0">
 </head>
 <body class="home-page">
-<div class="wrap home-wrap">
-  <nav class="home-nav" aria-label="Primary">
-    <a href="index.html" id="home-link" class="home-brand" title="Home (Alt+H)">SDET Explainer<span class="brand-dot">.</span></a>
-    <div class="home-nav-actions">
-      <button class="nav-btn" type="button" id="hero-search-btn">SEARCH [/]</button>
-      <button class="theme-toggle home-theme-toggle" type="button" id="hero-theme-btn" title="Toggle Light/Dark Theme (Alt+L)" aria-label="Toggle Light/Dark Theme">
-        <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="17" cy="6" r="3" class="night-moon" fill="currentColor" stroke="currentColor"></circle>
-          <path d="M2 19L8.5 9.5L15 19"></path>
-          <path d="M12.5 19L17 12.5L22 19"></path>
-          <line x1="2" y1="19" x2="22" y2="19"></line>
-        </svg>
-      </button>
-    </div>
-  </nav>
+<div class="home-wrap">
 
-  <section class="hero-banner" aria-label="Overview">
-    <div class="hero-left">
-      <div class="hero-kicker">01 / ZERO-FLUFF ENGINEERING SYLLABUS &middot; <span class="ver-pill">v3.6.0</span></div>
-      <h1>FORGED FOR<br>SDET MASTERY.</h1>
-      <p class="hero-sub">3-column DocTree navigation, inline term definitions, and 1,500+ interview Q&amp;As across Manual, Java, Selenium 4, TypeScript &amp; Playwright.</p>
-      <div class="hero-cta-row">
-        <a class="hero-cta" id="hero-resume-btn" href="topics/selenium-overview.html">RESUME: 1.1 Selenium Overview &rarr;</a>
-        <a class="hero-cta secondary" id="hero-random-btn" href="#Manual">RANDOM TRACK: MANUAL &rarr;</a>
-      </div>
+  <header class="home-header">
+    <div class="home-header-inner">
+      <a href="index.html" class="home-brand" id="home-link" title="Home (Alt+H)">SDET Explainer<span class="brand-dot">.</span></a>
+      <div class="home-header-meta" id="spec-total"></div>
+      <nav class="home-header-actions">
+        <button class="icon-btn" type="button" id="hero-search-btn" title="Search topics [/]" aria-label="Search">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </button>
+        <button class="icon-btn theme-toggle" type="button" id="hero-theme-btn" title="Toggle theme [Alt+L]" aria-label="Toggle theme">
+          <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </nav>
     </div>
-    <div class="hero-right">
-      <div class="hero-right-hdr">
-        <span>02 / LIVE COVERAGE</span>
-        <span id="spec-total">--</span>
-      </div>
-      <div class="hero-meter"><div class="hero-meter-fill" id="hero-meter-fill"></div></div>
-      <div class="hero-kpi-grid">
-        <a href="topics/selenium-overview.html" class="kpi-cell kpi-link" title="Open Selenium Track (25 Pages)">
-          <span>SELENIUM TRACK</span><b>25 / 25 &rarr;</b>
-        </a>
-        <a href="topics/manual-m1-1-static-dynamic.html" class="kpi-cell kpi-link" title="Open Manual Testing Track (15 Pages)">
-          <span>MANUAL TRACK</span><b>15 / 15 &rarr;</b>
-        </a>
-        <a href="topics/java-program-structure-main.html" class="kpi-cell kpi-link" title="Open Java Track (30 Pages)">
-          <span>JAVA TRACK</span><b>30 / 30 &rarr;</b>
-        </a>
-        <a href="#Interview" id="kpi-interview-btn" class="kpi-cell kpi-link" title="View All Interview Q&A Banks (30+ Banks)">
-          <span>Q&amp;A BANKS</span><b>1,500+ &rarr;</b>
-        </a>
-      </div>
-    </div>
-  </section>
+    <div class="home-track-bar" id="controls"></div>
+    <div class="home-progress"><div class="home-progress-fill" id="hero-meter-fill"></div></div>
+  </header>
 
-  <div class="controls home-tabs" id="controls"></div>
-  <div class="grid bento-grid" id="grid"></div>
+  <main class="home-main">
+    <div class="home-resume-row">
+      <a class="home-resume-link" id="hero-resume-btn" href="topics/selenium-overview.html">↩ Resume last read</a>
+      <a class="home-random-link" id="hero-random-btn" href="#Manual">⚡ Random track</a>
+      <span class="home-stats" id="stats"></span>
+    </div>
+    <div class="topic-grid" id="grid"></div>
+  </main>
+
+  <footer class="home-footer">
+    <span class="ver-pill">v3.7.0</span>
+    <span class="footer-sep">·</span>
+    <span class="footer-keys"><kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>/</kbd> Search <kbd>Alt+M</kbd> Manual <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+T</kbd> TS <kbd>Alt+P</kbd> Playwright</span>
+  </footer>
+
 </div>
-<footer><b class="ver-pill">v3.6.0</b> &middot; Shortcuts: <b>Alt+H</b> Home &middot; <b>Alt+L</b> Theme &middot; <b>/</b> Search &middot; <b>Alt+M</b> Manual &middot; <b>Alt+J</b> Java &middot; <b>Alt+S</b> Selenium &middot; <b>Alt+T</b> TS/JS &middot; <b>Alt+P</b> Playwright</footer>
-<script src="topics.js?v=3.6.0"></script>
-<script src="app.js?v=3.6.0"></script>
+<script src="topics.js?v=3.7.0"></script>
+<script src="app.js?v=3.7.0"></script>
 </body>
 </html>
