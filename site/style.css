@@ -289,7 +289,7 @@ body.home-page .fixed-theme-toggle { display: none !important; }
 .brand-accent { color: #10B981; }
 .home-brand:hover { text-decoration: none; }
 
-/* Keep SE and Dark/light strictly on same horizontal line */
+/* Keep SE and Dark/light strictly on same horizontal line — Pure SVG, No Border */
 .home-top-bar .theme-toggle {
   height: 22px !important;
   width: 22px !important;
@@ -303,14 +303,19 @@ body.home-page .fixed-theme-toggle { display: none !important; }
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
-  border: 1px solid var(--border) !important;
-  background: transparent !important;
+  border: none !important;            /* No border — just keep SVG */
+  background: transparent !important; /* No background */
+  box-shadow: none !important;        /* Zero gloss */
   color: var(--muted) !important;
   line-height: 1 !important;
+  cursor: pointer;
+  transition: color 0.15s ease, opacity 0.15s ease;
 }
 .home-top-bar .theme-toggle:hover {
-  border-color: var(--bold) !important;
+  border: none !important;
+  background: transparent !important;
   color: var(--bold) !important;
+  opacity: 1;
 }
 
 .icon-btn {
@@ -825,14 +830,14 @@ body.home-page .fixed-theme-toggle { display: none !important; }
   justify-content: center;
   width: 28px; height: 28px;
   padding: 0;
-  background: none;
-  border: 1px solid var(--border);
+  background: transparent !important;
+  border: none !important;
   color: var(--muted);
   cursor: pointer;
   overflow: hidden;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: color 0.15s ease;
 }
-.theme-toggle:hover { border-color: var(--accent); color: var(--bold); }
+.theme-toggle:hover { border: none !important; background: transparent !important; color: var(--bold); }
 
 /* 3-Column layout */
 .se-layout {
