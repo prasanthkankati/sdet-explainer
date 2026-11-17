@@ -3,19 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>SDET Explainer.</title>
-<link rel="stylesheet" href="style.css?v=3.7.0">
+<title>SDET Explainer — Engineering Syllabus & Interview Question Banks</title>
+<link rel="stylesheet" href="style.css?v=3.8.0">
 </head>
 <body class="home-page">
 <div class="home-wrap">
 
+  <!-- Top Sticky Header -->
   <header class="home-header">
     <div class="home-header-inner">
-      <a href="index.html" class="home-brand" id="home-link" title="Home (Alt+H)">SDET Explainer<span class="brand-dot">.</span></a>
-      <div class="home-header-meta" id="spec-total"></div>
+      <a href="index.html" class="home-brand" id="home-link" title="Home (Alt+H)">
+        <span class="home-brand-mark">SE</span>
+        <span class="home-brand-name">SDET<span class="brand-accent">Explainer</span></span>
+        <span class="ver-pill">v3.8.0</span>
+      </a>
+
+      <div class="home-header-center">
+        <div class="home-progress-box" title="Curriculum Completion Progress">
+          <div class="home-progress-info">
+            <span class="progress-label">CURRICULUM</span>
+            <span class="progress-val" id="spec-total">100 / 129 PUBLISHED</span>
+          </div>
+          <div class="home-progress-bar">
+            <div class="home-progress-fill" id="hero-meter-fill"></div>
+          </div>
+        </div>
+      </div>
+
       <nav class="home-header-actions">
-        <button class="icon-btn" type="button" id="hero-search-btn" title="Search topics [/]" aria-label="Search">
+        <button class="icon-btn" type="button" id="hero-search-btn" title="Search syllabus [/]" aria-label="Search">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <span class="kbd-badge">/</span>
         </button>
         <button class="icon-btn theme-toggle" type="button" id="hero-theme-btn" title="Toggle theme [Alt+L]" aria-label="Toggle theme">
           <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -23,27 +41,101 @@
         </button>
       </nav>
     </div>
-    <div class="home-track-bar" id="controls"></div>
-    <div class="home-progress"><div class="home-progress-fill" id="hero-meter-fill"></div></div>
   </header>
 
-  <main class="home-main">
-    <div class="home-resume-row">
-      <a class="home-resume-link" id="hero-resume-btn" href="topics/selenium-overview.html">↩ Resume last read</a>
-      <a class="home-random-link" id="hero-random-btn" href="#Manual">⚡ Random track</a>
-      <span class="home-stats" id="stats"></span>
+  <!-- Hero Command Deck (Zero Clutter, High Utility, Crisp Category Color) -->
+  <section class="home-hero-deck">
+    <div class="deck-lead">
+      <div class="deck-tagline">ARCHITECTURAL MASTERY &middot; ZERO FLUFF</div>
+      <h1 class="deck-title">Forged for Senior SDET Engineering.</h1>
+      <p class="deck-desc">From hardware silicon memory & JVM bytecode to production multi-threaded Selenium test frameworks and 623+ tier-verified interview Q&As.</p>
     </div>
+
+    <!-- 4 High-Access Track Cards -->
+    <div class="deck-track-cards">
+      <a href="#Java" class="deck-card track-java" data-target-track="Java">
+        <div class="deck-card-top">
+          <span class="deck-badge java">JAVA CORE</span>
+          <span class="deck-count">30 Topics</span>
+        </div>
+        <div class="deck-card-title">JVM, Memory & Bytecode</div>
+        <div class="deck-card-desc">Hardware ALU, Stack Frames, Type Erasure, IntegerCache, OOP & Concurrency.</div>
+      </a>
+
+      <a href="#Selenium" class="deck-card track-sel" data-target-track="Selenium">
+        <div class="deck-card-top">
+          <span class="deck-badge sel">SELENIUM</span>
+          <span class="deck-count">25 Topics</span>
+        </div>
+        <div class="deck-card-title">WebDriver Architecture</div>
+        <div class="deck-card-desc">W3C WebDriver protocol, dynamic synchronization, listeners & POM frameworks.</div>
+      </a>
+
+      <a href="#Manual" class="deck-card track-man" data-target-track="Manual">
+        <div class="deck-card-top">
+          <span class="deck-badge man">MANUAL QA</span>
+          <span class="deck-count">15 Topics</span>
+        </div>
+        <div class="deck-card-title">SDLC, STLC & Test Design</div>
+        <div class="deck-card-desc">V-Model, Agile In-Sprint QA, BVA, Equivalence Partitioning & Defect Triage.</div>
+      </a>
+
+      <a href="#Interview" class="deck-card track-int" data-target-track="Interview">
+        <div class="deck-card-top">
+          <span class="deck-badge int">Q&A BANKS</span>
+          <span class="deck-count">52 Banks</span>
+        </div>
+        <div class="deck-card-title">623+ Interview Q&As</div>
+        <div class="deck-card-desc">Tier 1–5 zero-to-hero practical interview questions connected to every topic.</div>
+      </a>
+    </div>
+
+    <!-- Fast Action Strip: Resume + Random + Live Quick Filter -->
+    <div class="deck-action-bar">
+      <div class="action-btn-group">
+        <a class="deck-action-btn action-resume" id="hero-resume-btn" href="topics/selenium-overview.html" title="Resume your reading session">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
+          <span class="btn-text">Resume Last Read</span>
+        </a>
+        <a class="deck-action-btn action-random" id="hero-random-btn" href="topics/selenium-overview.html" title="Jump to a random published chapter">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+          <span class="btn-text">Random Chapter</span>
+        </a>
+      </div>
+
+      <div class="deck-search-wrap">
+        <svg class="search-input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="search" class="deck-search-input" placeholder="Quick filter topics by keyword, method, or class..." autocomplete="off">
+      </div>
+    </div>
+  </section>
+
+  <!-- Sticky Track Filter Bar -->
+  <nav class="home-track-nav" aria-label="Syllabus Tracks">
+    <div id="controls" class="home-chips"></div>
+    <div class="home-stats-indicator" id="stats"></div>
+  </nav>
+
+  <!-- Main Topic Grid -->
+  <main class="home-main">
     <div class="topic-grid" id="grid"></div>
   </main>
 
+  <!-- Minimal Footer -->
   <footer class="home-footer">
-    <span class="ver-pill">v3.7.0</span>
-    <span class="footer-sep">·</span>
-    <span class="footer-keys"><kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>/</kbd> Search <kbd>Alt+M</kbd> Manual <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+T</kbd> TS <kbd>Alt+P</kbd> Playwright</span>
+    <div class="footer-left">
+      <span class="home-brand-name">SDET Explainer</span>
+      <span class="ver-pill">v3.8.0</span>
+      <span class="footer-sep">&middot;</span>
+      <span class="footer-tagline">Engineering-Grade SDET Knowledge Base</span>
+    </div>
+    <div class="footer-keys">
+      <kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>/</kbd> Search <kbd>Alt+M</kbd> Manual <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+T</kbd> TS <kbd>Alt+P</kbd> Playwright <kbd>Alt+I</kbd> Interview
+    </div>
   </footer>
 
 </div>
-<script src="topics.js?v=3.7.0"></script>
-<script src="app.js?v=3.7.0"></script>
+<script src="topics.js?v=3.8.0"></script>
+<script src="app.js?v=3.8.0"></script>
 </body>
 </html>

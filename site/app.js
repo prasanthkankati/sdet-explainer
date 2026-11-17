@@ -347,7 +347,7 @@
     loadGlossaryThenInit();
   }
 
-  const SITE_VERSION = "v3.7.0";
+  const SITE_VERSION = "v3.8.0";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -422,6 +422,7 @@
     const grid = document.getElementById("grid");
     if (!grid) return;
     const controls = document.getElementById("controls");
+    const search = document.getElementById("search");
     const stats = document.getElementById("stats");
     let track = "All";
 
@@ -445,7 +446,7 @@
       document.body.removeAttribute("data-track");
     }
 
-    // Resume Last Read
+    // 1. Resume Last Read Chapter
     const resumeBtn = document.getElementById("hero-resume-btn");
     if (resumeBtn) {
       try {
@@ -453,61 +454,72 @@
         if (rawLast) {
           const last = JSON.parse(rawLast);
           if (last && last.file) {
-            const shortTitle = (last.title || "").length > 32
-              ? last.title.slice(0, 30).trim() + "…"
-              : (last.title || "Last Doc");
+            const shortTitle = (last.title || "").length > 30
+              ? last.title.slice(0, 28).trim() + "…"
+              : (last.title || "Last Topic");
             resumeBtn.href = "topics/" + last.file;
-            resumeBtn.textContent = `↩ Resume: ${shortTitle}`;
-            resumeBtn.title = `Resume last read (${last.track || "Doc"}): ${last.title}`;
+            const textEl = resumeBtn.querySelector(".btn-text");
+            if (textEl) textEl.textContent = `Resume: ${shortTitle}`;
+            else resumeBtn.textContent = `↩ Resume: ${shortTitle}`;
+            resumeBtn.title = `Resume last read (${last.track || "Topic"}): ${last.title}`;
           }
         }
       } catch (e) {}
     }
 
-    // Random Track
+    // 2. Random Chapter Button — directly navigates to a random published chapter
     const randomBtn = document.getElementById("hero-random-btn");
-    const candidateTracks = tracksList.filter(t => t.id !== "All");
-    let suggestedTrackId = "Manual";
-    function pickRandomTrack(excludeId) {
-      const pool = candidateTracks.filter(t => t.id !== excludeId);
-      const chosen = pool[Math.floor(Math.random() * pool.length)] || candidateTracks[0];
-      suggestedTrackId = chosen.id;
-      if (randomBtn) {
-        randomBtn.href = `#${chosen.id}`;
-        randomBtn.textContent = `⚡ ${chosen.label}`;
-        randomBtn.title = `Open ${chosen.label} track`;
+    if (randomBtn && typeof TOPICS !== "undefined") {
+      const published = TOPICS.filter(t => t.file);
+      if (published.length > 0) {
+        const randTopic = published[Math.floor(Math.random() * published.length)];
+        randomBtn.href = (inTopicsDir ? "" : "topics/") + randTopic.file;
+        const textEl = randomBtn.querySelector(".btn-text");
+        const randTitle = randTopic.title.length > 24 ? randTopic.title.slice(0, 22).trim() + "…" : randTopic.title;
+        if (textEl) textEl.textContent = `Random: ${randTitle}`;
+        randomBtn.title = `Open random published chapter: ${randTopic.title} (${randTopic.track})`;
       }
     }
-    pickRandomTrack(track);
-    if (randomBtn) {
-      randomBtn.onclick = e => {
-        e.preventDefault();
-        const target = suggestedTrackId;
-        const targetTopic = TOPICS.find(t => t.track === target && t.file);
-        if (targetTopic) {
-          location.href = (inTopicsDir ? "" : "topics/") + targetTopic.file;
-        } else {
+
+    // 3. Quick-Access Hero Deck Track Cards
+    const deckCards = document.querySelectorAll(".deck-card[data-target-track]");
+    deckCards.forEach(card => {
+      card.addEventListener("click", e => {
+        const target = card.getAttribute("data-target-track");
+        if (target) {
+          e.preventDefault();
           history.replaceState(null, "", `#${target}`);
           if (selectTrackFn) selectTrackFn(target);
-          pickRandomTrack(target);
+          const scrollTarget = document.querySelector(".home-track-nav") || grid;
+          if (scrollTarget) scrollTarget.scrollIntoView({ behavior: "smooth" });
         }
-      };
-    }
-
-    controls.querySelectorAll(".chip").forEach(c => c.remove());
-    tracksList.forEach(tr => {
-      const b = document.createElement("button");
-      b.className = "chip" + (tr.id === track ? " active" : "");
-      b.dataset.track = tr.id;
-      const shortcutKey = tr.id.charAt(0).toUpperCase();
-      b.title = `Shortcut: Alt+${shortcutKey}`;
-      b.textContent = tr.label;
-      b.onclick = () => {
-        history.replaceState(null, "", tr.id === "All" ? "index.html" : `#${tr.id}`);
-        selectTrackFn(tr.id);
-      };
-      controls.appendChild(b);
+      });
     });
+
+    // 4. Render Dynamic Track Filter Chips with Topic Counts
+    if (controls) {
+      controls.querySelectorAll(".chip").forEach(c => c.remove());
+      tracksList.forEach(tr => {
+        const b = document.createElement("button");
+        b.className = "chip" + (tr.id === track ? " active" : "");
+        b.dataset.track = tr.id;
+        const shortcutKey = tr.id.charAt(0).toUpperCase();
+        b.title = `Filter ${tr.label} (Alt+${shortcutKey})`;
+
+        const countTotal = typeof TOPICS !== "undefined"
+          ? (tr.id === "All" ? TOPICS.length : TOPICS.filter(t => t.track === tr.id).length)
+          : "";
+
+        b.innerHTML = `<span class="chip-dot"></span><span class="chip-label">${esc(tr.label)}</span>` +
+          (countTotal !== "" ? `<span class="chip-count">${countTotal}</span>` : "");
+
+        b.onclick = () => {
+          history.replaceState(null, "", tr.id === "All" ? "index.html" : `#${tr.id}`);
+          selectTrackFn(tr.id);
+        };
+        controls.appendChild(b);
+      });
+    }
 
     selectTrackFn = function (newTrack) {
       const applySwitch = () => {
@@ -517,9 +529,11 @@
         } else {
           document.body.removeAttribute("data-track");
         }
-        controls.querySelectorAll(".chip").forEach(x => {
-          x.classList.toggle("active", x.dataset.track === track);
-        });
+        if (controls) {
+          controls.querySelectorAll(".chip").forEach(x => {
+            x.classList.toggle("active", x.dataset.track === track);
+          });
+        }
         render();
       };
       if (document.startViewTransition) {
@@ -540,6 +554,7 @@
     });
 
     function render() {
+      if (typeof TOPICS === "undefined") return;
       const q = (search ? search.value : "").trim().toLowerCase();
       const totalDone = TOPICS.filter(t => t.file).length;
       const specTotal = document.getElementById("spec-total");
@@ -550,10 +565,17 @@
       const list = TOPICS.filter(t => (track === "All" || t.track === track) &&
         (t.title + " " + (t.section || "") + " " + t.summary + " " + (t.keywords || "") + " " + t.track).toLowerCase().includes(q));
       const doneCount = list.filter(t => t.file).length;
-      if (stats) stats.textContent = `${list.length} syllabus topics (${doneCount} published, ${list.length - doneCount} queued)`;
+      if (stats) stats.textContent = `${list.length} topics (${doneCount} published, ${list.length - doneCount} queued)`;
 
       if (list.length === 0) {
-        grid.innerHTML = "<p>No syllabus topics in this track yet.</p>";
+        grid.innerHTML = `<div class="empty-state"><p>No topics found matching query "${esc(q)}".</p><button class="empty-reset-btn" id="reset-filter-btn">Clear Filter</button></div>`;
+        const resetBtn = document.getElementById("reset-filter-btn");
+        if (resetBtn) {
+          resetBtn.onclick = () => {
+            if (search) search.value = "";
+            selectTrackFn("All");
+          };
+        }
         return;
       }
 
@@ -577,9 +599,9 @@
           `</div>` +
           items.map(t => {
             if (t.file) {
-              return `<a class="topic-row" href="topics/${t.file}"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill">[ready]</span></a>`;
+              return `<a class="topic-row" href="topics/${t.file}"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill ready">[ready]</span></a>`;
             } else {
-              return `<div class="topic-row planned"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill">[queued]</span></div>`;
+              return `<div class="topic-row planned"><span class="topic-row-title">${esc(t.title)}</span><span class="topic-row-pill queued">[queued]</span></div>`;
             }
           }).join("") +
           `</section>`;
@@ -587,7 +609,16 @@
       grid.innerHTML = html;
     }
 
-    if (search) search.addEventListener("input", render);
+    if (search) {
+      search.addEventListener("input", render);
+      search.addEventListener("keydown", e => {
+        if (e.key === "Escape") {
+          search.value = "";
+          render();
+          search.blur();
+        }
+      });
+    }
     render();
   }
 
