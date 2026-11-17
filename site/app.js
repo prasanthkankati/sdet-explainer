@@ -533,7 +533,7 @@
     loadGlossaryAsync();
   }
 
-  const SITE_VERSION = "v3.9.3";
+  const SITE_VERSION = "v3.9.4";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SDET Explainer — Engineering Syllabus & Interview Question Banks</title>
-<link rel="stylesheet" href="style.css?v=3.9.3">
+<link rel="stylesheet" href="style.css?v=3.9.4">
 </head>
 <body class="home-page">
 <div class="home-wrap">
@@ -86,69 +86,36 @@
       </div>
     </section>
 
-    <!-- Unique Architectural Execution Command Dock -->
-    <div class="home-command-dock" role="navigation" aria-label="Reading shortcuts">
-      <a class="dock-segment dock-resume" id="hero-resume-btn" href="topics/java-jdk-jre-jvm.html" title="Resume your reading session">
-        <span class="dock-beacon beacon-emerald" aria-hidden="true"></span>
-        <div class="dock-meta">
-          <span class="dock-cmd">$ exec.resume</span>
-          <span class="dock-label btn-text">Start Reading</span>
-        </div>
-        <span class="dock-arrow" aria-hidden="true">&rarr;</span>
+    <!-- Action Buttons with Clean Icons moved to footer above right-aligned version -->
+    <!-- Plain SVG Action Icons in Middle-Left (No border, plain SVG) -->
+    <div class="home-plain-actions" role="navigation" aria-label="Reading shortcuts">
+      <a class="plain-action-icon action-resume" id="hero-resume-btn" href="topics/java-jdk-jre-jvm.html" title="Start Reading (Resume)" aria-label="Resume Reading">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="6 4 20 12 6 20 6 4"/>
+        </svg>
       </a>
 
-      <div class="dock-separator" aria-hidden="true">
-        <span class="dock-sep-glyph">&diams;</span>
-      </div>
-
-      <a class="dock-segment dock-random" id="hero-random-btn" href="topics/selenium-overview.html" title="Jump to a random published chapter">
-        <span class="dock-beacon beacon-amber" aria-hidden="true"></span>
-        <div class="dock-meta">
-          <span class="dock-cmd">$ exec.random</span>
-          <span class="dock-label btn-text">Random Topic</span>
-        </div>
-        <span class="dock-arrow" aria-hidden="true">&rarr;</span>
+      <a class="plain-action-icon action-random" id="hero-random-btn" href="topics/selenium-overview.html" title="Random Topic" aria-label="Random Topic">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="18" height="18" x="3" y="3"/>
+          <circle cx="8" cy="8" r="1.2" fill="currentColor"/>
+          <circle cx="16" cy="8" r="1.2" fill="currentColor"/>
+          <circle cx="12" cy="12" r="1.2" fill="currentColor"/>
+          <circle cx="8" cy="16" r="1.2" fill="currentColor"/>
+          <circle cx="16" cy="16" r="1.2" fill="currentColor"/>
+        </svg>
       </a>
     </div>
 
   </main>
 
-  <!-- Minimal Footer with Integrated Stats Strip -->
+  <!-- Version Only at Bottom Left -->
   <footer class="home-footer">
-    <div class="footer-left">
-      <span class="ver-pill">v3.9.3</span>
-    </div>
-
-    <!-- Stats Strip in Footer -->
-    <div class="home-stats-strip">
-      <div class="stat-item">
-        <span class="stat-number">129</span>
-        <span class="stat-label">Total Modules</span>
-      </div>
-      <div class="stat-divider">&middot;</div>
-      <div class="stat-item">
-        <span class="stat-number" id="spec-total">118</span>
-        <span class="stat-label">Published Specs</span>
-      </div>
-      <div class="stat-divider">&middot;</div>
-      <div class="stat-item">
-        <span class="stat-number">623+</span>
-        <span class="stat-label">Tier-Verified Q&amp;As</span>
-      </div>
-      <div class="stat-divider">&middot;</div>
-      <div class="stat-item">
-        <span class="stat-number">0</span>
-        <span class="stat-label">Fluff</span>
-      </div>
-    </div>
-
-    <div class="footer-keys">
-      <kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+M</kbd> Manual <kbd>Alt+I</kbd> Interview
-    </div>
+    <span class="ver-pill">v3.9.4</span>
   </footer>
 
 </div>
-<script src="topics.js?v=3.9.3"></script>
-<script src="app.js?v=3.9.3"></script>
+<script src="topics.js?v=3.9.4"></script>
+<script src="app.js?v=3.9.4"></script>
 </body>
 </html>
