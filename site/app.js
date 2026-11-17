@@ -66,6 +66,7 @@
     initTypeahead();
     initGlossary();
     initVolumeScroller();
+    initSmoothChapterTransitions();
   }
 
   // Convert any residual **bold** or `code` in article HTML into proper <b> and <code> tags
@@ -138,20 +139,23 @@
     const navTracks = ["Manual", "Java", "Selenium", "TypeScript", "Playwright", "Interview"];
     navbar.innerHTML = `
       <div class="se-navbar-left">
-        <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776; DOCS</button>
-        <a href="../index.html" class="se-brand" title="SDET Explainer (Alt+H)">SDET Explainer<span class="brand-accent">.</span></a>
+        <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776;</button>
+        <a href="../index.html" class="se-brand-mark-link" title="SDET Explainer Home (Alt+H)">
+          <span class="home-brand-mark">SE</span>
+        </a>
+      </div>
+      <div class="se-navbar-center">
         <ul class="se-navbar-links">
           ${navTracks.map(tr => `
-            <li><a href="${firstFileForTrack(tr)}" class="${tr === currentTrack ? "active" : ""}">${tr === "TypeScript" ? "TS / JS" : tr}</a></li>
+            <li>
+              <a href="${firstFileForTrack(tr)}" class="se-track-chip ${tr === currentTrack ? "active" : ""}" data-track="${tr}">
+                <span class="chip-label">${tr === "TypeScript" ? "TS / JS" : tr}</span>
+              </a>
+            </li>
           `).join("")}
         </ul>
       </div>
       <div class="se-navbar-right">
-        <button class="icon-btn search-trigger-btn" type="button" id="nav-search-btn" title="Search Syllabus [/]">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <span class="btn-label">Search</span>
-          <span class="kbd-badge">/</span>
-        </button>
         <button class="icon-btn theme-toggle nav-theme-toggle" type="button" id="nav-theme-btn" aria-label="Toggle Light/Dark Theme">
           ${createThemeToggleSvg()}
         </button>
@@ -162,10 +166,6 @@
     if (navThemeBtn) {
       navThemeBtn.onclick = toggleTheme;
       setTheme(root.getAttribute("data-theme") || "dark");
-    }
-    const navSearchBtn = document.getElementById("nav-search-btn");
-    if (navSearchBtn) {
-      navSearchBtn.onclick = () => { if (openCmdFn) openCmdFn(""); };
     }
 
     // Mobile DocTree Drawer Toggle & Backdrop
@@ -225,95 +225,259 @@
       }
     }
 
-    // 3. Populate Left Sidebar Documentation Tree (.se-sidebar) from TOPICS for currentTrack
+    // 3. Populate Left Sidebar Documentation Tree (.se-sidebar)
     const sidebar = layout.querySelector(".se-sidebar");
     if (sidebar) {
-      const trackTopics = TOPICS.filter(t => t.track === currentTrack);
-      const secGroups = new Map();
-      trackTopics.forEach(t => {
-        const sec = t.section || currentTrack;
-        if (!secGroups.has(sec)) secGroups.set(sec, []);
-        secGroups.get(sec).push(t);
-      });
-
-      const doneCount = trackTopics.filter(t => t.file).length;
-      let treeHtml = `<div class="se-sidebar-hdr"><span>${esc(currentTrack)} DocTree (${doneCount}/${trackTopics.length})</span><button type="button" class="se-sidebar-close" id="se-sidebar-close-btn">CLOSE &times;</button></div><ul class="se-tree">`;
-      secGroups.forEach((items, secName) => {
-        items.sort((a, b) => (a.order || 99) - (b.order || 99));
-        treeHtml += `<li><span class="se-sec-label">${esc(secName)}</span><ul>`;
-        items.forEach(item => {
-          const isActive = item.file === currentFile;
-          if (item.file) {
-            treeHtml += `<li><a href="${item.file}" class="${isActive ? "active" : ""}">${esc(item.title)}</a></li>`;
-          } else {
-            treeHtml += `<li><a href="#" class="planned">${esc(item.title)}</a></li>`;
-          }
-        });
-        treeHtml += `</ul></li>`;
-      });
-      treeHtml += `</ul>`;
-      sidebar.innerHTML = treeHtml;
-
-      const closeBtn = document.getElementById("se-sidebar-close-btn");
-      if (closeBtn) closeBtn.onclick = closeMobTree;
-
-      // Auto-scroll active item into center of sidebar
-      const activeLink = sidebar.querySelector("a.active");
-      if (activeLink) {
-        requestAnimationFrame(() => {
-          const topOffset = activeLink.offsetTop - sidebar.clientHeight / 2 + activeLink.clientHeight / 2;
-          sidebar.scrollTop = Math.max(0, topOffset);
-        });
-      }
+      renderSidebarTree(sidebar, currentTrack, currentFile);
     }
 
-    // 4. Populate Right Sidebar TOC (.se-toc "On this page") + Mobile Collapsible TOC (.se-mob-toc)
+    // 4. Populate Right Sidebar TOC (.se-toc)
+    rebuildTocForArticle(article, layout);
+  }
+
+  // Modular Sidebar Tree Renderer
+  function renderSidebarTree(sidebar, targetTrack, activeFile) {
+    if (!sidebar || typeof TOPICS === "undefined") return;
+    const trackTopics = TOPICS.filter(t => t.track === targetTrack);
+    const secGroups = new Map();
+    trackTopics.forEach(t => {
+      const sec = t.section || targetTrack;
+      if (!secGroups.has(sec)) secGroups.set(sec, []);
+      secGroups.get(sec).push(t);
+    });
+
+    const doneCount = trackTopics.filter(t => t.file).length;
+    let treeHtml = `<div class="se-sidebar-hdr"><span>${esc(targetTrack)} DocTree (${doneCount}/${trackTopics.length})</span><button type="button" class="se-sidebar-close" id="se-sidebar-close-btn">CLOSE &times;</button></div><ul class="se-tree">`;
+    secGroups.forEach((items, secName) => {
+      items.sort((a, b) => (a.order || 99) - (b.order || 99));
+      treeHtml += `<li><span class="se-sec-label">${esc(secName)}</span><ul>`;
+      items.forEach(item => {
+        const isActive = item.file === activeFile;
+        if (item.file) {
+          treeHtml += `<li><a href="${item.file}" class="${isActive ? "active" : ""}">${esc(item.title)}</a></li>`;
+        } else {
+          treeHtml += `<li><a href="#" class="planned">${esc(item.title)}</a></li>`;
+        }
+      });
+      treeHtml += `</ul></li>`;
+    });
+    treeHtml += `</ul>`;
+    sidebar.innerHTML = treeHtml;
+
+    const closeBtn = document.getElementById("se-sidebar-close-btn");
+    if (closeBtn) {
+      closeBtn.onclick = () => document.body.classList.remove("mob-tree-open");
+    }
+
+    // Auto-scroll active item into center of sidebar
+    const activeLink = sidebar.querySelector("a.active");
+    if (activeLink) {
+      requestAnimationFrame(() => {
+        const topOffset = activeLink.offsetTop - sidebar.clientHeight / 2 + activeLink.clientHeight / 2;
+        sidebar.scrollTop = Math.max(0, topOffset);
+      });
+    }
+  }
+
+  // Modular Right TOC & ScrollSpy Builder
+  function rebuildTocForArticle(article, layout) {
+    if (!article) return;
+    layout = layout || document.querySelector(".se-layout");
+    if (!layout) return;
+
     const toc = layout.querySelector(".se-toc");
     const mainContainer = layout.querySelector(".se-main");
-    if (toc) {
-      const headings = Array.from(article.querySelectorAll("h2"));
-      const usedIds = new Set();
-      const tocItems = headings.map((h, i) => {
-        const parentSec = h.closest("section");
-        let id = (parentSec && parentSec.id) || h.id;
-        if (!id) {
-          id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `sec-${i + 1}`;
-          if (usedIds.has(id)) id += `-${i + 1}`;
-          h.id = id;
+    if (!toc) return;
+
+    const headings = Array.from(article.querySelectorAll("h2"));
+    const usedIds = new Set();
+    const tocItems = headings.map((h, i) => {
+      const parentSec = h.closest("section");
+      let id = (parentSec && parentSec.id) || h.id;
+      if (!id) {
+        id = h.textContent.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `sec-${i + 1}`;
+        if (usedIds.has(id)) id += `-${i + 1}`;
+        h.id = id;
+      }
+      usedIds.add(id);
+      return { id, text: h.textContent.trim(), el: h };
+    });
+
+    const tocLinksHtml = tocItems.map(item => `<li><a href="#${item.id}" data-target="${item.id}">${esc(item.text)}</a></li>`).join("");
+    toc.innerHTML = `<div class="se-toc-title">On this page</div><ul>${tocLinksHtml}</ul>`;
+
+    const oldMobToc = mainContainer ? mainContainer.querySelector(".se-mob-toc") : null;
+    if (oldMobToc) oldMobToc.remove();
+
+    if (mainContainer && tocItems.length > 0) {
+      const mobToc = document.createElement("details");
+      mobToc.className = "se-mob-toc";
+      mobToc.innerHTML = `<summary>On this page (${tocItems.length})</summary><ul>${tocLinksHtml}</ul>`;
+      mobToc.querySelectorAll("a").forEach(a => {
+        a.addEventListener("click", () => { mobToc.removeAttribute("open"); });
+      });
+      mainContainer.insertBefore(mobToc, article);
+    }
+
+    const tocLinks = Array.from(toc.querySelectorAll("a[data-target]"));
+    function updateScrollSpy() {
+      const scrollY = window.scrollY + 110;
+      let currentId = tocItems[0] ? tocItems[0].id : "";
+      for (const item of tocItems) {
+        const top = item.el.getBoundingClientRect().top + window.scrollY;
+        if (top <= scrollY) {
+          currentId = item.id;
         }
-        usedIds.add(id);
-        return { id, text: h.textContent.trim(), el: h };
+      }
+      tocLinks.forEach(a => {
+        a.classList.toggle("active", a.dataset.target === currentId);
+      });
+    }
+
+    if (window._seScrollSpy) {
+      window.removeEventListener("scroll", window._seScrollSpy);
+    }
+    window._seScrollSpy = updateScrollSpy;
+    window.addEventListener("scroll", updateScrollSpy, { passive: true });
+    updateScrollSpy();
+  }
+
+  // Smooth In-Place Fast Chapter Transitions (No Page Reload, Zero Flash)
+  function initSmoothChapterTransitions() {
+    if (!inTopicsDir) return;
+
+    window.addEventListener("popstate", () => {
+      const pathFile = location.pathname.split("/").pop();
+      if (pathFile && pathFile.endsWith(".html")) {
+        loadTopicContent(pathFile, false);
+      }
+    });
+
+    document.addEventListener("click", e => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const link = e.target.closest("a[href]");
+      if (!link) return;
+      const href = link.getAttribute("href") || "";
+      if (!href || href.startsWith("#") || href.startsWith("javascript:") || link.target === "_blank") return;
+
+      if (href.includes("index.html") || href.startsWith("http:") || href.startsWith("https:")) return;
+
+      const [cleanHref, hash] = href.split("#");
+      if (cleanHref.endsWith(".html")) {
+        e.preventDefault();
+        loadTopicContent(cleanHref, true, hash ? "#" + hash : "");
+      }
+    });
+  }
+
+  async function loadTopicContent(targetFile, pushState = true, hash = "") {
+    const filename = targetFile.split("/").pop();
+    const layout = document.querySelector(".se-layout");
+    const mainEl = document.querySelector(".se-main");
+    if (!layout || !mainEl) {
+      location.href = targetFile + hash;
+      return;
+    }
+
+    // 1. Subtle smooth fade out of article only
+    mainEl.style.opacity = "0.2";
+    mainEl.style.transform = "translateY(2px)";
+
+    try {
+      const resp = await fetch(targetFile);
+      if (!resp.ok) throw new Error("Fetch failed: " + resp.status);
+      const htmlText = await resp.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(htmlText, "text/html");
+      const newArticle = doc.querySelector("article");
+      if (!newArticle) throw new Error("No article found");
+
+      // 2. Swap article content
+      const oldArticle = mainEl.querySelector("article");
+      if (oldArticle) oldArticle.replaceWith(newArticle);
+
+      // 3. Update title & URL
+      document.title = doc.title;
+      if (pushState) {
+        history.pushState(null, doc.title, targetFile + hash);
+      }
+
+      // 4. Update track context if changed
+      const tagEl = newArticle.querySelector(".tag");
+      const rawTag = tagEl ? tagEl.textContent.replace(/[\[\]]/g, "").trim() : "";
+      const currentTopic = (typeof TOPICS !== "undefined") ? TOPICS.find(t => t.file === filename) : null;
+      const newTrack = (currentTopic && currentTopic.track) || rawTag ||
+        (filename.startsWith("selenium-") ? "Selenium" :
+         filename.startsWith("java-") ? "Java" :
+         filename.startsWith("manual-") ? "Manual" :
+         filename.startsWith("interview-") ? "Interview" : "Selenium");
+
+      const oldTrack = document.body.getAttribute("data-track");
+      document.body.setAttribute("data-track", newTrack);
+
+      // 5. Update Sidebar
+      const sidebar = layout.querySelector(".se-sidebar");
+      if (sidebar) {
+        if (oldTrack !== newTrack) {
+          renderSidebarTree(sidebar, newTrack, filename);
+        } else {
+          sidebar.querySelectorAll("a").forEach(a => {
+            const isActive = a.getAttribute("href") === filename;
+            a.classList.toggle("active", isActive);
+            if (isActive) {
+              requestAnimationFrame(() => {
+                const topOffset = a.offsetTop - sidebar.clientHeight / 2 + a.clientHeight / 2;
+                sidebar.scrollTop = Math.max(0, topOffset);
+              });
+            }
+          });
+        }
+      }
+
+      // 6. Update Navbar active chip
+      const navbar = document.querySelector(".se-navbar");
+      if (navbar) {
+        navbar.querySelectorAll(".se-track-chip").forEach(chip => {
+          chip.classList.toggle("active", chip.getAttribute("data-track") === newTrack);
+        });
+      }
+
+      // 7. Rebuild TOC & highlight syntax
+      cleanMarkdownInArticle();
+      rebuildTocForArticle(newArticle, layout);
+      initSyntaxAndCopy();
+      if (typeof attachGlossaryTooltips === "function") {
+        attachGlossaryTooltips();
+      }
+
+      // 8. Scroll position
+      if (hash) {
+        const targetEl = document.querySelector(hash);
+        if (targetEl) targetEl.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "instant" });
+      }
+
+      // 9. Fade back in
+      requestAnimationFrame(() => {
+        mainEl.style.opacity = "1";
+        mainEl.style.transform = "translateY(0)";
       });
 
-      const tocLinksHtml = tocItems.map(item => `<li><a href="#${item.id}" data-target="${item.id}">${esc(item.text)}</a></li>`).join("");
-      toc.innerHTML = `<div class="se-toc-title">On this page</div><ul>${tocLinksHtml}</ul>`;
+      // 10. Update last read
+      try {
+        const h1El = newArticle.querySelector("h1");
+        const docTitle = (currentTopic && currentTopic.title) || (h1El && h1El.textContent.trim()) || filename;
+        localStorage.setItem("sdet_last_read", JSON.stringify({
+          file: filename,
+          title: docTitle,
+          track: newTrack
+        }));
+      } catch (e) {}
 
-      if (mainContainer && tocItems.length > 0 && !mainContainer.querySelector(".se-mob-toc")) {
-        const mobToc = document.createElement("details");
-        mobToc.className = "se-mob-toc";
-        mobToc.innerHTML = `<summary>On this page (${tocItems.length})</summary><ul>${tocLinksHtml}</ul>`;
-        mobToc.querySelectorAll("a").forEach(a => {
-          a.addEventListener("click", () => { mobToc.removeAttribute("open"); });
-        });
-        mainContainer.insertBefore(mobToc, article);
-      }
-
-      const tocLinks = Array.from(toc.querySelectorAll("a[data-target]"));
-      function updateScrollSpy() {
-        const scrollY = window.scrollY + 110;
-        let currentId = tocItems[0] ? tocItems[0].id : "";
-        for (const item of tocItems) {
-          const top = item.el.getBoundingClientRect().top + window.scrollY;
-          if (top <= scrollY) {
-            currentId = item.id;
-          }
-        }
-        tocLinks.forEach(a => {
-          a.classList.toggle("active", a.dataset.target === currentId);
-        });
-      }
-      window.addEventListener("scroll", updateScrollSpy, { passive: true });
-      updateScrollSpy();
+    } catch (err) {
+      console.warn("Smooth transition fallback:", err);
+      location.href = targetFile + hash;
     }
   }
 
@@ -345,28 +509,31 @@
     window.addEventListener("resize", updateScroller, { passive: true });
   }
 
-  function loadGlossaryThenInit() {
+  function loadGlossaryAsync() {
     if (typeof GLOSSARY === "undefined") {
       const g = document.createElement("script");
       g.src = assetPrefix + "glossary.js";
-      g.onload = initAll;
-      g.onerror = initAll;
+      g.onload = () => { if (typeof initGlossary === "function") initGlossary(); };
       document.head.appendChild(g);
     } else {
-      initAll();
+      if (typeof initGlossary === "function") initGlossary();
     }
   }
 
   if (typeof TOPICS === "undefined") {
     const s = document.createElement("script");
     s.src = assetPrefix + "topics.js";
-    s.onload = loadGlossaryThenInit;
+    s.onload = () => {
+      initAll();
+      loadGlossaryAsync();
+    };
     document.head.appendChild(s);
   } else {
-    loadGlossaryThenInit();
+    initAll();
+    loadGlossaryAsync();
   }
 
-  const SITE_VERSION = "v3.9.1";
+  const SITE_VERSION = "v3.9.3";
   const SHORTCUT_MAP = {
     h: "HOME",
     l: "THEME",
@@ -382,25 +549,6 @@
   function initHeaderAndShortcuts() {
     const homeHref = inTopicsDir ? "../index.html" : "index.html";
     // Footer on reading pages is dynamically injected by the doc layout builder; home footer is static HTML.
-
-    // Smooth page landing & navigation transition
-    window.addEventListener("pageshow", () => {
-      document.body.classList.remove("page-leaving");
-    });
-    document.addEventListener("click", e => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const link = e.target.closest("a[href]");
-      if (!link) return;
-      const href = link.getAttribute("href") || "";
-      if (!href || href.startsWith("#") || href.startsWith("javascript:") || link.target === "_blank") return;
-      if (href.includes(".html")) {
-        e.preventDefault();
-        document.body.classList.add("page-leaving");
-        setTimeout(() => {
-          location.href = link.href;
-        }, 120);
-      }
-    });
 
     document.addEventListener("keydown", e => {
       if (!e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;

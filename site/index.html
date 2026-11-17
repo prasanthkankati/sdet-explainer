@@ -4,181 +4,151 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>SDET Explainer — Engineering Syllabus & Interview Question Banks</title>
-<link rel="stylesheet" href="style.css?v=3.9.1">
+<link rel="stylesheet" href="style.css?v=3.9.3">
 </head>
 <body class="home-page">
 <div class="home-wrap">
 
-  <!-- Minimal Top Header -->
-  <header class="home-header">
-    <div class="home-header-inner">
-      <a href="index.html" class="home-brand" id="home-link" title="SDET Explainer (Alt+H)">
-        <span class="home-brand-mark">SE</span>
-        <span class="home-brand-name">SDET<span class="brand-accent">Explainer</span></span>
-        <span class="ver-pill">v3.9.1</span>
-      </a>
+  <!-- Top Brand & Theme Bar (No Header Element) -->
+  <div class="home-top-bar">
+    <a href="index.html" class="home-brand" id="home-link" title="SDET Explainer (Alt+H)">
+      <span class="home-brand-mark">SE</span>
+      <span class="home-brand-name">SDET<span class="brand-accent">Explainer</span></span>
+    </a>
 
-      <nav class="home-header-actions">
-        <button class="icon-btn search-trigger-btn" type="button" id="hero-search-btn" title="Search syllabus [/]" aria-label="Search">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <span class="btn-label">Search</span>
-          <span class="kbd-badge">/</span>
-        </button>
-        <button class="icon-btn theme-toggle" type="button" id="hero-theme-btn" title="Toggle theme [Alt+L]" aria-label="Toggle theme">
-          <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        </button>
-      </nav>
-    </div>
-  </header>
+    <button class="icon-btn theme-toggle" type="button" id="hero-theme-btn" title="Toggle theme [Alt+L]" aria-label="Toggle theme">
+      <svg class="theme-icon sun-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg class="theme-icon moon-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="17" cy="6" r="3" class="night-moon" fill="currentColor" stroke="currentColor"></circle>
+        <path d="M2 19L8.5 9.5L15 19"></path>
+        <path d="M12.5 19L17 12.5L22 19"></path>
+        <line x1="2" y1="19" x2="22" y2="19"></line>
+      </svg>
+    </button>
+  </div>
 
-  <!-- Viewport-Fit Minimal Main -->
+  <!-- Viewport-Fit Minimal Main: Tracks -> Actions -> Stats -->
   <main class="home-main-minimal">
 
-    <!-- Hero Identity -->
-    <section class="home-hero-minimal">
-      <div class="hero-badge-pill">ENGINEERING COMPENDIUM &middot; SENIOR SDET</div>
-      <h1 class="hero-minimal-title">SDET Explainer<span class="brand-accent">.</span></h1>
-      <p class="hero-minimal-desc">From physical silicon memory and JVM bytecode to production multi-threaded Selenium frameworks and 623+ tier-verified interview Q&As.</p>
-
-      <!-- Quick Action Buttons -->
-      <div class="hero-quick-actions">
-        <a class="hero-action-btn action-resume" id="hero-resume-btn" href="topics/java-jdk-jre-jvm.html" title="Resume your reading session">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-9 9 9"/><path d="M9 21V9h6v12"/></svg>
-          <span class="btn-text">Start Reading</span>
-        </a>
-        <a class="hero-action-btn action-random" id="hero-random-btn" href="topics/selenium-overview.html" title="Jump to a random published chapter">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
-          <span class="btn-text">Random Topic</span>
-        </a>
-      </div>
-    </section>
-
-    <!-- Balanced 3x2 Track Gateways -->
+    <!-- Horizontal Mode Track Chips with Filled Colors -->
     <section class="home-tracks-section">
-      <div class="section-label-minimal">SYLLABUS TRACKS</div>
-      <div class="track-cards-grid">
+      <div class="tracks-section-top">
+        <div class="section-label-minimal">SYLLABUS TRACKS</div>
+      </div>
+      <div class="home-track-chips-row">
 
-        <!-- Java -->
-        <a href="topics/java-jdk-jre-jvm.html" class="track-card track-card-java" data-track="Java">
-          <div class="track-card-header">
-            <span class="track-pill java">JAVA CORE</span>
-            <span class="track-count">30 Topics</span>
-          </div>
-          <div class="track-card-title">JVM, Memory & Bytecode</div>
-          <div class="track-card-desc">Hardware ALU, Stack Frames, Type Erasure, IntegerCache, OOP & Concurrency.</div>
-          <div class="track-card-foot">
-            <span class="track-enter-link">Open Track <span class="arrow-glyph">&rarr;</span></span>
-          </div>
+        <!-- Java Core -->
+        <a href="topics/java-jdk-jre-jvm.html" class="home-track-chip chip-java" data-track="Java" title="Java Core: JVM, Memory, Bytecode &amp; Concurrency (30 Topics)">
+          <span class="chip-name">Java Core</span>
+          <span class="chip-count">30</span>
         </a>
 
         <!-- Selenium -->
-        <a href="topics/selenium-overview.html" class="track-card track-card-sel" data-track="Selenium">
-          <div class="track-card-header">
-            <span class="track-pill sel">SELENIUM</span>
-            <span class="track-count">25 Topics</span>
-          </div>
-          <div class="track-card-title">WebDriver Architecture</div>
-          <div class="track-card-desc">W3C WebDriver protocol, dynamic synchronization, listeners & POM frameworks.</div>
-          <div class="track-card-foot">
-            <span class="track-enter-link">Open Track <span class="arrow-glyph">&rarr;</span></span>
-          </div>
+        <a href="topics/selenium-overview.html" class="home-track-chip chip-sel" data-track="Selenium" title="Selenium: WebDriver Architecture &amp; Frameworks (25 Topics)">
+          <span class="chip-name">Selenium</span>
+          <span class="chip-count">25</span>
         </a>
 
         <!-- Manual QA -->
-        <a href="topics/manual-m1-1-static-dynamic.html" class="track-card track-card-man" data-track="Manual">
-          <div class="track-card-header">
-            <span class="track-pill man">MANUAL QA</span>
-            <span class="track-count">15 Topics</span>
-          </div>
-          <div class="track-card-title">SDLC, STLC & Test Design</div>
-          <div class="track-card-desc">V-Model, Agile In-Sprint QA, BVA, Equivalence Partitioning & Defect Triage.</div>
-          <div class="track-card-foot">
-            <span class="track-enter-link">Open Track <span class="arrow-glyph">&rarr;</span></span>
-          </div>
+        <a href="topics/manual-m1-1-static-dynamic.html" class="home-track-chip chip-man" data-track="Manual" title="Manual QA: SDLC, STLC &amp; Test Design (15 Topics)">
+          <span class="chip-name">Manual QA</span>
+          <span class="chip-count">15</span>
         </a>
 
         <!-- Interview Q&A -->
-        <a href="topics/interview-m1-1-qa.html" class="track-card track-card-int" data-track="Interview">
-          <div class="track-card-header">
-            <span class="track-pill int">Q&A BANKS</span>
-            <span class="track-count">52 Banks &middot; 623+ Q&As</span>
-          </div>
-          <div class="track-card-title">Tier 1–5 Interview Banks</div>
-          <div class="track-card-desc">Practical scenario rubrics & zero-to-hero questions connected to every topic.</div>
-          <div class="track-card-foot">
-            <span class="track-enter-link">Open Banks <span class="arrow-glyph">&rarr;</span></span>
-          </div>
+        <a href="topics/interview-m1-1-qa.html" class="home-track-chip chip-int" data-track="Interview" title="Interview Q&amp;A: Tier 1–5 Interview Banks (52 Banks &middot; 623+ Q&amp;As)">
+          <span class="chip-name">Interview Q&amp;A</span>
+          <span class="chip-count">52</span>
         </a>
 
         <!-- TypeScript (Queued) -->
-        <div class="track-card track-card-ts track-card-planned">
-          <div class="track-card-header">
-            <span class="track-pill ts">TS / JS</span>
-            <span class="track-count">15 Topics &middot; Queued</span>
-          </div>
-          <div class="track-card-title">Execution Context & Async</div>
-          <div class="track-card-desc">Event loop, Closures, Promises, Type annotations & Node.js automation.</div>
-          <div class="track-card-foot">
-            <span class="track-enter-link">In Progress</span>
-          </div>
+        <div class="home-track-chip chip-ts chip-planned" title="TypeScript &amp; JS Automation (15 Topics &middot; Queued)">
+          <span class="chip-name">TS / JS</span>
+          <span class="chip-count">Queued</span>
         </div>
 
         <!-- Playwright (Queued) -->
-        <div class="track-card track-card-pw track-card-planned">
-          <div class="track-card-header">
-            <span class="track-pill pw">PLAYWRIGHT</span>
-            <span class="track-count">22 Topics &middot; Queued</span>
-          </div>
-          <div class="track-card-title">CDP & Modern Automation</div>
-          <div class="track-card-desc">BrowserContext isolation, auto-waiting locators, network pipes & tracing.</div>
-          <div class="track-card-foot">
-            <span class="track-enter-link">In Progress</span>
-          </div>
+        <div class="home-track-chip chip-pw chip-planned" title="Playwright CDP Automation (22 Topics &middot; Queued)">
+          <span class="chip-name">Playwright</span>
+          <span class="chip-count">Queued</span>
         </div>
 
       </div>
     </section>
 
-    <!-- Compact Minimal Stats Strip -->
-    <section class="home-stats-strip">
+    <!-- Unique Architectural Execution Command Dock -->
+    <div class="home-command-dock" role="navigation" aria-label="Reading shortcuts">
+      <a class="dock-segment dock-resume" id="hero-resume-btn" href="topics/java-jdk-jre-jvm.html" title="Resume your reading session">
+        <span class="dock-beacon beacon-emerald" aria-hidden="true"></span>
+        <div class="dock-meta">
+          <span class="dock-cmd">$ exec.resume</span>
+          <span class="dock-label btn-text">Start Reading</span>
+        </div>
+        <span class="dock-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+
+      <div class="dock-separator" aria-hidden="true">
+        <span class="dock-sep-glyph">&diams;</span>
+      </div>
+
+      <a class="dock-segment dock-random" id="hero-random-btn" href="topics/selenium-overview.html" title="Jump to a random published chapter">
+        <span class="dock-beacon beacon-amber" aria-hidden="true"></span>
+        <div class="dock-meta">
+          <span class="dock-cmd">$ exec.random</span>
+          <span class="dock-label btn-text">Random Topic</span>
+        </div>
+        <span class="dock-arrow" aria-hidden="true">&rarr;</span>
+      </a>
+    </div>
+
+  </main>
+
+  <!-- Minimal Footer with Integrated Stats Strip -->
+  <footer class="home-footer">
+    <div class="footer-left">
+      <span class="ver-pill">v3.9.3</span>
+    </div>
+
+    <!-- Stats Strip in Footer -->
+    <div class="home-stats-strip">
       <div class="stat-item">
         <span class="stat-number">129</span>
         <span class="stat-label">Total Modules</span>
       </div>
       <div class="stat-divider">&middot;</div>
       <div class="stat-item">
-        <span class="stat-number" id="spec-total">100</span>
+        <span class="stat-number" id="spec-total">118</span>
         <span class="stat-label">Published Specs</span>
       </div>
       <div class="stat-divider">&middot;</div>
       <div class="stat-item">
         <span class="stat-number">623+</span>
-        <span class="stat-label">Tier-Verified Q&As</span>
+        <span class="stat-label">Tier-Verified Q&amp;As</span>
       </div>
       <div class="stat-divider">&middot;</div>
       <div class="stat-item">
         <span class="stat-number">0</span>
         <span class="stat-label">Fluff</span>
       </div>
-    </section>
-  </main>
-
-  <!-- Minimal Footer -->
-  <footer class="home-footer">
-    <div class="footer-left">
-      <span class="home-brand-name">SDET Explainer</span>
-      <span class="ver-pill">v3.9.1</span>
-      <span class="footer-sep">&middot;</span>
-      <span class="footer-tagline">Engineering-Grade SDET Knowledge Base</span>
     </div>
+
     <div class="footer-keys">
-      <kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>/</kbd> Search <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+M</kbd> Manual <kbd>Alt+I</kbd> Interview
+      <kbd>Alt+H</kbd> Home <kbd>Alt+L</kbd> Theme <kbd>Alt+J</kbd> Java <kbd>Alt+S</kbd> Selenium <kbd>Alt+M</kbd> Manual <kbd>Alt+I</kbd> Interview
     </div>
   </footer>
 
 </div>
-<script src="topics.js?v=3.9.1"></script>
-<script src="app.js?v=3.9.1"></script>
+<script src="topics.js?v=3.9.3"></script>
+<script src="app.js?v=3.9.3"></script>
 </body>
 </html>
