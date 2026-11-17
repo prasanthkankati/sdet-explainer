@@ -263,7 +263,7 @@ body.home-page .fixed-theme-toggle { display: none !important; }
   color: #FFFFFF !important;
 }
 .home-brand-mark .mark-e {
-  color: #10B981 !important;
+  color: #059669 !important; /* Darker green in logo */
 }
 :root[data-theme="light"] .home-brand-mark {
   background: #0F172A !important;
@@ -273,7 +273,7 @@ body.home-page .fixed-theme-toggle { display: none !important; }
   color: #FFFFFF !important;
 }
 :root[data-theme="light"] .home-brand-mark .mark-e {
-  color: #10B981 !important;
+  color: #059669 !important; /* Darker green in logo */
 }
 .home-brand:hover .home-brand-mark {
   transform: scale(1.08);
@@ -286,7 +286,7 @@ body.home-page .fixed-theme-toggle { display: none !important; }
   align-items: center;
   line-height: 1;
 }
-.brand-accent { color: #10B981; }
+.brand-accent { color: #059669; } /* Darker green in logo text */
 .home-brand:hover { text-decoration: none; }
 
 /* Keep SE and Dark/light strictly on same horizontal line — Pure SVG, No Border */
