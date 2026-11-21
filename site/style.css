@@ -16,15 +16,15 @@
    TOKENS & THEME ARCHITECTURE
    ============================================================ */
 :root {
-  --bg:          #09090B;
-  --bg-radial:   radial-gradient(ellipse at 50% -10%, rgba(16, 185, 129, 0.05) 0%, transparent 65%);
-  --surface:     #121216;
-  --surface-hover: #18181E;
+  --bg:          #000000;
+  --bg-radial:   none;
+  --surface:     #0D0D10;
+  --surface-hover: #141418;
   --text:        #A1A1AA;
   --bold:        #FAFAFA;
   --muted:       #71717A;
-  --border:      #222226;
-  --border-subtle: #18181C;
+  --border:      #1C1C20;
+  --border-subtle: #141418;
   --accent:      #E4E4E7;
   --accent-rgb:  228, 228, 231;
 
@@ -110,7 +110,7 @@ body[data-track="Interview"]  { --accent: var(--int);  --accent-rgb: 251, 146, 6
 html, body {
   margin: 0; padding: 0;
   overflow-x: clip;
-  background-color: var(--bg);
+  background-color: #000000;
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -127,9 +127,8 @@ html::-webkit-scrollbar, body::-webkit-scrollbar,
 }
 
 body {
-  background: var(--bg);
-  background-image: var(--bg-radial);
-  background-repeat: no-repeat;
+  background: #000000;
+  background-image: none;
   color: var(--text);
   font: 15px/1.68 'Inter', -apple-system, system-ui, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
