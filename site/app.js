@@ -172,19 +172,6 @@
       setTheme(root.getAttribute("data-theme") || "dark");
     }
 
-    // Mobile DocTree Drawer Toggle & Backdrop
-    let backdropEl = document.querySelector(".se-sidebar-backdrop");
-    if (!backdropEl) {
-      backdropEl = document.createElement("div");
-      backdropEl.className = "se-sidebar-backdrop";
-      document.body.appendChild(backdropEl);
-    }
-    const closeMobTree = () => document.body.classList.remove("mob-tree-open");
-    const toggleMobTree = () => document.body.classList.toggle("mob-tree-open");
-    backdropEl.onclick = closeMobTree;
-    const mobTreeBtn = document.getElementById("se-mob-tree-btn");
-    if (mobTreeBtn) mobTreeBtn.onclick = toggleMobTree;
-
     // 2. Ensure .se-layout wrapper exists around sidebar, main article, and right TOC
     let layout = document.querySelector(".se-layout");
     if (!layout) {
@@ -204,9 +191,28 @@
       tocEl.className = "se-toc";
       tocEl.setAttribute("aria-label", "On this page");
 
+      // Shared stacking context: backdrop sits inside layout right before sidebar
+      let backdropEl = document.querySelector(".se-sidebar-backdrop");
+      if (!backdropEl) {
+        backdropEl = document.createElement("div");
+        backdropEl.className = "se-sidebar-backdrop";
+      }
+      layout.appendChild(backdropEl);
       layout.appendChild(sidebarEl);
       layout.appendChild(mainEl);
       layout.appendChild(tocEl);
+
+      const closeMobTree = () => document.body.classList.remove("mob-tree-open");
+      const toggleMobTree = () => document.body.classList.toggle("mob-tree-open");
+      backdropEl.onclick = closeMobTree;
+      const mobTreeBtn = document.getElementById("se-mob-tree-btn");
+      if (mobTreeBtn) {
+        mobTreeBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggleMobTree();
+        };
+      }
 
       if (oldWrap) {
         oldWrap.replaceWith(layout);
@@ -362,6 +368,7 @@
         const href = a.getAttribute("href");
         if (href && href !== "#" && !href.startsWith("javascript:")) {
           e.preventDefault();
+          e.stopPropagation();
           location.href = href;
         }
       });
