@@ -15,8 +15,22 @@
 
   <p>Listeners in TestNG implement the Observer pattern. They allow automation architects to intercept test events (start, success, failure, skip, suite start/finish) and execute cross-cutting concerns without polluting test logic with reporting boilerplate.</p>
 
+  <section id="project-structure">
+    <h2>1. Real-Time Project Structure: Where Listeners Live</h2>
+    <p>Listeners act as non-invasive event interceptors decoupled from test classes, wired via <code>testng.xml</code> or annotated on base classes:</p>
+
+    <pre><code>sdet-test-framework/
+├── testng.xml                            # 📍 Wires listener globally: <listeners><listener class-name="com.sdet.listeners.TestListener"/></listeners>
+└── src/test/java/com/sdet/
+    ├── core/BaseTest.java                # Provides static getDriver() for screenshot capture
+    ├── listeners/
+    │   ├── TestListener.java             # 📍 Implements ITestListener (captures failure screenshots)
+    │   └── SuiteListener.java            # 📍 Implements ISuiteListener (ExtentReports init & flush)
+    └── tests/PaymentTest.java            # Pure test logic, zero reporting boilerplate</code></pre>
+  </section>
+
   <section id="listener-interfaces">
-    <h2>1. Core Listener Interfaces</h2>
+    <h2>2. Core Listener Interfaces</h2>
     <table>
       <thead>
         <tr><th>Interface</th><th>Interception Scope</th><th>Primary Use Case</th></tr>

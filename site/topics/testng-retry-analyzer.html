@@ -15,8 +15,21 @@
 
   <p>Web applications frequently encounter transient network spikes, animation delays, and race conditions that cause automated tests to fail intermittently. TestNG provides the <code>IRetryAnalyzer</code> interface to automatically re-execute failed tests before marking the final build as failed.</p>
 
+  <section id="project-structure">
+    <h2>1. Real-Time Project Structure: Where Retry Logic Lives</h2>
+    <p>Flaky test retries are managed across two interconnected classes in the <code>retry</code> package, dynamically bound at runtime via XML:</p>
+
+    <pre><code>sdet-test-framework/
+├── testng.xml                            # 📍 Binds transformer: <listeners><listener class-name="com.sdet.retry.AnnotationTransformer"/></listeners>
+└── src/test/java/com/sdet/
+    ├── retry/
+    │   ├── RetryAnalyzer.java            # 📍 Implements IRetryAnalyzer (max retry bounds check)
+    │   └── AnnotationTransformer.java    # 📍 Implements IAnnotationTransformer (injects retry into all @Test)
+    └── tests/CheckoutTest.java           # Automatically retried on transient DOM/network failures</code></pre>
+  </section>
+
   <section id="retry-analyzer-impl">
-    <h2>1. Implementing <code>IRetryAnalyzer</code></h2>
+    <h2>2. Implementing <code>IRetryAnalyzer</code></h2>
     <pre><code>package com.sdet.retry;
 
 import org.testng.IRetryAnalyzer;

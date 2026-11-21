@@ -15,8 +15,24 @@
 
   <p>The <code>testng.xml</code> file is the declarative manifest that directs the TestNG engine. Rather than hardcoding test execution lists in source code, enterprise automation suites use XML configurations to declare test suites, assign parallel thread counts, inject cross-browser parameters, and target specific packages or test classes for regression and smoke runs.</p>
 
+  <section id="project-location">
+    <h2>1. Real-Time Project Structure: Where XML Suites Live</h2>
+    <p>In standard enterprise repositories, XML suite runners reside at the project root or in <code>src/test/resources/suites/</code>, directly referenced by Maven Surefire Plugin in <code>pom.xml</code>:</p>
+
+    <pre><code>sdet-test-framework/
+├── pom.xml                               # Defines <suiteXmlFile>testng.xml</suiteXmlFile>
+├── testng.xml                            # 📍 Root Suite Runner: Global orchestrator
+├── src/test/resources/suites/
+│   ├── smoke-suite.xml                   # 📍 Smoke XML: Packages com.sdet.tests.smoke.*
+│   └── crossbrowser-suite.xml            # 📍 Parallel XML: Chrome vs Firefox <test> blocks
+└── src/test/java/com/sdet/
+    ├── cart/                             # Package targeted by <package name="com.sdet.cart.*" />
+    ├── payment/                          # Package targeted with sub-exclusions
+    └── tests/AuthenticationTest.java     # Class filtered via <methods><include/></methods></code></pre>
+  </section>
+
   <section id="xml-schema">
-    <h2>1. XML Schema &amp; Root Attributes</h2>
+    <h2>2. XML Schema &amp; Root Attributes</h2>
     <p>The root tag of any TestNG configuration is <code>&lt;suite&gt;</code>. Key suite-level attributes determine the global runner behavior:</p>
     <ul>
       <li><code>name</code>: Mandatory identifier for the test suite, reflected in generated reports.</li>

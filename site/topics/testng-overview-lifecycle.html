@@ -15,8 +15,41 @@
 
   <p>TestNG ("Test Next Generation") is an enterprise Java test automation framework inspired by JUnit and NUnit, specifically engineered to support complex integration, end-to-end browser automation, and data-driven testing. While unit testing frameworks traditionally lack fine-grained lifecycle scoping, TestNG provides a 5-tier hierarchical runner architecture configured via <code>testng.xml</code>, built-in parameterization, parallel test execution down to the method level, and lifecycle interception hooks via listener interfaces.</p>
 
+  <section id="project-structure">
+    <h2>1. Real-Time Maven + TestNG Enterprise Framework Architecture</h2>
+    <p>To understand TestNG in production, examine how every component maps directly to an industry-standard Maven multi-browser automation repository:</p>
+
+    <pre><code>sdet-test-framework/
+├── pom.xml                               # Maven project dependencies: testng, selenium-java, extentreports
+├── testng-smoke.xml                      # Fast smoke test suite runner
+├── testng-regression.xml                 # Parallel multi-browser regression suite runner
+├── src/
+│   ├── main/java/com/sdet/
+│   │   ├── pages/                        # Page Object Model classes (LoginPage, CheckoutPage)
+│   │   └── utils/                        # Excel/JSON readers, ConfigProperties loader
+│   └── test/java/com/sdet/
+│       ├── core/                         # 📍 CHAPTER 1.1: BaseTest.java (10 Lifecycle Annotations + ThreadLocal)
+│       ├── listeners/                    # 📍 CHAPTER 5.1: TestListener.java (ITestListener screenshot capture)
+│       ├── retry/                        # 📍 CHAPTER 5.2: RetryAnalyzer.java (IRetryAnalyzer auto-rerun)
+│       ├── dataprovider/                 # 📍 CHAPTER 3.1: AuthDataProvider.java (@DataProvider matrices)
+│       └── tests/                        # 📍 CHAPTER 2.1-4.2: LoginTest.java, CheckoutTest.java (@Test methods)
+└── src/test/resources/
+    ├── config.properties                 # Environment URLs, default timeouts
+    └── testdata/credentials.xlsx         # External data sources ingested by @DataProvider</code></pre>
+
+    <p><b>How execution flows in realtime through this structure:</b></p>
+    <ol>
+      <li><b>Jenkins / CI Terminal:</b> Executes <code>mvn clean test -DsuiteXmlFile=testng-regression.xml</code>.</li>
+      <li><b>Control Plane (<code>testng-regression.xml</code>):</b> TestNG boots, reads suite parameters (browser, env), attaches listeners, and initializes worker thread pools.</li>
+      <li><b>Core Base Layer (<code>com/sdet/core/BaseTest.java</code>):</b> Runs <code>@BeforeSuite</code> to initialize reports, then runs <code>@BeforeMethod</code> to instantiate a thread-isolated <code>ThreadLocal&lt;WebDriver&gt;</code> per thread.</li>
+      <li><b>Test Payload Layer (<code>com/sdet/tests/</code>):</b> Worker threads run <code>@Test</code> methods using Page Objects, validating states via assertions.</li>
+      <li><b>Interception Layer (<code>com/sdet/listeners/</code>):</b> If a test fails, <code>TestListener</code> intercepts the event, captures a screenshot using <code>BaseTest.getDriver()</code>, and writes it to the report.</li>
+      <li><b>Teardown Layer (<code>com/sdet/core/BaseTest.java</code>):</b> <code>@AfterMethod(alwaysRun = true)</code> invokes <code>driver.quit()</code> and clears the <code>ThreadLocal</code>.</li>
+    </ol>
+  </section>
+
   <section id="testng-architecture">
-    <h2>1. TestNG Framework Architecture</h2>
+    <h2>2. TestNG Framework Architecture</h2>
     <p>In automated testing architectures, Selenium WebDriver acts purely as a browser automation API—it provides no test runner, assertion library, or lifecycle orchestration. TestNG acts as the execution backbone and control plane that wraps WebDriver, managing test suites, instantiation order, parallel worker threads, and failure reporting.</p>
 
     <table>

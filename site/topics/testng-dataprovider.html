@@ -15,8 +15,22 @@
 
   <p>TestNG's <code>@DataProvider</code> annotation is the gold standard for data-driven testing in Java. It allows a single test method to execute repeatedly with different combinations of input arguments, producing distinct pass/fail status and test metrics for each data row.</p>
 
+  <section id="project-structure">
+    <h2>1. Real-Time Project Structure: Where Data Providers Live</h2>
+    <p>In robust framework designs, test classes should never pollute test logic with data generation code. Data providers reside in dedicated utility or data-provider packages:</p>
+
+    <pre><code>sdet-test-framework/
+├── src/test/resources/testdata/
+│   └── user_credentials.xlsx            # External test matrix source
+└── src/test/java/com/sdet/
+    ├── dataprovider/
+    │   └── AuthDataProvider.java        # 📍 Dedicated @DataProvider class with Object[][] matrix
+    └── tests/
+        └── LoginTest.java                # 📍 Ingests external provider: @Test(dataProviderClass = AuthDataProvider.class)</code></pre>
+  </section>
+
   <section id="basic-dataprovider">
-    <h2>1. The <code>Object[][]</code> Matrix Pattern</h2>
+    <h2>2. The <code>Object[][]</code> Matrix Pattern</h2>
     <p>A data provider method must return an <code>Object[][]</code> (two-dimensional object array) or an <code>Iterator&lt;Object[]&gt;</code>. Each row in the matrix represents an individual test execution:</p>
 
     <pre><code>import org.testng.annotations.DataProvider;
