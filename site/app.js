@@ -141,7 +141,7 @@
       <div class="se-navbar-left">
         <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776;</button>
         <a href="../index.html" class="se-brand-mark-link" title="SDET Explainer Home (Alt+H)">
-          <span class="home-brand-mark"><span class="mark-s">S</span><span class="mark-e">E</span></span>
+          <span class="home-brand-name se-nav-brand-name">SDET_<span class="brand-accent">Explainer</span><span class="brand-cursor">_</span></span>
         </a>
       </div>
       <div class="se-navbar-center">
