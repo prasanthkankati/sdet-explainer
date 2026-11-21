@@ -356,9 +356,15 @@
       closeBtn.onclick = () => document.body.classList.remove("mob-tree-open");
     }
 
-    // Dismiss mobile drawer when any link in sidebar is tapped
+    // Immediate, bulletproof navigation on mobile and desktop
     sidebar.querySelectorAll("a").forEach(a => {
-      a.addEventListener("click", () => document.body.classList.remove("mob-tree-open"));
+      a.addEventListener("click", (e) => {
+        const href = a.getAttribute("href");
+        if (href && href !== "#" && !href.startsWith("javascript:")) {
+          e.preventDefault();
+          location.href = href;
+        }
+      });
     });
 
     // Auto-scroll active item into center of sidebar

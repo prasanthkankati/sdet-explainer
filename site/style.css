@@ -676,21 +676,23 @@ body.home-page .fixed-theme-toggle { display: none !important; }
 .se-navbar-center {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex: 1;
   min-width: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  padding: 0 4px;
 }
 .se-navbar-center::-webkit-scrollbar { display: none; }
 .se-navbar-links {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
   gap: 6px;
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0 4px;
   white-space: nowrap;
 }
 .se-navbar-right {
@@ -907,30 +909,47 @@ body.home-page .fixed-theme-toggle { display: none !important; }
 .se-tree li { margin: 1px 0; }
 .se-tree a {
   display: block;
-  padding: 4px 8px;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  color: var(--text);
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: #e2e8f0;
   text-decoration: none;
   border-left: 2px solid transparent;
   margin-left: -1px;
-  transition: color 0.1s ease, background 0.1s ease;
+  border-radius: 4px;
+  transition: color 0.12s ease, background 0.12s ease;
 }
-.se-tree a:hover { color: var(--bold); background: var(--bg); text-decoration: none; }
+.se-tree a:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+  border-left-color: var(--accent);
+}
 .se-tree a.active {
   color: var(--accent);
-  font-weight: 600;
+  font-weight: 700;
   border-left-color: var(--accent);
-  background: var(--bg);
+  background: rgba(255, 255, 255, 0.06);
 }
-.se-tree a.planned { color: var(--muted); opacity: 0.5; pointer-events: none; }
+:root[data-theme="light"] .se-tree a {
+  color: #1e293b;
+}
+:root[data-theme="light"] .se-tree a:hover {
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.05);
+}
+:root[data-theme="light"] .se-tree a.active {
+  color: var(--accent);
+  background: rgba(0, 0, 0, 0.04);
+}
+.se-tree a.planned { color: var(--muted); opacity: 0.4; pointer-events: none; }
 .se-tree .se-sec-label {
   display: block;
-  padding: 8px 6px 3px;
-  font: 700 0.68rem/1 'JetBrains Mono', monospace;
-  color: var(--bold);
+  padding: 10px 8px 4px;
+  font: 700 0.7rem/1 'JetBrains Mono', monospace;
+  color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
 }
 .se-main {
   padding: 24px 28px 48px;
