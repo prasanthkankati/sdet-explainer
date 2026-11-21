@@ -137,28 +137,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Gradient landing background for homepage */
+/* OLED Pure Black landing background for homepage */
 body.home-page {
-  background-color: #070709 !important;
-  background-image: 
-    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(139, 92, 246, 0.15) 0%, transparent 70%),
-    radial-gradient(circle 500px at 100% 40%, rgba(52, 211, 153, 0.08) 0%, transparent 60%),
-    radial-gradient(circle 500px at 0% 70%, rgba(217, 70, 239, 0.08) 0%, transparent 60%),
-    linear-gradient(180deg, #09090B 0%, #050507 100%) !important;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-color: #000000 !important;
+  background-image: none !important;
 }
 :root[data-theme="light"] body.home-page {
   background-color: #F8FAFC !important;
-  background-image: 
-    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(147, 51, 234, 0.09) 0%, transparent 70%),
-    radial-gradient(circle 500px at 100% 40%, rgba(16, 185, 129, 0.07) 0%, transparent 60%),
-    radial-gradient(circle 500px at 0% 70%, rgba(217, 70, 239, 0.06) 0%, transparent 60%),
-    linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%) !important;
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
+  background-image: none !important;
 }
 .home-wrap {
   animation: pageFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;

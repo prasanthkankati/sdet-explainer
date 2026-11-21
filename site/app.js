@@ -42,7 +42,8 @@
   }
 
   const updateMetaThemeColor = (theme) => {
-    const color = theme === "light" ? "#ffffff" : "#09090b";
+    const isHome = document.body.classList.contains("home-page");
+    const color = theme === "light" ? "#ffffff" : (isHome ? "#000000" : "#09090b");
     let meta = document.querySelector('meta[name="theme-color"]:not([media])');
     if (!meta) {
       meta = document.createElement("meta");
