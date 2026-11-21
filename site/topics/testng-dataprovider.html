@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3.1 @DataProvider &amp; Multi-Dimensional Object Arrays &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>3.1 @DataProvider &amp; Multi-Dimensional Object Arrays</h1>
+  <div class="se-lead">Data-driven testing engine: Object[][] matrix mapping, Iterator streaming, Method reflection routing, and parallel data providers.</div>
+
+  <p>TestNG's <code>@DataProvider</code> annotation is the gold standard for data-driven testing in Java. It allows a single test method to execute repeatedly with different combinations of input arguments, producing distinct pass/fail status and test metrics for each data row.</p>
+
+  <section id="basic-dataprovider">
+    <h2>1. The <code>Object[][]</code> Matrix Pattern</h2>
+    <p>A data provider method must return an <code>Object[][]</code> (two-dimensional object array) or an <code>Iterator&lt;Object[]&gt;</code>. Each row in the matrix represents an individual test execution:</p>
+
+    <pre><code>import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+public class DataProviderDemo {
+    @DataProvider(name = "loginCredentials")
+    public Object[][] provideCredentials() {
+        return new Object[][] {
+            {"standard_user", "secret_sauce", true},
+            {"locked_out_user", "secret_sauce", false},
+            {"problem_user", "secret_sauce", true}
+        };
+    }
+
+    @Test(dataProvider = "loginCredentials")
+    public void testUserAuthentication(String username, String password, boolean expectedSuccess) {
+        boolean actual = loginService.authenticate(username, password);
+        Assert.assertEquals(actual, expectedSuccess);
+    }
+}</code></pre>
+  </section>
+
+  <section id="parallel-dataprovider">
+    <h2>2. Parallel Data Providers</h2>
+    <p>By default, data rows execute sequentially. Setting <code>@DataProvider(parallel = true)</code> executes each row concurrently using TestNG's thread pool:</p>
+
+    <pre><code>@DataProvider(name = "searchQueries", parallel = true)
+public Object[][] provideQueries() {
+    return new Object[][] {
+        {"Selenium WebDriver"},
+        {"TestNG Concurrency"},
+        {"Playwright Async"}
+    };
+}</code></pre>
+    <p>The default thread pool size for data providers is 10, configurable via <code>data-provider-thread-count</code> in <code>&lt;suite&gt;</code>.</p>
+  </section>
+
+  <section id="method-reflection">
+    <h2>3. Method Reflection Dynamic Routing</h2>
+    <p>By passing <code>java.lang.reflect.Method</code> into a <code>@DataProvider</code>, a single provider can supply custom data payloads based on the caller method's name:</p>
+
+    <pre><code>@DataProvider(name = "universalProvider")
+public Object[][] routeData(java.lang.reflect.Method method) {
+    if (method.getName().equals("testFastCheckout")) {
+        return new Object[][] {{"FastUser", 1}};
+    } else {
+        return new Object[][] {{"StandardUser", 5}};
+    }
+}</code></pre>
+  </section>
+
+  <section id="interview-qa">
+    <h2>4. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>When should you return <code>Iterator&lt;Object[]&gt;</code> instead of <code>Object[][]</code>?</b><br>
+        When parsing massive external datasets (e.g., 50,000 rows from CSV or Excel). <code>Object[][]</code> forces the entire dataset into Java heap memory at once, risking <code>OutOfMemoryError</code>. <code>Iterator</code> streams rows on demand, keeping heap consumption minimal.
+      </li>
+      <li>
+        <b>How do you use a <code>@DataProvider</code> located in another class?</b><br>
+        Declare <code>dataProviderClass = ExternalDataClass.class</code> inside the <code>@Test</code> annotation. The external provider method must be <code>public static</code>.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

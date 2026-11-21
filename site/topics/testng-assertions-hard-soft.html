@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2.1 Hard Assertions vs Soft Assertions (SoftAssert) &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>2.1 Hard Assertions vs Soft Assertions (SoftAssert)</h1>
+  <div class="se-lead">Deterministic verification: Assert.assertEquals failure termination semantics vs SoftAssert multi-checkpoint collection and assertAll().</div>
+
+  <p>Assertions form the validation core of test automation. Without assertions, test code merely executes actions without determining correctness. TestNG provides two distinct assertion paradigms: <b>Hard Assertions</b> (via <code>org.testng.Assert</code>) and <b>Soft Assertions</b> (via <code>org.testng.asserts.SoftAssert</code>), each designed for specific verification scopes.</p>
+
+  <section id="hard-assertions">
+    <h2>1. Hard Assertions: Immediate Termination</h2>
+    <p>Hard assertions immediately throw an <code>java.lang.AssertionError</code> upon failure, terminating the current test method at that exact instruction line. Subsequent statements in the test method are completely skipped.</p>
+
+    <pre><code>import org.testng.Assert;
+import org.testng.annotations.Test;
+
+public class HardAssertExample {
+    @Test
+    public void testAuthenticationFlow() {
+        boolean isLoginSuccessful = performLogin();
+        // If this fails, the method aborts immediately. The profile check is never executed.
+        Assert.assertTrue(isLoginSuccessful, "Authentication failed for user");
+
+        String welcomeMsg = getWelcomeMessage();
+        Assert.assertEquals(welcomeMsg, "Welcome, Prasanth!", "Welcome banner mismatch");
+    }
+}</code></pre>
+
+    <p><b>When to use:</b> Critical path gateways where downstream steps are meaningless or will throw secondary exceptions (e.g. failing to login, failing to create an order, or receiving an invalid HTTP 500 status code).</p>
+  </section>
+
+  <section id="soft-assertions">
+    <h2>2. Soft Assertions: Multi-Point Validation</h2>
+    <p>In UI verification, a page often contains multiple independent fields (header, footer, profile picture, pricing, copyright year). Using hard assertions causes the test to fail at the first discrepancy without verifying the remaining 5 fields. <code>SoftAssert</code> records failures in memory and continues execution until <code>assertAll()</code> is explicitly called:</p>
+
+    <pre><code>import org.testng.asserts.SoftAssert;
+import org.testng.annotations.Test;
+
+public class SoftAssertExample {
+    @Test
+    public void testUserProfileDashboard() {
+        SoftAssert softAssert = new SoftAssert();
+
+        softAssert.assertEquals(getHeaderTitle(), "Dashboard", "Header mismatch");
+        softAssert.assertTrue(isAvatarVisible(), "Avatar should be displayed");
+        softAssert.assertEquals(getUserRole(), "Admin", "User role mismatch");
+        softAssert.assertEquals(getFooterYear(), "2026", "Footer year mismatch");
+
+        // CRITICAL: assertAll() aggregates all recorded errors and marks the test failed if any assert failed
+        softAssert.assertAll();
+    }
+}</code></pre>
+  </section>
+
+  <section id="comparison">
+    <h2>3. Side-by-Side Comparison</h2>
+    <table>
+      <thead>
+        <tr><th>Dimension</th><th>Hard Assertion (<code>Assert</code>)</th><th>Soft Assertion (<code>SoftAssert</code>)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Package</b></td><td><code>org.testng.Assert</code> (Static)</td><td><code>org.testng.asserts.SoftAssert</code> (Instance)</td></tr>
+        <tr><td><b>Execution on Failure</b></td><td>Aborts test method immediately</td><td>Continues executing subsequent checkpoints</td></tr>
+        <tr><td><b>Failure Aggregation</b></td><td>None (Single failure per test)</td><td>Collects all failures until <code>assertAll()</code></td></tr>
+        <tr><td><b>Thread Safety</b></td><td>Thread-safe (Static pure methods)</td><td>Must create a new instance per test method to prevent cross-test contamination</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="interview-qa">
+    <h2>4. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>What happens if you omit <code>softAssert.assertAll()</code> at the end of a test?</b><br>
+        If <code>assertAll()</code> is omitted, the test will <b>pass</b> even if every single soft assertion failed! TestNG relies on <code>assertAll()</code> to throw the aggregated <code>AssertionError</code>. Omitting it creates a dangerous false-positive test.
+      </li>
+      <li>
+        <b>Can you share a single <code>SoftAssert</code> instance across multiple test methods?</b><br>
+        No! If a <code>SoftAssert</code> instance is shared across methods, failures from Test A will carry over into Test B, causing subsequent tests to fail falsely. Always instantiate a new <code>SoftAssert</code> inside the method or in a <code>@BeforeMethod</code>.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>5.2 IRetryAnalyzer &amp; Automatic Flaky Test Retries &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>5.2 IRetryAnalyzer &amp; Automatic Flaky Test Retries</h1>
+  <div class="se-lead">Mitigating UI flakiness: implementing IRetryAnalyzer, max retry bounds, and dynamic injection via IAnnotationTransformer.</div>
+
+  <p>Web applications frequently encounter transient network spikes, animation delays, and race conditions that cause automated tests to fail intermittently. TestNG provides the <code>IRetryAnalyzer</code> interface to automatically re-execute failed tests before marking the final build as failed.</p>
+
+  <section id="retry-analyzer-impl">
+    <h2>1. Implementing <code>IRetryAnalyzer</code></h2>
+    <pre><code>package com.sdet.retry;
+
+import org.testng.IRetryAnalyzer;
+import org.testng.ITestResult;
+
+public class RetryAnalyzer implements IRetryAnalyzer {
+    private int retryCount = 0;
+    private static final int MAX_RETRY_COUNT = 2; // Retry at most twice
+
+    @Override
+    public boolean retry(ITestResult result) {
+        if (retryCount &lt; MAX_RETRY_COUNT) {
+            retryCount++;
+            System.out.println("[RETRYING TEST]: " + result.getName() + " (Attempt " + retryCount + ")");
+            return true; // TestNG re-executes the test method
+        }
+        return false; // Stop retrying; mark test as FAILED
+    }
+}</code></pre>
+  </section>
+
+  <section id="annotation-transformer">
+    <h2>2. Dynamic Injection via <code>IAnnotationTransformer</code></h2>
+    <p>Manually adding <code>@Test(retryAnalyzer = RetryAnalyzer.class)</code> to hundreds of methods is error-prone. Use <code>IAnnotationTransformer</code> to automatically attach the retry analyzer to all tests across the framework:</p>
+
+    <pre><code>package com.sdet.retry;
+
+import org.testng.IAnnotationTransformer;
+import org.testng.annotations.ITestAnnotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+
+public class RetryTransformer implements IAnnotationTransformer {
+    @Override
+    public void transform(ITestAnnotation annotation, Class testClass, Constructor testConstructor, Method testMethod) {
+        annotation.setRetryAnalyzer(RetryAnalyzer.class);
+    }
+}</code></pre>
+  </section>
+
+  <section id="interview-qa">
+    <h2>3. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>Is relying heavily on <code>IRetryAnalyzer</code> an anti-pattern?</b><br>
+        Yes, when used as a crutch to mask bad locators, missing explicit waits, or race conditions. Retries should only catch genuine external flakiness (e.g. transient 502 Bad Gateway or third-party payment gateway latency). Retried tests must be tagged and tracked as technical debt.
+      </li>
+      <li>
+        <b>How does TestNG report retried tests in standard HTML reports?</b><br>
+        Intermediate failures are categorized under the <code>Retried / Skipped</code> section, and only the final attempt determines whether the test is marked as <code>Pass</code> or <code>Fail</code> in the test summary.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>4.2 Test Groups &amp; Regression / Smoke Filtering &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>4.2 Test Groups &amp; Regression / Smoke Filtering</h1>
+  <div class="se-lead">Targeted test orchestration: categorizing tests with groups, meta-groups, regular expression filtering, and Maven Surefire profiles.</div>
+
+  <p>Rather than running an entire 8-hour regression suite on every commit, test engineers categorize tests into logical groups such as <code>smoke</code>, <code>sanity</code>, <code>regression</code>, and <code>flaky</code>. TestNG provides first-class support for tagging and filtering test execution by groups.</p>
+
+  <section id="groups-annotation">
+    <h2>1. Tagging Tests with Groups</h2>
+    <p>The <code>groups</code> attribute on <code>@Test</code> accepts an array of strings. A single test can belong to multiple groups:</p>
+
+    <pre><code>public class OrderCheckoutTest {
+    @Test(groups = {"smoke", "checkout", "p1"})
+    public void testDirectCreditCardCheckout() { ... }
+
+    @Test(groups = {"regression", "checkout"})
+    public void testGiftCardWithPromoCode() { ... }
+}</code></pre>
+  </section>
+
+  <section id="xml-filtering">
+    <h2>2. Filtering in <code>testng.xml</code></h2>
+    <pre><code>&lt;suite name="SmokeSuite"&gt;
+  &lt;test name="FastSmoke"&gt;
+    &lt;groups&gt;
+      &lt;run&gt;
+        &lt;include name="smoke" /&gt;
+        &lt;exclude name="broken" /&gt;
+      &lt;/run&gt;
+    &lt;/groups&gt;
+    &lt;packages&gt;
+      &lt;package name="com.sdet.tests.*" /&gt;
+    &lt;/packages&gt;
+  &lt;/test&gt;
+&lt;/suite&gt;</code></pre>
+  </section>
+
+  <section id="interview-qa">
+    <h2>3. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>What are Meta-Groups in TestNG?</b><br>
+        Meta-groups are groups composed of other groups defined in <code>testng.xml</code>. For example:
+        <code>&lt;meta-group name="daily-build"&gt;&lt;include name="smoke"/&gt;&lt;include name="payment"/&gt;&lt;/meta-group&gt;</code>.
+      </li>
+      <li>
+        <b>How do you run specific groups from the command line without modifying XML?</b><br>
+        Using Maven Surefire: <code>mvn test -Dgroups="smoke"</code> or <code>mvn test -Dgroups="smoke,regression" -DexcludedGroups="slow"</code>.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

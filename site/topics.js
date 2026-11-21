@@ -828,10 +828,10 @@ const TOPICS = [
     section: "T1. Architecture & Lifecycle",
     order: 2,
     title: "1.2 testng.xml Suite Configuration & Package Scanning",
-    file: "",
+    file: "testng-xml-configuration.html",
     summary: "XML suite file syntax, suite/test tags, parameter passing, include/exclude groups, packages, and verbose levels.",
     keywords: "testng.xml, suite, test, packages, classes, methods, include, exclude, verbose",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -839,10 +839,10 @@ const TOPICS = [
     section: "T2. Assertions & Validation",
     order: 3,
     title: "2.1 Hard Assertions vs Soft Assertions (SoftAssert)",
-    file: "",
+    file: "testng-assertions-hard-soft.html",
     summary: "Assert.assertEquals vs SoftAssert, assertAll(), execution termination semantics, and multi-field form validation.",
     keywords: "Assert, SoftAssert, assertAll, Hard Assert, assertions, AssertionError",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -850,10 +850,10 @@ const TOPICS = [
     section: "T2. Assertions & Validation",
     order: 4,
     title: "2.2 Priority, dependsOnMethods & enabled Attribute",
-    file: "",
+    file: "testng-priority-dependencies.html",
     summary: "Test ordering with priority, conditional execution with dependsOnMethods and dependsOnGroups, and disabling tests with enabled=false.",
     keywords: "priority, dependsOnMethods, dependsOnGroups, enabled, ignoreMissingDependencies",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -861,10 +861,10 @@ const TOPICS = [
     section: "T3. Data-Driven Testing",
     order: 5,
     title: "3.1 @DataProvider & Multi-Dimensional Object Arrays",
-    file: "",
+    file: "testng-dataprovider.html",
     summary: "Parameterized execution via @DataProvider, Object[][], Method reflection routing, and parallel data streaming.",
     keywords: "@DataProvider, Object[][], Iterator, Method, parallel, indices, name",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -872,10 +872,10 @@ const TOPICS = [
     section: "T3. Data-Driven Testing",
     order: 6,
     title: "3.2 @Parameters & XML Suite Injection",
-    file: "",
+    file: "testng-parameters-xml.html",
     summary: "Injecting browser types, URLs, and environments via @Parameters and <parameter> tags in testng.xml with @Optional fallbacks.",
     keywords: "@Parameters, parameter, @Optional, cross browser, testng.xml parameter injection",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -883,10 +883,10 @@ const TOPICS = [
     section: "T4. Parallel Execution & Concurrency",
     order: 7,
     title: "4.1 Parallel Execution: methods, tests & classes",
-    file: "",
+    file: "testng-parallel-execution.html",
     summary: "Multi-threaded test execution in testng.xml, thread-count, data-provider-thread-count, and thread safety with ThreadLocal.",
     keywords: "parallel, thread-count, methods, tests, classes, thread safety, race conditions, ThreadLocal",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -894,10 +894,10 @@ const TOPICS = [
     section: "T4. Parallel Execution & Concurrency",
     order: 8,
     title: "4.2 Test Groups & Regression / Smoke Filtering",
-    file: "",
+    file: "testng-groups-filtering.html",
     summary: "Categorizing tests with groups, meta-groups, regular expression group matching, and command-line execution via Maven Surefire.",
     keywords: "groups, smoke, regression, run, include, exclude, surefire, meta-groups",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -905,10 +905,10 @@ const TOPICS = [
     section: "T5. Listeners, Retry & Reporting",
     order: 9,
     title: "5.1 Listeners Architecture (ITestListener & ISuiteListener)",
-    file: "",
+    file: "testng-listeners-architecture.html",
     summary: "Interception with ITestListener, ISuiteListener, IInvokedMethodListener, screenshot on failure, and HTML report hooks.",
     keywords: "ITestListener, ISuiteListener, IInvokedMethodListener, onTestFailure, screenshot, ExtentReports, Allure",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
   {
@@ -916,10 +916,10 @@ const TOPICS = [
     section: "T5. Listeners, Retry & Reporting",
     order: 10,
     title: "5.2 IRetryAnalyzer & Automatic Flaky Test Retries",
-    file: "",
+    file: "testng-retry-analyzer.html",
     summary: "Implementing IRetryAnalyzer, max retry count limits, IAnnotationTransformer dynamic injection, and handling test flakiness in CI/CD.",
     keywords: "IRetryAnalyzer, retry, IAnnotationTransformer, flaky tests, maxRetryCount, CI/CD",
-    status: "planned",
+    status: "done",
     date: "2026-11-21"
   },
 

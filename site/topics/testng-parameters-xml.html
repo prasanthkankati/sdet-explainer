@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>3.2 @Parameters &amp; XML Suite Injection &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>3.2 @Parameters &amp; XML Suite Injection</h1>
+  <div class="se-lead">Decoupling test configuration: injecting browser types, target environments, and timeouts via testng.xml with @Optional fallbacks.</div>
+
+  <p>Hardcoding environment variables (such as base URLs, browser targets, or database connection strings) inside Java test classes violates clean architecture. TestNG's <code>@Parameters</code> annotation provides clean, declarative dependency injection from <code>testng.xml</code> directly into configuration and test methods.</p>
+
+  <section id="parameter-injection">
+    <h2>1. XML Declaration &amp; Method Binding</h2>
+    <p>Parameters declared with <code>&lt;parameter name="key" value="val" /&gt;</code> are mapped into Java method signatures matching annotation argument names:</p>
+
+    <pre><code>&lt;!-- In testng.xml --&gt;
+&lt;suite name="CrossBrowserSuite"&gt;
+  &lt;parameter name="appUrl" value="https://staging.example.com" /&gt;
+
+  &lt;test name="ChromeRun"&gt;
+    &lt;parameter name="browser" value="chrome" /&gt;
+    &lt;classes&gt;
+      &lt;class name="com.sdet.tests.LoginTest" /&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt;
+&lt;/suite&gt;</code></pre>
+
+    <pre><code>// In Java Class
+import org.testng.annotations.Parameters;
+import org.testng.annotations.BeforeClass;
+
+public class LoginTest {
+    @Parameters({"browser", "appUrl"})
+    @BeforeClass
+    public void setup(String browser, String appUrl) {
+        System.out.println("Launching " + browser + " against " + appUrl);
+    }
+}</code></pre>
+  </section>
+
+  <section id="optional-fallback">
+    <h2>2. The <code>@Optional</code> Fallback</h2>
+    <p>If a test method is run standalone from an IDE (without <code>testng.xml</code>), TestNG throws a <code>TestNGException: Parameter 'browser' is required by @Test on method but has not been marked @Optional or defined</code>. Adding <code>@Optional</code> provides safe local defaults:</p>
+
+    <pre><code>@Parameters({"browser"})
+@BeforeMethod
+public void initDriver(@Optional("chrome") String browser) {
+    // If not supplied in XML, browser defaults to "chrome"
+}</code></pre>
+  </section>
+
+  <section id="interview-qa">
+    <h2>3. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>What is the key difference between <code>@Parameters</code> and <code>@DataProvider</code>?</b><br>
+        <code>@Parameters</code> injects environment configurations from <code>testng.xml</code> (run once per test setup). <code>@DataProvider</code> injects dynamic test input data in Java memory, running the test method multiple times across different data sets.
+      </li>
+      <li>
+        <b>Can <code>@Parameters</code> inject non-String types?</b><br>
+        Yes! TestNG automatically converts string parameter values into Java primitives (int, boolean, long, double, etc.) based on the target method parameter type.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>2.2 Priority, dependsOnMethods &amp; enabled Attribute &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>2.2 Priority, dependsOnMethods &amp; enabled Attribute</h1>
+  <div class="se-lead">Controlling test execution sequence, conditional dependency cascades, and skipping vs soft failure semantics.</div>
+
+  <p>By default, TestNG executes test methods in arbitrary or alphabetical order. In real-world enterprise suites, test engineers must control sequencing, disable deprecated tests, or establish hard dependencies between transactional workflows.</p>
+
+  <section id="priority">
+    <h2>1. The <code>priority</code> Attribute</h2>
+    <p>Assigns numerical precedence to <code>@Test</code> methods. Lower numbers execute first (e.g. priority 0 runs before priority 1). Negative priorities are valid and run before priority 0.</p>
+
+    <pre><code>public class PriorityTest {
+    @Test(priority = -1)
+    public void setupEnvironment() { /* Runs first */ }
+
+    @Test(priority = 0)
+    public void loginTest() { /* Runs second */ }
+
+    @Test(priority = 1)
+    public void createProjectTest() { /* Runs third */ }
+}</code></pre>
+  </section>
+
+  <section id="depends-on">
+    <h2>2. Dependency Mapping: <code>dependsOnMethods</code></h2>
+    <p>When Method B depends on Method A, TestNG guarantees Method A runs first. If Method A fails, Method B is <b>skipped</b> (marked as <code>SKIP</code>, not <code>FAIL</code>), avoiding false-negative noise:</p>
+
+    <pre><code>public class DependencyTest {
+    @Test
+    public void createUser() {
+        // If this throws AssertionError...
+        Assert.assertTrue(apiCreateUser(), "User creation API failed");
+    }
+
+    @Test(dependsOnMethods = {"createUser"})
+    public void updateUserSettings() {
+        // ...This method is automatically SKIPPED, not executed
+        openSettingsPage();
+    }
+}</code></pre>
+  </section>
+
+  <section id="enabled">
+    <h2>3. The <code>enabled</code> Attribute</h2>
+    <p>Setting <code>@Test(enabled = false)</code> instructs the compiler and runner to completely ignore the test during suite execution. It does not appear in test counts or reports.</p>
+  </section>
+
+  <section id="interview-qa">
+    <h2>4. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>What is the difference between <code>priority</code> and <code>dependsOnMethods</code>?</b><br>
+        <code>priority</code> only influences execution order—if priority 1 fails, priority 2 will still run. <code>dependsOnMethods</code> enforces a hard conditional dependency: if the upstream method fails, downstream methods are automatically skipped.
+      </li>
+      <li>
+        <b>What does <code>alwaysRun = true</code> do when combined with <code>dependsOnMethods</code>?</b><br>
+        It forces the dependent method to execute even if the parent method failed. Frequently used for cleanup routines like <code>deleteUserSession()</code>.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

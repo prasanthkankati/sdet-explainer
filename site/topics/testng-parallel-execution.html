@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>4.1 Parallel Execution: methods, tests &amp; classes &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>4.1 Parallel Execution: methods, tests &amp; classes</h1>
+  <div class="se-lead">Scaling automated test throughput: configuring parallel modes in testng.xml, thread-count sizing, and eliminating race conditions.</div>
+
+  <p>In modern CI/CD pipelines, executing 500 Selenium tests sequentially can easily exceed 2 hours. TestNG's native multi-threading architecture reduces regression duration to minutes by distributing tests across worker thread pools.</p>
+
+  <section id="parallel-modes">
+    <h2>1. The Four Parallel Modes</h2>
+    <table>
+      <thead>
+        <tr><th>Mode (<code>parallel="..."</code>)</th><th>Execution Mechanism</th><th>Thread Safety Requirement</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b><code>classes</code> (Recommended)</b></td><td>Each test class executes in its own thread. Methods inside the class run sequentially.</td><td>Low to moderate. Static fields must not be shared across classes.</td></tr>
+        <tr><td><b><code>methods</code></b></td><td>Every single <code>@Test</code> method runs in a separate thread concurrently.</td><td>High. <code>WebDriver</code> must use <code>ThreadLocal</code>. No shared class state.</td></tr>
+        <tr><td><b><code>tests</code></b></td><td>Each <code>&lt;test&gt;</code> block in <code>testng.xml</code> runs in parallel.</td><td>Ideal for parallel cross-browser runs (e.g. Chrome vs Firefox).</td></tr>
+        <tr><td><b><code>instances</code></b></td><td>Tests on different class instances run in separate threads.</td><td>Used with factory test patterns.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="xml-configuration">
+    <h2>2. Suite Configuration Example</h2>
+    <pre><code>&lt;suite name="ParallelExecutionSuite" parallel="classes" thread-count="4"&gt;
+  &lt;test name="RegressionPart1"&gt;
+    &lt;classes&gt;
+      &lt;class name="com.sdet.tests.SearchTest" /&gt;
+      &lt;class name="com.sdet.tests.CheckoutTest" /&gt;
+      &lt;class name="com.sdet.tests.ProfileTest" /&gt;
+      &lt;class name="com.sdet.tests.PaymentTest" /&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt;
+&lt;/suite&gt;</code></pre>
+  </section>
+
+  <section id="interview-qa">
+    <h2>3. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>What causes race conditions when running Selenium tests with <code>parallel="methods"</code>?</b><br>
+        Using a standard <code>static WebDriver driver</code> field. When Method A and Method B execute concurrently on separate threads, both threads overwrite the same memory reference, causing commands intended for Browser A to be sent to Browser B. Solution: <code>ThreadLocal&lt;WebDriver&gt;</code>.
+      </li>
+      <li>
+        <b>How do you size <code>thread-count</code> in a Jenkins/Docker agent?</b><br>
+        Rule of thumb: 1 headless browser session consumes roughly 1 vCPU core and 1GB RAM. On a 4-core, 8GB agent, set <code>thread-count="3"</code> or <code>"4"</code> to prevent CPU thrashing and memory exhaustion.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

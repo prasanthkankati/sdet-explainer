@@ -1275,14 +1275,17 @@ th { color: var(--bold); border-bottom: 2px solid var(--border); font-weight: 70
 .se-mob-tree-btn {
   display: none;
   align-items: center;
-  height: 28px;
-  padding: 0 9px;
-  font: 700 0.72rem/1 'JetBrains Mono', monospace;
+  justify-content: center;
+  height: 32px;
+  min-width: 34px;
+  padding: 0 10px;
+  font: 700 0.88rem/1 'JetBrains Mono', monospace;
   color: var(--accent);
   border: 1px solid var(--border);
-  background: none;
+  background: var(--surface);
   cursor: pointer;
   white-space: nowrap;
+  border-radius: 4px;
 }
 .se-sidebar-close {
   display: none;
@@ -1323,6 +1326,119 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
 .se-mob-toc ul { list-style: none; margin: 0; padding: 8px 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 4px 10px; }
 .se-mob-toc a { display: block; padding: 4px 6px; font-size: 0.76rem; color: var(--text); border-left: 2px solid var(--border); text-decoration: none; }
 .se-mob-toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+/* ============================================================
+   CHAPTER PAGINATION NAV (Previous / Next Chapter at bottom)
+   ============================================================ */
+.se-chapter-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.se-chapter-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px;
+  border-radius: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-decoration: none !important;
+  color: var(--text);
+  transition: all 0.15s ease;
+}
+.se-chapter-btn:hover {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+  transform: translateY(-1px);
+}
+.se-chapter-btn.next {
+  text-align: right;
+  align-items: flex-end;
+}
+.se-chapter-btn.prev {
+  text-align: left;
+  align-items: flex-start;
+}
+.se-chapter-btn .btn-sub {
+  font: 700 0.68rem/1 'JetBrains Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+.se-chapter-btn .btn-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-h, #ffffff);
+}
+:root[data-theme="light"] .se-chapter-btn .btn-title {
+  color: #0f172a;
+}
+.se-chapter-btn.disabled {
+  visibility: hidden;
+  border: none;
+  background: none;
+}
+
+@media (max-width: 600px) {
+  .se-chapter-nav {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 32px;
+  }
+  .se-chapter-btn.next, .se-chapter-btn.prev {
+    text-align: left;
+    align-items: flex-start;
+    padding: 12px 14px;
+  }
+}
+
+/* ============================================================
+   MOBILE TOP CHAPTER SWITCHER BAR
+   ============================================================ */
+.se-mob-chapter-bar {
+  display: none;
+  margin-bottom: 16px;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+@media (max-width: 860px) {
+  .se-mob-chapter-bar {
+    display: block;
+  }
+}
+.se-mob-chapter-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.se-mob-chapter-badge {
+  font: 700 0.72rem/1 'JetBrains Mono', monospace;
+  color: var(--accent);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.se-mob-chapter-select {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font: 500 0.82rem 'Inter', sans-serif;
+  cursor: pointer;
+  outline: none;
+}
+.se-mob-chapter-select:focus {
+  border-color: var(--accent);
+}
 
 /* ============================================================
    RESPONSIVE

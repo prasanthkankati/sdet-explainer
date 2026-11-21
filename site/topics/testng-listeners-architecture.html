@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>5.1 Listeners Architecture: ITestListener &amp; ISuiteListener &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>5.1 Listeners Architecture: ITestListener &amp; ISuiteListener</h1>
+  <div class="se-lead">AOP event interception: capturing failures, auto-capturing screenshots, and driving ExtentReports/Allure pipelines.</div>
+
+  <p>Listeners in TestNG implement the Observer pattern. They allow automation architects to intercept test events (start, success, failure, skip, suite start/finish) and execute cross-cutting concerns without polluting test logic with reporting boilerplate.</p>
+
+  <section id="listener-interfaces">
+    <h2>1. Core Listener Interfaces</h2>
+    <table>
+      <thead>
+        <tr><th>Interface</th><th>Interception Scope</th><th>Primary Use Case</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b><code>ITestListener</code></b></td><td>Individual test methods and results</td><td>Capturing screenshots on failure, logging pass/fail to HTML reports.</td></tr>
+        <tr><td><b><code>ISuiteListener</code></b></td><td>Suite start and suite finish</td><td>Initializing reporting engines (ExtentReports), global database teardowns.</td></tr>
+        <tr><td><b><code>IInvokedMethodListener</code></b></td><td>Before &amp; after every method (config + test)</td><td>Logging method execution duration, thread ID monitoring.</td></tr>
+        <tr><td><b><code>IAnnotationTransformer</code></b></td><td>Runtime annotation transformation</td><td>Dynamically injecting retry analyzers without modifying test source code.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="itestlistener-code">
+    <h2>2. Implementation Example: Screenshot on Failure</h2>
+    <pre><code>package com.sdet.listeners;
+
+import org.testng.ITestListener;
+import org.testng.ITestResult;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import com.sdet.core.BaseTest;
+
+public class TestFailureListener implements ITestListener {
+    @Override
+    public void onTestFailure(ITestResult result) {
+        String testName = result.getMethod().getMethodName();
+        System.err.println("[TEST FAILED]: " + testName);
+
+        // Capture base64 screenshot from ThreadLocal driver
+        TakesScreenshot ts = (TakesScreenshot) BaseTest.getDriver();
+        String base64Screenshot = ts.getScreenshotAs(OutputType.BASE64);
+
+        // Attach to ExtentReports or Allure
+        ReportingManager.logFailure(testName, result.getThrowable(), base64Screenshot);
+    }
+}</code></pre>
+  </section>
+
+  <section id="interview-qa">
+    <h2>3. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>Where should you register listeners for production test execution?</b><br>
+        In <code>testng.xml</code> under <code>&lt;listeners&gt;&lt;listener class-name="..."/&gt;&lt;/listeners&gt;</code>. While <code>@Listeners</code> works at the class level, registering in XML ensures global application across all test classes.
+      </li>
+      <li>
+        <b>How does <code>ITestContext</code> differ from <code>ITestResult</code>?</b><br>
+        <code>ITestResult</code> contains metadata about a single test method (status, exception, execution time). <code>ITestContext</code> contains suite and test-level data, including all passed, failed, and skipped tests, start/end timestamps, and injected XML attributes.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -234,6 +234,72 @@
 
     // 4. Populate Right Sidebar TOC (.se-toc)
     rebuildTocForArticle(article, layout);
+
+    // 5. Build Previous / Next Chapter Navigation & Mobile Chapter Selector
+    buildChapterNav(article, currentTrack, currentFile);
+  }
+
+  // Chapter Navigation Bar (Prev / Next) & Mobile Chapter Selector
+  function buildChapterNav(article, track, filename) {
+    if (!article || typeof TOPICS === "undefined") return;
+    const trackTopics = TOPICS.filter(t => t.track === track && t.file);
+    if (!trackTopics.length) return;
+    const idx = trackTopics.findIndex(t => t.file === filename);
+
+    // 1. Mobile top chapter selector bar
+    const mainContainer = article.closest(".se-main") || article.parentElement;
+    if (mainContainer) {
+      let mobBar = mainContainer.querySelector(".se-mob-chapter-bar");
+      if (!mobBar) {
+        mobBar = document.createElement("div");
+        mobBar.className = "se-mob-chapter-bar";
+        mainContainer.insertBefore(mobBar, article);
+      }
+      const currentNum = idx >= 0 ? `${idx + 1}/${trackTopics.length}` : "";
+      mobBar.innerHTML = `
+        <div class="se-mob-chapter-inner">
+          <span class="se-mob-chapter-badge">${esc(track)} (${currentNum})</span>
+          <select class="se-mob-chapter-select" aria-label="Switch Chapter">
+            ${trackTopics.map((t, i) => `<option value="${t.file}" ${t.file === filename ? "selected" : ""}>${i + 1}. ${esc(t.title)}</option>`).join("")}
+          </select>
+        </div>
+      `;
+      const sel = mobBar.querySelector("select");
+      if (sel) {
+        sel.onchange = (e) => {
+          const target = e.target.value;
+          if (target && target !== filename) {
+            loadTopicContent(target, true);
+          }
+        };
+      }
+    }
+
+    // 2. Bottom Previous / Next Chapter Buttons
+    let navBox = article.querySelector(".se-chapter-nav");
+    if (!navBox) {
+      navBox = document.createElement("nav");
+      navBox.className = "se-chapter-nav";
+      navBox.setAttribute("aria-label", "Previous and Next Chapter");
+      article.appendChild(navBox);
+    }
+    const prevTopic = idx > 0 ? trackTopics[idx - 1] : null;
+    const nextTopic = idx >= 0 && idx < trackTopics.length - 1 ? trackTopics[idx + 1] : null;
+
+    navBox.innerHTML = `
+      ${prevTopic ? `
+        <a href="${prevTopic.file}" class="se-chapter-btn prev" title="Previous: ${esc(prevTopic.title)}">
+          <span class="btn-sub">&larr; PREVIOUS CHAPTER</span>
+          <span class="btn-title">${esc(prevTopic.title)}</span>
+        </a>
+      ` : `<div class="se-chapter-btn disabled"></div>`}
+      ${nextTopic ? `
+        <a href="${nextTopic.file}" class="se-chapter-btn next" title="Next: ${esc(nextTopic.title)}">
+          <span class="btn-sub">NEXT CHAPTER &rarr;</span>
+          <span class="btn-title">${esc(nextTopic.title)}</span>
+        </a>
+      ` : `<div class="se-chapter-btn disabled"></div>`}
+    `;
   }
 
   // Modular Sidebar Tree Renderer
@@ -274,6 +340,11 @@
     if (closeBtn) {
       closeBtn.onclick = () => document.body.classList.remove("mob-tree-open");
     }
+
+    // Dismiss mobile drawer when any link in sidebar is tapped
+    sidebar.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", () => document.body.classList.remove("mob-tree-open"));
+    });
 
     // Auto-scroll active item into center of sidebar
     const activeLink = sidebar.querySelector("a.active");
@@ -454,6 +525,7 @@
       // 7. Rebuild TOC & highlight syntax
       cleanMarkdownInArticle();
       rebuildTocForArticle(newArticle, layout);
+      buildChapterNav(newArticle, newTrack, filename);
       initSyntaxAndCopy();
       if (typeof attachGlossaryTooltips === "function") {
         attachGlossaryTooltips();
@@ -464,7 +536,7 @@
         const targetEl = document.querySelector(hash);
         if (targetEl) targetEl.scrollIntoView({ behavior: "smooth" });
       } else {
-        window.scrollTo({ top: 0, behavior: "instant" });
+        window.scrollTo(0, 0);
       }
 
       // 9. Fade back in
