@@ -111,6 +111,8 @@ html, body {
   margin: 0; padding: 0;
   overflow-x: clip;
   background-color: var(--bg);
+  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 /* Hide scrollbars — cleaner reading */
@@ -135,7 +137,29 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Smooth layout entry & FOUC prevention */
+/* Gradient landing background for homepage */
+body.home-page {
+  background-color: #070709 !important;
+  background-image: 
+    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(139, 92, 246, 0.15) 0%, transparent 70%),
+    radial-gradient(circle 500px at 100% 40%, rgba(52, 211, 153, 0.08) 0%, transparent 60%),
+    radial-gradient(circle 500px at 0% 70%, rgba(217, 70, 239, 0.08) 0%, transparent 60%),
+    linear-gradient(180deg, #09090B 0%, #050507 100%) !important;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+:root[data-theme="light"] body.home-page {
+  background-color: #F8FAFC !important;
+  background-image: 
+    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(147, 51, 234, 0.09) 0%, transparent 70%),
+    radial-gradient(circle 500px at 100% 40%, rgba(16, 185, 129, 0.07) 0%, transparent 60%),
+    radial-gradient(circle 500px at 0% 70%, rgba(217, 70, 239, 0.06) 0%, transparent 60%),
+    linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%) !important;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
 .home-wrap {
   animation: pageFadeIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
@@ -582,10 +606,6 @@ body.home-page .fixed-theme-toggle { display: none !important; }
     height: 100dvh;
     overflow: hidden;
     font-family: 'JetBrains Mono', Consolas, 'Cascadia Mono', monospace;
-    background: #000000 !important; /* Pure OLED Black */
-  }
-  :root[data-theme="light"] body.home-page {
-    background: #F8FAFC !important;
   }
   .home-wrap {
     height: 100vh;
@@ -595,7 +615,7 @@ body.home-page .fixed-theme-toggle { display: none !important; }
     justify-content: flex-start;
     max-width: 960px; /* ~10-15cm blank space on left & right */
     margin: 0 auto;
-    padding: 12px 20px 24px;
+    padding: calc(12px + env(safe-area-inset-top, 0px)) 20px calc(24px + env(safe-area-inset-bottom, 0px));
     box-sizing: border-box;
   }
   .home-top-bar {
@@ -1621,17 +1641,18 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
     min-height: 100vh;
     min-height: 100dvh;
     height: auto !important;
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(36px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important;
+    justify-content: space-between !important; /* Brand at top, tracks in center, actions at bottom */
     max-width: 100% !important;
     box-sizing: border-box !important;
   }
   .home-top-bar {
     height: 38px !important;
     padding: 0 !important;
-    margin-bottom: 32px !important;
+    margin-bottom: 0 !important;
+    flex-shrink: 0 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
@@ -1652,12 +1673,13 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
     flex: 1;
     display: flex !important;
     flex-direction: column !important;
-    justify-content: flex-start !important;
-    align-items: flex-start !important;
+    justify-content: center !important; /* Center tracks vertically in the page */
+    align-items: stretch !important;
     min-height: 0 !important;
+    margin: 20px 0 !important;
   }
   .home-tracks-section {
-    margin: 0 0 32px !important;
+    margin: 0 !important;
     width: 100% !important;
   }
   .tracks-section-top {
@@ -1686,9 +1708,10 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
   }
   .home-plain-actions {
     margin-top: 16px !important;
-    margin-bottom: 16px !important;
-    padding: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 8px 0 !important;
     gap: 20px !important;
+    flex-shrink: 0 !important;
   }
   .action-icon-btn {
     width: 36px !important;
