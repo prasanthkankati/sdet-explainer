@@ -66,7 +66,7 @@
     initTypeahead();
     initGlossary();
     initVolumeScroller();
-    initSmoothChapterTransitions();
+    initMobileDrawerEvents();
   }
 
   // Convert any residual **bold** or `code` in article HTML into proper <b> and <code> tags
@@ -141,8 +141,11 @@
     navbar.innerHTML = `
       <div class="se-navbar-left">
         <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776;</button>
-        <a href="../index.html" class="se-brand-mark-link" title="SDET Explainer Home (Alt+H)">
-          <span class="home-brand-name se-nav-brand-name">SDET_<span class="brand-accent">Explainer</span><span class="brand-cursor">_</span></span>
+        <a href="../index.html" class="se-nav-home-btn" title="Back to Syllabus Hub (Alt+H)" aria-label="Home">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
         </a>
       </div>
       <div class="se-navbar-center">
@@ -237,6 +240,18 @@
 
     // 5. Build Previous / Next Chapter Navigation & Mobile Chapter Selector
     buildChapterNav(article, currentTrack, currentFile);
+
+    // 6. Update last read
+    try {
+      const h1El = article.querySelector("h1");
+      const currentTopic = (typeof TOPICS !== "undefined") ? TOPICS.find(t => t.file === currentFile) : null;
+      const docTitle = (currentTopic && currentTopic.title) || (h1El && h1El.textContent.trim()) || currentFile;
+      localStorage.setItem("sdet_last_read", JSON.stringify({
+        file: currentFile,
+        title: docTitle,
+        track: currentTrack
+      }));
+    } catch (e) {}
   }
 
   // Chapter Navigation Bar (Prev / Next) & Mobile Chapter Selector
@@ -269,7 +284,7 @@
         sel.onchange = (e) => {
           const target = e.target.value;
           if (target && target !== filename) {
-            loadTopicContent(target, true);
+            location.href = target;
           }
         };
       }
@@ -419,147 +434,23 @@
     updateScrollSpy();
   }
 
-  // Smooth In-Place Fast Chapter Transitions (No Page Reload, Zero Flash)
-  function initSmoothChapterTransitions() {
-    if (!inTopicsDir) return;
-
-    window.addEventListener("popstate", () => {
-      const pathFile = location.pathname.split("/").pop();
-      if (pathFile && pathFile.endsWith(".html")) {
-        loadTopicContent(pathFile, false);
-      }
-    });
-
-    document.addEventListener("click", e => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-      const link = e.target.closest("a[href]");
-      if (!link) return;
-      const href = link.getAttribute("href") || "";
-      if (!href || href.startsWith("#") || href.startsWith("javascript:") || link.target === "_blank") return;
-
-      if (href.includes("index.html") || href.startsWith("http:") || href.startsWith("https:")) return;
-
-      const [cleanHref, hash] = href.split("#");
-      if (cleanHref.endsWith(".html")) {
-        e.preventDefault();
-        document.body.classList.remove("mob-tree-open");
-        loadTopicContent(cleanHref, true, hash ? "#" + hash : "");
-      }
-    });
-  }
-
-  async function loadTopicContent(targetFile, pushState = true, hash = "") {
-    document.body.classList.remove("mob-tree-open");
-    const filename = targetFile.split("/").pop();
-    const layout = document.querySelector(".se-layout");
-    const mainEl = document.querySelector(".se-main");
-    if (!layout || !mainEl) {
-      location.href = targetFile + hash;
-      return;
-    }
-
-    // 1. Subtle smooth fade out of article only
-    mainEl.style.opacity = "0.2";
-    mainEl.style.transform = "translateY(2px)";
-
-    try {
-      const resp = await fetch(targetFile);
-      if (!resp.ok) throw new Error("Fetch failed: " + resp.status);
-      const htmlText = await resp.text();
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(htmlText, "text/html");
-      const newArticle = doc.querySelector("article");
-      if (!newArticle) throw new Error("No article found");
-
-      // 2. Swap article content
-      const oldArticle = mainEl.querySelector("article");
-      if (oldArticle) oldArticle.replaceWith(newArticle);
-
-      // 3. Update title & URL
-      document.title = doc.title;
-      if (pushState) {
-        history.pushState(null, doc.title, targetFile + hash);
-      }
-
-      // 4. Update track context if changed
-      const tagEl = newArticle.querySelector(".tag");
-      const rawTag = tagEl ? tagEl.textContent.replace(/[\[\]]/g, "").trim() : "";
-      const currentTopic = (typeof TOPICS !== "undefined") ? TOPICS.find(t => t.file === filename) : null;
-      const newTrack = (currentTopic && currentTopic.track) || rawTag ||
-        (filename.startsWith("testng-") ? "TestNG" :
-         filename.startsWith("selenium-") ? "Selenium" :
-         filename.startsWith("java-") ? "Java" :
-         filename.startsWith("manual-") ? "Manual" :
-         filename.startsWith("interview-") ? "Interview" : "Selenium");
-
-      const oldTrack = document.body.getAttribute("data-track");
-      document.body.setAttribute("data-track", newTrack);
-
-      // 5. Update Sidebar
-      const sidebar = layout.querySelector(".se-sidebar");
-      if (sidebar) {
-        if (oldTrack !== newTrack) {
-          renderSidebarTree(sidebar, newTrack, filename);
-        } else {
-          sidebar.querySelectorAll("a").forEach(a => {
-            const isActive = a.getAttribute("href") === filename;
-            a.classList.toggle("active", isActive);
-            if (isActive) {
-              requestAnimationFrame(() => {
-                const topOffset = a.offsetTop - sidebar.clientHeight / 2 + a.clientHeight / 2;
-                sidebar.scrollTop = Math.max(0, topOffset);
-              });
-            }
-          });
-        }
-      }
-
-      // 6. Update Navbar active chip
-      const navbar = document.querySelector(".se-navbar");
-      if (navbar) {
-        navbar.querySelectorAll(".se-track-chip").forEach(chip => {
-          chip.classList.toggle("active", chip.getAttribute("data-track") === newTrack);
-        });
-      }
-
-      // 7. Rebuild TOC & highlight syntax
-      cleanMarkdownInArticle();
-      rebuildTocForArticle(newArticle, layout);
-      buildChapterNav(newArticle, newTrack, filename);
-      initSyntaxAndCopy();
-      if (typeof attachGlossaryTooltips === "function") {
-        attachGlossaryTooltips();
-      }
-
-      // 8. Scroll position
-      if (hash) {
-        const targetEl = document.querySelector(hash);
-        if (targetEl) targetEl.scrollIntoView({ behavior: "smooth" });
-      } else {
-        window.scrollTo(0, 0);
-      }
-
-      // 9. Fade back in
-      requestAnimationFrame(() => {
+  // Mobile Drawer & Page Lifecycle Management (Native, 100% reliable navigation)
+  function initMobileDrawerEvents() {
+    window.addEventListener("pageshow", () => {
+      document.body.classList.remove("mob-tree-open");
+      const mainEl = document.querySelector(".se-main");
+      if (mainEl) {
         mainEl.style.opacity = "1";
-        mainEl.style.transform = "translateY(0)";
-      });
+        mainEl.style.transform = "none";
+      }
+    });
 
-      // 10. Update last read
-      try {
-        const h1El = newArticle.querySelector("h1");
-        const docTitle = (currentTopic && currentTopic.title) || (h1El && h1El.textContent.trim()) || filename;
-        localStorage.setItem("sdet_last_read", JSON.stringify({
-          file: filename,
-          title: docTitle,
-          track: newTrack
-        }));
-      } catch (e) {}
-
-    } catch (err) {
-      console.warn("Smooth transition fallback:", err);
-      location.href = targetFile + hash;
-    }
+    // Close mobile drawer when pressing Escape
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape" && document.body.classList.contains("mob-tree-open")) {
+        document.body.classList.remove("mob-tree-open");
+      }
+    });
   }
 
   // Minimalist Floating Scroll-Dot Indicator Across All Pages (No lines/rails; fades when idle)

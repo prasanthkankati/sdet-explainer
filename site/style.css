@@ -640,52 +640,65 @@ body.home-page .fixed-theme-toggle { display: none !important; }
   position: sticky;
   top: 0;
   z-index: 85;
-  display: grid;
-  grid-template-columns: 80px 1fr 80px;
+  display: flex;
   align-items: center;
-  justify-items: center;
+  justify-content: space-between;
   height: 48px;
-  padding: 0 20px;
+  padding: 0 16px;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
+  gap: 12px;
 }
 .se-navbar-left {
   display: flex;
   align-items: center;
-  gap: 10px;
-  justify-self: start;
+  gap: 8px;
+  flex-shrink: 0;
 }
-.se-brand-mark-link {
+.se-nav-home-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  background: var(--surface);
   text-decoration: none;
+  transition: all 0.15s ease;
 }
-.se-brand-mark-link:hover {
-  text-decoration: none;
+.se-nav-home-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--surface-hover);
 }
-
 .se-navbar-center {
   display: flex;
   align-items: center;
   justify-content: center;
-  justify-self: center;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.se-navbar-center::-webkit-scrollbar { display: none; }
 .se-navbar-links {
   display: flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
   list-style: none;
   margin: 0;
   padding: 0;
+  white-space: nowrap;
 }
 .se-navbar-right {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  justify-self: end;
+  flex-shrink: 0;
 }
 
 /* Track Chips in Reading Header (Uniform with homepage filled chips & zero cornering) */
@@ -1471,14 +1484,23 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
     justify-content: space-between;
     padding: 0 8px;
     gap: 8px;
+    height: 46px;
+  }
+  .se-navbar-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
   }
   .se-navbar-center {
     display: flex !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    max-width: calc(100vw - 110px);
-    padding: 0 2px;
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    padding: 0 4px;
   }
   .se-navbar-center::-webkit-scrollbar { display: none; }
   .se-navbar-links {
@@ -1490,7 +1512,7 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
     list-style: none !important;
   }
   .se-navbar-links .se-track-chip {
-    padding: 3px 7px !important;
+    padding: 3px 8px !important;
     font-size: 11px !important;
     min-height: 28px;
   }
