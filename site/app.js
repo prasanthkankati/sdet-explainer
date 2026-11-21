@@ -41,12 +41,24 @@
     `;
   }
 
+  const updateMetaThemeColor = (theme) => {
+    const color = theme === "light" ? "#ffffff" : "#09090b";
+    let meta = document.querySelector('meta[name="theme-color"]:not([media])');
+    if (!meta) {
+      meta = document.createElement("meta");
+      meta.name = "theme-color";
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute("content", color);
+  };
+
   const setTheme = t => {
     root.setAttribute("data-theme", t);
     document.querySelectorAll(".theme-toggle").forEach(b => {
       b.title = t === "light" ? "Switch to Dark Mode (Alt+L)" : "Switch to Light Mode (Alt+L)";
     });
     localStorage.setItem("theme", t);
+    updateMetaThemeColor(t);
   };
   const toggleTheme = () => setTheme(root.getAttribute("data-theme") === "light" ? "dark" : "light");
 
@@ -89,6 +101,28 @@
     if (!inTopicsDir || typeof TOPICS === "undefined") return;
     const article = document.querySelector("article");
     if (!article) return;
+
+    // Ensure edge-to-edge viewport and status-bar tags exist on every topic page
+    let vp = document.querySelector('meta[name="viewport"]');
+    if (!vp) {
+      vp = document.createElement("meta");
+      vp.name = "viewport";
+      document.head.appendChild(vp);
+    }
+    vp.setAttribute("content", "width=device-width,initial-scale=1,viewport-fit=cover");
+
+    if (!document.querySelector('meta[name="apple-mobile-web-app-capable"]')) {
+      const cap = document.createElement("meta");
+      cap.name = "apple-mobile-web-app-capable";
+      cap.content = "yes";
+      document.head.appendChild(cap);
+    }
+    if (!document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')) {
+      const bar = document.createElement("meta");
+      bar.name = "apple-mobile-web-app-status-bar-style";
+      bar.content = "black-translucent";
+      document.head.appendChild(bar);
+    }
 
     document.body.classList.add("in-chapter", "selenium-doc-page");
 
