@@ -6,6 +6,7 @@ const TRACKS = [
   { id: "Manual",     label: "Manual" },
   { id: "Java",       label: "Java" },
   { id: "Selenium",   label: "Selenium" },
+  { id: "TestNG",     label: "TestNG" },
   { id: "TypeScript", label: "TypeScript" },
   { id: "Playwright", label: "Playwright" },
   { id: "Interview",  label: "Interview" }
@@ -810,7 +811,119 @@ const TOPICS = [
     date: "2026-11-15"
   },
 
-  // ==================== TRACK 4: TYPESCRIPT / JS (TS1 - TS3) ====================
+  // ==================== TRACK 4: TESTNG (T1 - T5) ====================
+  {
+    track: "TestNG",
+    section: "T1. Architecture & Lifecycle",
+    order: 1,
+    title: "1.1 Overview, Test Runner & Full 10-Annotation Lifecycle",
+    file: "testng-overview-lifecycle.html",
+    summary: "TestNG architecture, testng.xml runner hierarchy, the 10 core annotations execution order, and ThreadLocal WebDriver safety.",
+    keywords: "TestNG, suite, test, class, method, @BeforeSuite, @AfterSuite, @BeforeTest, @BeforeClass, @BeforeMethod, lifecycle, ThreadLocal",
+    status: "done",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T1. Architecture & Lifecycle",
+    order: 2,
+    title: "1.2 testng.xml Suite Configuration & Package Scanning",
+    file: "",
+    summary: "XML suite file syntax, suite/test tags, parameter passing, include/exclude groups, packages, and verbose levels.",
+    keywords: "testng.xml, suite, test, packages, classes, methods, include, exclude, verbose",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T2. Assertions & Validation",
+    order: 3,
+    title: "2.1 Hard Assertions vs Soft Assertions (SoftAssert)",
+    file: "",
+    summary: "Assert.assertEquals vs SoftAssert, assertAll(), execution termination semantics, and multi-field form validation.",
+    keywords: "Assert, SoftAssert, assertAll, Hard Assert, assertions, AssertionError",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T2. Assertions & Validation",
+    order: 4,
+    title: "2.2 Priority, dependsOnMethods & enabled Attribute",
+    file: "",
+    summary: "Test ordering with priority, conditional execution with dependsOnMethods and dependsOnGroups, and disabling tests with enabled=false.",
+    keywords: "priority, dependsOnMethods, dependsOnGroups, enabled, ignoreMissingDependencies",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T3. Data-Driven Testing",
+    order: 5,
+    title: "3.1 @DataProvider & Multi-Dimensional Object Arrays",
+    file: "",
+    summary: "Parameterized execution via @DataProvider, Object[][], Method reflection routing, and parallel data streaming.",
+    keywords: "@DataProvider, Object[][], Iterator, Method, parallel, indices, name",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T3. Data-Driven Testing",
+    order: 6,
+    title: "3.2 @Parameters & XML Suite Injection",
+    file: "",
+    summary: "Injecting browser types, URLs, and environments via @Parameters and <parameter> tags in testng.xml with @Optional fallbacks.",
+    keywords: "@Parameters, parameter, @Optional, cross browser, testng.xml parameter injection",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T4. Parallel Execution & Concurrency",
+    order: 7,
+    title: "4.1 Parallel Execution: methods, tests & classes",
+    file: "",
+    summary: "Multi-threaded test execution in testng.xml, thread-count, data-provider-thread-count, and thread safety with ThreadLocal.",
+    keywords: "parallel, thread-count, methods, tests, classes, thread safety, race conditions, ThreadLocal",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T4. Parallel Execution & Concurrency",
+    order: 8,
+    title: "4.2 Test Groups & Regression / Smoke Filtering",
+    file: "",
+    summary: "Categorizing tests with groups, meta-groups, regular expression group matching, and command-line execution via Maven Surefire.",
+    keywords: "groups, smoke, regression, run, include, exclude, surefire, meta-groups",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T5. Listeners, Retry & Reporting",
+    order: 9,
+    title: "5.1 Listeners Architecture (ITestListener & ISuiteListener)",
+    file: "",
+    summary: "Interception with ITestListener, ISuiteListener, IInvokedMethodListener, screenshot on failure, and HTML report hooks.",
+    keywords: "ITestListener, ISuiteListener, IInvokedMethodListener, onTestFailure, screenshot, ExtentReports, Allure",
+    status: "planned",
+    date: "2026-11-21"
+  },
+  {
+    track: "TestNG",
+    section: "T5. Listeners, Retry & Reporting",
+    order: 10,
+    title: "5.2 IRetryAnalyzer & Automatic Flaky Test Retries",
+    file: "",
+    summary: "Implementing IRetryAnalyzer, max retry count limits, IAnnotationTransformer dynamic injection, and handling test flakiness in CI/CD.",
+    keywords: "IRetryAnalyzer, retry, IAnnotationTransformer, flaky tests, maxRetryCount, CI/CD",
+    status: "planned",
+    date: "2026-11-21"
+  },
+
+  // ==================== TRACK 5: TYPESCRIPT / JS (TS1 - TS3) ====================
   {
     track: "TypeScript",
     section: "TS1. JavaScript Core & Asynchronous Event Loop",

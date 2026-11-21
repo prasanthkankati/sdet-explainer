@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1.1 TestNG Overview, Test Runner &amp; Full 10-Annotation Lifecycle &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag TestNG">TestNG</span>
+  <h1>1.1 TestNG Overview, Test Runner &amp; Lifecycle</h1>
+  <div class="se-lead">Core architecture of TestNG 7.x, the complete 10-annotation execution hierarchy, XML runner anatomy, and thread-safe test isolation.</div>
+
+  <p>TestNG ("Test Next Generation") is an enterprise Java test automation framework inspired by JUnit and NUnit, specifically engineered to support complex integration, end-to-end browser automation, and data-driven testing. While unit testing frameworks traditionally lack fine-grained lifecycle scoping, TestNG provides a 5-tier hierarchical runner architecture configured via <code>testng.xml</code>, built-in parameterization, parallel test execution down to the method level, and lifecycle interception hooks via listener interfaces.</p>
+
+  <section id="testng-architecture">
+    <h2>1. TestNG Framework Architecture</h2>
+    <p>In automated testing architectures, Selenium WebDriver acts purely as a browser automation API—it provides no test runner, assertion library, or lifecycle orchestration. TestNG acts as the execution backbone and control plane that wraps WebDriver, managing test suites, instantiation order, parallel worker threads, and failure reporting.</p>
+
+    <table>
+      <thead>
+        <tr><th>Layer</th><th>Responsibility</th><th>Key Components</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Control Plane (Runner)</b></td><td>Suite definition, thread pools, filtering, group execution</td><td><code>testng.xml</code>, Maven Surefire Plugin, CLI Runner</td></tr>
+        <tr><td><b>Lifecycle Orchestration</b></td><td>Setup/teardown scoping across suites, tests, classes, and methods</td><td>10 Core Lifecycle Annotations (<code>@Before*</code> / <code>@After*</code>)</td></tr>
+        <tr><td><b>Data Ingestion</b></td><td>Parameterized test data streams</td><td><code>@DataProvider</code>, <code>@Parameters</code></td></tr>
+        <tr><td><b>Validation &amp; State</b></td><td>Pass/fail assertion evaluation and soft assertion batches</td><td><code>org.testng.Assert</code>, <code>org.testng.asserts.SoftAssert</code></td></tr>
+        <tr><td><b>Interception &amp; Reporting</b></td><td>Event listening, automatic retry of flaky tests, reporting hooks</td><td><code>ITestListener</code>, <code>ISuiteListener</code>, <code>IRetryAnalyzer</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="xml-hierarchy">
+    <h2>2. The XML Runner Hierarchy</h2>
+    <p>A TestNG execution is strictly structured by an XML document conforming to the TestNG DTD. The hierarchical nesting directly determines thread scoping, parameter inheritance, and execution boundaries:</p>
+
+    <pre><code>&lt;!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd"&gt;
+&lt;suite name="RegressionSuite" parallel="classes" thread-count="4" verbose="2"&gt;
+  &lt;parameter name="environment" value="staging" /&gt;
+
+  &lt;listeners&gt;
+    &lt;listener class-name="com.sdet.listeners.ExecutionListener" /&gt;
+  &lt;/listeners&gt;
+
+  &lt;test name="ChromeSmokeTests"&gt;
+    &lt;parameter name="browser" value="chrome" /&gt;
+    &lt;classes&gt;
+      &lt;class name="com.sdet.tests.LoginTest"&gt;
+        &lt;methods&gt;
+          &lt;include name="validLoginTest" /&gt;
+          &lt;exclude name="legacyOAuthTest" /&gt;
+        &lt;/methods&gt;
+      &lt;/class&gt;
+      &lt;class name="com.sdet.tests.DashboardTest" /&gt;
+    &lt;/classes&gt;
+  &lt;/test&gt;
+&lt;/suite&gt;</code></pre>
+
+    <ul>
+      <li><b><code>&lt;suite&gt;</code></b>: The root container. One XML file represents one suite. Configures parallel thread counts, global listeners, and suite-level parameters.</li>
+      <li><b><code>&lt;test&gt;</code></b>: Logical test tag representing a functional module or browser run. (Note: A TestNG <code>&lt;test&gt;</code> tag is <i>not</i> a single <code>@Test</code> method).</li>
+      <li><b><code>&lt;classes&gt;</code></b>: Container holding all test classes targeted for execution.</li>
+      <li><b><code>&lt;class&gt;</code></b>: Individual compiled Java class containing <code>@Test</code> and configuration methods.</li>
+      <li><b><code>&lt;methods&gt;</code></b>: Optional filter to selectively <code>&lt;include&gt;</code> or <code>&lt;exclude&gt;</code> specific test methods.</li>
+    </ul>
+  </section>
+
+  <section id="ten-annotation-lifecycle">
+    <h2>3. The Complete 10-Annotation Lifecycle</h2>
+    <p>TestNG executes annotations in a rigorous deterministic hierarchy from the broadest global scope down to the individual test method invocation:</p>
+
+    <pre><code>[1]  @BeforeSuite       — Runs ONCE before all tests in the XML suite
+      [2]  @BeforeTest        — Runs ONCE before any test class inside a &lt;test&gt; tag
+            [3]  @BeforeGroups      — Runs before specific group tests execute
+                  [4]  @BeforeClass       — Runs ONCE before the first method in current class
+                        [5]  @BeforeMethod      — Runs BEFORE EACH @Test method
+                              [*]  @Test              — The actual test payload
+                        [6]  @AfterMethod       — Runs AFTER EACH @Test method
+                  [7]  @AfterClass        — Runs ONCE after all methods in current class
+            [8]  @AfterGroups       — Runs after specific group tests complete
+      [9]  @AfterTest         — Runs ONCE after all classes in a &lt;test&gt; tag complete
+[10] @AfterSuite       — Runs ONCE after all tests in the XML suite complete</code></pre>
+
+    <h3>Detailed Scoping Guide</h3>
+    <ol>
+      <li><b><code>@BeforeSuite</code> / <code>@AfterSuite</code></b>: Global initialization. Used to spin up Docker containers, initialize Extent/Allure reporting instances, and delete old screenshot directories.</li>
+      <li><b><code>@BeforeTest</code> / <code>@AfterTest</code></b>: Scoped to the <code>&lt;test&gt;</code> tag in <code>testng.xml</code>. Often used to parse environment-level configurations or initialize module-level test databases.</li>
+      <li><b><code>@BeforeGroups</code> / <code>@AfterGroups</code></b>: Executes before/after the first and last test method belonging to specified groups (e.g., <code>groups = {"database", "smoke"}</code>).</li>
+      <li><b><code>@BeforeClass</code> / <code>@AfterClass</code></b>: Executes once per Java class instantiation. Used to launch heavy browser sessions when reusing a single driver across multiple class tests.</li>
+      <li><b><code>@BeforeMethod</code> / <code>@AfterMethod</code></b>: Executes immediately prior to and after every single <code>@Test</code> method. Standard location for WebDriver initialization (for isolated browser instances) and cleanup (<code>driver.quit()</code>).</li>
+    </ol>
+  </section>
+
+  <section id="code-implementation">
+    <h2>4. Production Thread-Safe TestNG Base Pattern</h2>
+    <p>In modern CI/CD pipelines where tests run concurrently across multiple CPU threads, using raw static <code>WebDriver</code> instances causes catastrophic race conditions. TestNG lifecycle methods must combine with <code>ThreadLocal</code> to guarantee thread safety:</p>
+
+    <pre><code>package com.sdet.core;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.testng.annotations.*;
+import java.time.Duration;
+
+public abstract class BaseTest {
+    // ThreadLocal container guarantees each worker thread has an isolated WebDriver instance
+    private static final ThreadLocal&lt;WebDriver&gt; driverThreadLocal = new ThreadLocal&lt;&gt;();
+
+    public static WebDriver getDriver() {
+        return driverThreadLocal.get();
+    }
+
+    @BeforeSuite(alwaysRun = true)
+    public void setupSuite() {
+        System.out.println("[SUITE INIT] Initializing Test Run &amp; Global Services");
+    }
+
+    @Parameters({"browser"})
+    @BeforeMethod(alwaysRun = true)
+    public void setUp(@Optional("chrome") String browser) {
+        WebDriver driver;
+        if (browser.equalsIgnoreCase("firefox")) {
+            driver = new FirefoxDriver();
+        } else {
+            driver = new ChromeDriver();
+        }
+
+        driver.manage().window().maximize();
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+        driverThreadLocal.set(driver);
+    }
+
+    @AfterMethod(alwaysRun = true)
+    public void tearDown() {
+        WebDriver driver = driverThreadLocal.get();
+        if (driver != null) {
+            driver.quit();
+            driverThreadLocal.remove(); // Prevent memory leaks in Jenkins thread pools
+        }
+    }
+
+    @AfterSuite(alwaysRun = true)
+    public void tearDownSuite() {
+        System.out.println("[SUITE TEARDOWN] Flushing Reports &amp; Cleaning Resources");
+    }
+}</code></pre>
+  </section>
+
+  <section id="interview-qa">
+    <h2>5. Senior SDET Interview Q&amp;A</h2>
+    <ol>
+      <li>
+        <b>What is the exact execution hierarchy between <code>@BeforeTest</code> and <code>@BeforeClass</code>?</b><br>
+        <code>@BeforeTest</code> runs <i>before</i> <code>@BeforeClass</code>. <code>@BeforeTest</code> executes once per <code>&lt;test&gt;</code> tag defined in <code>testng.xml</code> before any class inside that tag is loaded. <code>@BeforeClass</code> executes once before the first method of a specific Java class.
+      </li>
+      <li>
+        <b>What does <code>alwaysRun = true</code> do on configuration methods?</b><br>
+        By default, if an earlier configuration method (like <code>@BeforeClass</code>) fails, TestNG skips all subsequent configuration methods and test methods. Specifying <code>@AfterMethod(alwaysRun = true)</code> guarantees cleanup logic (such as <code>driver.quit()</code>) runs even if the test method or setup failed, preventing orphaned browser processes.
+      </li>
+      <li>
+        <b>Why should you avoid <code>priority</code> in enterprise test automation suites?</b><br>
+        Using <code>priority</code> couples test execution order, turning tests into dependent integration flows rather than atomic, independent units. Prioritized tests are difficult to run reliably in parallel because failures in earlier priorities can cascade. Prefer atomic tests seeded via APIs, and use <code>dependsOnMethods</code> only when an absolute hard prerequisite exists.
+      </li>
+      <li>
+        <b>How does TestNG handle multi-threaded parallel execution?</b><br>
+        Via the <code>parallel</code> attribute in <code>testng.xml</code>, which accepts <code>methods</code>, <code>classes</code>, or <code>tests</code>, paired with <code>thread-count="N"</code>. When set to <code>classes</code>, TestNG executes up to N test classes simultaneously using a thread pool.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

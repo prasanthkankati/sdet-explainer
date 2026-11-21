@@ -121,6 +121,7 @@
       Manual: { badge: "MANUAL QA", pill: "ISTQB + AGILE" },
       Java: { badge: "JAVA CORE", pill: "LANG: JAVA 21" },
       Selenium: { badge: "SELENIUM DOCS", pill: "SELENIUM 4 · JAVA" },
+      TestNG: { badge: "TESTNG AUTOMATION", pill: "FRAMEWORK: TESTNG 7.10" },
       TypeScript: { badge: "TS / JS", pill: "LANG: TYPESCRIPT" },
       Playwright: { badge: "PLAYWRIGHT", pill: "PLAYWRIGHT · TS" },
       Interview: { badge: "INTERVIEW", pill: "SDET Q&A" }
@@ -136,7 +137,7 @@
       document.body.insertBefore(navbar, document.body.firstChild);
     }
 
-    const navTracks = ["Manual", "Java", "Selenium", "TypeScript", "Playwright", "Interview"];
+    const navTracks = ["Manual", "Java", "Selenium", "TestNG", "TypeScript", "Playwright", "Interview"];
     navbar.innerHTML = `
       <div class="se-navbar-left">
         <button class="se-mob-tree-btn" type="button" id="se-mob-tree-btn" aria-label="Toggle Documentation Tree" title="Toggle Documentation Tree">&#9776;</button>
@@ -247,7 +248,12 @@
     });
 
     const doneCount = trackTopics.filter(t => t.file).length;
-    let treeHtml = `<div class="se-sidebar-hdr"><span>${esc(targetTrack)} DocTree (${doneCount}/${trackTopics.length})</span><button type="button" class="se-sidebar-close" id="se-sidebar-close-btn">CLOSE &times;</button></div><ul class="se-tree">`;
+    const navTracks = ["Manual", "Java", "Selenium", "TestNG", "TypeScript", "Playwright", "Interview"];
+    const trackPillsHtml = `<div class="se-sidebar-track-selector" aria-label="Switch Track">` +
+      navTracks.map(tr => `<a href="${firstFileForTrack(tr)}" class="se-side-track-pill ${tr === targetTrack ? "active" : ""}" data-track="${tr}">${tr === "TypeScript" ? "TS / JS" : tr}</a>`).join("") +
+      `</div>`;
+
+    let treeHtml = `<div class="se-sidebar-hdr"><span>${esc(targetTrack)} DocTree (${doneCount}/${trackTopics.length})</span><button type="button" class="se-sidebar-close" id="se-sidebar-close-btn" aria-label="Close Navigation Drawer">&times;</button></div>${trackPillsHtml}<ul class="se-tree">`;
     secGroups.forEach((items, secName) => {
       items.sort((a, b) => (a.order || 99) - (b.order || 99));
       treeHtml += `<li><span class="se-sec-label">${esc(secName)}</span><ul>`;
@@ -365,12 +371,14 @@
       const [cleanHref, hash] = href.split("#");
       if (cleanHref.endsWith(".html")) {
         e.preventDefault();
+        document.body.classList.remove("mob-tree-open");
         loadTopicContent(cleanHref, true, hash ? "#" + hash : "");
       }
     });
   }
 
   async function loadTopicContent(targetFile, pushState = true, hash = "") {
+    document.body.classList.remove("mob-tree-open");
     const filename = targetFile.split("/").pop();
     const layout = document.querySelector(".se-layout");
     const mainEl = document.querySelector(".se-main");
@@ -407,7 +415,8 @@
       const rawTag = tagEl ? tagEl.textContent.replace(/[\[\]]/g, "").trim() : "";
       const currentTopic = (typeof TOPICS !== "undefined") ? TOPICS.find(t => t.file === filename) : null;
       const newTrack = (currentTopic && currentTopic.track) || rawTag ||
-        (filename.startsWith("selenium-") ? "Selenium" :
+        (filename.startsWith("testng-") ? "TestNG" :
+         filename.startsWith("selenium-") ? "Selenium" :
          filename.startsWith("java-") ? "Java" :
          filename.startsWith("manual-") ? "Manual" :
          filename.startsWith("interview-") ? "Interview" : "Selenium");
