@@ -1613,7 +1613,7 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
     min-height: 100vh;
     min-height: 100dvh;
     height: auto !important;
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: calc(36px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: space-between !important; /* Brand at top, tracks in center, actions at bottom */
@@ -1621,8 +1621,9 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
     box-sizing: border-box !important;
   }
   .home-top-bar {
-    height: 38px !important;
+    height: 42px !important;
     padding: 0 !important;
+    margin-top: 14px !important;
     margin-bottom: 0 !important;
     flex-shrink: 0 !important;
     display: flex !important;
@@ -1693,7 +1694,7 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
 
 @media (max-width: 440px) {
   .home-wrap {
-    padding: calc(14px + env(safe-area-inset-top, 0px)) 12px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+    padding: calc(36px + env(safe-area-inset-top, 0px)) 12px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
   }
   .home-brand-name {
     font-size: 0.95rem !important;
