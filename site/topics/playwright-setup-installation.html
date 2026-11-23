@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1.1 Setup for Playwright Testing (Node.js, npm init, Config &amp; First Test) &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css?v=3.9.5">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag Playwright">Playwright</span>
+  <h1>1.1 Setup for Playwright Testing (Node.js, npm init, Config &amp; First Test)</h1>
+  <div class="se-lead">Complete end-to-end installation walkthrough: Node.js engine verification, scaffolding via npm init playwright@latest, complete playwright.config.ts architecture, dedicated browser engine binaries, your first TypeScript test spec, CLI execution, interactive UI Mode, and CI/CD configuration.</div>
+
+  <p>Playwright by Microsoft is an enterprise-grade test automation library designed for modern web applications. Unlike traditional HTTP-polling WebDriver implementations, Playwright operates over a persistent, bi-directional WebSocket connection using the Chrome DevTools Protocol (CDP) for Chromium and equivalent internal debugging protocols for Firefox and WebKit. It ships with out-of-the-box auto-waiting, parallel isolated browser contexts, built-in network interception, web-first auto-retrying assertions, and a dedicated test runner (<code>@playwright/test</code>).</p>
+
+  <section id="project-structure">
+    <h2>1. Real-Time Playwright Enterprise Framework Architecture</h2>
+    <p>In modern enterprise test automation, Playwright with TypeScript is structured to cleanly separate test configuration, page models, test specs, custom fixtures, test data, and CI/CD pipelines:</p>
+
+    <pre><code>playwright-e2e-framework/
+├── package.json                         # Project dependencies, scripts (test, test:ui, report)
+├── tsconfig.json                        # TypeScript compiler options (target, module, paths)
+├── playwright.config.ts                 # 📍 Core runner control plane (workers, projects, retries, reporter)
+├── .github/
+│   └── workflows/
+│       └── playwright.yml               # Automated CI workflow on push / PR
+├── tests/
+│   ├── auth/
+│   │   └── login.spec.ts                # 📍 Chapter 1.1: Functional login spec with assertions
+│   ├── checkout/
+│   │   └── order-placement.spec.ts      # Multi-step checkout flow
+│   └── api/
+│       └── user-service.spec.ts         # Direct APIRequestContext integration tests
+├── pages/
+│   ├── base.page.ts                     # Common page actions, URL verification
+│   └── login.page.ts                    # Page Object Model with Locator members
+├── fixtures/
+│   └── test-fixtures.ts                 # Custom test.extend() for dependency injection
+├── test-data/
+│   └── staging-users.json               # Environment-specific test payloads
+└── playwright-report/                   # Auto-generated interactive HTML report with traces</code></pre>
+
+    <p><b>How execution flows through this structure:</b></p>
+    <ol>
+      <li><b>CLI / CI Invocation:</b> Developer or CI executes <code>npx playwright test</code>.</li>
+      <li><b>Control Plane (<code>playwright.config.ts</code>):</b> Playwright loads projects (Chromium, Firefox, WebKit), spins up worker processes based on CPU cores, and applies global timeout and reporter settings.</li>
+      <li><b>Browser &amp; Context Allocation:</b> Each worker launches a single browser process and creates an isolated, zero-overhead <code>BrowserContext</code> (incognito session) per test method.</li>
+      <li><b>Test Payload Execution (<code>tests/</code>):</b> Tests execute asynchronously using TypeScript <code>async/await</code>, interacting with web elements via auto-waiting <code>Locator</code> objects.</li>
+      <li><b>Failure Interception &amp; Trace Capture:</b> If an assertion fails, Playwright's trace recorder captures DOM snapshots, action logs, network waterfalls, and console outputs for time-travel debugging.</li>
+      <li><b>Report Generation:</b> The runner writes results to <code>playwright-report/index.html</code> and exits with code <code>0</code> (success) or <code>1</code> (failure).</li>
+    </ol>
+  </section>
+
+  <section id="prerequisites">
+    <h2>2. System Prerequisites &amp; Node.js Verification</h2>
+    <p>Playwright requires <b>Node.js LTS (Long Term Support)</b> version 18.x or 20.x or higher. Verify your local environment before scaffolding:</p>
+
+    <pre><code class="bash"># Check Node.js runtime version (must be >= 18.0.0)
+node -v
+# Example output: v20.18.0
+
+# Check npm package manager version
+npm -v
+# Example output: 10.8.2</code></pre>
+
+    <p>If Node.js is not installed, install it via the official installer (<a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>), <code>nvm</code> (macOS/Linux), or <code>nvm-windows</code> / <code>winget install OpenJS.NodeJS.LTS</code> (Windows).</p>
+  </section>
+
+  <section id="initialization">
+    <h2>3. Scaffolding Playwright via npm init playwright</h2>
+    <p>Playwright provides an official, zero-configuration interactive scaffolding CLI tool. Run the initialization command in your target project directory:</p>
+
+    <pre><code class="bash"># Initialize a new Playwright project with latest official template
+npm init playwright@latest</code></pre>
+
+    <p>The CLI prompts you through 5 critical project configuration choices:</p>
+
+    <table>
+      <thead>
+        <tr><th>CLI Prompt</th><th>Recommended Option</th><th>Engineering Rationale</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>TypeScript or JavaScript?</b></td><td><code>TypeScript</code></td><td>Provides compile-time type safety, IDE autocompletion for <code>Locator</code> and <code>Page</code> APIs, and refactoring confidence.</td></tr>
+        <tr><td><b>Where to put end-to-end tests?</b></td><td><code>tests</code></td><td>Standard directory convention recognized automatically by <code>playwright.config.ts</code>.</td></tr>
+        <tr><td><b>Add a GitHub Actions workflow?</b></td><td><code>true (Yes)</code></td><td>Generates <code>.github/workflows/playwright.yml</code> with cross-browser matrix execution and artifact archiving.</td></tr>
+        <tr><td><b>Install Playwright browsers?</b></td><td><code>true (Yes)</code></td><td>Downloads the exact patched Chromium, Firefox, and WebKit browser builds matching the installed Playwright version.</td></tr>
+        <tr><td><b>Install Linux dependencies?</b></td><td><code>true (Yes)</code></td><td>(Linux/WSL only) Installs required OS-level graphic and font libraries (e.g., <code>libasound2</code>, <code>libgbm1</code>).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="config-anatomy">
+    <h2>4. Deep Anatomy of playwright.config.ts</h2>
+    <p>The <code>playwright.config.ts</code> file is the master configuration file governing concurrency, timeouts, reporters, cross-browser projects, and artifact recording. Below is a production-grade enterprise configuration with explanatory comments:</p>
+
+    <pre><code>import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  // Directory where test spec files are discovered
+  testDir: "./tests",
+
+  // Global test timeout per single test (30 seconds)
+  timeout: 30 * 1000,
+
+  // Assertion expect() auto-retry timeout (5 seconds)
+  expect: {
+    timeout: 5000,
+  },
+
+  // Run all tests in all spec files in parallel
+  fullyParallel: true,
+
+  // Fail the build on CI if test.only is accidentally committed
+  forbidOnly: !!process.env.CI,
+
+  // Retry failed tests on CI to handle environmental network flakiness
+  retries: process.env.CI ? 2 : 0,
+
+  // Parallel worker processes: 1 on CI (predictable resources), undefined locally (auto-scales to CPU cores)
+  workers: process.env.CI ? 1 : undefined,
+
+  // Test reporters: Terminal list output + Full HTML artifact report
+  reporter: [
+    ["list"],
+    ["html", { open: "never", outputFolder: "playwright-report" }]
+  ],
+
+  // Shared configuration options across all browser projects
+  use: {
+    // Base application URL used for relative navigations like page.goto('/login')
+    baseURL: process.env.BASE_URL || "https://practicetestautomation.com",
+
+    // Record trace on first retry for time-travel debugging
+    trace: "on-first-retry",
+
+    // Capture screenshot only when a test fails
+    screenshot: "only-on-failure",
+
+    // Record video only for failing tests to save disk space
+    video: "retain-on-failure",
+
+    // Run tests in headless mode (no visual UI)
+    headless: true,
+
+    // Browser viewport dimensions
+    viewport: { width: 1280, height: 720 },
+
+    // Ignore HTTPS certificate errors in staging / test environments
+    ignoreHTTPSErrors: true,
+  },
+
+  // Matrix of target browser projects
+  projects: [
+    {
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
+    },
+    {
+      name: "firefox",
+      use: { ...devices["Desktop Firefox"] },
+    },
+    {
+      name: "webkit",
+      use: { ...devices["Desktop Safari"] },
+    },
+    // Optional Mobile Viewport Emulation
+    {
+      name: "Mobile Chrome",
+      use: { ...devices["Pixel 7"] },
+    },
+  ],
+});</code></pre>
+  </section>
+
+  <section id="browsers">
+    <h2>5. Dedicated Browser Binaries vs System Browsers</h2>
+    <p>Unlike Selenium, which searches for and launches your locally installed Google Chrome or Mozilla Firefox, Playwright downloads and manages <b>custom, reproducible open-source browser builds</b> (Chromium, Firefox, and WebKit). This guarantees deterministic behavior across development workstations and CI servers.</p>
+
+    <pre><code class="bash"># Manually install all 3 browser binaries (Chromium, Firefox, WebKit)
+npx playwright install
+
+# Install only Chromium to save disk space and network bandwidth
+npx playwright install chromium
+
+# Install browsers AND missing OS system dependencies (mandatory on Linux / Docker / CI)
+npx playwright install --with-deps</code></pre>
+
+    <p><b>Where Playwright caches browser binaries on your machine:</b></p>
+    <ul>
+      <li><b>Windows:</b> <code>%USERPROFILE%\AppData\Local\ms-playwright</code></li>
+      <li><b>macOS:</b> <code>~/Library/Caches/ms-playwright</code></li>
+      <li><b>Linux:</b> <code>~/.cache/ms-playwright</code></li>
+    </ul>
+
+    <p>Because browser binaries are cached in the user's home directory rather than <code>node_modules</code>, multiple Playwright projects on the same machine share the same browser binaries without redundant downloads.</p>
+  </section>
+
+  <section id="first-test">
+    <h2>6. Writing Your First Playwright Test Spec</h2>
+    <p>Create a test spec file at <code>tests/auth-login.spec.ts</code>. Playwright tests import <code>test</code> and <code>expect</code> directly from <code>@playwright/test</code>:</p>
+
+    <pre><code>import { test, expect } from "@playwright/test";
+
+test.describe("Authentication - Customer Portal", () => {
+
+  test.beforeEach(async ({ page }) => {
+    // Navigates using baseURL configured in playwright.config.ts
+    await page.goto("/practice-test-login/");
+  });
+
+  test("should successfully log in with valid credentials", async ({ page }) => {
+    // 1. Verify page title with web-first auto-retrying assertion
+    await expect(page).toHaveTitle(/Test Login/);
+
+    // 2. Locate elements using resilient user-facing locators
+    const usernameInput = page.getByLabel("Username");
+    const passwordInput = page.getByLabel("Password");
+    const submitButton  = page.getByRole("button", { name: "Submit" });
+
+    // 3. Fill in credentials (Playwright automatically waits for visibility and readiness)
+    await usernameInput.fill("student");
+    await passwordInput.fill("Password123");
+
+    // 4. Click Submit
+    await submitButton.click();
+
+    // 5. Validate successful URL redirection
+    await expect(page).toHaveURL(/.*logged-in-successfully/);
+
+    // 6. Validate success message is visible and contains expected text
+    const successBanner = page.locator(".post-title");
+    await expect(successBanner).toBeVisible();
+    await expect(successBanner).toContainText("Logged In Successfully");
+
+    // 7. Verify Log Out button is now accessible
+    const logoutBtn = page.getByRole("link", { name: "Log out" });
+    await expect(logoutBtn).toBeVisible();
+  });
+
+  test("should display error message on invalid password", async ({ page }) => {
+    await page.getByLabel("Username").fill("student");
+    await page.getByLabel("Password").fill("IncorrectPassword");
+    await page.getByRole("button", { name: "Submit" }).click();
+
+    const errorMessage = page.locator("#error");
+    await expect(errorMessage).toBeVisible();
+    await expect(errorMessage).toHaveText("Your password is invalid!");
+  });
+
+});</code></pre>
+  </section>
+
+  <section id="execution-modes">
+    <h2>7. Test Execution Modes &amp; CLI Commands</h2>
+    <p>Playwright provides several execution modes tailored for developer feedback loops, debugging, and headless CI runs:</p>
+
+    <pre><code class="bash"># 1. Run all tests across all configured projects in headless mode
+npx playwright test
+
+# 2. Run tests on a single browser project (e.g., Chromium only)
+npx playwright test --project=chromium
+
+# 3. Run a specific test spec file
+npx playwright test tests/auth-login.spec.ts
+
+# 4. Run tests with visible browser window (Headed Mode)
+npx playwright test --headed
+
+# 5. Launch interactive UI Mode (Time-travel, locator playground, live watch)
+npx playwright test --ui
+
+# 6. Launch Playwright Inspector for step-by-step interactive debugging
+npx playwright test --debug
+
+# 7. Open the generated HTML test report in browser
+npx playwright show-report</code></pre>
+
+    <p><b>Interactive UI Mode (<code>--ui</code>):</b> The killer feature of Playwright. It gives developers a graphical runner with instant watch mode, time-travel DOM snapshots before and after every click, network request inspection, and live locator testing without rerunning tests from scratch.</p>
+  </section>
+
+  <section id="vscode-extension">
+    <h2>8. Recommended VS Code Extension Setup</h2>
+    <p>The official <b>Playwright Test for VS Code</b> extension (by Microsoft) integrates directly into the VS Code sidebar:</p>
+    <ul>
+      <li><b>Run &amp; Debug from Gutter:</b> Click the green play button next to any <code>test()</code> block to execute or debug that individual test.</li>
+      <li><b>Pick Locator:</b> Hover over DOM elements in a live browser to automatically generate resilient Playwright locators.</li>
+      <li><b>Record New Tests (Codegen):</b> Click "Record Tests" to interact with your application; Playwright automatically writes clean TypeScript code in real time.</li>
+      <li><b>Show Trace Viewer:</b> Click any failed test in the Test Explorer to immediately open the full visual trace without running CLI commands.</li>
+    </ul>
+  </section>
+
+  <section id="common-mistakes">
+    <h2>9. Critical Traps &amp; Anti-Patterns in Playwright Setup</h2>
+    <ol>
+      <li>
+        <b>Forgetting the <code>await</code> keyword:</b><br>
+        All Playwright actions (<code>page.click()</code>, <code>page.fill()</code>) and web-first assertions (<code>expect(locator).toBeVisible()</code>) return asynchronous Promises. Omitting <code>await</code> causes the test to finish before actions execute, leading to silent race conditions or unhandled promise rejections.
+      </li>
+      <li>
+        <b>Using <code>page.waitForTimeout(5000)</code>:</b><br>
+        Hardcoded sleeps are an anti-pattern. Playwright features built-in auto-waiting for actionability (visible, stable, enabled) and auto-retrying assertions (<code>expect(locator).toBeVisible()</code>). Hardcoded timeouts slow down suites and cause arbitrary CI flakiness.
+      </li>
+      <li>
+        <b>Mixing Jest or Mocha Assertions with Playwright:</b><br>
+        Never use <code>expect(await locator.isVisible()).toBe(true)</code>. That evaluates a one-time snapshot without retrying. Always use Playwright's web-first assertion: <code>await expect(locator).toBeVisible()</code>, which automatically polls until the timeout expires.
+      </li>
+      <li>
+        <b>Missing <code>--with-deps</code> on Linux CI / Docker:</b><br>
+        Running <code>npx playwright install</code> on Ubuntu/Debian installs browser binaries but leaves out OS shared libraries (like font rendering or audio libs), causing headless Chromium to crash on startup. Always run <code>npx playwright install --with-deps</code> in CI environments.
+      </li>
+    </ol>
+  </section>
+
+  <section id="faq">
+    <h2>10. Interview Q&amp;A: Playwright Setup &amp; Architecture</h2>
+    <ol>
+      <li>
+        <b>How does Playwright's connection architecture differ from Selenium WebDriver?</b><br>
+        Selenium WebDriver communicates via HTTP requests over the W3C WebDriver specification, sending individual stateless POST/GET requests for each browser action and polling for state changes. Playwright establishes a single, persistent, bi-directional WebSocket connection via Chrome DevTools Protocol (CDP) or native browser pipes, allowing real-time event streaming and sub-millisecond execution speeds.
+      </li>
+      <li>
+        <b>What is the difference between a Browser, BrowserContext, and Page in Playwright?</b><br>
+        A <b>Browser</b> is the single operating system process (e.g., <code>chromium.exe</code>). A <b>BrowserContext</b> is an isolated incognito session created inside the browser with its own cookies, localStorage, and cache. Creating a context takes ~5-10ms with virtually zero memory overhead. A <b>Page</b> is a single browser tab inside a context. In Playwright, tests share browser processes but run in completely isolated contexts for 100% test independence and blazing-fast parallelism.
+      </li>
+      <li>
+        <b>Why does Playwright download its own browser binaries instead of using Google Chrome?</b><br>
+        To ensure 100% deterministic, reproducible test results across developer workstations and CI servers. Locally installed browsers receive automatic updates that can introduce unexpected regressions or driver mismatches. Playwright pins each library release to exact patched browser revisions built and tested against that version.
+      </li>
+      <li>
+        <b>What is the role of <code>fullyParallel: true</code> in <code>playwright.config.ts</code>?</b><br>
+        By default, Playwright runs tests inside a single spec file sequentially. Setting <code>fullyParallel: true</code> instructs the runner to execute all tests across all files concurrently across available worker processes, dramatically reducing total suite execution time.
+      </li>
+    </ol>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

@@ -958,9 +958,20 @@ const TOPICS = [
   // ==================== TRACK 5: PLAYWRIGHT (P1 - P4) ====================
   {
     track: "Playwright",
-    section: "P1. Architecture, BrowserContext & Auto-Waiting Locators",
+    section: "P1. Installation, Setup & Environment",
     order: 1,
-    title: "1.1 Playwright CDP/WebSocket Architecture vs Selenium W3C HTTP",
+    title: "1.1 Setup for Playwright Testing (Node.js, npm init, Config & First Test)",
+    file: "playwright-setup-installation.html",
+    summary: "Complete environment setup: Node.js prerequisites, npm init playwright@latest CLI walkthrough, playwright.config.ts anatomy, browser engine binaries, your first spec, and CLI/UI execution modes.",
+    keywords: "Playwright setup, install Playwright, npm init playwright, playwright.config.ts, npx playwright test, UI mode, browsers, TypeScript, test runner",
+    status: "done",
+    date: "2026-11-23"
+  },
+  {
+    track: "Playwright",
+    section: "P2. Architecture, BrowserContext & Auto-Waiting Locators",
+    order: 1,
+    title: "2.1 Playwright CDP/WebSocket Architecture vs Selenium W3C HTTP",
     file: "",
     summary: "Persistent bidirectional pipe vs HTTP requests, Browser vs BrowserContext (ms isolation) vs Page, and Locator recipe vs WebElement.",
     keywords: "Playwright architecture, WebSocket, BrowserContext, Page, Locator vs WebElement, strict mode",
@@ -968,9 +979,9 @@ const TOPICS = [
   },
   {
     track: "Playwright",
-    section: "P1. Architecture, BrowserContext & Auto-Waiting Locators",
+    section: "P2. Architecture, BrowserContext & Auto-Waiting Locators",
     order: 2,
-    title: "1.2 User-Facing Locators (getByRole), Chaining & Actionability Checks",
+    title: "2.2 User-Facing Locators (getByRole), Chaining & Actionability Checks",
     file: "",
     summary: "getByRole, getByLabel, getByText, filter({ hasText, has }), and Playwright's automatic visibility/stability/enabled checks.",
     keywords: "getByRole, getByLabel, getByTestId, filter, chaining, auto-waiting, actionability",
@@ -978,9 +989,9 @@ const TOPICS = [
   },
   {
     track: "Playwright",
-    section: "P2. Assertions, Fixtures, Network Mocking & Trace Viewer",
+    section: "P3. Assertions, Fixtures, Network Mocking & Trace Viewer",
     order: 1,
-    title: "2.1 Web-First Assertions, Custom Fixtures (test.extend) & storageState",
+    title: "3.1 Web-First Assertions, Custom Fixtures (test.extend) & storageState",
     file: "",
     summary: "Auto-retrying expect(locator), POM with fixtures, and saving authentication state to bypass login UI.",
     keywords: "web-first assertions, expect, toBeVisible, fixtures, test.extend, storageState",
@@ -988,9 +999,9 @@ const TOPICS = [
   },
   {
     track: "Playwright",
-    section: "P2. Assertions, Fixtures, Network Mocking & Trace Viewer",
+    section: "P3. Assertions, Fixtures, Network Mocking & Trace Viewer",
     order: 2,
-    title: "2.2 API Testing, Network Interception (page.route) & Trace Viewer",
+    title: "3.2 API Testing, Network Interception (page.route) & Trace Viewer",
     file: "",
     summary: "Mocking/modifying API responses with page.route(), APIRequestContext, Trace Viewer time-travel debugging, and CI sharding.",
     keywords: "page.route, network mocking, waitForResponse, Trace Viewer, sharding, playwright.config.ts",

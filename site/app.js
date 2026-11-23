@@ -132,7 +132,9 @@
     const rawTag = tagEl ? tagEl.textContent.replace(/[\[\]]/g, "").trim() : "";
     const currentTrack = (currentTopic && currentTopic.track) ||
       rawTag ||
-      (currentFile.startsWith("selenium-") ? "Selenium" :
+      (currentFile.startsWith("playwright-") ? "Playwright" :
+       currentFile.startsWith("testng-") ? "TestNG" :
+       currentFile.startsWith("selenium-") ? "Selenium" :
        currentFile.startsWith("java-") ? "Java" :
        currentFile.startsWith("manual-") ? "Manual" :
        currentFile.startsWith("interview-") ? "Interview" : "Selenium");

@@ -1558,16 +1558,20 @@ body.mob-tree-open .se-sidebar-backdrop { display: block; }
   table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
 
-/* Sidebar Track Selector for Mobile Drawer & Desktop Drawer */
+/* Sidebar Track Selector (Mobile Drawer only - hidden on Desktop where top navbar already has track chips) */
 .se-sidebar-track-selector {
-  display: flex;
-  gap: 4px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding: 6px 10px;
-  border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-  background: rgba(0, 0, 0, 0.08);
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .se-sidebar-track-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    background: rgba(0, 0, 0, 0.08);
+  }
 }
 .se-sidebar-track-selector::-webkit-scrollbar { display: none; }
 .se-side-track-pill {
