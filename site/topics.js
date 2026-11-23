@@ -960,10 +960,10 @@ const TOPICS = [
     track: "Playwright",
     section: "P1. Installation, Setup & Environment",
     order: 1,
-    title: "1.1 Setup for Playwright Testing (Node.js, npm init, Config & First Test)",
+    title: "1.1 Playwright Introduction, Key Features, TS vs JS & Setup",
     file: "playwright-setup-installation.html",
-    summary: "Complete environment setup: Node.js prerequisites, npm init playwright@latest CLI walkthrough, playwright.config.ts anatomy, browser engine binaries, your first spec, and CLI/UI execution modes.",
-    keywords: "Playwright setup, install Playwright, npm init playwright, playwright.config.ts, npx playwright test, UI mode, browsers, TypeScript, test runner",
+    summary: "Introduction to Playwright: Microsoft 2020 origins, 9 key features, Inspector/Codegen/Trace Viewer tools, JavaScript vs TypeScript static typing, npm init scaffolding, first test, and CLI/UI execution.",
+    keywords: "Playwright introduction, key features, cross browser, auto waiting, shadow dom, Inspector, Codegen, Trace Viewer, JavaScript vs TypeScript, npm init, setup",
     status: "done",
     date: "2026-11-23"
   },
