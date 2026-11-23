@@ -136,6 +136,21 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Enforce guaranteed pure canvas backgrounds across all viewports and screens */
+:root[data-theme="light"],
+:root[data-theme="light"] html,
+:root[data-theme="light"] body {
+  background: #F8FAFC !important;
+  background-color: #F8FAFC !important;
+}
+
+:root[data-theme="dark"],
+:root[data-theme="dark"] html,
+:root[data-theme="dark"] body {
+  background: #000000 !important;
+  background-color: #000000 !important;
+}
+
 /* OLED Pure Black landing background for homepage */
 body.home-page {
   background-color: #000000 !important;
