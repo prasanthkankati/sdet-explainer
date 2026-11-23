@@ -110,7 +110,7 @@ body[data-track="Interview"]  { --accent: var(--int);  --accent-rgb: 251, 146, 6
 html, body {
   margin: 0; padding: 0;
   overflow-x: clip;
-  background-color: #000000;
+  background-color: var(--bg);
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -127,7 +127,7 @@ html::-webkit-scrollbar, body::-webkit-scrollbar,
 }
 
 body {
-  background: #000000;
+  background: var(--bg);
   background-image: none;
   color: var(--text);
   font: 15px/1.68 'Inter', -apple-system, system-ui, sans-serif;
