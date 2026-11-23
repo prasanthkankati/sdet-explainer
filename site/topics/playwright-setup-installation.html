@@ -14,232 +14,240 @@
 
   <section id="what-is-playwright">
     <h2>1. What is Playwright?</h2>
-    <p class="def"><b>Playwright</b> is an open-source test automation framework developed by Microsoft (released in 2020) for end-to-end web testing and browser automation across modern single-page applications and micro-frontends.</p>
+    <p class="def"><b>Playwright</b> is an open-source Node.js library and test automation framework developed by Microsoft (released in 2020) for automating modern web browsers and end-to-end testing.</p>
+
     <p><b>Interview Answer:</b> <i>"Playwright Test is an end-to-end test framework for modern web apps created by Microsoft. It bundles a test runner, auto-waiting assertions, isolated browser contexts, parallelization, and rich tooling. It natively supports Chromium, WebKit, and Firefox across Windows, Linux, and macOS in both headless and headed modes, with built-in mobile emulation for Chrome (Android) and Mobile Safari."</i></p>
 
-    <p><b>Core Architectural Pillars:</b></p>
+    <p><b>Core Facts to Know:</b></p>
     <ul>
-      <li><b>Runtime Foundation:</b> Built on <b>Node.js</b> (Google V8 JavaScript runtime), executing automation code outside the browser while communicating over high-speed native debugging pipes.</li>
-      <li><b>Connection Protocol:</b> Communicates over a persistent, bi-directional WebSocket connection (using Chrome DevTools Protocol / CDP for Chromium and native internal socket protocols for Firefox and WebKit) rather than stateless HTTP roundtrips.</li>
-      <li><b>Unified Scope:</b> Supports complete end-to-end browser automation alongside a dedicated <code>APIRequestContext</code> client to test backend REST APIs and seed test data without third-party HTTP libraries.</li>
+      <li><b>Developer &amp; Year:</b> Created by Microsoft and open-sourced in 2020.</li>
+      <li><b>Primary Use Case:</b> Built mainly for fast, reliable end-to-end (E2E) testing of modern single-page applications (React, Angular, Vue, Next.js).</li>
+      <li><b>API Testing Included:</b> Beyond UI browser automation, Playwright includes native support for testing backend REST APIs and validating microservices via <code>APIRequestContext</code> without extra libraries.</li>
+      <li><b>Technology Foundation:</b> It is a Node.js library that executes outside the browser while communicating over high-speed native debugging protocols.</li>
     </ul>
   </section>
 
-  <section id="key-features">
-    <h2>2. Key Features of Playwright (Deep Explanation)</h2>
-    <p>Playwright addresses the historical pain points of UI automation through 9 foundational capabilities:</p>
+  <section id="architecture">
+    <h2>2. Playwright Architecture &amp; The Restaurant Analogy</h2>
+    <p>To understand how Playwright communicates with browser processes at runtime, examine the <b>Restaurant Analogy</b>:</p>
 
     <table>
       <thead>
-        <tr><th>Feature</th><th>How It Works Technically</th><th>Why It Matters to QA / SDET</th></tr>
+        <tr><th>Role in Analogy</th><th>Playwright Component</th><th>Real Technical Function</th></tr>
       </thead>
       <tbody>
-        <tr>
-          <td><b>1. Cross-Browser Support</b></td>
-          <td>Directly automates <b>Chromium</b> (Google Chrome, Microsoft Edge), <b>Firefox</b> (Gecko), and <b>WebKit</b> (Apple Safari) using exact rendering engine builds.</td>
-          <td>Ensures true cross-browser compatibility across all major browser engines without installing separate vendor drivers (e.g., no ChromeDriver or GeckoDriver management).</td>
-        </tr>
-        <tr>
-          <td><b>2. Cross-Platform</b></td>
-          <td>Runs identically on <b>Windows</b>, <b>macOS</b>, and <b>Linux</b> operating systems, as well as containerized Docker environments and Windows Subsystem for Linux (WSL).</td>
-          <td>Enables seamless test portability between local developer machines (macOS/Windows) and continuous integration runners (Ubuntu Linux).</td>
-        </tr>
-        <tr>
-          <td><b>3. Multi-Language Support</b></td>
-          <td>The Playwright core protocol exposes official SDK language bindings for <b>TypeScript</b>, <b>JavaScript</b>, <b>Python</b>, <b>Java</b>, and <b>C# (.NET)</b>.</td>
-          <td>Teams can adopt Playwright using their existing enterprise language stack without forcing an organization-wide migration.</td>
-        </tr>
-        <tr>
-          <td><b>4. Mobile Web Testing</b></td>
-          <td>Emulates mobile screen viewports, device scale factors, user-agent headers, geolocation, and touch gestures for <b>Chrome for Android</b> and <b>Mobile Safari (iOS)</b>.</td>
-          <td>Validates responsive mobile web applications directly on desktop hardware without requiring expensive third-party device clouds or local Appium servers.</td>
-        </tr>
-        <tr>
-          <td><b>5. API Testing</b></td>
-          <td>Provides a built-in <code>APIRequestContext</code> accessible directly inside tests via the <code>{ request }</code> fixture.</td>
-          <td>Enables fast test setup (generating auth tokens via API, seeding database records) and teardown, drastically reducing end-to-end execution time.</td>
-        </tr>
-        <tr>
-          <td><b>6. Auto-Waiting</b></td>
-          <td>Before executing any action (e.g., <code>click()</code>, <code>fill()</code>), Playwright performs automatic <i>actionability checks</i>: attached to DOM, visible, stable (not animating), enabled, and non-obscured.</td>
-          <td>Eliminates arbitrary <code>Thread.sleep()</code> and manual wait polling, removing 95%+ of typical test flakiness.</td>
-        </tr>
-        <tr>
-          <td><b>7. Handles Complex Elements</b></td>
-          <td>Playwright locators naturally penetrate and pierce open <b>Shadow DOM</b> subtrees without requiring custom JavaScript executors, and seamlessly traverses nested <code>&lt;iframe&gt;</code> elements via <code>frameLocator()</code>.</td>
-          <td>Simplifies automation of modern web components and embedded third-party widgets (e.g., payment gateways) that traditionally break Selenium locators.</td>
-        </tr>
-        <tr>
-          <td><b>8. Parallel Execution</b></td>
-          <td>Leverages isolated OS worker processes and lightweight <b>BrowserContext</b> instances (creating a clean incognito session in ~5–10ms with zero memory bloat).</td>
-          <td>Executes hundreds of test specs simultaneously across multi-core processors, turning hour-long regression suites into 3-minute runs.</td>
-        </tr>
-        <tr>
-          <td><b>9. Built-in &amp; Third-Party Reporting</b></td>
-          <td>Natively outputs <b>HTML</b>, <b>JSON</b>, and <b>JUnit XML</b> formats, and easily integrates with enterprise visual reporters like <b>Allure</b>.</td>
-          <td>Provides actionable test results with embedded screenshots, videos, and time-travel execution traces ready for CI/CD dashboards.</td>
-        </tr>
+        <tr><td><b>Customer 👨‍💻</b></td><td><b>You (Test Script)</b></td><td>Writes test commands (e.g., <code>await page.goto()</code>, <code>await locator.click()</code>).</td></tr>
+        <tr><td><b>Waiter 🍽️</b></td><td><b>Playwright API</b></td><td>Receives your test instructions, serializes them, and passes them to the communication channel.</td></tr>
+        <tr><td><b>Communication Line 📡</b></td><td><b>WebSocket Connection</b></td><td>A single, persistent, bi-directional pipe streaming JSON messages via Chrome DevTools Protocol (CDP) or native browser socket pipes.</td></tr>
+        <tr><td><b>Kitchen 👨‍🍳</b></td><td><b>Browser Process</b></td><td>The actual operating system browser process (e.g., <code>chromium.exe</code>) that compiles JavaScript and renders the DOM.</td></tr>
+        <tr><td><b>Separate Table 🍴</b></td><td><b>BrowserContext</b></td><td>An isolated incognito dining session. Each table has its own independent cutlery (cookies, cache, localStorage) with zero crossover to other tables.</td></tr>
+        <tr><td><b>Food 🍕</b></td><td><b>Target Application (Web Page)</b></td><td>The live web application being served, interacted with, and asserted on.</td></tr>
       </tbody>
     </table>
   </section>
 
-  <section id="playwright-tools">
-    <h2>3. Built-in Playwright Developer Tools</h2>
-    <p>Playwright includes three rich built-in developer tools designed to streamline authoring, debugging, and post-mortem analysis:</p>
+  <section id="rendering-engines">
+    <h2>3. Real Browsers vs. Rendering Engines</h2>
+    <p>A fundamental concept in Playwright is that it automates <b>browser rendering engines</b>, not branded consumer browsers:</p>
+    <ul>
+      <li><b>Chromium, Firefox, and WebKit are rendering browser engines</b> (the underlying layout and JavaScript execution cores).</li>
+      <li><b>Branded consumer browsers are developed on top of these rendering engines:</b>
+        <ul>
+          <li><b>Chromium Engine:</b> Powers Google Chrome, Microsoft Edge, Brave, Vivaldi, and Opera.</li>
+          <li><b>WebKit Engine:</b> Powers Apple Safari (macOS and iOS).</li>
+          <li><b>Gecko Engine:</b> Powers Mozilla Firefox.</li>
+        </ul>
+      </li>
+    </ul>
+    <p>When you run tests in Playwright, it downloads and launches dedicated, pinned builds of <b>Chromium, Firefox, and WebKit</b>. This guarantees tests run deterministically against the core layout engines without interference from personal user extensions, auto-updates, or custom browser skins.</p>
+  </section>
+
+  <section id="playwright-vs-selenium">
+    <h2>4. Playwright vs. Selenium WebDriver</h2>
+    <p>A direct architectural comparison between the two leading automation frameworks:</p>
+
+    <table>
+      <thead>
+        <tr><th>Architecture Dimension</th><th>Playwright</th><th>Selenium WebDriver</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Communication Protocol</b></td><td>Single, persistent, bi-directional <b>WebSocket</b> (CDP / BiDi socket). Zero HTTP polling.</td><td>Stateless <b>HTTP request-response</b> roundtrips over W3C WebDriver wire protocol.</td></tr>
+        <tr><td><b>Driver Executables</b></td><td><b>Zero driver management.</b> Directly controls browser engine binaries via native internal pipes.</td><td>Requires intermediate driver executables (ChromeDriver, GeckoDriver, msedgedriver).</td></tr>
+        <tr><td><b>Execution Speed</b></td><td>Extremely fast (sub-millisecond command execution over WebSocket).</td><td>Slower due to network roundtrips for every findElement and interaction.</td></tr>
+        <tr><td><b>Auto-Waiting</b></td><td><b>Built-in automatic actionability checks</b> (visible, stable, enabled, clickable) before every action.</td><td>No built-in auto-waiting. Requires explicit <code>WebDriverWait</code> and <code>ExpectedConditions</code> loops.</td></tr>
+        <tr><td><b>Session Isolation</b></td><td>Lightweight <b>BrowserContext</b> (creates fresh incognito profile in ~5–10ms with zero memory bloat).</td><td>Cold browser boots. Running a new session requires launching a brand-new OS browser process.</td></tr>
+        <tr><td><b>Shadow DOM</b></td><td><b>Pierces open Shadow DOM automatically</b> without special syntax or JavaScript executors.</td><td>Requires complex custom JavaScript traversal (<code>getShadowRoot()</code>).</td></tr>
+        <tr><td><b>Network &amp; API</b></td><td>Built-in network interception, API mocking (<code>page.route</code>), and direct REST API testing.</td><td>Requires external proxy tools (Browsermob) or complex BiDi DevTools listener scripts.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="system-requirements">
+    <h2>5. System Requirements &amp; Supported Operating Systems</h2>
+    <p>Playwright officially supports modern operating systems and Node.js runtimes:</p>
+
+    <table>
+      <thead>
+        <tr><th>Component</th><th>Supported Versions</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>Node.js Runtime</b></td><td>Latest LTS <b>20.x, 22.x, or 24.x</b> (minimum Node.js 18+).</td></tr>
+        <tr><td><b>Windows</b></td><td><b>Windows 11+</b>, <b>Windows Server 2019+</b>, or <b>Windows Subsystem for Linux (WSL)</b>.</td></tr>
+        <tr><td><b>macOS</b></td><td><b>macOS 14 (Sonoma)</b> or later (Apple Silicon arm64 &amp; Intel x86-64).</td></tr>
+        <tr><td><b>Linux</b></td><td><b>Debian 12 / 13</b>, <b>Ubuntu 22.04 / 24.04 / 26.04</b> (x86-64 or arm64).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="prerequisites">
+    <h2>6. Pre-requisites</h2>
+    <p>Before installing Playwright, prepare your local developer environment with these 3 steps:</p>
+    <ol>
+      <li><b>Install Node.js:</b> Download and install the latest LTS release from <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>. Verify via terminal: <code>node -v</code>.</li>
+      <li><b>Install VS Code:</b> Download and install Visual Studio Code (<a href="https://code.visualstudio.com" target="_blank" rel="noopener">code.visualstudio.com</a>).</li>
+      <li><b>Create and Open Project Folder:</b> Create an empty directory for your tests and open it in VS Code:
+        <pre><code class="bash">mkdir playwright-tests
+cd playwright-tests
+code .</code></pre>
+      </li>
+    </ol>
+  </section>
+
+  <section id="installation">
+    <h2>7. Playwright Installation &amp; Version Check</h2>
+    <p>Initialize Playwright in your project folder using the official scaffolding command:</p>
+
+    <pre><code class="bash"># Install Playwright test runner and scaffolding
+npm init playwright@latest</code></pre>
+
+    <p>After installation completes, verify the installed Playwright version:</p>
+    <pre><code class="bash"># Check Playwright CLI version
+npx playwright --version
+# Example output: Version 1.50.0</code></pre>
+
+    <p><b>What gets installed:</b></p>
+    <pre><code>playwright-tests/
+├── playwright.config.ts                 # Master runner configuration (projects, workers, use options)
+├── package.json                         # Dependencies (@playwright/test) and npm scripts
+├── package-lock.json                    # Exact pinned dependency lockfile
+├── tests/
+│   └── example.spec.ts                  # Starter end-to-end test spec
+└── tests-examples/
+    └── demo-todo-app.spec.ts            # Complete TodoMVC test reference suite</code></pre>
+  </section>
+
+  <section id="creating-tests">
+    <h2>8. Multiple Ways to Create Playwright Tests</h2>
+    <p>Playwright accommodates both traditional coding workflows and cutting-edge AI-assisted authoring across 5 distinct methods:</p>
 
     <div class="arch">
-      <div class="lbl">PLAYWRIGHT TOOLING ECOSYSTEM <small>Authoring &bull; Debugging &bull; Analysis</small></div>
+      <div class="lbl">5 WAYS TO CREATE PLAYWRIGHT TESTS <small>Manual &bull; Tooling &bull; Extensions &bull; AI</small></div>
       <div class="cols">
         <div class="item">
-          <b>1. Playwright Inspector</b>
-          <span>&bull; Command: <code>npx playwright test --debug</code><br>&bull; Graphical debugger that steps through tests line-by-line.<br>&bull; Highlights active target locators and red click-target points.<br>&bull; Allows real-time live selector editing in the browser console.</span>
+          <b>1. Manual Scripting</b>
+          <span>&bull; Write clean TypeScript / JS code in <code>.spec.ts</code> files.<br>&bull; Import <code>test</code> and <code>expect</code> from <code>@playwright/test</code>.<br>&bull; Build Page Object Models (POM) with locator members.</span>
         </div>
         <div class="item">
           <b>2. Codegen (Test Generator)</b>
-          <span>&bull; Command: <code>npx playwright codegen [URL]</code><br>&bull; Opens a browser and records user clicks and typing.<br>&bull; Automatically generates clean, resilient TypeScript/JS code.<br>&bull; Automatically picks user-facing role locators (<code>getByRole</code>).</span>
+          <span>&bull; Run <code>npx playwright codegen [URL]</code>.<br>&bull; Click and fill fields in the browser.<br>&bull; Playwright automatically generates resilient code with <code>getByRole</code>.</span>
         </div>
         <div class="item">
-          <b>3. Trace Viewer</b>
-          <span>&bull; Command: <code>npx playwright show-trace [file]</code><br>&bull; Full time-travel debugging recording.<br>&bull; Captures DOM snapshots before &amp; after every action.<br>&bull; Inspects console logs, network waterfalls, and metadata.</span>
+          <b>3. VS Code Extension</b>
+          <span>&bull; Install official <b>Playwright Test for VS Code</b>.<br>&bull; Click <i>"Record new test"</i> directly inside the editor.<br>&bull; Pick live locators and run tests directly from gutter play buttons.</span>
+        </div>
+        <div class="item">
+          <b>4. Using MCP (AI Assistants)</b>
+          <span>&bull; Connect Playwright MCP Server to AI IDEs (Cursor, Claude, Antigravity).<br>&bull; AI inspects live DOM snapshots, navigates pages, and drafts robust test specs autonomously.</span>
+        </div>
+        <div class="item">
+          <b>5. Playwright AI Agents</b>
+          <span>&bull; Autonomous testing agents that explore user journeys.<br>&bull; Dynamically validate accessibility, find edge cases, and self-heal broken assertions on UI changes.</span>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="js-vs-ts">
-    <h2>4. JavaScript vs. TypeScript in Test Automation</h2>
-    <p>Playwright supports both JavaScript and TypeScript out of the box with zero build configuration. Understanding the architectural differences is critical when architecting an enterprise test suite:</p>
-
-    <h3>1. JavaScript (Dynamically Typed)</h3>
-    <p>In JavaScript, variable types are resolved dynamically at runtime. Variables can change types at any point, and the interpreter enforces no strict type checking during authoring:</p>
-
-    <pre><code>let age = 30;       // Number
-let name = "John";  // String
-age = "thirty";     // Valid in JS — variable mutated from Number to String without error</code></pre>
-
-    <p><b>Automation Risk:</b> A typo in a method call or an invalid locator payload will only be caught when the test actually runs and fails in the browser, wasting significant developer and CI debugging time.</p>
-
-    <h3>2. TypeScript (Statically Typed)</h3>
-    <p>TypeScript is an open-source language developed by Microsoft as a <b>strict syntactical superset of JavaScript</b>. It adds optional static typing, compile-time contract validation, and rich IDE tooling:</p>
-
-    <pre><code>let age: number = 30; // Strictly typed as number
-let name: string = "John";
-age = "thirty";       // COMPILE ERROR: Type 'string' is not assignable to type 'number'</code></pre>
-
-    <h3>3. Why Use TypeScript for Playwright?</h3>
-    <ul>
-      <li><b>ECMAScript Standard:</b> TypeScript compiles cleanly down to standard ECMAScript (JavaScript) that executes in any standard Node.js runtime.</li>
-      <li><b>Catches Errors Early:</b> Syntax errors, missing parameters, and wrong assertion signatures are caught immediately inside VS Code before launching expensive browser sessions.</li>
-      <li><b>Superior IDE Autocompletion (IntelliSense):</b> Typing <code>page.</code> or <code>expect(locator).</code> instantly displays every available method, parameter signature, and documentation snippet.</li>
-      <li><b>Refactoring Confidence:</b> When renaming a Page Object property or updating a test data interface, TypeScript automatically identifies all broken references across the entire repository.</li>
-    </ul>
-  </section>
-
-  <section id="installation">
-    <h2>5. Installing Playwright &amp; Project Scaffolding</h2>
-    <p>Scaffold a brand-new Playwright automation repository using your preferred package manager:</p>
-
-    <pre><code class="bash"># Recommended: Initialize via npm
-npm init playwright@latest
-
-# Alternative package managers
-yarn create playwright
-pnpm create playwright</code></pre>
-
-    <p><b>Interactive CLI Setup Choices:</b></p>
-    <ul>
-      <li><b>TypeScript or JavaScript:</b> Choose <b>TypeScript</b> (default and industry best practice).</li>
-      <li><b>Where to put end-to-end tests:</b> <code>tests</code> (standard convention).</li>
-      <li><b>Add a GitHub Actions workflow:</b> Choose <b>Yes</b> to auto-generate CI/CD configuration.</li>
-      <li><b>Install Playwright browsers:</b> Choose <b>Yes</b> (downloads Chromium, Firefox, WebKit binaries).</li>
-    </ul>
-  </section>
-
-  <section id="whats-installed">
-    <h2>6. What's Installed</h2>
-    <p>The initialization command generates a clean, production-ready directory structure:</p>
-
-    <pre><code>my-playwright-project/
-├── playwright.config.ts                 # Master runner control plane (workers, projects, retries)
-├── package.json                         # Project scripts and dependencies (@playwright/test)
-├── package-lock.json                    # Exact dependency lockfile
-├── tests/
-│   └── example.spec.ts                  # Starter test spec demonstrating locators & assertions
-└── tests-examples/
-    └── demo-todo-app.spec.ts            # Official TodoMVC end-to-end test suite reference</code></pre>
-  </section>
-
-  <section id="example-spec">
-    <h2>7. Writing Your First Playwright Test Spec</h2>
-    <p>Examine the generated <code>tests/example.spec.ts</code>. It demonstrates Playwright's core mental model:</p>
-
-    <pre><code>import { test, expect } from "@playwright/test";
-
-test("has title", async ({ page }) => {
-  await page.goto("https://playwright.dev/");
-
-  // Expect a title "to contain" a substring.
-  await expect(page).toHaveTitle(/Playwright/);
-});
-
-test("get started link", async ({ page }) => {
-  await page.goto("https://playwright.dev/");
-
-  // Click the get started link.
-  await page.getByRole("link", { name: "Get started" }).click();
-
-  // Expects page to have a heading with the name of Installation.
-  await expect(page.getByRole("heading", { name: "Installation" })).toBeVisible();
-});</code></pre>
-
-    <p><b>Key architectural primitives:</b></p>
-    <ul>
-      <li><b><code>{ page }</code> Fixture:</b> Playwright automatically creates an isolated browser page in a brand-new <code>BrowserContext</code> for each test. No manual browser opening or closing needed.</li>
-      <li><b>Auto-Waiting:</b> <code>click()</code> automatically waits for the element to be visible, stable, enabled, and clickable before firing the event.</li>
-      <li><b>Web-First Assertions:</b> <code>await expect(locator).toBeVisible()</code> continuously retries until the element appears or the timeout expires.</li>
-    </ul>
-  </section>
-
   <section id="running-tests">
-    <h2>8. Running Your Tests &amp; CLI Commands</h2>
-    <p>Execute tests from your terminal using Playwright's versatile runner flags:</p>
+    <h2>9. Running Tests: Headless vs. Headed Execution</h2>
+    <p>Playwright offers flexible test execution modes from the command line:</p>
 
-    <pre><code class="bash"># Run all tests across all configured projects (Chromium, Firefox, WebKit) in headless mode
+    <h3>1. Headless Mode (Default Execution)</h3>
+    <p>By default, Playwright runs tests in <b>headless mode</b>—the browser runs entirely in memory without opening a visible graphical window, making execution fast and ideal for CI/CD servers:</p>
+    <pre><code class="bash"># Run all tests headlessly across Chromium, Firefox, and WebKit
 npx playwright test
 
-# Run tests with visible browser windows (Headed Mode)
-npx playwright test --headed
+# Run a specific test file headlessly
+npx playwright test ./tests/example.spec.ts</code></pre>
 
-# Run tests on a specific browser project only
-npx playwright test --project=chromium
+    <h3>2. Headed Mode (Visual Browser Window)</h3>
+    <p>To watch the browser window execute actions visually for debugging, pass the <code>--headed</code> flag:</p>
+    <pre><code class="bash"># Run a specific test file with visible browser window
+npx playwright test ./tests/example.spec.ts --headed
 
-# Run a single specific test file
-npx playwright test tests/example.spec.ts
+# Run tests on a single browser engine with visible window
+npx playwright test --project=chromium --headed</code></pre>
 
-# Run tests that match a specific title or regex
-npx playwright test -g "has title"
-
-# Launch interactive UI Mode (time-travel debugging, watch mode, locator playground)
+    <h3>3. Interactive UI Mode &amp; Reports</h3>
+    <pre><code class="bash"># Launch interactive UI Mode (time-travel debugging, watch mode, locator playground)
 npx playwright test --ui
 
 # Open the auto-generated HTML test report
 npx playwright show-report</code></pre>
   </section>
 
-  <section id="browser-binaries">
-    <h2>9. Installing &amp; Managing Dedicated Browser Binaries</h2>
-    <p>Playwright uses custom patched browser builds matching exact library versions. Manage browser binaries via the CLI:</p>
+  <section id="key-features">
+    <h2>10. The 9 Key Features of Playwright (Deep Explanation)</h2>
+    <table>
+      <thead>
+        <tr><th>Feature</th><th>Technical Mechanics</th><th>SDET Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><b>1. Cross-Browser Support</b></td><td>Automates Chromium (Chrome, Edge), Firefox (Gecko), and WebKit (Safari).</td><td>True multi-engine test coverage without separate driver executables.</td></tr>
+        <tr><td><b>2. Cross-Platform</b></td><td>Runs uniformly on Windows 11+, macOS Sonoma+, and Linux (Ubuntu/Debian).</td><td>Zero drift between local dev machines and Linux CI runners.</td></tr>
+        <tr><td><b>3. Multi-Language Support</b></td><td>Official SDKs for TypeScript, JavaScript, Python, Java, and C# (.NET).</td><td>Teams use their native language without learning a new stack.</td></tr>
+        <tr><td><b>4. Mobile Web Testing</b></td><td>Emulates screen dimensions, device scale factors, user agents, and touch for Chrome Android &amp; Mobile Safari.</td><td>Validates responsive mobile web without expensive device clouds.</td></tr>
+        <tr><td><b>5. API Testing</b></td><td>Built-in <code>APIRequestContext</code> accessible via <code>{ request }</code> fixture.</td><td>Seeds database state and generates auth tokens directly in tests.</td></tr>
+        <tr><td><b>6. Auto-Waiting</b></td><td>Checks actionability (attached, visible, stable, enabled, clickable) before interacting.</td><td>Eliminates hardcoded sleeps (<code>Thread.sleep</code>) and flakiness.</td></tr>
+        <tr><td><b>7. Handles Complex Elements</b></td><td>Pierces open Shadow DOM trees natively and handles nested iframes via <code>frameLocator()</code>.</td><td>Automates web components and payment frames without custom JS.</td></tr>
+        <tr><td><b>8. Parallel Execution</b></td><td>Spins up parallel worker processes with isolated <code>BrowserContext</code> incognito sessions (~5ms boot).</td><td>Dramatically reduces test execution duration across CPU cores.</td></tr>
+        <tr><td><b>9. Built-in Reporting</b></td><td>Natively outputs HTML, JSON, and JUnit XML with Allure support.</td><td>Embedded screenshots, video replays, and execution traces.</td></tr>
+      </tbody>
+    </table>
+  </section>
 
-    <pre><code class="bash"># Install all default browser binaries (Chromium, Firefox, WebKit)
+  <section id="js-vs-ts">
+    <h2>11. JavaScript vs. TypeScript in Test Automation</h2>
+    <p>Understanding static vs. dynamic typing in automation suites:</p>
+
+    <h3>JavaScript (Dynamically Typed)</h3>
+    <p>Variables can change types at runtime without strict compiler verification:</p>
+    <pre><code>let age = 30;       // Number
+let name = "John";  // String
+age = "thirty";     // Valid in JS — variable mutated from Number to String without compile error</code></pre>
+
+    <h3>TypeScript (Statically Typed)</h3>
+    <p>Superset of JavaScript that enforces strict type contracts at compile time:</p>
+    <pre><code>let age: number = 30; // Strictly typed as number
+let name: string = "John";
+age = "thirty";       // COMPILE ERROR: Type 'string' is not assignable to type 'number'</code></pre>
+
+    <p><b>Why Use TypeScript for Playwright?</b></p>
+    <ul>
+      <li><b>ECMAScript Standard:</b> Compiles down to standard JavaScript executing on any Node.js runtime.</li>
+      <li><b>Catches Errors Early:</b> Identifies invalid locator arguments and broken method calls inside VS Code before running tests.</li>
+      <li><b>Full IntelliSense:</b> Displays available methods, arguments, and return types for <code>Page</code>, <code>Locator</code>, and <code>Expect</code>.</li>
+    </ul>
+  </section>
+
+  <section id="browser-binaries">
+    <h2>12. Installing &amp; Managing Dedicated Browser Binaries</h2>
+    <pre><code class="bash"># Install default browser binaries (Chromium, Firefox, WebKit)
 npx playwright install
 
-# Install a single browser engine
-npx playwright install chromium
-
-# Install browsers AND missing OS system dependencies (essential for Linux CI / Docker)
+# Install browsers AND operating system dependencies (required for Linux CI / Docker)
 npx playwright install --with-deps</code></pre>
 
-    <p><b>Local Browser Cache Locations:</b></p>
+    <p><b>Browser Binary Cache Locations:</b></p>
     <ul>
       <li><b>Windows:</b> <code>%USERPROFILE%\AppData\Local\ms-playwright</code></li>
       <li><b>macOS:</b> <code>~/Library/Caches/ms-playwright</code></li>
@@ -248,9 +256,7 @@ npx playwright install --with-deps</code></pre>
   </section>
 
   <section id="updating">
-    <h2>10. Updating Playwright</h2>
-    <p>To upgrade Playwright to the latest release and download matching browser binaries:</p>
-
+    <h2>13. Updating Playwright</h2>
     <pre><code class="bash"># Update @playwright/test to latest version
 npm install -D @playwright/test@latest
 
@@ -259,7 +265,7 @@ npx playwright install --with-deps</code></pre>
   </section>
 
   <section id="qa-bank">
-    <h2>11. Q&amp;A</h2>
+    <h2>14. Q&amp;A</h2>
     <p><a class="qa-chip" href="interview-p1-1-qa.html"><span class="tag Interview">Interview</span>P1.1 Question Bank (30 Questions) &rarr;</a></p>
   </section>
 </article>

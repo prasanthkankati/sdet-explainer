@@ -11,7 +11,7 @@
 </head>
 <body>
 <div class="wrap">
-<p><a href="../index.html">&larr; All topics</a> &middot; <a href="playwright-setup-installation.html">&larr; Back to Concept Page: P1.1 Playwright Introduction &amp; Setup</a></p>
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="playwright-setup-installation.html">&larr; Back to Concept Page: P1.1 Playwright Introduction, Key Features, TS vs JS &amp; Setup</a></p>
 <article>
   <span class="tag Interview">Interview</span>
   <h1>P1.1 Question Bank: Playwright Architecture, Features, Tools &amp; Setup (30 Questions)</h1>
@@ -21,23 +21,23 @@
       <li><b>What is Playwright at its core, and who develops it? (common)</b><br>
       Playwright is an open-source test automation library and end-to-end testing framework created by Microsoft in 2020. It bundles a built-in test runner, auto-waiting web assertions, isolated browser contexts, and rich developer tooling. It automates Chromium, Firefox, and WebKit on Windows, macOS, and Linux without third-party drivers.</li>
 
+      <li><b>Explain the Playwright Restaurant Analogy. (common)</b><br>
+      In the analogy, <b>You</b> are the customer writing the order (test script), the <b>Playwright API</b> is the waiter taking the order, and the <b>WebSocket connection</b> is the communication line to the kitchen. The <b>Browser process</b> is the kitchen preparing the meal, each <b>BrowserContext</b> is a separate private dining table with its own independent tableware (cookies/cache), and the <b>Target Web App</b> is the food being served and evaluated.</li>
+
+      <li><b>What is the difference between real browsers and browser rendering engines? (common)</b><br>
+      Rendering engines (Chromium, WebKit, Gecko) are the foundational software cores that parse HTML/CSS and execute JavaScript, whereas branded consumer browsers (Google Chrome, Safari, Firefox, Edge, Brave, Opera) are built on top of those engines with proprietary user accounts, extensions, and custom skins. Playwright directly automates the underlying rendering engines to ensure clean, deterministic testing uninfluenced by consumer browser bloat.</li>
+
+      <li><b>Which real-world browsers are built using the Chromium, WebKit, and Gecko engines? (common)</b><br>
+      The <b>Chromium engine</b> powers Google Chrome, Microsoft Edge, Brave, Vivaldi, and Opera. The <b>WebKit engine</b> powers Apple Safari on macOS and iOS. The <b>Gecko engine</b> powers Mozilla Firefox.</li>
+
       <li><b>How does Playwright communicate with browsers differently from Selenium WebDriver? (common)</b><br>
       Selenium sends individual stateless HTTP commands over the W3C WebDriver wire protocol to an external driver binary (like ChromeDriver), which polls for state changes. Playwright establishes a single, persistent, bi-directional WebSocket connection directly to the browser process using native debugging protocols (such as Chrome DevTools Protocol / CDP). This enables real-time event streaming, network interception, and execution speeds measured in milliseconds.</li>
 
       <li><b>What is the difference between a Browser, a BrowserContext, and a Page in Playwright? (common)</b><br>
       A <b>Browser</b> represents the single operating system binary process (e.g., <code>chromium.exe</code>). A <b>BrowserContext</b> is an isolated incognito-equivalent session inside that browser process, possessing its own independent cookies, localStorage, and cache. A <b>Page</b> is a single browser tab or window residing within a context.</li>
 
-      <li><b>Why are Playwright assertions described as "web-first"? (common)</b><br>
-      Traditional assertion libraries (like Chai or JUnit) evaluate a condition as a one-time snapshot, immediately failing if an element is still rendering. Web-first assertions (e.g., <code>await expect(locator).toBeVisible()</code>) are asynchronous and automatically poll the DOM until the expected condition passes or the configured timeout expires. This eliminates explicit synchronization loops and timing race conditions.</li>
-
       <li><b>What is the difference between JavaScript and TypeScript in test automation? (common)</b><br>
       JavaScript is dynamically typed, meaning types are evaluated at runtime and variables can mutate types without compiler errors. TypeScript is a statically typed superset of JavaScript that enforces strict type contracts at compile time. In test automation, TypeScript catches invalid locator payloads and incorrect method calls inside the IDE before running expensive browser tests.</li>
-
-      <li><b>Why does TypeScript compile to JavaScript before running in Node.js? (common)</b><br>
-      Node.js and modern browser engines (like V8) natively execute ECMAScript (standard JavaScript) bytecode and do not understand TypeScript type annotations. The TypeScript compiler (<code>tsc</code> or Babel) strips away all type interfaces and compiles the source code into clean JavaScript. Playwright handles this compilation step on the fly with zero extra configuration.</li>
-
-      <li><b>Which major browser rendering engines does Playwright support? (common)</b><br>
-      Playwright natively supports <b>Chromium</b> (the foundation for Google Chrome and Microsoft Edge), <b>Firefox</b> (Mozilla Gecko engine), and <b>WebKit</b> (Apple Safari engine). It executes tests against exact revisions of these rendering engines on Windows, macOS, and Linux.</li>
     </ol></section>
 
   <section><h2>Tier 2: Mechanics &amp; How It Works (Q8&ndash;Q14)</h2>
@@ -45,29 +45,36 @@
       <li><b>What exact actionability checks does Playwright perform during auto-waiting? (common)</b><br>
       Before executing pointer or keyboard actions (like <code>click()</code> or <code>fill()</code>), Playwright verifies five sequential conditions: the element is attached to the DOM, visible, stable (not animating or moving), enabled (not disabled), and receiving events (not covered by an overlay). If any condition fails, Playwright retries continuously until the action timeout expires.</li>
 
+      <li><b>What are the 5 distinct ways to create tests in Playwright? (common)</b><br>
+      1. <b>Manual Scripting:</b> Handcrafting TypeScript/JS test files with Page Objects.<br>
+      2. <b>Codegen (Test Generator):</b> Recording user browser interactions via <code>npx playwright codegen</code>.<br>
+      3. <b>VS Code Extension:</b> Clicking <i>"Record new test"</i> and picking locators directly in the IDE.<br>
+      4. <b>Using MCP (Model Context Protocol):</b> Connecting AI coding assistants (Cursor, Claude, Antigravity) to explore live DOM snapshots and generate specs.<br>
+      5. <b>Playwright AI Agents:</b> Autonomous agents exploring user journeys and self-healing broken locators.</li>
+
+      <li><b>What is the command to verify the installed Playwright version? (common)</b><br>
+      Run <code>npx playwright --version</code> in your terminal. This prints the exact version of the installed <code>@playwright/test</code> library (e.g., <code>Version 1.50.0</code>).</li>
+
+      <li><b>What is the difference between Headless and Headed mode in Playwright execution? (common)</b><br>
+      <b>Headless mode</b> runs tests in background memory without opening any visual browser window, making it the fastest execution mode and the default choice for CI/CD servers. <b>Headed mode</b> (invoked via <code>--headed</code>) launches an actual graphical browser window, allowing engineers to watch animations, inspect layouts, and visually debug interactions.</li>
+
       <li><b>How does Playwright handle Shadow DOM elements? (advanced)</b><br>
       Playwright locators penetrate open Shadow DOM subtrees by default without requiring special XPath functions, pierce selectors, or JavaScript execution scripts. Locators like <code>page.locator('custom-button')</code> seamlessly locate elements nested within shadow roots as if they were standard DOM nodes.</li>
-
-      <li><b>What occurs under the hood when executing <code>npm init playwright@latest</code>? (common)</b><br>
-      The initialization CLI creates a <code>package.json</code> (or updates the existing one) with the <code>@playwright/test</code> dependency, generates a production-ready <code>playwright.config.ts</code>, creates starter spec files in the <code>tests/</code> folder, optionally configures a GitHub Actions CI workflow, and downloads the matching browser engine binaries.</li>
 
       <li><b>Why does Playwright download dedicated browser binaries instead of launching system Google Chrome? (advanced)</b><br>
       System browsers receive automated background updates that can introduce unexpected regressions, driver mismatches, or OS-level profile locks. Playwright downloads pinned, reproducible open-source browser builds specifically tested against that exact Playwright library release. This guarantees 100% deterministic test execution across local workstations and headless CI pipelines.</li>
 
       <li><b>Where does Playwright cache downloaded browser binaries on the local filesystem? (common)</b><br>
       On Windows, binaries are saved in <code>%USERPROFILE%\AppData\Local\ms-playwright</code>. On macOS, they reside in <code>~/Library/Caches/ms-playwright</code>. On Linux, they are cached in <code>~/.cache/ms-playwright</code>. Because binaries are stored globally in user home directories, multiple projects share identical browser versions without redundant downloads.</li>
-
-      <li><b>How does Playwright's parallel execution model achieve high speed without heavy memory consumption? (advanced)</b><br>
-      Playwright launches a limited number of OS worker processes matching available CPU cores, and each worker runs a single browser instance. Within that browser instance, every test runs in a fresh, lightweight <code>BrowserContext</code> created in ~5–10ms. This avoids the heavy operating system overhead of launching and killing hundreds of browser processes.</li>
-
-      <li><b>What is the purpose of the <code>{ page }</code> fixture in Playwright test functions? (common)</b><br>
-      The <code>{ page }</code> fixture is an automatically injected, isolated browser tab created within a pristine <code>BrowserContext</code> specifically for that individual test. Playwright manages its lifecycle, automatically opening the context before the test begins and closing it when the test completes.</li>
     </ol></section>
 
   <section><h2>Tier 3: Real Situations &amp; Scenarios (Q15&ndash;Q20)</h2>
     <ol start="15">
-      <li><b>You have a regression suite of 300 tests that takes 45 minutes in Selenium. How does Playwright reduce this time? (common)</b><br>
-      Playwright runs tests in parallel across worker processes using zero-overhead <code>BrowserContext</code> instances rather than cold browser boots. Furthermore, Playwright's persistent WebSocket connection eliminates HTTP request-response latency, and auto-waiting removes unnecessary hardcoded sleeps. Together, these features typically reduce a 45-minute suite to under 4 minutes.</li>
+      <li><b>What are the supported operating system versions for running Playwright? (common)</b><br>
+      Playwright officially supports <b>Windows 11+</b>, Windows Server 2019+, and Windows Subsystem for Linux (WSL); <b>macOS 14 (Sonoma)</b> or later on Apple Silicon and Intel; and <b>Debian 12/13</b> or <b>Ubuntu 22.04 / 24.04 / 26.04</b> (x86-64 and arm64). Supported Node.js runtimes are latest LTS 20.x, 22.x, or 24.x.</li>
+
+      <li><b>How do you run a specific test file in headed mode on the Chromium engine only? (common)</b><br>
+      Execute <code>npx playwright test ./tests/login.spec.ts --project=chromium --headed</code>. This targets solely the Chromium project configuration, runs only <code>login.spec.ts</code>, and renders a visible Google Chrome/Chromium window.</li>
 
       <li><b>How do you emulate an iPhone 14 Pro Max in Playwright without connecting a real physical device? (common)</b><br>
       Configure the project in <code>playwright.config.ts</code> using Playwright's built-in device descriptor: <code>{ name: 'Mobile Safari', use: { ...devices['iPhone 14 Pro Max'] } }</code>. Playwright automatically configures the WebKit engine with the exact screen resolution, device pixel ratio, touch event support, and mobile user-agent string.</li>
@@ -80,9 +87,6 @@
 
       <li><b>An element on your web page renders inside a nested <code>&lt;iframe&gt;</code>. How do you interact with it in Playwright? (common)</b><br>
       Use Playwright's <code>page.frameLocator()</code> API: <code>await page.frameLocator('#payment-iframe').getByRole('button', { name: 'Submit Payment' }).click()</code>. Playwright automatically waits for the iframe to load, switches context internally, and executes the click without needing <code>driver.switchTo().frame()</code> or manual parent frame resets.</li>
-
-      <li><b>How do you record user interactions on an existing website and convert them into clean Playwright test code? (common)</b><br>
-      Run <code>npx playwright codegen https://example.com</code> in your terminal. Playwright launches a browser window alongside the Playwright Inspector, recording all clicks, form fills, and navigation events, while generating resilient, user-facing role locators (<code>getByRole</code>) in real time.</li>
     </ol></section>
 
   <section><h2>Tier 4: Troubleshooting &amp; Debugging (Q21&ndash;Q25)</h2>
@@ -114,8 +118,8 @@
       <li><b>What is the purpose of the <code>forbidOnly: !!process.env.CI</code> setting in <code>playwright.config.ts</code>? (common)</b><br>
       During local development, engineers frequently use <code>test.only()</code> to isolate and debug a single failing test. If committed to version control, <code>forbidOnly</code> ensures the continuous integration pipeline immediately fails the build, preventing developers from accidentally deploying suites where 99% of regression tests were skipped.</li>
 
-      <li><b>How does Playwright's Trace Viewer differ from standard video recording? (advanced)</b><br>
-      Video recording captures a flat, non-interactive pixel stream that cannot be inspected. Trace Viewer records full DOM snapshots, action metadata, console logs, and network request/response headers. While reviewing a trace, engineers can open DevTools, inspect DOM elements, copy locators, and view exact HTTP payloads long after the test completed.</li>
+      <li><b>How do Playwright MCP (Model Context Protocol) and AI Agents differ from standard Codegen? (advanced)</b><br>
+      <b>Codegen</b> records human clicks into static code. <b>Playwright MCP</b> allows AI assistants (like Claude, Cursor, Antigravity) to query live DOM accessibility trees, evaluate locators, and write test suites conversationally. <b>Playwright AI Agents</b> take autonomous exploration a step further, dynamically navigating unforeseen application paths and self-healing broken locators when layouts change.</li>
 
       <li><b>When should an organization choose Playwright over Selenium for greenfield automation projects? (advanced)</b><br>
       Choose Playwright when testing modern web applications that require auto-waiting, built-in network mocking, fast parallel cross-browser execution without driver maintenance, and first-class TypeScript tooling. Choose Selenium only when legacy browser support (like Internet Explorer), non-standard custom browser forks, or strict adherence to W3C-only vendor certifications are required.</li>
