@@ -1539,6 +1539,17 @@ const TOPICS = [
   },
   {
     track: "Interview",
+    section: "I-P1. Playwright: Architecture, Features & Setup Q&A",
+    order: 1,
+    title: "P1.1 Q&A: Playwright Architecture, Key Features, Tooling & Setup (30 Questions)",
+    file: "interview-p1-1-qa.html",
+    summary: "30 questions across 5 tiers: Definitions, Mechanics, Scenarios, Troubleshooting, and Design choices covering CDP/WebSocket, 9 key features, Inspector/Codegen/Tracer, TS vs JS, and npm init setup.",
+    keywords: "Playwright interview questions, CDP, WebSocket, BrowserContext, actionability, auto waiting, Codegen, Inspector, Trace Viewer, TypeScript vs JavaScript, npm init playwright",
+    status: "done",
+    date: "2026-11-23"
+  },
+  {
+    track: "Interview",
     section: "I1. Rapid Recall Cheat Sheets (Why / Why Not)",
     order: 1,
     title: "1.1 Java & OOP Rapid Recall Sheet (Why / Why Not)",
