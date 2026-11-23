@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#09090b">
+<title>Interview Q&amp;A: P1.2 Playwright Scripting Basics, Async/Await &amp; Page Fixture</title>
+<link rel="stylesheet" href="../style.css?v=4.0.0">
+</head>
+<body>
+<div class="wrap">
+<p><a href="../index.html">&larr; All topics</a> &middot; <a href="playwright-scripting-basics-first-test.html">&larr; Back to Concept Page: P1.2 Scripting Basics</a></p>
+<article>
+  <span class="tag Interview">Interview</span>
+  <h1>P1.2 Question Bank: Scripting Basics, Line-by-Line Anatomy, Async/Await &amp; Fixtures (30 Questions)</h1>
+
+  <section><h2>Tier 1: Core Definitions &amp; Syntax Mechanics (Q1&ndash;Q7)</h2>
+    <ol>
+      <li><b>What is the difference between <code>require()</code> and <code>import</code> in a Playwright test file? (common)</b><br>
+      <code>require()</code> is the older CommonJS module loading syntax native to Node.js, whereas <code>import</code> is the modern ECMAScript Module (ESM) standard. Both load the identical testing primitives from <code>@playwright/test</code>. In modern TypeScript projects, <code>import</code> is standard and preferred for static analysis.</li>
+
+      <li><b>Why do we use object destructuring <code>const { test, expect }</code> when importing from <code>@playwright/test</code>? (common)</b><br>
+      The <code>@playwright/test</code> package exports an entire suite of utilities, fixtures, and runner hooks. Object destructuring extracts only the specific <code>test</code> runner and <code>expect</code> assertion library into local scope, keeping code concise and avoiding repetitive namespace prefixes like <code>playwright.test()</code>.</li>
+
+      <li><b>What are the two parameters accepted by the <code>test()</code> function? (common)</b><br>
+      The first parameter is a <b>test title string</b> (e.g., <code>'HomepageTitle'</code>) used to identify the test in CLI outputs, test explorers, and HTML reports. The second parameter is an <b>asynchronous callback function</b> (e.g., <code>async ({ page }) => { ... }</code>) that receives injected fixtures and executes the test steps.</li>
+
+      <li><b>What is a Playwright fixture in simple terms? (common)</b><br>
+      A fixture is an environment helper object whose setup, lifecycle, and teardown are managed automatically by the Playwright test runner. Fixtures provide tests with isolated resources—such as a clean browser tab (<code>{ page }</code>) or an HTTP client (<code>{ request }</code>)—without manual instantiation or cleanup.</li>
+
+      <li><b>Why must the test callback function always be prefixed with the <code>async</code> keyword? (common)</b><br>
+      Because JavaScript runs on a non-blocking asynchronous event loop, browser operations return <b>Promises</b>. Marking the callback function <code>async</code> allows the use of the <code>await</code> keyword inside its body, ensuring each asynchronous action pauses until the browser completes the operation before moving to the next line.</li>
+
+      <li><b>What does the <code>page.goto()</code> method do, and when does it finish waiting? (common)</b><br>
+      <code>page.goto(url)</code> dispatches a navigation command to the browser and returns a Promise. By default, it resolves when the page fires the <code>load</code> event, guaranteeing that the HTML document and its initial stylesheets and scripts have finished loading before executing subsequent commands.</li>
+
+      <li><b>What is the difference between <code>page.title()</code> and <code>expect(page).toHaveTitle()</code>? (common)</b><br>
+      <code>page.title()</code> is an asynchronous query that takes a single instantaneous snapshot of the document title string at that exact millisecond. <code>expect(page).toHaveTitle()</code> is a web-first assertion that automatically polls and auto-retries until the title matches the expected text or the assertion timeout expires, eliminating timing race conditions.</li>
+    </ol></section>
+
+  <section><h2>Tier 2: Async/Await &amp; Language Mechanics (Q8&ndash;Q14)</h2>
+    <ol start="8">
+      <li><b>How does the JavaScript execution model differ from Java when automating browsers? (common)</b><br>
+      Java executes code in a synchronous, blocking series order on operating system threads; when <code>driver.get()</code> is called, the thread waits. JavaScript is single-threaded and non-blocking; calls to browser APIs initiate a background task and immediately return a Promise. Without <code>await</code>, JavaScript does not wait and executes the next line immediately.</li>
+
+      <li><b>What is a Promise in JavaScript? (common)</b><br>
+      A Promise is an object representing the eventual completion (or failure) of an asynchronous operation and its resulting value. A Promise exists in one of three states: <i>pending</i> (in progress), <i>fulfilled</i> (completed successfully), or <i>rejected</i> (failed with an error).</li>
+
+      <li><b>What exact technical role does the <code>await</code> keyword perform? (common)</b><br>
+      <code>await</code> suspends the execution of the enclosing <code>async</code> function until the Promise settles. If the Promise fulfills, <code>await</code> unwraps and returns its resolved value; if the Promise rejects, it throws an error that can be caught by a <code>try/catch</code> block or reported as a test failure.</li>
+
+      <li><b>Why is <code>const</code> used instead of <code>let</code> or <code>var</code> when declaring imported packages and extracted variables? (common)</b><br>
+      <code>const</code> creates an immutable reference, preventing accidental variable reassignment elsewhere in the test script. Using <code>const</code> ensures that references to <code>test</code>, <code>expect</code>, and captured snapshots (like <code>pageTitle</code>) cannot be overwritten or mutated accidentally.</li>
+
+      <li><b>Is <code>page.url()</code> an asynchronous Promise in Playwright? (advanced)</b><br>
+      No, <code>page.url()</code> is a synchronous getter function that returns the current main frame's URL string immediately from the local client state without an asynchronous WebSocket roundtrip. However, asserting on the URL using <code>await expect(page).toHaveURL()</code> is asynchronous because it auto-retries until redirects settle.</li>
+
+      <li><b>Is calling <code>await page.close()</code> mandatory at the end of every Playwright test? (common)</b><br>
+      No, it is completely optional. Playwright's test runner implements automatic fixture lifecycle management; when the <code>test()</code> block exits (whether passing or failing), the runner automatically disposes of the <code>page</code> and destroys its parent <code>BrowserContext</code> to prevent memory leaks.</li>
+
+      <li><b>What does <code>console.log()</code> do in a Playwright test executed in headless mode? (common)</b><br>
+      It prints the specified string or object directly to the terminal's standard output (stdout) stream where the test runner was executed. It does not print to the browser DevTools console unless injected into the page context via <code>page.evaluate()</code>.</li>
+    </ol></section>
+
+  <section><h2>Tier 3: Real Situations &amp; Scenarios (Q15&ndash;Q20)</h2>
+    <ol start="15">
+      <li><b>You run a test where <code>page.click('#submit')</code> has no <code>await</code> keyword. What happens? (common)</b><br>
+      The click action returns a pending Promise, but JavaScript does not wait for the browser to click the element and immediately advances to the next line or exits the test. The test often reports as PASSED because no error was thrown, even though the click never actually happened.</li>
+
+      <li><b>Why should an automated test assert on both the page title and the page URL after a login flow? (common)</b><br>
+      Validating both the URL and title confirms that single-page application routing (URL pushState) completed and that the correct view component successfully rendered with expected title metadata. It prevents false passes where a URL redirect succeeded but the page body failed to render.</li>
+
+      <li><b>How do you run a specific test file <code>tests/homepage.spec.ts</code> with a visible browser window? (common)</b><br>
+      Execute <code>npx playwright test tests/homepage.spec.ts --headed</code> in your terminal. Playwright overrides the default headless configuration and opens a visible Chromium, Firefox, or WebKit browser window so you can watch execution.</li>
+
+      <li><b>A page takes 3 seconds to redirect from <code>/login</code> to <code>/dashboard</code>. How do you prevent a race condition? (common)</b><br>
+      Use the web-first URL assertion: <code>await expect(page).toHaveURL(/.*dashboard/);</code>. Playwright automatically polls the browser URL every 100 milliseconds until it matches the expected regex pattern or reaches the timeout, eliminating the need for hardcoded sleeps.</li>
+
+      <li><b>How can you pass custom navigation options to <code>page.goto()</code> for a slow legacy web application? (advanced)</b><br>
+      You can pass an options object as the second argument: <code>await page.goto('https://example.com', { waitUntil: 'networkidle', timeout: 60000 });</code>. This instructs Playwright to wait until there are no network connections for at least 500ms and extends the navigation timeout to 60 seconds.</li>
+
+      <li><b>How do you capture console output from the browser's developer console during a test? (advanced)</b><br>
+      Attach an event listener to the page fixture before navigating: <code>page.on('console', msg => console.log('BROWSER LOG:', msg.text()));</code>. Playwright streams all browser <code>console.log</code>, <code>console.error</code>, and warning messages directly over the WebSocket to your terminal.</li>
+    </ol></section>
+
+  <section><h2>Tier 4: Troubleshooting &amp; Debugging (Q21&ndash;Q25)</h2>
+    <ol start="21">
+      <li><b>You encounter <code>ReferenceError: require is not defined</code> when running a test. What is the cause and fix? (advanced)</b><br>
+      Your project is configured as an ES Module (having <code>"type": "module"</code> in <code>package.json</code> or running in an ESM environment), which disables CommonJS <code>require()</code>. To fix it, switch the import statement to ES Module syntax: <code>import { test, expect } from '@playwright/test';</code>.</li>
+
+      <li><b>An assertion fails with <code>Timed out 5000ms waiting for expect(locator).toHaveTitle('STORE')</code>. What should you check? (common)</b><br>
+      Check the terminal failure diff, which displays the exact actual title received versus the expected string (e.g., casing differences, leading spaces, or dynamic suffixes). Alternatively, the page may have encountered an error or redirect loop that prevented the title from updating.</li>
+
+      <li><b>Why does <code>expect(await page.title()).toBe('STORE')</code> sometimes fail intermittently while <code>await expect(page).toHaveTitle('STORE')</code> passes reliably? (advanced)</b><br>
+      Because <code>await page.title()</code> evaluates the title at a single point in time; if a client-side JavaScript router updates the title 50ms later, the static check fails immediately. <code>await expect(page).toHaveTitle()</code> auto-retries continuously until the title matches, handling asynchronous DOM updates seamlessly.</li>
+
+      <li><b>How do you debug a single test step-by-step to inspect what the <code>{ page }</code> fixture sees? (common)</b><br>
+      Execute the test with the debug flag: <code>npx playwright test tests/homepage.spec.ts --debug</code>. This launches the Playwright Inspector, pauses execution at the first line, highlights targeted DOM elements, and lets you step through actions one by one.</li>
+
+      <li><b>You see an error: <code>TypeError: page.goto is not a function</code>. What did you write incorrectly? (common)</b><br>
+      You forgot the curly braces when destructuring the fixture in the test signature, writing <code>async (page) =></code> instead of <code>async ({ page }) =></code>. In Playwright, the test function receives a single context object containing fixtures; without braces, <code>page</code> refers to the entire test context object rather than the <code>Page</code> instance.</li>
+    </ol></section>
+
+  <section><h2>Tier 5: Design Choices &amp; Best Practices (Q26&ndash;Q30)</h2>
+    <ol start="26">
+      <li><b>Why should production test suites avoid printing page titles and URLs with <code>console.log()</code>? (common)</b><br>
+      Manual <code>console.log()</code> statements create noisy, unparseable terminal output and do not validate test correctness. Web-first assertions (<code>await expect(page).toHaveTitle()</code>) validate state automatically and log rich, formatted diffs directly into HTML test reports only when failures occur.</li>
+
+      <li><b>Why does Playwright prefer passing <code>{ page }</code> as a fixture rather than instantiating a global page variable? (advanced)</b><br>
+      Global page variables share state across tests, causing concurrency collisions when running parallel worker processes. Dependency injection via <code>{ page }</code> ensures that every test receives a dedicated, thread-safe, isolated page instance that cannot be corrupted by other tests running concurrently.</li>
+
+      <li><b>When should you use regular expressions in <code>toHaveTitle()</code> and <code>toHaveURL()</code> assertions? (common)</b><br>
+      Use regex (e.g., <code>await expect(page).toHaveURL(/.*index\.html/);</code>) when URLs contain dynamic query parameters, session IDs, or varying domain environments (like staging vs production). This makes assertions robust against environmental variations without hardcoding absolute URLs.</li>
+
+      <li><b>Why is <code>await page.close()</code> occasionally placed inside a <code>test.afterEach()</code> hook if it is optional? (advanced)</b><br>
+      In custom enterprise frameworks, engineers sometimes close pages explicitly to trigger custom cleanup telemetry, clear temporary indexedDB data, or disconnect specific network listeners before the runner tears down the entire <code>BrowserContext</code>.</li>
+
+      <li><b>How does the Playwright test runner guarantee test independence? (advanced)</b><br>
+      By strictly executing each test inside a fresh <code>BrowserContext</code> created from scratch. Even if an earlier test modified cookies, stored credentials in localStorage, or changed session state, subsequent tests start with a completely empty, unpolluted browser context.</li>
+    </ol></section>
+
+  <section><h2>Navigation</h2>
+    <p><a class="qa-chip" href="playwright-scripting-basics-first-test.html"><span class="tag Playwright">Playwright</span>&larr; Back to P1.2 Concept Page</a></p>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

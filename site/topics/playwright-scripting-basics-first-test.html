@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>1.2 Playwright Scripting Basics: Line-by-Line First Test Anatomy, Async/Await &amp; Page Fixture &mdash; SDET Explainer.</title>
+<link rel="stylesheet" href="../style.css?v=4.0.0">
+</head>
+<body>
+<div class="wrap">
+<article>
+  <span class="tag Playwright">Playwright</span>
+  <h1>1.2 Playwright Scripting Basics: Line-by-Line First Test Anatomy, Async/Await &amp; Page Fixture</h1>
+
+  <section id="what-is-scripting-basics">
+    <h2>1. The Base: What is a Playwright Test Script?</h2>
+    <p class="def">A <b>Playwright Test Script</b> is an asynchronous function registered with the <code>test()</code> runner that accepts built-in fixtures (such as <code>{ page }</code>), executes user interactions over a persistent WebSocket pipe, and validates application state using auto-retrying <code>expect()</code> assertions.</p>
+
+    <p><b>Interview Answer:</b> <i>"A Playwright test script consists of importing the test runner and assertion library from @playwright/test, defining test cases using the test() function with an async arrow callback, interacting with the browser through the injected { page } fixture, and verifying outcomes with web-first await expect() matchers. Because JavaScript is single-threaded and non-blocking, every browser interaction returns a Promise and must be preceded by the await keyword."</i></p>
+  </section>
+
+  <section id="the-code">
+    <h2>2. Complete First Test Script: Demoblaze Homepage Test</h2>
+    <p>Below is the complete, production-ready Playwright test verifying the title and URL of the Demoblaze e-commerce portal:</p>
+
+    <pre><code>// 1. Module Import: CommonJS vs ES Modules syntax
+const { test, expect } = require('@playwright/test');
+// Alternative ES Modules syntax:
+// import { test, expect } from '@playwright/test';
+
+// 2. Test Block declaration with title and asynchronous arrow fixture callback
+test('HomepageTitle', async ({ page }) => {
+
+  // 3. Navigate to target web application URL
+  await page.goto('https://demoblaze.com/index.html');
+
+  // 4. Capture page title and URL into local constants
+  const pageTitle = await page.title();
+  const pageURL = await page.url();
+
+  // 5. Print values to terminal standard output
+  console.log('the page title: ' + pageTitle);
+  console.log('the page URL: ' + pageURL);
+
+  // 6. Web-first auto-retrying assertions
+  await expect(page).toHaveTitle('STORE');
+  await expect(page).toHaveURL('https://demoblaze.com/index.html');
+
+  // 7. Explicit page closure (optional in Playwright)
+  await page.close();
+});</code></pre>
+  </section>
+
+  <section id="line-by-line-breakdown">
+    <h2>3. Line-by-Line Detailed Technical Breakdown</h2>
+    <p>Every single line in a Playwright test performs a specific architectural responsibility:</p>
+
+    <table>
+      <thead>
+        <tr><th>Code Snippet</th><th>Underlying Mechanics</th><th>Why It Is Written This Way</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>const { test, expect } = require('@playwright/test');</code></td>
+          <td><b>CommonJS Destructuring Import:</b> Invokes Node's built-in <code>require()</code> function to load the <code>@playwright/test</code> module from <code>node_modules</code>. Uses object destructuring to extract only <code>test</code> and <code>expect</code>.</td>
+          <td><code>test</code> is the test runner harness used to declare test blocks. <code>expect</code> is the assertion library providing web-first matchers. <code>const</code> ensures the references are immutable.</td>
+        </tr>
+        <tr>
+          <td><code>import { test, expect } from '@playwright/test';</code></td>
+          <td><b>ES Modules (ESM) Import:</b> The modern ECMAScript standard syntax supported natively in TypeScript and Node.js projects when <code>"type": "module"</code> is configured in <code>package.json</code>.</td>
+          <td>Both CommonJS (<code>require</code>) and ESM (<code>import</code>) perform the identical task of loading the testing primitives. In modern TypeScript projects, <code>import</code> is standard.</td>
+        </tr>
+        <tr>
+          <td><code>test('HomepageTitle', async ({ page }) => { ... });</code></td>
+          <td><b>Test Declaration &amp; Fixture Injection:</b> <code>test()</code> takes 2 parameters: (1) string test title (<code>'HomepageTitle'</code>) displayed in reports, and (2) an asynchronous callback function receiving test fixtures.</td>
+          <td><code>{ page }</code> is a <b>built-in fixture</b>. Playwright automatically launches an isolated <code>BrowserContext</code> (incognito session) and provides a clean tab for this test.</td>
+        </tr>
+        <tr>
+          <td><code>async ({ page }) => {</code></td>
+          <td><b>Async Function Signature:</b> The arrow function must be declared with <code>async</code> because it contains asynchronous non-blocking Promise calls.</td>
+          <td>Unlike Java where steps execute sequentially on a dedicated thread, JavaScript runs on a single-threaded event loop. <code>async</code> enables the use of <code>await</code> inside the function body.</td>
+        </tr>
+        <tr>
+          <td><code>await page.goto('https://demoblaze.com/index.html');</code></td>
+          <td><b>Navigation Method &amp; Promise Await:</b> <code>page.goto()</code> dispatches a navigation command to the browser process over the WebSocket pipe and returns a Promise.</td>
+          <td>The <code>await</code> keyword pauses execution of this test function until the browser emits the <code>load</code> event, ensuring the DOM is loaded before subsequent steps execute.</td>
+        </tr>
+        <tr>
+          <td><code>const pageTitle = await page.title();</code></td>
+          <td><b>State Extraction (Title):</b> Queries the browser document head for <code>document.title</code> and stores the returned string in an immutable constant.</td>
+          <td>Requires <code>await</code> because querying the browser across the WebSocket process boundary is asynchronous.</td>
+        </tr>
+        <tr>
+          <td><code>const pageURL = await page.url();</code></td>
+          <td><b>State Extraction (URL):</b> Returns the current main frame URL as a string.</td>
+          <td>In Playwright, <code>page.url()</code> is a fast, synchronous getter, though storing it in a constant provides clean debugging logs.</td>
+        </tr>
+        <tr>
+          <td><code>console.log('the page title: ' + pageTitle);</code></td>
+          <td><b>Terminal Logging:</b> Standard Node.js output stream that prints extracted metadata to the terminal console during execution.</td>
+          <td>Useful for local debugging and verification of environment configurations during script development.</td>
+        </tr>
+        <tr>
+          <td><code>await expect(page).toHaveTitle('STORE');</code></td>
+          <td><b>Web-First Title Assertion:</b> Automatically polls the browser DOM until <code>document.title</code> equals <code>'STORE'</code> or the 5-second assertion timeout expires.</td>
+          <td><b>Superior to manual verification:</b> Manually asserting <code>expect(pageTitle).toBe('STORE')</code> checks a single static snapshot. <code>await expect(page).toHaveTitle()</code> retries automatically if the title takes a moment to update.</td>
+        </tr>
+        <tr>
+          <td><code>await expect(page).toHaveURL('https://demoblaze.com/index.html');</code></td>
+          <td><b>Web-First URL Assertion:</b> Verifies the current active page URL against the expected string or regular expression.</td>
+          <td>Guarantees that any server redirects or client-side routing (SPA history pushState) have completed before progressing.</td>
+        </tr>
+        <tr>
+          <td><code>await page.close();</code></td>
+          <td><b>Tab Cleanup:</b> Closes the current browser tab and disposes of page resources.</td>
+          <td><b>Optional:</b> Playwright automatically closes the page and its isolated <code>BrowserContext</code> as soon as the <code>test()</code> block exits, preventing memory leaks automatically.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="async-await">
+    <h2>4. JavaScript Asynchronous Model vs. Java Sequential Threads</h2>
+    <p>Engineers moving from <b>Java / Selenium</b> to <b>JavaScript / TypeScript Playwright</b> must understand the difference in execution models:</p>
+
+    <div class="arch">
+      <div class="lbl">EXECUTION MODEL PARADIGM SHIFT <small>Java Threads vs Node.js Event Loop</small></div>
+      <div class="cols">
+        <div class="item">
+          <b>Java (Sequential Synchronous Threading)</b>
+          <span>&bull; In Java Selenium, each line runs in strict series order on an OS thread.<br>&bull; When you call <code>driver.get(url)</code>, the thread physically blocks and waits.<br>&bull; No special keywords like <code>async</code> or <code>await</code> are needed because blocking is the default.</span>
+        </div>
+        <div class="item">
+          <b>Node.js (Single-Threaded Asynchronous Event Loop)</b>
+          <span>&bull; In Node.js, operations are non-blocking and return <b>Promises</b>.<br>&bull; If you omit <code>await</code>, JavaScript does not wait—it fires the next line immediately.<br>&bull; <code>await</code> tells the JavaScript runtime: <i>"Pause this test function until the browser acknowledges completion, then proceed."</i></span>
+        </div>
+      </div>
+    </div>
+
+    <h3>The Disaster of Forgetting `await`</h3>
+    <pre><code>// ❌ SEVERE BUG: Missing await
+test('broken test', async ({ page }) => {
+  page.goto('https://demoblaze.com'); // Returns unhandled Promise!
+  page.click('#login2');              // Runs before page has even connected!
+  // Test finishes with PASS because JS exited without waiting for network!
+});
+
+// ✅ CORRECT: Every browser interaction is awaited
+test('working test', async ({ page }) => {
+  await page.goto('https://demoblaze.com'); // Awaited navigation
+  await page.click('#login2');              // Awaited click
+});</code></pre>
+  </section>
+
+  <section id="page-fixture">
+    <h2>5. The `{ page }` Fixture Under the Hood</h2>
+    <p>In Selenium, you must manually instantiate a driver and manually quit it:</p>
+    <pre><code>// Selenium Java: Heavy boilerplate
+WebDriver driver = new ChromeDriver();
+driver.get("https://demoblaze.com");
+driver.quit(); // If forgotten, leaves orphan process!</code></pre>
+
+    <p>In Playwright, the test runner utilizes a powerful <b>Dependency Injection Fixture System</b>:</p>
+    <ol>
+      <li><b>Automatic Setup:</b> Before your test starts, Playwright allocates an available worker process, opens a lightweight <code>BrowserContext</code>, and creates a fresh <code>Page</code> tab.</li>
+      <li><b>Zero State Leakage:</b> Cookies, localStorage, and session tokens from previous tests never bleed into this <code>{ page }</code> instance.</li>
+      <li><b>Automatic Teardown:</b> Even if an assertion throws an error on line 5, Playwright's test runner intercepts the failure, captures traces/screenshots, and cleanly closes the page and context.</li>
+    </ol>
+  </section>
+
+  <section id="running-the-script">
+    <h2>6. How to Run This Test</h2>
+    <p>Save the test file in your project as <code>tests/homepage.spec.js</code> (or <code>.ts</code>) and execute it using Playwright CLI commands:</p>
+
+    <pre><code class="bash"># 1. Run in default Headless Mode (fast, no visible browser window)
+npx playwright test tests/homepage.spec.js
+
+# 2. Run in Headed Mode (opens a visible Chromium browser window)
+npx playwright test tests/homepage.spec.js --headed
+
+# 3. Run in interactive UI Mode (time-travel debugging, watch mode)
+npx playwright test tests/homepage.spec.js --ui
+
+# 4. View the auto-generated HTML execution report
+npx playwright show-report</code></pre>
+  </section>
+
+  <section id="qa-bank">
+    <h2>7. Q&amp;A</h2>
+    <p><a class="qa-chip" href="interview-p1-2-qa.html"><span class="tag Interview">Interview</span>P1.2 Question Bank (30 Questions) &rarr;</a></p>
+  </section>
+</article>
+</div>
+<script src="../topics.js"></script>
+<script src="../app.js"></script>
+</body>
+</html>

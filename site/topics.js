@@ -969,6 +969,17 @@ const TOPICS = [
   },
   {
     track: "Playwright",
+    section: "P1. Installation, Setup & Environment",
+    order: 2,
+    title: "1.2 Playwright Scripting Basics: First Test Anatomy, Async/Await & Page Fixture",
+    file: "playwright-scripting-basics-first-test.html",
+    summary: "Line-by-line breakdown of a Playwright test: CommonJS vs ESM, test() declaration, { page } fixture injection, async/await event loop, page.goto, page.title/url, and web-first expect matchers.",
+    keywords: "Playwright scripting basics, first test, async await, page fixture, CommonJS, ES Modules, page.goto, expect toHaveTitle, toHaveURL, Demoblaze",
+    status: "done",
+    date: "2026-11-23"
+  },
+  {
+    track: "Playwright",
     section: "P2. Architecture, BrowserContext & Auto-Waiting Locators",
     order: 1,
     title: "2.1 Playwright CDP/WebSocket Architecture vs Selenium W3C HTTP",
@@ -1545,6 +1556,17 @@ const TOPICS = [
     file: "interview-p1-1-qa.html",
     summary: "30 questions across 5 tiers: Definitions, Mechanics, Scenarios, Troubleshooting, and Design choices covering CDP/WebSocket, 9 key features, Inspector/Codegen/Tracer, TS vs JS, and npm init setup.",
     keywords: "Playwright interview questions, CDP, WebSocket, BrowserContext, actionability, auto waiting, Codegen, Inspector, Trace Viewer, TypeScript vs JavaScript, npm init playwright",
+    status: "done",
+    date: "2026-11-23"
+  },
+  {
+    track: "Interview",
+    section: "I-P1. Playwright: Architecture, Features & Setup Q&A",
+    order: 2,
+    title: "P1.2 Q&A: Playwright Scripting Basics, Async/Await & Page Fixture (30 Questions)",
+    file: "interview-p1-2-qa.html",
+    summary: "30 questions across 5 tiers: CommonJS vs ESM, test() parameters, async/await Promise resolution, { page } fixture lifecycle, web-first vs manual assertions, and headless/headed execution.",
+    keywords: "Playwright scripting interview questions, async await, Promises, page fixture, require vs import, toHaveTitle, toHaveURL, headless vs headed",
     status: "done",
     date: "2026-11-23"
   },
